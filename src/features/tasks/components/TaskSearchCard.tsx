@@ -12,7 +12,7 @@ import {
 import { toast } from "react-hot-toast";
 
 // 🔥 IMPORT YOUR TASK JSON
-import mockTasks from "../data/mockTasks.json";
+import mockTasks from "@/data/mockTasks.json";
 
 /* ============================================================
    TYPES

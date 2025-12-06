@@ -6,28 +6,28 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-import MapLegend from "./panels/MapLegend";
-import SearchModeWrapper from "./panels/SearchModeWrapper";
+import MapLegend from "./components/MapLegend";
+import SearchModeWrapper from "./components/SearchModeWrapper";
 
-import TimelinePanel from "./panels/TimelinePanel";
-import MapPanel from "./panels/MapPanel";
-import TaskTablePanel from "./panels/TaskTablePanel";
-import ResourceTablePanel from "./panels/ResourceTablePanel";
+import TimelinePanel from "./components/TimelinePanel";
+import MapPanel from "./components/MapPanel";
+import TaskTablePanel from "./components/TaskTablePanel";
+import ResourceTablePanel from "./components/ResourceTablePanel";
 
-import mockTasks from "../data/mockTasks.json";
-import ResourceMock from "../data/ResourceMock.json";
+import mockTasks from "@/data/mockTasks.json";
+import ResourceMock from "@/data/ResourceMock.json";
 
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 import {
   usePanelDocking,
   PanelContainer,
-  PanelKey,
-} from "../config/usePanelDocking";
+} from "@hooks/usePanelDocking";
+import { PanelKey } from "@/types";
 
-import { useSearchLeftMenu } from "../config/useSearchLeftMenu";
+import { useSearchLeftMenu } from "@hooks/useSearchLeftMenu";
 
-import { useLiveSelectEngine } from "./hooks/useLiveSelectEngine";
+import { useLiveSelectEngine } from "@/features/schedule/hooks/useLiveSelectEngine";
 
 import {
   Search,

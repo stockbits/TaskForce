@@ -4,8 +4,8 @@
 
 import React, { useState, useCallback } from "react";
 import ReactDOM from "react-dom/client";
-import TaskPopoutPanel from "./components/TaskPopoutPanel";
-import { TaskDetails } from "./components/TaskDetailsModal";
+import TaskPopoutPanel from "@/features/tasks/components/TaskPopoutPanel";
+import { TaskDetails } from "@/types";
 
 declare global {
   interface Window {

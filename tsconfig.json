@@ -16,7 +16,14 @@
     "baseUrl": "./src",
     "paths": {
       "@/*": ["*"],
-      "@config/*": ["config/*"],
+      "@types/*": ["types/*"],
+      "@lib/*": ["lib/*"],
+      "@hooks/*": ["lib/hooks/*"],
+      "@utils/*": ["lib/utils/*"],
+      "@features/*": ["features/*"],
+      "@shared/*": ["shared/*"],
+      "@config/*": ["shared/config/*"],
+      "@ui/*": ["shared/ui/*"],
       "@containers/*": ["A-Navigation_Container/*"],
       "@components/*": ["components/*"]
     },

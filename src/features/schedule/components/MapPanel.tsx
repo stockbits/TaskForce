@@ -21,9 +21,9 @@ import {
   createTaskSVG,
   createResourceSVG,
   COMMIT_COLORS,
-} from "../../config/pins";
+} from "@/shared/config/pins";
 
-import type { TaskRecord, ResourceRecord } from "../hooks/useLiveSelectEngine";
+import type { TaskRecord, ResourceRecord } from "@/features/schedule/hooks/useLiveSelectEngine";
 
 /* ============================================================================
    MAP RESIZE AUTO-FIX

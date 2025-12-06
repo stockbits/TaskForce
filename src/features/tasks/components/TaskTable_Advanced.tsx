@@ -8,7 +8,7 @@ import React, {
   useCallback,
 } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import TaskRowContextMenu from "../config/TaskRowContextMenu";
+import TaskRowContextMenu from "@/shared/ui/TaskRowContextMenu";
 
 type SortDir = "asc" | "desc" | null;
 
@@ -923,10 +923,10 @@ export default function TaskTable_Advanced({
         onClose={closeMenu}
         mouseScreenX={mouseScreenX}
         mouseScreenY={mouseScreenY}
-        onOpenPopout={(tasks, mX, mY) => {
+        onOpenPopout={(tasks: any[], mX: number, mY: number) => {
           if (onOpenPopout) onOpenPopout(tasks, mX, mY);
         }}
-        onOpenCalloutIncident={(task) => {
+        onOpenCalloutIncident={(task: any) => {
           if (onOpenCalloutIncident) onOpenCalloutIncident(task);
         }}
       />

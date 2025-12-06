@@ -5,8 +5,8 @@
 // ============================================================================
 
 import React, { useMemo } from "react";
-import TaskTable_Advanced from "../../A-Navigation_Container/TaskTable_Advanced";
-import type { TaskRecord } from "../hooks/useLiveSelectEngine";
+import TaskTable_Advanced from "@/features/tasks/components/TaskTable_Advanced";
+import type { TaskRecord } from "@/features/schedule/hooks/useLiveSelectEngine";
 
 const PRIORITY_KEYS = [
   "taskId",

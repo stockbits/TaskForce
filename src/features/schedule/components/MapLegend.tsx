@@ -5,7 +5,7 @@ import {
   STATUS_COLORS,
   createTaskSVG,
   createResourceSVG,
-} from "../../config/pins";
+} from "@/shared/config/pins";
 
 interface MapLegendProps {
   visible: boolean;

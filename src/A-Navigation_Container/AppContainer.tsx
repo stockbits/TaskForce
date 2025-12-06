@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CalloutLandingPage } from "../components/CalloutLandingPage";
-import mockTasks from "../data/mockTasks.json";
-import ScheduleLivePage from "../SCH_Live/ScheduleLivePage";
+import { CalloutLandingPage } from "@features/callout/components/CalloutLandingPage";
+import mockTasks from "@/data/mockTasks.json";
+import ResourceMock from "@/data/ResourceMock.json";
+import ScheduleLivePage from "@/features/schedule/ScheduleLivePage";
 import { User } from "lucide-react";
 
 import {
   CalloutIncidentPanel,
   CalloutOutcome,
   ResourceRecord,
-} from "../components/CalloutIncidentPanel";
+} from "@features/callout/components/CalloutIncidentPanel";
 import {
   Menu,
   Search,
@@ -28,13 +29,13 @@ import { Toaster, toast } from "react-hot-toast";
 import { createPortal } from "react-dom";
 
 import { Sidebar } from "./SidePanel";
-import TaskSearchCard from "./TaskSearchCard";
-import TaskTable_Advanced from "./TaskTable_Advanced";
-import TaskPopoutPanel from "../components/TaskPopoutPanel";
+import TaskSearchCard from "@/features/tasks/components/TaskSearchCard";
+import TaskTable_Advanced from "@/features/tasks/components/TaskTable_Advanced";
+import TaskPopoutPanel from "@/features/tasks/components/TaskPopoutPanel";
 
-import { cardMap } from "../config/menuRegistry";
-import { TaskDetails } from "../components/TaskDetailsModal";
-import { useExternalWindow } from "../config/useExternalWindow";
+import { cardMap } from "@/shared/config/menuRegistry";
+import { TaskDetails } from "@/types";
+import { useExternalWindow } from "@hooks/useExternalWindow";
 
 /* =========================================================
    ICON MAP & TABLE HEADERS
@@ -479,14 +480,14 @@ export default function AppContainer() {
     setDataLoaded(true);
   }, []);
 
-  // Load resource mock data
+  // Load resource mock data (static import)
   useEffect(() => {
-    import("../data/ResourceMock.json")
-      .then((module) => {
-        setResources(module.default as ResourceRecord[]);
-        setResourceLoaded(true);
-      })
-      .catch(() => toast.error("Error loading resource data."));
+    try {
+      setResources(ResourceMock as ResourceRecord[]);
+      setResourceLoaded(true);
+    } catch (err) {
+      toast.error("Error loading resource data.");
+    }
   }, []);
 
   // Window resize
@@ -753,10 +754,8 @@ export default function AppContainer() {
   // External panel expand handlers
   const handleExternalToggleSection = useCallback(
     (section: string) => {
-      setExternalExpandedSections((prev) =>
-        prev.includes(section)
-          ? prev.filter((s) => s !== section)
-          : [...prev, section]
+      setExternalExpandedSections((prev: string[]) =>
+        prev.includes(section) ? prev.filter((s) => s !== section) : [...prev, section]
       );
     },
     [setExternalExpandedSections]

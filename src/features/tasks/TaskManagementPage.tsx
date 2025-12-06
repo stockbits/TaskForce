@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { motion } from "framer-motion";
-import TaskSearchCard from "./TaskSearchCard";
-import TaskTable_Advanced from "./TaskTable_Advanced";
-import rawMockTasks from "../data/mockTasks.json";
+import rawMockTasks from "@/data/mockTasks.json";
+import TaskSearchCard from "@/features/tasks/components/TaskSearchCard";
+import TaskTable_Advanced from "@/features/tasks/components/TaskTable_Advanced";
 
 /* --------------------------------
    CAST JSON → ANY[]
