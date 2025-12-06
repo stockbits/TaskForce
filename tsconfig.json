@@ -1,0 +1,51 @@
+{
+  "compilerOptions": {
+    /* ================================
+       ✅ Core Settings
+    ================================= */
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",        /* ✅ Vite 5 uses 'Bundler' */
+    "jsx": "react-jsx",                   /* ✅ React 17+ JSX Transform */
+
+    /* ================================
+       ✅ Imports & Path Aliases
+    ================================= */
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["*"],
+      "@config/*": ["config/*"],
+      "@containers/*": ["A-Navigation_Container/*"],
+      "@components/*": ["components/*"]
+    },
+
+    /* ================================
+       ✅ TypeScript Behavior
+    ================================= */
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": ["vite/client"],            /* ✅ Gives access to import.meta.env */
+
+    /* ================================
+       ✅ Code Quality & Strictness
+    ================================= */
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": false,             /* 👈 Optional: set false to reduce dev noise */
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true
+  },
+
+  /* ================================
+     ✅ Project Structure
+  ================================= */
+  "include": ["src"],                    /* Type-check only your app source */
+  "references": [{ "path": "./tsconfig.node.json" }],
+  "exclude": ["node_modules", "dist"]
+}

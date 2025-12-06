@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    /* ================================
+       ✅ Core Build Configuration
+    ================================= */
+    "composite": true,               /* Required for Vite project references */
+    "skipLibCheck": true,            /* Faster builds, skip type checking libs */
+    "resolveJsonModule": true,       /* Allow importing .json files */
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,         /* Enables CommonJS interop */
+    "module": "ESNext",
+    "moduleResolution": "Bundler",   /* ✅ Recommended for Vite 5+ */
+
+    /* ================================
+       ✅ Node.js + Vite Environment
+    ================================= */
+    "types": ["node", "vite/client"], /* Add Vite types globally */
+
+    /* ================================
+       ✅ Strictness & Cleanliness
+    ================================= */
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true
+  },
+
+  /* ================================
+     ✅ Includes / Excludes
+  ================================= */
+  "include": ["vite.config.ts"],
+  "exclude": ["node_modules", "dist"]
+}
