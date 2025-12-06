@@ -282,6 +282,7 @@ const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
           onChange={(e) =>
             setFilters((f) => ({ ...f, impCondition: e.target.value }))
           }
+          style={{ minWidth: "clamp(100px,12vw,140px)" }}
         >
           <option value="">Condition</option>
           <option value="greater">Greater Than</option>
@@ -290,12 +291,13 @@ const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
 
         <input
           type="number"
-          className="border border-gray-300 rounded-md text-[12px] px-2 h-[32px] w-[100px] bg-white"
+          className="border border-gray-300 rounded-md text-[12px] px-2 h-[32px] bg-white"
           value={filters.impValue ?? ""}
           onChange={(e) =>
             setFilters((f) => ({ ...f, impValue: e.target.value }))
           }
           placeholder="Value"
+          style={{ width: "clamp(80px,8vw,100px)" }}
         />
       </div>
     </div>
@@ -445,7 +447,8 @@ function DropdownMultiSelect({
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.2 }}
             className="absolute z-[9999] mt-1 p-2 text-[12px] bg-white border border-gray-300
-                       rounded-lg shadow-2xl w-full min-w-[220px]"
+                     rounded-lg shadow-2xl w-full"
+            style={{ minWidth: "min(90vw,320px)" }}
           >
             {/* SEARCH BOX */}
             <input
@@ -483,8 +486,9 @@ function DropdownMultiSelect({
 
             {/* LIST */}
             <div
-              className="max-h-[220px] overflow-y-auto"
+              className="overflow-y-auto"
               style={{
+                maxHeight: "calc(var(--vh, 1vh) * 40)",
                 scrollbarWidth: "thin",
                 scrollbarColor: "#9ca3af #e5e7eb",
               }}

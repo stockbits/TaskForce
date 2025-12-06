@@ -443,7 +443,7 @@ export default function TaskSearchCard({
                 handleSelectAll={() =>
                   handleSelectAll("division", filteredDivisions)
                 }
-                className="w-[190px]"
+                style={{ width: "clamp(160px,20vw,190px)" }}
               />
 
               {/* DOMAIN ID */}
@@ -462,7 +462,7 @@ export default function TaskSearchCard({
                 handleSelectAll={() =>
                   handleSelectAll("domainId", filteredDomains)
                 }
-                className="w-[190px]"
+                style={{ width: "clamp(160px,20vw,190px)" }}
               />
 
               {/* TASK STATUS */}
@@ -481,7 +481,7 @@ export default function TaskSearchCard({
                 handleSelectAll={() =>
                   handleSelectAll("taskStatuses", filteredStatuses)
                 }
-                className="w-[210px]"
+                style={{ width: "clamp(160px,22vw,210px)" }}
               />
 
               {/* REQUESTER */}
@@ -490,7 +490,7 @@ export default function TaskSearchCard({
                 value={filters.requester}
                 onChange={handleChange}
                 placeholder="Requester"
-                className="w-[190px]"
+                style={{ width: "clamp(160px,20vw,190px)" }}
               />
 
               {/* JOB TYPE */}
@@ -499,7 +499,7 @@ export default function TaskSearchCard({
                 value={filters.jobType}
                 onChange={handleChange}
                 placeholder="Job Type"
-                className="w-[190px]"
+                style={{ width: "clamp(160px,20vw,190px)" }}
               />
 
               {/* COMMIT */}
@@ -518,7 +518,7 @@ export default function TaskSearchCard({
                 handleSelectAll={() =>
                   handleSelectAll("commitType", filteredCommits)
                 }
-                className="w-[210px]"
+                style={{ width: "clamp(160px,22vw,210px)" }}
               />
 
               {/* RESPONSE CODE */}
@@ -537,14 +537,14 @@ export default function TaskSearchCard({
                 handleSelectAll={() =>
                   handleSelectAll("responseCode", filteredResponses)
                 }
-                className="w-[190px]"
+                style={{ width: "clamp(160px,20vw,190px)" }}
               />
             </div>
 
-            {/* Row 2 */}
-            <div className="flex flex-wrap justify-start gap-4 bg-white py-3 px-4 border border-gray-200 shadow-sm rounded-lg">
+            {/* Row 2 - Aligned inputs */}
+            <div className="flex flex-wrap items-end justify-start gap-4 bg-white py-3 px-4 border border-gray-200 shadow-sm rounded-lg">
               {/* IMP Score */}
-              <div className="flex flex-col w-[210px]">
+              <div className="flex flex-col" style={{ width: "clamp(160px,16vw,200px)" }}>
                 <label className="text-[11px] font-semibold text-gray-800 mb-[3px]">
                   IMP Score
                 </label>
@@ -558,20 +558,40 @@ export default function TaskSearchCard({
                       { value: "greater", label: "Greater Than" },
                       { value: "less", label: "Less Than" },
                     ]}
-                    className="w-[160px]"
+                    style={{ width: "clamp(100px,10vw,140px)" }}
                   />
                   <FilterInput
                     name="scoreValue"
                     value={filters.scoreValue}
                     onChange={handleChange}
                     placeholder="Value"
-                    className="w-[80px]"
+                    style={{ width: "clamp(50px,5vw,70px)" }}
                   />
                 </div>
               </div>
 
+              {/* PWA Selector */}
+              <div className="flex flex-col" style={{ width: "clamp(150px,18vw,220px)" }}>
+                <label className="text-[11px] font-semibold text-gray-800 mb-[3px]">
+                  PWA Selector
+                </label>
+                <DropdownMultiSelect
+                  refObj={pwaRef}
+                  open={openDropdown === "pwa"}
+                  setOpen={(isOpen) => setOpenDropdown(isOpen ? "pwa" : null)}
+                  query={queries.pwa}
+                  setQuery={(value) => setQuery("pwa", value)}
+                  label="Select PWA"
+                  options={filteredPwa}
+                  selected={filters.pwa}
+                  toggle={(v: string) => toggleArrayValue("pwa", v)}
+                  handleSelectAll={() => handleSelectAll("pwa", filteredPwa)}
+                  style={{ width: "clamp(150px,18vw,220px)" }}
+                />
+              </div>
+
               {/* Location */}
-              <div className="flex flex-col w-[230px]">
+              <div className="flex flex-col" style={{ width: "clamp(160px,18vw,220px)" }}>
                 <label className="text-[11px] font-semibold text-gray-800 mb-[3px]">
                   Location Fields
                 </label>
@@ -587,20 +607,21 @@ export default function TaskSearchCard({
                       { value: "1141", label: "1141" },
                       { value: "GroupCode", label: "Group Code" },
                     ]}
-                    className="w-[160px]"
+                    className=""
+                    style={{ width: "clamp(100px,10vw,140px)" }}
                   />
                   <FilterInput
                     name="locationValue"
                     value={filters.locationValue}
                     onChange={handleChange}
                     placeholder="Value"
-                    className="w-[90px]"
+                    style={{ width: "clamp(50px,6vw,70px)" }}
                   />
                 </div>
               </div>
 
               {/* Capabilities */}
-              <div className="flex flex-col w:[220px] w-[220px]">
+              <div className="flex flex-col" style={{ width: "clamp(150px,18vw,220px)" }}>
                 <label className="text-[11px] font-semibold text-gray-800 mb-[3px]">
                   Capabilities
                 </label>
@@ -619,34 +640,20 @@ export default function TaskSearchCard({
                   handleSelectAll={() =>
                     handleSelectAll("capabilities", filteredCapabilities)
                   }
-                  className="w-[220px]"
+                  style={{ width: "clamp(150px,18vw,220px)" }}
                 />
               </div>
-            </div>
 
-            {/* Row 3 */}
-            <div className="flex flex-wrap justify-start items-end gap-4 bg-white py-3 px-4 border border-gray-200 shadow-sm rounded-lg">
-              <div className="flex flex-col w-[240px]">
+              {/* Date Range - Always at end */}
+              <div className="flex flex-col ml-auto" style={{ width: "clamp(240px,28vw,380px)" }}>
                 <label className="text-[11px] font-semibold text-gray-800 mb-[3px]">
-                  PWA Selector
+                  Date Range
                 </label>
-                <DropdownMultiSelect
-                  refObj={pwaRef}
-                  open={openDropdown === "pwa"}
-                  setOpen={(isOpen) => setOpenDropdown(isOpen ? "pwa" : null)}
-                  query={queries.pwa}
-                  setQuery={(value) => setQuery("pwa", value)}
-                  label="Select PWA"
-                  options={filteredPwa}
-                  selected={filters.pwa}
-                  toggle={(v: string) => toggleArrayValue("pwa", v)}
-                  handleSelectAll={() => handleSelectAll("pwa", filteredPwa)}
-                  className="w-[240px]"
-                />
+                <DateRangeInputs filters={filters} handleChange={handleChange} />
               </div>
-
-              <DateRangeInputs filters={filters} handleChange={handleChange} />
             </div>
+
+            {/* Row 3 removed — DateRangeInputs moved into Row 2 */}
           </motion.div>
         )}
       </AnimatePresence>
@@ -717,6 +724,7 @@ interface FilterInputProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 const FilterInput = ({
@@ -725,6 +733,7 @@ const FilterInput = ({
   onChange,
   placeholder,
   className = "",
+  style,
 }: FilterInputProps) => (
   <input
     type="text"
@@ -733,6 +742,7 @@ const FilterInput = ({
     onChange={onChange}
     placeholder={placeholder}
     className={`${inputBase} ${className}`}
+    style={style}
   />
 );
 
@@ -752,12 +762,14 @@ const FilterSelect = ({
   placeholder,
   options,
   className = "",
-}: FilterSelectProps) => (
+  style,
+}: FilterSelectProps & { style?: React.CSSProperties }) => (
   <select
     name={name}
     value={value}
     onChange={onChange}
     className={`${selectBase} ${className}`}
+    style={style}
   >
     <option value="" disabled hidden>
       {placeholder}
@@ -796,12 +808,13 @@ const DropdownMultiSelect = ({
   toggle,
   handleSelectAll,
   className = "",
-}: DropdownMultiSelectProps) => {
+  style,
+}: DropdownMultiSelectProps & { style?: React.CSSProperties }) => {
   const allSelected =
     options.length > 0 && options.every((o) => selected.includes(o));
 
   return (
-    <div ref={refObj} className={`relative ${className}`}>
+    <div ref={refObj} className={`relative ${className}`} style={style}>
       <div
         onClick={() => setOpen(!open)}
         className="w-full h-[34px] px-3 text-[12px] border border-gray-300 rounded-md bg-white text-gray-900 shadow-sm cursor-pointer flex items-center justify-between hover:border-gray-400 focus-within:ring-2 focus-within:ring-blue-500/70"
@@ -819,7 +832,8 @@ const DropdownMultiSelect = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.2 }}
-            className="absolute z-[9999] mt-1 p-2 text-[12px] bg-white border border-gray-300 rounded-lg shadow-2xl w-full min-w-[220px]"
+            className="absolute z-[9999] mt-1 p-2 text-[12px] bg-white border border-gray-300 rounded-lg shadow-2xl w-full"
+            style={{ minWidth: "min(90vw,320px)" }}
           >
             <input
               type="text"
@@ -850,8 +864,9 @@ const DropdownMultiSelect = ({
             </div>
 
             <div
-              className="max-h-[240px] overflow-y-auto"
+              className="overflow-y-auto"
               style={{
+                maxHeight: "calc(var(--vh, 1vh) * 45)",
                 scrollbarWidth: "thin",
                 scrollbarColor: "#9ca3af #e5e7eb",
               }}
@@ -896,14 +911,16 @@ const DateRangeInputs = ({ filters, handleChange }: DateRangeInputsProps) => (
             name="fromDate"
             value={filters.fromDate}
             onChange={handleChange}
-            className="border border-gray-300 rounded-md text-[11px] px-2 h-[32px] w-[120px] shadow-sm bg-white focus:ring-2 focus:ring-blue-500/70 focus:border-blue-500"
+            className="border border-gray-300 rounded-md text-[11px] px-2 h-[32px] shadow-sm bg-white focus:ring-2 focus:ring-blue-500/70 focus:border-blue-500"
+            style={{ width: "clamp(100px,12vw,120px)" }}
           />
           <input
             type="time"
             name="fromTime"
             value={filters.fromTime}
             onChange={handleChange}
-            className="border border-gray-300 rounded-md text-[11px] px-2 h-[32px] w-[80px] shadow-sm bg-white focus:ring-2 focus:ring-blue-500/70 focus:border-blue-500"
+            className="border border-gray-300 rounded-md text-[11px] px-2 h-[32px] shadow-sm bg-white focus:ring-2 focus:ring-blue-500/70 focus:border-blue-500"
+            style={{ width: "clamp(64px,6vw,80px)" }}
           />
         </div>
       </div>
@@ -922,14 +939,16 @@ const DateRangeInputs = ({ filters, handleChange }: DateRangeInputsProps) => (
             name="toDate"
             value={filters.toDate}
             onChange={handleChange}
-            className="border border-gray-300 rounded-md text-[11px] px-2 h-[32px] w-[120px] shadow-sm bg-white focus:ring-2 focus:ring-blue-500/70 focus:border-blue-500"
+            className="border border-gray-300 rounded-md text-[11px] px-2 h-[32px] shadow-sm bg-white focus:ring-2 focus:ring-blue-500/70 focus:border-blue-500"
+            style={{ width: "clamp(100px,12vw,120px)" }}
           />
           <input
             type="time"
             name="toTime"
             value={filters.toTime}
             onChange={handleChange}
-            className="border border-gray-300 rounded-md text-[11px] px-2 h-[32px] w-[80px] shadow-sm bg-white focus:ring-2 focus:ring-blue-500/70 focus:border-blue-500"
+            className="border border-gray-300 rounded-md text-[11px] px-2 h-[32px] shadow-sm bg-white focus:ring-2 focus:ring-blue-500/70 focus:border-blue-500"
+            style={{ width: "clamp(64px,6vw,80px)" }}
           />
         </div>
       </div>

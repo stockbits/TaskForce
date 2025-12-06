@@ -279,10 +279,10 @@ const Header: React.FC<HeaderProps> = memo(
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setShowDropdown(globalResults.length > 0)}
-              className="pl-9 pr-3 py-2 w-[240px] sm:w-[280px]
-                       rounded-md border border-white/30 bg-white/10 
+              className="pl-9 pr-3 py-2 rounded-md border border-white/30 bg-white/10 
                        text-sm text-white placeholder-white/70
                        focus:outline-none focus:ring-2 focus:ring-white/40"
+              style={{ width: "clamp(180px,22vw,280px)" }}
             />
 
             <AnimatePresence>
@@ -381,7 +381,7 @@ const MainContent: React.FC<MainContentProps> = memo(
                   whileHover={{ scale: 1.02 }}
                   onClick={() => onCardClick(item)}
                   className="cursor-pointer bg-white rounded-xl border border-gray-200 shadow-sm 
-                             p-6 w-full sm:w-72 md:w-80 h-[180px] text-center hover:shadow-md transition-all"
+                               p-6 w-full sm:w-72 md:w-80 min-h-[140px] text-center hover:shadow-md transition-all"
                 >
                   <h3 className="text-lg font-semibold mb-2 text-gray-900">
                     {item.name}
@@ -424,6 +424,8 @@ export default function MainLayout() {
   const [showDropdown, setShowDropdown] = useState(false);
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [windowHeight, setWindowHeight] = useState(window.innerHeight);
+  const [uiScale, setUiScale] = useState(1);
 
   /* ---------------------- Data ---------------------- */
   const [allRows, setAllRows] = useState<Record<string, any>[]>([]);
@@ -490,9 +492,40 @@ export default function MainLayout() {
     }
   }, []);
 
-  // Window resize
+  // Window resize + update CSS variable for mobile 100vh fixes
   useEffect(() => {
-    const resize = () => setWindowWidth(window.innerWidth);
+    const setVh = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty("--vh", `${vh}px`);
+    };
+
+    const resize = () => {
+      setWindowWidth(window.innerWidth);
+      setWindowHeight(window.innerHeight);
+      setVh();
+
+      // Compute a conservative UI scale based on height so smaller viewports
+      // get a denser/compact UI automatically. Clamp between 0.75 and 1.
+      const h = window.innerHeight;
+      const computed = Math.max(0.75, Math.min(1, h / 900));
+      setUiScale(Number(computed.toFixed(2)));
+      // Also set a CSS var for access if needed
+      document.documentElement.style.setProperty("--ui-scale", String(computed));
+      // Adjust base font-size lightly to help density (keeps readable)
+      const fontSize = Math.max(13, Math.min(16, Math.round(h / 60)));
+      document.documentElement.style.fontSize = `${fontSize}px`;
+    };
+
+    // initialize
+    setVh();
+    // also initialize scale + font
+    const h0 = window.innerHeight;
+    const initScale = Math.max(0.75, Math.min(1, h0 / 900));
+    setUiScale(Number(initScale.toFixed(2)));
+    document.documentElement.style.setProperty("--ui-scale", String(initScale));
+    const initFont = Math.max(13, Math.min(16, Math.round(h0 / 60)));
+    document.documentElement.style.fontSize = `${initFont}px`;
+
     window.addEventListener("resize", resize);
     return () => window.removeEventListener("resize", resize);
   }, []);
@@ -774,7 +807,15 @@ export default function MainLayout() {
   ========================================================= */
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-[#F5F7FA] text-gray-900 font-inter relative">
+    <div
+      className="overflow-hidden bg-[#F5F7FA] text-gray-900 font-inter relative w-full"
+      style={{
+        height: `calc(var(--vh, 1vh) * 100 / ${uiScale})`,
+        width: `${100 / uiScale}vw`,
+        transform: `scale(${uiScale})`,
+        transformOrigin: "top left",
+      }}
+    >
       <Toaster position="top-center" />
 
       {/* SIDEBAR */}

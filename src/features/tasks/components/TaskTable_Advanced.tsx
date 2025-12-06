@@ -463,8 +463,9 @@ export default function TaskTable_Advanced({
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    setMouseScreenX(e.screenX);
-    setMouseScreenY(e.screenY);
+    // Use viewport-relative coordinates for accurate placement (clientX/Y)
+    setMouseScreenX(e.clientX);
+    setMouseScreenY(e.clientY);
 
     // Detect column
     let clickedColumnKey: string | null = null;
@@ -864,15 +865,19 @@ export default function TaskTable_Advanced({
             style={{
               top: columnMenu.y,
               left: columnMenu.x,
+              width: "clamp(160px,18vw,220px)",
             }}
-            className="absolute z-[9999] w-[220px] rounded-lg border border-gray-200 bg-white shadow-xl text-xs text-gray-800 py-2"
+            className="absolute z-[9999] rounded-lg border border-gray-200 bg-white shadow-xl text-xs text-gray-800 py-2"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
               Header Settings
             </div>
 
-            <div className="max-h-[220px] overflow-y-auto">
+            <div
+              className="overflow-y-auto"
+              style={{ maxHeight: "calc(var(--vh, 1vh) * 35)" }}
+            >
               {allColumns.map((key) => {
                 const enabled = visibleColumns.includes(key);
                 return (

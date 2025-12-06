@@ -110,7 +110,10 @@ export default function TaskPopoutPanel({
   return (
     <div className="fixed inset-0 flex bg-black/30 backdrop-blur-sm z-[9999]">
       {/* MAIN SURFACE */}
-      <div className="w-screen h-screen flex flex-col overflow-hidden bg-transparent">
+      <div
+        className="w-full flex flex-col overflow-hidden bg-transparent"
+        style={{ height: "calc(var(--vh, 1vh) * 100)", width: "100vw" }}
+      >
         {/* HEADER */}
         <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-800">
@@ -192,7 +195,7 @@ export default function TaskPopoutPanel({
                 key={task.taskId}
                 className="bg-white border border-gray-200 rounded-xl shadow-md flex-shrink-0"
                 style={{
-                  width: singleTaskMode ? 720 : 520,
+                  width: singleTaskMode ? "min(90vw,720px)" : "min(90vw,520px)",
                 }}
               >
                 <div className="px-5 pt-4 pb-2 text-[15px] font-semibold text-gray-800">

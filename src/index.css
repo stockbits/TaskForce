@@ -3,6 +3,12 @@
 ===================================== */
 @import "leaflet/dist/leaflet.css";
 
+/* Set a fallback CSS variable for mobile-safe 100vh handling.
+  We update this value from JS on mount/resize: --vh = window.innerHeight * 0.01 */
+:root {
+  --vh: 1vh;
+}
+
 /* =====================================
    0️⃣.A — Leaflet Z-Index Override Fix
 ===================================== */

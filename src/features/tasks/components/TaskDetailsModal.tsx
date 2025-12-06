@@ -94,7 +94,10 @@ const statusStyles: Record<
 
 /* LOG VIEW — clean but not borderless */
 const LogView = ({ logs }: { logs: typeof exampleLogs }) => (
-  <div className="border border-gray-300 rounded-md overflow-y-auto h-[220px] bg-white p-3">
+  <div
+    className="border border-gray-300 rounded-md overflow-y-auto bg-white p-3"
+    style={{ maxHeight: "calc(var(--vh, 1vh) * 40)" }}
+  >
     <div className="space-y-3 text-sm text-gray-800 font-mono">
       {logs.map((log, i) => {
         const style = statusStyles[log.status] || {

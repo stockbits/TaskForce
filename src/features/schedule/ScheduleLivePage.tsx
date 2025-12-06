@@ -414,7 +414,10 @@ export default function ScheduleLivePage() {
       </div>
 
       {/* GLOBAL SEARCH */}
-      <div className="border border-gray-300 rounded-md shadow-sm bg-white px-2 py-1.5 flex items-center gap-2 min-w-[240px]">
+      <div
+        className="border border-gray-300 rounded-md shadow-sm bg-white px-2 py-1.5 flex items-center gap-2"
+        style={{ minWidth: "clamp(180px,20vw,240px)" }}
+      >
         <Search size={16} className="text-gray-500" />
         <input
           value={searchAnywhere}
@@ -520,7 +523,7 @@ export default function ScheduleLivePage() {
                 (searchButtonRef.current?.offsetHeight ?? 0) +
                 6,
               left: searchButtonRef.current?.offsetLeft ?? 0,
-              width: 760,
+              width: "min(95vw,760px)",
             }}
           >
             <ClickOutside
@@ -539,8 +542,8 @@ export default function ScheduleLivePage() {
                 <div className="flex gap-4">
                   {/* LEFT SEARCH MENU */}
                   <div
-                    className="w-[240px] bg-white border rounded-lg shadow-sm p-3 space-y-6"
-                    style={{ borderColor: THEME.border }}
+                    className="bg-white border rounded-lg shadow-sm p-3 space-y-6"
+                    style={{ width: "clamp(180px,24vw,240px)", borderColor: THEME.border }}
                   >
                     {/* TASK SEARCH MENU */}
                     <div>

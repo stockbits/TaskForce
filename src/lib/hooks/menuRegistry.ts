@@ -1,3 +1,14 @@
+/*
+  Thin re-export module so code that imports from
+  `src/lib/hooks/menuRegistry` continues to work,
+  while `src/shared/config/menuRegistry.ts` remains the single source of truth.
+*/
+
+export * from "@/shared/config/menuRegistry";
+
+// Also expose default cardMap for convenience
+import { cardMap } from "@/shared/config/menuRegistry";
+export default cardMap;
 /* ============================================================================
    MENU REGISTRY — Shared Source of Truth
    Used by Sidebar, Global Search, and Navigation Components

@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, Copy, AlertTriangle } from "lucide-react";
 
@@ -110,7 +111,7 @@ export default function TaskRowContextMenu({
     ? `Callout Incident: ${taskId}`
     : "Callout Incident";
 
-  return (
+  const menu = (
     <AnimatePresence>
       {visible && (
         <motion.ul
@@ -118,13 +119,16 @@ export default function TaskRowContextMenu({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.96 }}
           transition={{ duration: 0.12 }}
+          // Use fixed positioning so the menu appears at the exact viewport
+          // coordinates where the user clicked (clientX/clientY).
           style={{
-            position: "absolute",
-            top: y,
-            left: x,
+            position: "fixed",
+            top: mouseScreenY,
+            left: mouseScreenX,
+            minWidth: "min(90vw,340px)",
+            zIndex: 99999,
           }}
-          className="z-[9999] min-w-[240px] rounded-xl border border-gray-200 bg-white shadow-xl 
-                     backdrop-blur-md text-sm text-gray-800 py-1 overflow-hidden"
+          className="rounded-xl border border-gray-200 bg-white shadow-xl backdrop-blur-md text-sm text-gray-800 py-1 overflow-hidden"
           onMouseDown={(e) => e.stopPropagation()}
         >
           {/* ---------------------------
@@ -173,4 +177,14 @@ export default function TaskRowContextMenu({
       )}
     </AnimatePresence>
   );
+
+  // Render the menu into document.body to avoid being affected by transforms
+  // or stacking contexts from parent layout containers.
+  try {
+    return createPortal(menu, document.body);
+  } catch (err) {
+    // Fallback to in-place render if portal fails for any reason
+    return menu;
+  }
+
 }

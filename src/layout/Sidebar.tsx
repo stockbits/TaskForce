@@ -161,7 +161,7 @@ export const Sidebar = memo(function Sidebar({
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -280, opacity: 0 }}
             transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
-            className="fixed top-0 left-0 h-screen w-[280px] flex flex-col justify-between
+            className="fixed top-0 left-0 bottom-0 w-[280px] flex flex-col justify-between
             bg-white
             border-r border-black/10
             shadow-[4px_0_16px_rgba(0,0,0,0.18)]
