@@ -1,3 +1,11 @@
+// =====================================================================
+// useExternalWindow.ts — Dynamic Popup Sizing (Card-based)
+// - 1 card: centred, wide layout
+// - 2–3 cards: window width = cards + gap + outer padding
+// - 4+ cards: same width as 3-card row, horizontal scroll inside panel
+// - Popup always centred on screen (X & Y)
+// =====================================================================
+
 import { useState, useRef, useCallback } from "react";
 import { TaskDetails } from "@/types";
 

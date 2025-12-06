@@ -1,6 +1,10 @@
 import React, { useState, useMemo } from "react";
 import { X, Maximize2 } from "lucide-react";
-import { PanelKey } from "@/types";
+
+/* ============================================================
+   TYPES
+============================================================ */
+export type PanelKey = "timeline" | "map" | "resources" | "tasks";
 
 /* ============================================================
    PANEL DOCKING HOOK

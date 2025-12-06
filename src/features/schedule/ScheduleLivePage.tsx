@@ -22,10 +22,10 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import {
   usePanelDocking,
   PanelContainer,
-} from "@hooks/usePanelDocking";
+} from "@/lib/hooks/usePanelDocking";
 import { PanelKey } from "@/types";
 
-import { useSearchLeftMenu } from "@hooks/useSearchLeftMenu";
+import { useSearchLeftMenu } from "@/lib/hooks/useSearchLeftMenu";
 
 import { useLiveSelectEngine } from "@/features/schedule/hooks/useLiveSelectEngine";
 

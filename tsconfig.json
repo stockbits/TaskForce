@@ -24,7 +24,7 @@
       "@shared/*": ["shared/*"],
       "@config/*": ["shared/config/*"],
       "@ui/*": ["shared/ui/*"],
-      "@containers/*": ["A-Navigation_Container/*"],
+      "@layout/*": ["layout/*"],
       "@components/*": ["components/*"]
     },
 
