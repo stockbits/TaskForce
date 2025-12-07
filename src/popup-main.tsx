@@ -66,10 +66,6 @@ function PopupApp() {
     <TaskPopoutPanel
       open={true}
       tasks={tasks}
-      expanded={expanded}
-      onToggleSection={onToggleSection}
-      onExpandAll={onExpandAll}
-      onCollapseAll={onCollapseAll}
       onClose={() => window.__POPUP_CLOSE__?.()}
     />
   );

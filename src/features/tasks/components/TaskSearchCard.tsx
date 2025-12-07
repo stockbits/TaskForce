@@ -602,10 +602,9 @@ export default function TaskSearchCard({
                     onChange={handleChange}
                     placeholder="Type"
                     options={[
-                      { value: "Postcode", label: "Postcode" },
-                      { value: "Exchange", label: "Exchange" },
-                      { value: "1141", label: "1141" },
-                      { value: "GroupCode", label: "Group Code" },
+                      { value: "postCode", label: "Postcode" },
+                      { value: "location", label: "Location" },
+                      { value: "groupCode", label: "Group Code" },
                     ]}
                     className=""
                     style={{ width: "clamp(100px,10vw,140px)" }}

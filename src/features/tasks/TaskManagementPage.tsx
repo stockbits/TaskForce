@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import rawMockTasks from "@/data/mockTasks.json";
 import TaskSearchCard from "@/features/tasks/components/TaskSearchCard";
 import TaskTable_Advanced from "@/features/tasks/components/TaskTable_Advanced";
+import TaskPopoutPanel from "@/features/tasks/components/TaskPopoutPanel";
 
 const mockTasks = rawMockTasks as Record<string, any>[];
 
@@ -73,6 +74,12 @@ export default function TaskManagementPage() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const searchRef = useRef<HTMLDivElement | null>(null);
 
+  // Popout pinned panel state
+  const [popoutOpen, setPopoutOpen] = useState(false);
+  const [popoutTasks, setPopoutTasks] = useState<Record<string, any>[]>([]);
+  const [expandedSections, setExpandedSections] = useState<string[]>([]);
+  const [initialPopout, setInitialPopout] = useState<{ x: number; y: number }>({ x: 120, y: 120 });
+
   useEffect(() => {
     const updateHeight = () => {
       if (containerRef.current && searchRef.current) {
@@ -101,7 +108,7 @@ export default function TaskManagementPage() {
         const {
           taskSearch = "",
           division = [],
-          domainId = "",
+          domainId = [],
           taskStatuses = [],
           requester = "",
           responseCode = [],
@@ -141,10 +148,11 @@ export default function TaskManagementPage() {
           filtered = filtered.filter((t) => division.includes(t.division));
         }
 
-        if (domainId.trim()) {
-          const q = domainId.toLowerCase();
+        // DOMAIN ID (multi-select)
+        if (Array.isArray(domainId) && domainId.length > 0) {
+          const lowerSet = new Set(domainId.map((d: string) => d.toLowerCase()));
           filtered = filtered.filter((t) =>
-            String(t.domainId || "").toLowerCase().includes(q)
+            lowerSet.has(String(t.domain || t.domainId || "").toLowerCase())
           );
         }
 
@@ -169,6 +177,14 @@ export default function TaskManagementPage() {
 
         if (Array.isArray(capabilities) && capabilities.length > 0) {
           filtered = filtered.filter((t) => capabilities.includes(t.primarySkill));
+        }
+
+        // PWA selector (optional field)
+        if (Array.isArray(filters.pwa) && filters.pwa.length > 0) {
+          const pwaSet = new Set(filters.pwa.map((p: string) => p.toLowerCase()));
+          filtered = filtered.filter((t) =>
+            pwaSet.has(String(t.pwa || t.externalQueueId || "").toLowerCase())
+          );
         }
 
         if (jobType.trim()) {
@@ -277,6 +293,20 @@ export default function TaskManagementPage() {
           rows={filteredTasks}
           headerNames={headerNames}
           tableHeight={tableHeight}
+          onOpenPopout={(tasks, mX, mY) => {
+            // Inline popout shows one task at a time
+            const first = tasks && tasks.length ? [tasks[0]] : [];
+            setPopoutTasks(first);
+            setPopoutOpen(true);
+            // Store initial position via state by passing to panel
+            setInitialPopout({ x: mX ?? 120, y: mY ?? 120 });
+          }}
+          onSelectionChange={(rows) => {
+            // If popout is open, update it live with current selection
+            if (popoutOpen && rows && rows.length > 0) {
+              setPopoutTasks([rows[0]]);
+            }
+          }}
         />
       ) : (
         <motion.div
@@ -289,6 +319,20 @@ export default function TaskManagementPage() {
             Apply filters above to populate the table.
           </p>
         </motion.div>
+      )}
+
+      {/* Pinned popout window */}
+      {popoutOpen && (
+        <TaskPopoutPanel
+          open={popoutOpen}
+          tasks={popoutTasks as any}
+          initialX={initialPopout.x}
+          initialY={initialPopout.y}
+          onClose={() => {
+            setPopoutOpen(false);
+            setPopoutTasks([]);
+          }}
+        />
       )}
     </motion.div>
   );
