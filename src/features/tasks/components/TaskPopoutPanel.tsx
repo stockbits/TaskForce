@@ -7,10 +7,11 @@
 // ===============================================================
 
 import React, { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import { X, Pin } from "lucide-react";
 import TaskDetailsModal, { TaskDetails } from "./TaskDetailsModal";
  
-function ProgressNotesEditor({ taskId, taskStatus, onSaved }: { taskId: string; taskStatus?: string; onSaved?: (entry: { ts: string; status: string; text: string }) => void }) {
+function ProgressNotesEditor({ taskId, taskStatus, onSaved, shouldReset }: { taskId: string; taskStatus?: string; onSaved?: (entry: { ts: string; status: string; text: string }) => void; shouldReset?: boolean }) {
   const draftKey = `taskProgressNotes:${taskId}:draft`;
   const listKey = `task:${taskId}:progressNotes`;
   const [text, setText] = useState<string>("");
@@ -19,18 +20,29 @@ function ProgressNotesEditor({ taskId, taskStatus, onSaved }: { taskId: string; 
 
   useEffect(() => {
     fetch("http://localhost:5179/health").then(() => setServerOk(true)).catch(() => setServerOk(false));
-    const existing = localStorage.getItem(draftKey);
-    if (existing) setText(existing);
     setStatus("idle");
   }, [draftKey]);
 
+  // Clear editor whenever Progress Notes tab is activated
+  useEffect(() => {
+    if (shouldReset) {
+      setText("");
+      try {
+        localStorage.removeItem(draftKey);
+      } catch {}
+    }
+  }, [shouldReset, draftKey]);
+
   const onSave = () => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+
     const tryServer = async () => {
       try {
         const resp = await fetch("http://localhost:5179/progress-notes", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ taskId, text, taskStatus }),
+          body: JSON.stringify({ taskId, text: trimmed, taskStatus }),
         });
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         return true;
@@ -41,9 +53,8 @@ function ProgressNotesEditor({ taskId, taskStatus, onSaved }: { taskId: string; 
 
     (async () => {
       const ts = new Date().toISOString();
-      const entry = { ts, status: taskStatus || "", text };
+      const entry = { ts, status: taskStatus || "", text: trimmed };
       const savedServer = serverOk ? await tryServer() : false;
-      // Persist locally as an append to the entries list
       try {
         const cur = JSON.parse(localStorage.getItem(listKey) || "[]");
         const next = Array.isArray(cur) ? [...cur, entry] : [entry];
@@ -51,9 +62,7 @@ function ProgressNotesEditor({ taskId, taskStatus, onSaved }: { taskId: string; 
       } catch {
         localStorage.setItem(listKey, JSON.stringify([entry]));
       }
-      // Also keep the latest draft text for convenience
-      localStorage.setItem(draftKey, text);
-      // Update UI immediately
+      localStorage.setItem(draftKey, trimmed);
       onSaved?.(entry);
       setStatus("saved");
       setTimeout(() => setStatus("idle"), 1200);
@@ -65,13 +74,24 @@ function ProgressNotesEditor({ taskId, taskStatus, onSaved }: { taskId: string; 
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
+        onDoubleClick={() => {
+          setText("");
+          try {
+            localStorage.removeItem(draftKey);
+          } catch {}
+        }}
         placeholder="Add progress notes..."
         className="w-full h-20 text-[12px] p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200"
       />
       <div className="flex items-center gap-2">
         <button
           onClick={onSave}
-          className="px-2.5 py-1 text-xs rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          disabled={!text.trim()}
+          className={`px-2.5 py-1 text-xs rounded-md text-white focus:outline-none focus:ring-2 ${
+            text.trim()
+              ? "bg-[#0A4A7A] hover:bg-[#083B61] focus:ring-[#0A4A7A]/30"
+              : "bg-gray-300 cursor-not-allowed"
+          }`}
         >
           Save Notes
         </button>
@@ -99,7 +119,7 @@ export default function TaskPopoutPanel({
   initialY = 120,
 }: TaskPopoutPanelProps) {
 
-  function ProgressNotesSection({ task }: { task: any }) {
+  function ProgressNotesSection({ task, shouldReset }: { task: any; shouldReset?: boolean }) {
     const [notes, setNotes] = React.useState<any[]>(() => {
       const base = Array.isArray(task?.progressNotes) ? task.progressNotes : [];
       try {
@@ -127,42 +147,46 @@ export default function TaskPopoutPanel({
 
     return (
       <div className="space-y-3">
-        {notes.length > 0 && (
-          <div className="space-y-1">
-            <div className="text-[11px] text-gray-500">Saved entries</div>
-            <div className="space-y-1 max-h-32 overflow-auto pr-1">
-              {notes.slice().reverse().map((entry: any, i: number) => {
-                const formatted = (() => {
-                  try {
-                    return new Date(entry.ts).toLocaleString("en-GB", {
-                      year: "numeric",
-                      month: "short",
-                      day: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    });
-                  } catch {
-                    return entry.ts;
-                  }
-                })();
-                return (
-                  <div key={i} className="text-[12px] text-gray-700 border border-gray-200 rounded-md p-2">
-                    <div className="text-[11px] text-gray-500 flex items-center justify-between">
-                      <span>{formatted}</span>
-                      <span className="text-gray-600">{entry.status || ""}</span>
-                    </div>
-                    <div className="whitespace-pre-wrap mt-1">{entry.text}</div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        {/* Editor first, closer to user action */}
         <ProgressNotesEditor
           taskId={task?.taskId}
           taskStatus={task?.taskStatus}
           onSaved={(entry) => setNotes((prev) => [...prev, entry])}
+          shouldReset={shouldReset}
         />
+        {/* Saved entries below with scroll */}
+        <div className="space-y-1 max-h-44 overflow-y-auto pr-1">
+          <div className="text-[11px] text-gray-500">Saved entries</div>
+          {notes.length > 0 ? (
+            // Show only the latest three entries to keep height consistent
+            notes.slice(-3).reverse().map((entry: any, i: number) => {
+              const formatted = (() => {
+                try {
+                  return new Date(entry.ts).toLocaleString("en-GB", {
+                    year: "numeric",
+                    month: "short",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+                } catch {
+                  return entry.ts;
+                }
+              })();
+              return (
+                <div key={i} className="text-[12px] text-gray-700 border border-gray-200 rounded-md p-2">
+                  <div className="text-[11px] text-gray-500 flex items-center justify-between">
+                    <span>{formatted}</span>
+                    <span className="text-gray-600">{entry.status || ""}</span>
+                  </div>
+                  <div className="whitespace-pre-wrap mt-1">{entry.text}</div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="text-[11px] text-gray-500">No saved progress notes yet.</div>
+          )}
+        </div>
       </div>
     );
   }
@@ -202,6 +226,8 @@ export default function TaskPopoutPanel({
   const [pinned, setPinned] = useState<boolean>(false);
   const draggingRef = useRef(false);
   const dragStartRef = useRef<{ mx: number; my: number; x: number; y: number }>({ mx: 0, my: 0, x: initialX, y: initialY });
+  // Run snap only when panel transitions from closed -> open
+  const prevOpenRef = useRef<boolean>(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("taskPopout.pos");
@@ -239,9 +265,10 @@ export default function TaskPopoutPanel({
     const onUp = () => {
       draggingRef.current = false;
       document.body.style.cursor = "default";
-      if (pinned) {
+      // Persist latest position after any drag
+      try {
         localStorage.setItem("taskPopout.pos", JSON.stringify(pos));
-      }
+      } catch {}
     };
     window.addEventListener("mousemove", onMove as EventListener);
     window.addEventListener("mouseup", onUp as EventListener);
@@ -258,6 +285,56 @@ export default function TaskPopoutPanel({
     document.body.style.cursor = "grabbing";
   };
 
+  // When a new task triggers the panel and it's not pinned,
+  // snap the panel near the trigger coordinates.
+  useEffect(() => {
+    // Detect open transition
+    const justOpened = open && !prevOpenRef.current;
+    if (!pinned && justOpened) {
+      const margin = 8;             // viewport margin
+      const offsetX = 6;            // tighter X offset from cursor
+      const offsetY = 6;            // tighter Y offset from cursor
+      const clickX = (initialX ?? 120);
+      const clickY = (initialY ?? 120);
+      const viewportW = typeof window !== "undefined" ? window.innerWidth : 1280;
+      const viewportH = typeof window !== "undefined" ? window.innerHeight : 720;
+      const panelW = Math.min(viewportW * 0.9, 600);
+      const panelH = 360;
+      const headerH = 36;           // approximate header height for visual alignment
+      const alignY = clickY - Math.round(headerH / 2);
+
+      // Try placements in priority order: right, left, below-right, above-right
+      const candidates = [
+        { x: clickX + offsetX, y: alignY },                                        // right aligned to header
+        { x: clickX - panelW - offsetX, y: alignY },                               // left aligned to header
+        { x: clickX + offsetX, y: clickY + offsetY },                              // below-right
+        { x: clickX + offsetX, y: clickY - panelH - offsetY },                     // above-right
+      ];
+
+      const clamp = (x: number, y: number) => ({
+        x: Math.max(margin, Math.min(x, viewportW - panelW - margin)),
+        y: Math.max(margin, Math.min(y, viewportH - panelH - margin)),
+      });
+
+      let placed = clamp(candidates[0].x, candidates[0].y);
+      const fits = (p: { x: number; y: number }) =>
+        p.x >= margin && p.y >= margin && p.x + panelW <= viewportW - margin && p.y + panelH <= viewportH - margin;
+
+      for (const c of candidates) {
+        const p = clamp(c.x, c.y);
+        if (fits(p)) {
+          placed = p;
+          break;
+        }
+      }
+
+      setPos(placed);
+      prevOpenRef.current = true;
+    }
+    // Track close to allow snap next time it opens
+    if (!open) prevOpenRef.current = false;
+  }, [initialX, initialY, pinned, open]);
+
   // Reset tab on task change only when not pinned
   useEffect(() => {
     if (!pinned) {
@@ -266,20 +343,21 @@ export default function TaskPopoutPanel({
   }, [tasks, pinned]);
 
   return (
-    <div className="fixed z-[9999]" style={{ left: pos.x, top: pos.y, maxWidth: "min(96vw, 600px)" }}>
+    <motion.div
+      className="fixed z-[9999]"
+      style={{ left: pos.x, top: pos.y, maxWidth: "min(96vw, 600px)" }}
+      initial={{ opacity: 0, scale: 0.98, y: -4 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.98, y: -4 }}
+      transition={{ duration: 0.15, ease: "easeOut" }}
+    >
       {/* MAIN SURFACE */}
       <div ref={rootRef} className="flex flex-col overflow-hidden bg-white rounded-lg border border-gray-200 shadow-none ring-1 ring-gray-200/70" id="task-popout-root">
         {/* HEADER (draggable) */}
         <div
-          className="flex items-center justify-between px-3 py-2 bg-gray-800 text-white cursor-move select-none rounded-t-lg"
+          className="flex items-center justify-end px-3 py-2 bg-gray-800 text-white select-none rounded-t-lg"
           onMouseDown={onDragStart}
         >
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Tasks: {tasks.length}</span>
-            <span className={`text-xs px-2 py-0.5 rounded ${pinned ? "bg-blue-600" : "bg-gray-700"}`}>
-              {pinned ? "Pinned" : "Draggable"}
-            </span>
-          </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => {
@@ -288,13 +366,13 @@ export default function TaskPopoutPanel({
                 localStorage.setItem("taskPopout.pinned", String(next));
                 if (next) localStorage.setItem("taskPopout.pos", JSON.stringify(pos));
               }}
-              className="px-2 py-1 bg-white/15 text-white rounded-md text-xs flex items-center gap-1"
+              className="px-2 py-1 bg-[#0A4A7A] hover:bg-[#083B61] text-white rounded-md text-xs flex items-center gap-1 shadow-sm"
             >
               <Pin size={14} /> {pinned ? "Unpin" : "Pin"}
             </button>
             <button
               onClick={onClose}
-              className="px-2 py-1 bg-white/15 text-white rounded-md text-xs flex items-center gap-1"
+              className="px-2 py-1 bg-[#0A4A7A] hover:bg-[#083B61] text-white rounded-md text-xs flex items-center gap-1 shadow-sm"
             >
               <X size={14} /> Close
             </button>
@@ -379,7 +457,7 @@ export default function TaskPopoutPanel({
                     </div>
                   )}
                   {activeTab === "ProgressNotes" && (
-                    <ProgressNotesSection task={task} />
+                    <ProgressNotesSection task={task} shouldReset={true} />
                   )}
                 </div>
               </div>
@@ -387,6 +465,6 @@ export default function TaskPopoutPanel({
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
