@@ -43,6 +43,10 @@ type Filters = {
   locationType: string;
   locationValue: string;
   pwa: string[];
+  fromDate: string;
+  fromTime: string;
+  toDate: string;
+  toTime: string;
 };
 
 type DropdownId =
@@ -75,6 +79,10 @@ const initialFilters: Filters = {
   locationType: "",
   locationValue: "",
   pwa: [],
+  fromDate: "",
+  fromTime: "",
+  toDate: "",
+  toTime: "",
 };
 
 const initialQueries: QueryState = {
@@ -353,15 +361,15 @@ export default function TaskSearchCard({
       initial={{ opacity: 0, y: -6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
-      className="bg-white border border-gray-200 rounded-xl shadow-md p-0"
+      className="bg-white border border-gray-200 rounded-xl shadow-sm p-0"
     >
       {/* ------------------------------------------------------------------ */}
       {/* HEADER */}
       {/* ------------------------------------------------------------------ */}
       <div
         className="flex items-center justify-between gap-4 
-    bg-[#0A4A7A] text-white px-5 py-3 
-    border-b border-black/20 rounded-t-xl shadow-sm"
+    bg-[#0A4A7A]/90 text-white px-5 py-3.5 
+    border-b border-black/10 rounded-t-xl shadow-sm"
       >
         <h2 className="text-sm font-semibold text-white tracking-tight">
           Search Tasks
@@ -415,10 +423,10 @@ export default function TaskSearchCard({
               collapsed: { opacity: 0, height: 0 },
             }}
             transition={{ duration: 0.25 }}
-            className="px-4 pb-3 pt-3 space-y-4"
+            className="px-4 pb-4 pt-4 space-y-4"
           >
             {/* Row 1 */}
-            <div className="flex flex-wrap justify-start gap-3 bg-white py-3 px-4 border border-gray-200 shadow-sm rounded-lg">
+            <div className="flex flex-wrap justify-start gap-3 bg-white py-3 px-4 border border-gray-100 rounded-lg">
               {/* DIVISION */}
               <DropdownMultiSelect
                 refObj={divisionRef}
@@ -534,7 +542,7 @@ export default function TaskSearchCard({
             </div>
 
             {/* Row 2 - Aligned inputs */}
-            <div className="flex flex-wrap items-end justify-start gap-4 bg-white py-3 px-4 border border-gray-200 shadow-sm rounded-lg">
+            <div className="flex flex-wrap items-end justify-start gap-4 bg-white py-3 px-4 border border-gray-100 rounded-lg">
               {/* IMP Score */}
               <div className="flex flex-col" style={{ width: "clamp(160px,16vw,200px)" }}>
                 <label className="text-[11px] font-semibold text-gray-800 mb-[3px]">
@@ -636,7 +644,10 @@ export default function TaskSearchCard({
                 />
               </div>
 
-              {/* Date range removed per request; inputs realigned */}
+              {/* Date Range - concise labels, aligned at end */}
+              <div className="flex flex-col shrink-0" style={{ width: "clamp(240px,30vw,420px)" }}>
+                <DateRangeInputs filters={filters} handleChange={handleChange} />
+              </div>
             </div>
 
             {/* Row 3 removed — DateRangeInputs moved into Row 2 */}
@@ -879,4 +890,55 @@ const DropdownMultiSelect = ({
   );
 };
 
-// Date range inputs removed
+interface DateRangeInputsProps {
+  filters: Filters;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+const DateRangeInputs = ({ filters, handleChange }: DateRangeInputsProps) => (
+  <div className="flex items-start gap-4">
+    <div className="flex flex-col">
+      <label className="text-[11px] font-semibold text-gray-800 mb-[3px]">Date From</label>
+      <div className="flex items-center gap-2">
+        <input
+          type="date"
+          name="fromDate"
+          value={filters.fromDate}
+          onChange={handleChange}
+          className="border border-gray-300 rounded-md text-[11px] px-2 h-[32px] shadow-sm bg-white focus:ring-2 focus:ring-blue-500/70 focus:border-blue-500"
+          style={{ width: "clamp(110px,12vw,140px)" }}
+        />
+        <input
+          type="time"
+          name="fromTime"
+          value={filters.fromTime}
+          onChange={handleChange}
+          className="border border-gray-300 rounded-md text-[11px] px-2 h-[32px] shadow-sm bg-white focus:ring-2 focus:ring-blue-500/70 focus:border-blue-500"
+          style={{ width: "clamp(70px,7vw,90px)" }}
+        />
+      </div>
+    </div>
+
+    <div className="flex flex-col">
+      <label className="text-[11px] font-semibold text-gray-800 mb-[3px]">Date To</label>
+      <div className="flex items-center gap-2">
+        <input
+          type="date"
+          name="toDate"
+          value={filters.toDate}
+          onChange={handleChange}
+          className="border border-gray-300 rounded-md text-[11px] px-2 h-[32px] shadow-sm bg-white focus:ring-2 focus:ring-blue-500/70 focus:border-blue-500"
+          style={{ width: "clamp(110px,12vw,140px)" }}
+        />
+        <input
+          type="time"
+          name="toTime"
+          value={filters.toTime}
+          onChange={handleChange}
+          className="border border-gray-300 rounded-md text-[11px] px-2 h-[32px] shadow-sm bg-white focus:ring-2 focus:ring-blue-500/70 focus:border-blue-500"
+          style={{ width: "clamp(70px,7vw,90px)" }}
+        />
+      </div>
+    </div>
+  </div>
+);

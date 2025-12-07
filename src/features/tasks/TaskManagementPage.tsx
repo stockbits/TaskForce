@@ -112,6 +112,10 @@ export default function TaskManagementPage() {
           scoreValue = "",
           locationType = "",
           locationValue = "",
+          fromDate = "",
+          fromTime = "",
+          toDate = "",
+          toTime = "",
         } = filters;
 
         let filtered = [...mockTasks];
@@ -188,6 +192,25 @@ export default function TaskManagementPage() {
           filtered = filtered.filter((t) =>
             String(t[locationType] || "").toLowerCase().includes(q)
           );
+        }
+
+        // Date range filter
+        const buildDate = (dateStr: string, timeStr: string, endOfDay = false) => {
+          if (!dateStr) return null;
+          if (!timeStr) return new Date(dateStr + (endOfDay ? "T23:59:59" : "T00:00:00"));
+          return new Date(`${dateStr}T${timeStr}`);
+        };
+
+        const from = buildDate(fromDate, fromTime, false);
+        const to = buildDate(toDate, toTime, true);
+        if (from || to) {
+          filtered = filtered.filter((t) => {
+            const d = new Date(t.startDate || t.taskCreated);
+            if (Number.isNaN(d.getTime())) return false;
+            if (from && d < from) return false;
+            if (to && d > to) return false;
+            return true;
+          });
         }
 
       setFilteredTasks(filtered);
