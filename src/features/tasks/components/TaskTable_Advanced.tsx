@@ -155,6 +155,7 @@ export default function TaskTable_Advanced({
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const columnMenuRef = useRef<HTMLDivElement | null>(null);
+  const tableRef = useRef<HTMLTableElement | null>(null);
 
   /* -------------- ABSOLUTE MOUSE POSITION -------------- */
   const [mouseScreenX, setMouseScreenX] = useState(0);
@@ -164,6 +165,15 @@ export default function TaskTable_Advanced({
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(100);
   const totalPages = Math.max(1, Math.ceil(rows.length / rowsPerPage));
+
+  /* ------------------- DENSITY TOGGLE ------------------- */
+  const [density, setDensity] = useState<"compact" | "comfortable">(() => {
+    const saved = localStorage.getItem("taskTableDensity");
+    return saved === "comfortable" ? "comfortable" : "compact";
+  });
+  useEffect(() => {
+    localStorage.setItem("taskTableDensity", density);
+  }, [density]);
 
   const clearSelection = useCallback(() => {
     setSelectedRows(new Set());
@@ -589,6 +599,16 @@ export default function TaskTable_Advanced({
   const tableBlurClass = columnMenu.visible
     ? "blur-[1.5px] pointer-events-none"
     : "";
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const el = containerRef.current?.querySelector(
+      ".table-scroll-wrapper"
+    ) as HTMLElement | null;
+    if (!el) return;
+    const onScroll = () => setScrolled(el.scrollTop > 0);
+    el.addEventListener("scroll", onScroll);
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
 
   const selectedTasksForContext = Array.from(selectedRows)
     .map((pageIndex) => {
@@ -606,11 +626,56 @@ export default function TaskTable_Advanced({
 
   const clickedRowForContext = contextMenu.clickedRow ?? null;
 
+  // Keep selected row visible during keyboard navigation
+  useEffect(() => {
+    if (!tableRef.current) return;
+    if (lastSelectedIndex == null) return;
+    const rowEl = tableRef.current.querySelector(
+      `tbody tr:nth-child(${lastSelectedIndex + 1})`
+    ) as HTMLTableRowElement | null;
+    rowEl?.scrollIntoView({ block: 'nearest' });
+  }, [lastSelectedIndex]);
+
   return (
     <div
       ref={containerRef}
       data-table={rowIdKey}
       className={`w-full flex flex-col border border-gray-200 rounded-2xl shadow-md bg-white/80 backdrop-blur-sm overflow-hidden relative ${className}`}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (contextMenu.visible) return; // let menu own keys
+        const maxIndex = pagedRows.length - 1;
+        if (maxIndex < 0) return;
+
+        const current = lastSelectedIndex ?? (selectedRows.size ? Math.min(...Array.from(selectedRows)) : 0);
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          const nextIndex = Math.min(maxIndex, (current ?? -1) + 1);
+          userSelectingRef.current = true;
+          setSelectedRows(new Set([nextIndex]));
+          setLastSelectedIndex(nextIndex);
+          if (onSelectionChange) onSelectionChange([pagedRows[nextIndex]]);
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          const nextIndex = Math.max(0, (current ?? 0) - 1);
+          userSelectingRef.current = true;
+          setSelectedRows(new Set([nextIndex]));
+          setLastSelectedIndex(nextIndex);
+          if (onSelectionChange) onSelectionChange([pagedRows[nextIndex]]);
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          const index = current ?? 0;
+          if (onOpenPopout && pagedRows[index]) {
+            onOpenPopout([pagedRows[index]], mouseScreenX, mouseScreenY);
+          } else if (onOpenTask && pagedRows[index]) {
+            onOpenTask(pagedRows[index]);
+          }
+        } else if (e.key === 'Escape') {
+          closeMenu();
+          closeColumnMenu();
+        }
+      }}
       onClick={(e) => e.stopPropagation()}
     >
       <div
@@ -631,8 +696,9 @@ export default function TaskTable_Advanced({
             opacity: tableOpacity,
             transition: "opacity 0.25s ease-in-out",
           }}
+          ref={tableRef}
         >
-          <thead className="bg-gray-100 text-gray-900 font-semibold sticky top-0 z-10 select-none border-b border-gray-200">
+          <thead className={`bg-gray-100 text-gray-900 font-semibold sticky top-0 z-10 select-none border-b border-gray-200 ${scrolled ? 'shadow-sm' : ''}`}>
             <tr>
               {visibleColumns.map((key) => (
                 <th
@@ -680,11 +746,13 @@ export default function TaskTable_Advanced({
                     <button
                       type="button"
                       onClick={(e) => openColumnMenu(key, e)}
-                      className="column-dots-button h-[18px] w-[10px] flex flex-col items-center justify-center cursor-pointer"
+                      title="Column options"
+                      aria-label={`Column options for ${headerNames[key] ?? key}`}
+                      className="h-[18px] w-[18px] flex items-center justify-center cursor-pointer text-gray-700 hover:text-gray-900"
                     >
-                      <span className="w-[2px] h-[2px] rounded-full bg-black mb-[1px]" />
-                      <span className="w-[2px] h-[2px] rounded-full bg-black mb-[1px]" />
-                      <span className="w-[2px] h-[2px] rounded-full bg-black" />
+                      <span className="inline-block w-[12px] h-[12px] rounded-full border border-current relative">
+                        <span className="absolute inset-[3px] rounded-full border-t-2 border-current rotate-45" />
+                      </span>
                     </button>
 
                     <div
@@ -703,9 +771,24 @@ export default function TaskTable_Advanced({
               <tr>
                 <td
                   colSpan={visibleColumns.length || 1}
-                  className="px-3 py-6 text-center text-gray-500"
+                  className="px-3 py-10 text-center text-gray-600"
                 >
-                  No tasks loaded Please Search.
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="text-3xl">🔎</div>
+                    <div className="text-sm">No results found</div>
+                    <div className="text-xs text-gray-500">
+                      Try adjusting filters or resetting column layout.
+                    </div>
+                    <div className="mt-2 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={resetColumns}
+                        className="px-3 py-1.5 border rounded-md bg-white hover:bg-gray-100 text-gray-700"
+                      >
+                        Reset Columns
+                      </button>
+                    </div>
+                  </div>
                 </td>
               </tr>
             ) : (
@@ -782,13 +865,13 @@ export default function TaskTable_Advanced({
                         : pageIndex % 2 === 0
                         ? "bg-white"
                         : "bg-gray-50"
-                    }`}
+                    } hover:bg-indigo-50 transition-colors`}
                   >
                     {visibleColumns.map((key) => (
                       <td
                         key={key}
                         data-colkey={key}
-                        className="px-3 py-1.5 whitespace-nowrap overflow-hidden text-ellipsis border-r border-gray-100 last:border-r-0"
+                        className={`${density === 'comfortable' ? 'py-2.5' : 'py-1.5'} px-3 whitespace-nowrap overflow-hidden text-ellipsis border-r border-gray-100 last:border-r-0`}
                       >
                         {String(row[key] ?? "")}
                       </td>
@@ -849,6 +932,90 @@ export default function TaskTable_Advanced({
               >
                 Next
               </button>
+            </div>
+            <div className="flex items-center gap-2 ml-4">
+              <label className="text-gray-700">Preset:</label>
+              <select
+                onChange={(e) => {
+                  const preset = e.target.value;
+                  const views: Record<string, string[]> = {
+                    Default: Object.keys(headerNames),
+                    Dispatch: ['taskId','taskStatus','taskType','primarySkill','importanceScore','startDate','location','responseCode'],
+                    Scheduling: ['taskId','commitmentDate','commitmentType','expectedStartDate','expectedFinishDate','resourceName','postCode','groupCode'],
+                    Customer: ['taskId','customerAddress','assetName','description','requester','appointmentStartDate'],
+                  };
+                  const next = views[preset] || views.Default;
+                  setVisibleColumns(next.filter((k) => headerNames[k]));
+                  localStorage.setItem('taskTablePreset', preset);
+                }}
+                defaultValue={localStorage.getItem('taskTablePreset') || 'Default'}
+                className="border border-gray-300 rounded-md px-2 py-1 bg-white text-gray-800"
+              >
+                <option>Default</option>
+                <option>Dispatch</option>
+                <option>Scheduling</option>
+                <option>Customer</option>
+              </select>
+              <button
+                type="button"
+                className="px-2 py-1 border rounded-md bg-white hover:bg-gray-100 text-gray-700"
+                onClick={() => {
+                  const name = prompt('Save preset as:');
+                  if (!name) return;
+                  const key = `taskTablePreset:${name}`;
+                  localStorage.setItem(key, JSON.stringify(visibleColumns));
+                  try {
+                    const saved = JSON.parse(localStorage.getItem('taskTableCustomPresets') || '[]');
+                    const list = Array.isArray(saved) ? saved : [];
+                    if (!list.includes(name)) {
+                      localStorage.setItem('taskTableCustomPresets', JSON.stringify([...list, name]));
+                    }
+                  } catch {
+                    localStorage.setItem('taskTableCustomPresets', JSON.stringify([name]));
+                  }
+                }}
+              >
+                Save Preset
+              </button>
+              <select
+                onChange={(e) => {
+                  const name = e.target.value;
+                  if (!name) return;
+                  const key = `taskTablePreset:${name}`;
+                  const json = localStorage.getItem(key);
+                  if (!json) return;
+                  try {
+                    const cols = JSON.parse(json);
+                    if (Array.isArray(cols)) setVisibleColumns(cols.filter((k) => headerNames[k]));
+                  } catch {}
+                }}
+                defaultValue=""
+                className="border border-gray-300 rounded-md px-2 py-1 bg-white text-gray-800"
+              >
+                <option value="" disabled hidden>Load preset…</option>
+                {(() => {
+                  try {
+                    const list = JSON.parse(localStorage.getItem('taskTableCustomPresets') || '[]');
+                    if (Array.isArray(list)) {
+                      return list.map((n: string) => (
+                        <option key={n} value={n}>{n}</option>
+                      ));
+                    }
+                  } catch {}
+                  return null;
+                })()}
+              </select>
+            </div>
+            <div className="flex items-center gap-2 ml-4">
+              <label className="text-gray-700">Density:</label>
+              <select
+                value={density}
+                onChange={(e) => setDensity(e.target.value as any)}
+                className="border border-gray-300 rounded-md px-2 py-1 bg-white text-gray-800"
+              >
+                <option value="compact">Compact</option>
+                <option value="comfortable">Comfortable</option>
+              </select>
             </div>
           </div>
         </div>

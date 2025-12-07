@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { motion } from "framer-motion";
 import rawMockTasks from "@/data/mockTasks.json";
-import TaskSearchCard from "@/features/tasks/components/TaskSearchCard";
+import TaskSearchCard from "@/features/tasks/components/TaskSearchCardClean";
 import TaskTable_Advanced from "@/features/tasks/components/TaskTable_Advanced";
 import TaskPopoutPanel from "@/features/tasks/components/TaskPopoutPanel";
 
@@ -124,6 +124,16 @@ export default function TaskManagementPage() {
           toDate = "",
           toTime = "",
         } = filters;
+
+        // Enforce search rule: Global search OR both Division and Domain
+        const hasGlobal = Boolean(taskSearch.trim());
+        const hasDivision = Array.isArray(division) && division.length > 0;
+        const hasDomain = Array.isArray(domainId) && domainId.length > 0;
+        if (!hasGlobal && !(hasDivision && hasDomain)) {
+          toast.error("Select Division and Domain, or use Global search.");
+          setFilteredTasks([]);
+          return;
+        }
 
         let filtered = [...mockTasks];
 

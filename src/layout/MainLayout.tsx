@@ -29,7 +29,7 @@ import { Toaster, toast } from "react-hot-toast";
 import { createPortal } from "react-dom";
 
 import { Sidebar } from "./Sidebar";
-import TaskSearchCard from "@/features/tasks/components/TaskSearchCard";
+import TaskSearchCard from "@/features/tasks/components/TaskSearchCardClean";
 import TaskTable_Advanced from "@/features/tasks/components/TaskTable_Advanced";
 import TaskPopoutPanel from "@/features/tasks/components/TaskPopoutPanel";
 
