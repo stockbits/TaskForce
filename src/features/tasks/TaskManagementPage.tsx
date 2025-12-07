@@ -5,14 +5,8 @@ import rawMockTasks from "@/data/mockTasks.json";
 import TaskSearchCard from "@/features/tasks/components/TaskSearchCard";
 import TaskTable_Advanced from "@/features/tasks/components/TaskTable_Advanced";
 
-/* --------------------------------
-   CAST JSON → ANY[]
--------------------------------- */
 const mockTasks = rawMockTasks as Record<string, any>[];
 
-/* --------------------------------
-   TABLE HEADERS
--------------------------------- */
 const headerNames: Record<string, string> = {
   taskId: "Task ID",
   division: "Division",
@@ -52,9 +46,6 @@ const headerNames: Record<string, string> = {
   requester: "Requester",
 };
 
-/* --------------------------------
-   CSV HELPERS
--------------------------------- */
 function toCSV(headers: string[], rows: Array<Record<string, unknown>>) {
   const q = (v: unknown) => {
     const s = String(v ?? "");
@@ -76,29 +67,19 @@ async function writeToClipboard(text: string) {
   }
 }
 
-function buildDate(dateStr: string, timeStr: string, endOfDay = false) {
-  if (!dateStr) return null;
-  if (!timeStr)
-    return new Date(dateStr + (endOfDay ? "T23:59:59" : "T00:00:00"));
-  return new Date(`${dateStr}T${timeStr}`);
-}
-
-/* ========================================================================
-   MAIN COMPONENT
-========================================================================= */
 export default function TaskManagementPage() {
-  // ✅ Start EMPTY (user must search to populate)
   const [filteredTasks, setFilteredTasks] = useState<Record<string, any>[]>([]);
   const [tableHeight, setTableHeight] = useState<number>(600);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const searchRef = useRef<HTMLDivElement | null>(null);
 
-  /* ========================= Auto height logic ========================= */
   useEffect(() => {
     const updateHeight = () => {
       if (containerRef.current && searchRef.current) {
         const searchRect = searchRef.current.getBoundingClientRect();
-        const available = window.innerHeight - searchRect.bottom - 140;
+        const paginationHeight = 56;
+        const available =
+          window.innerHeight - searchRect.bottom - paginationHeight - 24;
         const newHeight = Math.min(Math.max(350, available), 720);
         setTableHeight(newHeight);
       }
@@ -115,128 +96,99 @@ export default function TaskManagementPage() {
     };
   }, []);
 
-  /* ========================= FILTERING ========================= */
   const applyFilters = useCallback((filters: Record<string, any> = {}) => {
-    try {
-      const {
-        taskSearch = "",
-        division = [],
-        domainId = "",
-        taskStatuses = [],
-        requester = "",
-        responseCode = [],
-        commitType = [],
-        capabilities = [],
-        jobType = "",
-        scoreCondition = "",
-        scoreValue = "",
-        locationType = "",
-        locationValue = "",
-        fromDate = "",
-        fromTime = "",
-        toDate = "",
-        toTime = "",
-      } = filters;
+      try {
+        const {
+          taskSearch = "",
+          division = [],
+          domainId = "",
+          taskStatuses = [],
+          requester = "",
+          responseCode = [],
+          commitType = [],
+          capabilities = [],
+          jobType = "",
+          scoreCondition = "",
+          scoreValue = "",
+          locationType = "",
+          locationValue = "",
+        } = filters;
 
-      let filtered = [...mockTasks];
+        let filtered = [...mockTasks];
 
-      /* 🔍 GLOBAL SEARCH */
-      if (taskSearch.trim()) {
-        const q = taskSearch.toLowerCase();
-        filtered = filtered.filter((task) =>
-          [
-            task.taskId,
-            task.workId,
-            task.resourceName,
-            task.assetName,
-            task.description,
-          ]
-            .filter(Boolean)
-            .join(" ")
-            .toLowerCase()
-            .includes(q)
-        );
-      }
-
-      /* DIVISION */
-      if (Array.isArray(division) && division.length > 0) {
-        filtered = filtered.filter((t) => division.includes(t.division));
-      }
-
-      /* DOMAIN ID */
-      if (domainId.trim()) {
-        const q = domainId.toLowerCase();
-        filtered = filtered.filter((t) =>
-          String(t.domainId || "").toLowerCase().includes(q)
-        );
-      }
-
-      /* TASK STATUSES */
-      if (Array.isArray(taskStatuses) && taskStatuses.length > 0) {
-        filtered = filtered.filter((t) => taskStatuses.includes(t.taskStatus));
-      }
-
-      /* REQUESTER */
-      if (requester.trim()) {
-        const q = requester.toLowerCase();
-        filtered = filtered.filter((t) =>
-          String(t.resourceName || "").toLowerCase().includes(q)
-        );
-      }
-
-      /* RESPONSE CODE */
-      if (Array.isArray(responseCode) && responseCode.length > 0) {
-        filtered = filtered.filter((t) => responseCode.includes(t.responseCode));
-      }
-
-      /* COMMIT TYPE */
-      if (Array.isArray(commitType) && commitType.length > 0) {
-        filtered = filtered.filter((t) => commitType.includes(t.commitmentType));
-      }
-
-      /* CAPABILITIES */
-      if (Array.isArray(capabilities) && capabilities.length > 0) {
-        filtered = filtered.filter((t) => capabilities.includes(t.primarySkill));
-      }
-
-      /* JOB TYPE */
-      if (jobType.trim()) {
-        const q = jobType.toLowerCase();
-        filtered = filtered.filter((t) =>
-          String(t.taskType || "").toLowerCase().includes(q)
-        );
-      }
-
-      /* IMPORTANCE SCORE */
-      if (scoreValue && !isNaN(Number(scoreValue))) {
-        const val = Number(scoreValue);
-        if (scoreCondition === "greater") {
-          filtered = filtered.filter((t) => Number(t.importanceScore) > val);
-        } else if (scoreCondition === "less") {
-          filtered = filtered.filter((t) => Number(t.importanceScore) < val);
+        if (taskSearch.trim()) {
+          const q = taskSearch.toLowerCase();
+          filtered = filtered.filter((task) =>
+            [
+              task.taskId,
+              task.workId,
+              task.resourceName,
+              task.assetName,
+              task.description,
+            ]
+              .filter(Boolean)
+              .join(" ")
+              .toLowerCase()
+              .includes(q)
+          );
         }
-      }
 
-      /* LOCATION */
-      if (locationType && locationValue.trim()) {
-        const q = locationValue.toLowerCase();
-        filtered = filtered.filter((t) =>
-          String(t[locationType] || "").toLowerCase().includes(q)
-        );
-      }
+        if (Array.isArray(division) && division.length > 0) {
+          filtered = filtered.filter((t) => division.includes(t.division));
+        }
 
-      /* DATE RANGE */
-      const from = buildDate(fromDate, fromTime, false);
-      const to = buildDate(toDate, toTime, true);
-      if (from || to) {
-        filtered = filtered.filter((t) => {
-          const d = new Date(t.startDate || t.taskCreated);
-          if (Number.isNaN(d.getTime())) return false;
-          if (from && d < from) return false;
-          if (to && d > to) return false;
-          return true;
-        });
-      }
+        if (domainId.trim()) {
+          const q = domainId.toLowerCase();
+          filtered = filtered.filter((t) =>
+            String(t.domainId || "").toLowerCase().includes(q)
+          );
+        }
+
+        if (Array.isArray(taskStatuses) && taskStatuses.length > 0) {
+          filtered = filtered.filter((t) => taskStatuses.includes(t.taskStatus));
+        }
+
+        if (requester.trim()) {
+          const q = requester.toLowerCase();
+          filtered = filtered.filter((t) =>
+            String(t.resourceName || "").toLowerCase().includes(q)
+          );
+        }
+
+        if (Array.isArray(responseCode) && responseCode.length > 0) {
+          filtered = filtered.filter((t) => responseCode.includes(t.responseCode));
+        }
+
+        if (Array.isArray(commitType) && commitType.length > 0) {
+          filtered = filtered.filter((t) => commitType.includes(t.commitmentType));
+        }
+
+        if (Array.isArray(capabilities) && capabilities.length > 0) {
+          filtered = filtered.filter((t) => capabilities.includes(t.primarySkill));
+        }
+
+        if (jobType.trim()) {
+          const q = jobType.toLowerCase();
+          filtered = filtered.filter((t) =>
+            String(t.taskType || "").toLowerCase().includes(q)
+          );
+        }
+
+        if (scoreValue && !isNaN(Number(scoreValue))) {
+          const val = Number(scoreValue);
+          if (scoreCondition === "greater") {
+            filtered = filtered.filter((t) => Number(t.importanceScore) > val);
+          } else if (scoreCondition === "less") {
+            filtered = filtered.filter((t) => Number(t.importanceScore) < val);
+          }
+        }
+
+        if (locationType && locationValue.trim()) {
+          const q = locationValue.toLowerCase();
+          filtered = filtered.filter((t) =>
+            String(t[locationType] || "").toLowerCase().includes(q)
+          );
+        }
 
       setFilteredTasks(filtered);
 
@@ -249,13 +201,11 @@ export default function TaskManagementPage() {
     }
   }, []);
 
-  /* ========================= Clear Filters ========================= */
   const handleClear = useCallback(() => {
-    setFilteredTasks([]); // ✅ Clear the table — don't show all data
+    setFilteredTasks([]);
     toast("Filters cleared.", { icon: "🧹" });
   }, []);
 
-  /* ========================= Copy & CSV ========================= */
   const canCopy = filteredTasks.length > 0;
 
   const copyAll = useCallback(async () => {
@@ -278,7 +228,6 @@ export default function TaskManagementPage() {
     toast.success("Exported CSV file.");
   }, [canCopy, filteredTasks]);
 
-  /* ========================= Render ========================= */
   return (
     <motion.div
       ref={containerRef}

@@ -43,10 +43,6 @@ type Filters = {
   locationType: string;
   locationValue: string;
   pwa: string[];
-  fromDate: string;
-  fromTime: string;
-  toDate: string;
-  toTime: string;
 };
 
 type DropdownId =
@@ -79,10 +75,6 @@ const initialFilters: Filters = {
   locationType: "",
   locationValue: "",
   pwa: [],
-  fromDate: "",
-  fromTime: "",
-  toDate: "",
-  toTime: "",
 };
 
 const initialQueries: QueryState = {
@@ -644,13 +636,7 @@ export default function TaskSearchCard({
                 />
               </div>
 
-              {/* Date Range - Always at end */}
-              <div className="flex flex-col ml-auto" style={{ width: "clamp(240px,28vw,380px)" }}>
-                <label className="text-[11px] font-semibold text-gray-800 mb-[3px]">
-                  Date Range
-                </label>
-                <DateRangeInputs filters={filters} handleChange={handleChange} />
-              </div>
+              {/* Date range removed per request; inputs realigned */}
             </div>
 
             {/* Row 3 removed — DateRangeInputs moved into Row 2 */}
@@ -893,65 +879,4 @@ const DropdownMultiSelect = ({
   );
 };
 
-interface DateRangeInputsProps {
-  filters: Filters;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}
-
-const DateRangeInputs = ({ filters, handleChange }: DateRangeInputsProps) => (
-  <div className="flex flex-col">
-    <div className="flex items-end gap-3">
-      <div className="flex flex-col">
-        <label className="text-[10px] font-medium text-gray-700 mb-[2px]">
-          Date From
-        </label>
-        <div className="flex items-center gap-2">
-          <input
-            type="date"
-            name="fromDate"
-            value={filters.fromDate}
-            onChange={handleChange}
-            className="border border-gray-300 rounded-md text-[11px] px-2 h-[32px] shadow-sm bg-white focus:ring-2 focus:ring-blue-500/70 focus:border-blue-500"
-            style={{ width: "clamp(100px,12vw,120px)" }}
-          />
-          <input
-            type="time"
-            name="fromTime"
-            value={filters.fromTime}
-            onChange={handleChange}
-            className="border border-gray-300 rounded-md text-[11px] px-2 h-[32px] shadow-sm bg-white focus:ring-2 focus:ring-blue-500/70 focus:border-blue-500"
-            style={{ width: "clamp(64px,6vw,80px)" }}
-          />
-        </div>
-      </div>
-
-      <div className="w-7 h-7 flex items-center justify-center rounded-full bg-gray-100 text-gray-700 text-xs font-bold shadow-sm mb-1">
-        →
-      </div>
-
-      <div className="flex flex-col">
-        <label className="text-[10px] font-medium text-gray-700 mb-[2px]">
-          Date To
-        </label>
-        <div className="flex items-center gap-2">
-          <input
-            type="date"
-            name="toDate"
-            value={filters.toDate}
-            onChange={handleChange}
-            className="border border-gray-300 rounded-md text-[11px] px-2 h-[32px] shadow-sm bg-white focus:ring-2 focus:ring-blue-500/70 focus:border-blue-500"
-            style={{ width: "clamp(100px,12vw,120px)" }}
-          />
-          <input
-            type="time"
-            name="toTime"
-            value={filters.toTime}
-            onChange={handleChange}
-            className="border border-gray-300 rounded-md text-[11px] px-2 h-[32px] shadow-sm bg-white focus:ring-2 focus:ring-blue-500/70 focus:border-blue-500"
-            style={{ width: "clamp(64px,6vw,80px)" }}
-          />
-        </div>
-      </div>
-    </div>
-  </div>
-);
+// Date range inputs removed
