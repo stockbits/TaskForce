@@ -422,6 +422,8 @@ export default function MainLayout() {
   const [searchQuery, setSearchQuery] = useState("");
   const [globalResults, setGlobalResults] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedDomain, setSelectedDomain] = useState("");
+  const [selectedDivision, setSelectedDivision] = useState("");
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
@@ -653,6 +655,35 @@ export default function MainLayout() {
     setCurrentMenu({ label, icon: iconMap[label] || Folder });
     setCards(menuCards);
     setActiveSubPage(item.name === "Task Management" ? "TaskManagement" : null);
+  }, []);
+
+  // Build domain and division options from DB (mock JSON)
+  const domainOptions = useMemo(() => {
+    const set = new Set<string>();
+    (mockTasks as any[]).forEach((t) => {
+      const v = String(t.domain || "").toUpperCase();
+      if (v) set.add(v);
+    });
+    return Array.from(set).sort();
+  }, []);
+
+  const divisionOptions = useMemo(() => {
+    const set = new Set<string>();
+    (mockTasks as any[]).forEach((t) => {
+      const v = String(t.groupCode || "").toUpperCase();
+      if (v) set.add(v);
+    });
+    return Array.from(set).sort();
+  }, []);
+
+  const handleChangeDomain = useCallback((v: string) => {
+    setSelectedDomain(v);
+    // Optionally filter division list when domain changes (kept simple)
+    // No hard filter applied to options; use selection to drive data filters.
+  }, []);
+
+  const handleChangeDivision = useCallback((v: string) => {
+    setSelectedDivision(v);
   }, []);
 
   // Callback passed into TaskTable_Advanced for popout

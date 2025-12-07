@@ -97,8 +97,10 @@ function mapSelectedMode(id: string): string {
    MAIN COMPONENT
 ============================================================================ */
 export default function ScheduleLivePage() {
-  /* ---------------- DIVISION ---------------- */
+  /* ---------------- DOMAIN + DIVISION ---------------- */
+  const [domain, setDomain] = useState<string>("");
   const [division, setDivision] = useState<string>("");
+  const [favActive, setFavActive] = useState<boolean>(false);
 
   /* ---------------- LEGEND ---------------- */
   const [legendOpen, setLegendOpen] = useState(false);
@@ -157,6 +159,12 @@ export default function ScheduleLivePage() {
     return Array.from(s).sort();
   }, []);
 
+  const domainOptions = useMemo(() => {
+    const s = new Set<string>();
+    (mockTasks as TaskRecord[]).forEach((t) => t.domain && s.add(String(t.domain).toUpperCase()));
+    return Array.from(s).sort();
+  }, []);
+
   /* ============================================================================
      DROPDOWN BUILDER
   ============================================================================ */
@@ -208,6 +216,21 @@ export default function ScheduleLivePage() {
     setSearchAnywhere("");
   };
 
+  const handleDomainChange = (value: string) => {
+    setDomain(value);
+    setTaskData([]);
+    setResourceData([]);
+    setResetKey((n) => n + 1);
+
+    // Rebuild dropdowns based on domain + division if set
+    let rows = [...(mockTasks as TaskRecord[])];
+    if (value) rows = rows.filter((t) => String(t.domain).toUpperCase() === value);
+    if (division) rows = rows.filter((t) => t.division === division);
+    setDropdownData(buildFilteredDropdowns(rows));
+
+    setSearchAnywhere("");
+  };
+
   /* ============================================================================
      DOCKING LOGIC
   ============================================================================ */
@@ -227,6 +250,9 @@ export default function ScheduleLivePage() {
   const runTaskSearch = (filters: any) => {
     let results = [...(mockTasks as TaskRecord[])];
 
+    if (domain) {
+      results = results.filter((t) => String(t.domain).toUpperCase() === domain);
+    }
     if (division) {
       results = results.filter((t) => t.division === division);
     }
@@ -247,6 +273,17 @@ export default function ScheduleLivePage() {
       );
     }
 
+    // Sort at source: importance desc, then appointmentStartDate asc
+    results.sort((a, b) => {
+      const ai = Number(a.importanceScore ?? 0);
+      const bi = Number(b.importanceScore ?? 0);
+      if (bi !== ai) return bi - ai; // desc
+
+      const aDate = a.appointmentStartDate ? new Date(a.appointmentStartDate).getTime() : 0;
+      const bDate = b.appointmentStartDate ? new Date(b.appointmentStartDate).getTime() : 0;
+      return aDate - bDate; // asc
+    });
+
     setTaskData(results);
     setSearchOpen(false);
     setSearchButtonActive(false);
@@ -256,10 +293,20 @@ export default function ScheduleLivePage() {
      RESOURCE SEARCH
   ============================================================================ */
   const runResourceSearch = (filters: any) => {
+    // Resource search MUST be derived from division selection
+    if (!division) {
+      setResourceData([]);
+      return;
+    }
+
     let results = [...allResources];
 
-    if (division) {
-      results = results.filter((r) => r.division === division);
+    // Apply division first (primary key for resource lookup)
+    results = results.filter((r) => r.division === division);
+
+    // Optional secondary filter by domain, if provided
+    if (domain) {
+      results = results.filter((r) => String(r.domain).toUpperCase() === domain);
     }
     if (filters.statuses?.length) {
       results = results.filter((r) => filters.statuses.includes(r.status));
@@ -267,6 +314,23 @@ export default function ScheduleLivePage() {
     if (filters.pwa?.length) {
       results = results.filter((r) => filters.pwa.includes(r.pwa));
     }
+
+    // Sort at source: status priority then availableAgainAt asc
+    const statusPriority: Record<string, number> = {
+      Available: 1,
+      Busy: 2,
+      Offline: 3,
+    };
+
+    results.sort((a, b) => {
+      const sa = statusPriority[a.status] ?? 99;
+      const sb = statusPriority[b.status] ?? 99;
+      if (sa !== sb) return sa - sb;
+
+      const aTime = a.availableAgainAt ? new Date(a.availableAgainAt).getTime() : Number.POSITIVE_INFINITY;
+      const bTime = b.availableAgainAt ? new Date(b.availableAgainAt).getTime() : Number.POSITIVE_INFINITY;
+      return aTime - bTime;
+    });
 
     setResourceData(results);
     setSearchOpen(false);
@@ -399,16 +463,38 @@ export default function ScheduleLivePage() {
   ============================================================================ */
   const toolbar = (
     <div className="w-full bg-white border-b border-gray-200 px-3 py-2 flex items-center gap-3">
-      {/* DIVISION SELECT */}
-      <div className="border border-gray-300 rounded-md shadow-sm bg-white px-2 py-1.5">
+      {/* DIVISION SELECT (first) */}
+      <div
+        className="rounded-md shadow-sm bg-white px-2 py-1.5 hover:bg-gray-100"
+        style={{ border: `1px solid ${THEME.blue}` }}
+      >
         <select
           value={division}
           onChange={(e) => handleDivisionChange(e.target.value)}
           className="text-sm bg-transparent outline-none"
+          style={{ minWidth: "clamp(90px,10vw,120px)" }}
         >
           <option value="">Division</option>
           {divisionOptions.map((d) => (
-            <option key={d}>{d}</option>
+            <option key={d} value={d}>{d}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* DOMAIN SELECT (second) */}
+      <div
+        className="rounded-md shadow-sm bg-white px-2 py-1.5 hover:bg-gray-100"
+        style={{ border: `1px solid ${THEME.blue}` }}
+      >
+        <select
+          value={domain}
+          onChange={(e) => handleDomainChange(e.target.value)}
+          className="text-sm bg-transparent outline-none"
+          style={{ minWidth: "clamp(90px,10vw,120px)" }}
+        >
+          <option value="">Domain</option>
+          {domainOptions.map((d) => (
+            <option key={d} value={d}>{d}</option>
           ))}
         </select>
       </div>
@@ -437,9 +523,7 @@ export default function ScheduleLivePage() {
           setSearchButtonActive(!searchOpen);
         }}
         className={`border rounded-md shadow-sm px-3 py-1.5 text-sm flex items-center gap-2 ${
-          division
-            ? "bg-white hover:bg-gray-100"
-            : "bg-gray-100 text-gray-400 cursor-not-allowed"
+          division ? "bg-white hover:bg-gray-100" : "bg-gray-100 text-gray-400 cursor-not-allowed"
         }`}
         style={
           division && searchButtonActive
@@ -456,17 +540,29 @@ export default function ScheduleLivePage() {
       </button>
 
       {/* FAV */}
-      <button className="border border-gray-300 rounded-md shadow-sm bg-white px-2 py-1.5">
-        <Star size={16} className="text-gray-600" />
+      <button
+        onClick={() => setFavActive((v) => !v)}
+        className={`rounded-md shadow-sm px-2 py-1.5 ${favActive ? '' : 'hover:bg-gray-100'}`}
+        style={{
+          border: `1px solid ${THEME.blue}`,
+          background: favActive ? THEME.blue : "white",
+        }}
+        title="Favorite"
+      >
+        <Star size={16} className={favActive ? "text-white" : "text-gray-700"} />
       </button>
 
       {/* MAP LEGEND BUTTON */}
       <button
         onClick={() => setLegendOpen((o) => !o)}
-        className="border border-gray-300 rounded-md shadow-sm bg-white px-2 py-1.5"
+        className={`rounded-md shadow-sm px-2 py-1.5 ${legendOpen ? '' : 'hover:bg-gray-100'}`}
         title="Map Legend"
+        style={{
+          border: `1px solid ${THEME.blue}`,
+          background: legendOpen ? THEME.blue : "white",
+        }}
       >
-        <Info size={16} className="text-gray-700" />
+        <Info size={16} className={legendOpen ? "text-white" : "text-gray-700"} />
       </button>
 
       <div className="flex-1" />
@@ -516,7 +612,7 @@ export default function ScheduleLivePage() {
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className="absolute z-[200]"
+            className="absolute z-[1000]"
             style={{
               top:
                 (searchButtonRef.current?.offsetTop ?? 0) +
@@ -622,9 +718,12 @@ export default function ScheduleLivePage() {
                     onClick={() => {
                       const filters = currentFiltersRef.current;
                       const mode = mapSelectedMode(selectedMode);
-
-                      if (mode.startsWith("task")) runTaskSearch(filters);
-                      else runResourceSearch(filters);
+                      // Run the search independently based on selected menu
+                      if (mode.startsWith("task")) {
+                        runTaskSearch(filters);
+                      } else {
+                        runResourceSearch(filters);
+                      }
                     }}
                     className="px-5 py-2 rounded-md text-sm font-medium text-white"
                     style={{ background: THEME.blue }}

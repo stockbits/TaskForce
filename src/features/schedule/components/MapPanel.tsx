@@ -10,7 +10,7 @@ import {
   MapContainer,
   TileLayer,
   Marker,
-  Popup,
+    Tooltip,
   useMap,
   useMapEvents,
 } from "react-leaflet";
@@ -65,11 +65,9 @@ function MapInteractionHandler({
     dragend() {
       onMapDragEnd();
     },
-    mousedown() {
-      onMapDragStart();
-    },
-    mouseup() {
-      onMapDragEnd();
+    // Background map clicks should NOT clear selection; handle as no-op
+    click() {
+      // intentionally no selection changes on bare map click
     },
   });
 
@@ -204,7 +202,7 @@ export default function MapPanel({
   );
 
   return (
-    <div className="bg-white border h-full rounded-lg shadow-sm p-4 flex flex-col">
+    <div className="bg-white border h-full rounded-lg shadow-sm p-4 flex flex-col" data-map-root="true">
       <div className="flex-1 rounded overflow-hidden relative">
         <MapContainer
           center={[51.713, -3.449]}
@@ -262,13 +260,25 @@ export default function MapPanel({
 
                     handleTaskMapClick(t, multi);
                   },
+                  mouseover: (e) => {
+                    // prevent default hover show by closing if opened
+                    const m: any = e.target;
+                    m.closeTooltip?.();
+                  },
+                  dblclick: (e) => {
+                    const m: any = e.target;
+                    m.openTooltip?.();
+                  },
                 }}
               >
-                <Popup>
-                  <b>{t.taskId}</b>
-                  <br />
-                  {t.customerAddress}
-                </Popup>
+                <Tooltip direction="top" offset={[0, -36]} permanent={false} sticky={false} opacity={1}
+                  className="shadow-sm">
+                  <div className="text-xs">
+                    <b>{t.taskId}</b>
+                    <br />
+                    {t.customerAddress}
+                  </div>
+                </Tooltip>
               </Marker>
             );
           })}
@@ -302,15 +312,26 @@ export default function MapPanel({
 
                     handleResourceMapClick(r, multi);
                   },
+                  mouseover: (e) => {
+                    const m: any = e.target;
+                    m.closeTooltip?.();
+                  },
+                  dblclick: (e) => {
+                    const m: any = e.target;
+                    m.openTooltip?.();
+                  },
                 }}
               >
-                <Popup>
-                  <b>{r.name}</b>
-                  <br />
-                  {r.homePostCode}
-                  <br />
-                  Status: {r.status}
-                </Popup>
+                <Tooltip direction="top" offset={[0, -36]} permanent={false} sticky={false} opacity={1}
+                  className="shadow-sm">
+                  <div className="text-xs">
+                    <b>{r.name}</b>
+                    <br />
+                    {r.homePostCode}
+                    <br />
+                    Status: {r.status}
+                  </div>
+                </Tooltip>
               </Marker>
             );
           })}

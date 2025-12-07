@@ -550,15 +550,16 @@ export default function TaskTable_Advanced({
         closeMenu();
       }
 
-      // ⭐ Only clear if user clicks outside THIS table, but do NOT clear because of other tables
+      // ⭐ Only clear if user clicks outside THIS table, but do NOT clear because of other tables or map root
       if (containerRef.current && !containerRef.current.contains(target)) {
         const clickedInsideAnyTable = target.closest("[data-table]");
         const clickedInsideThisTable = target.closest(
           `[data-table="${rowIdKey}"]`
         );
+        const clickedInsideMap = target.closest('[data-map-root="true"]');
 
         // If clicked inside another table → do NOT clear THIS table
-        if (clickedInsideAnyTable && !clickedInsideThisTable) {
+        if ((clickedInsideAnyTable && !clickedInsideThisTable) || clickedInsideMap) {
           return;
         }
 

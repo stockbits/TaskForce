@@ -13,14 +13,7 @@ export interface SearchMenuItem {
 ------------------------------------------------------------ */
 export const SEARCH_MENU_ITEMS: readonly SearchMenuItem[] = [
   // ----- TASK SEARCHES -----
-  { id: "tasksByCommit", label: "Tasks by Commit", group: "task" },
-  { id: "notAssigned", label: "Not Assigned Tasks", group: "task" },
-  {
-    id: "earliestResource",
-    label: "Earliest Resource for Task",
-    group: "task",
-  },
-  { id: "closeResource", label: "Close Resource for Tasks", group: "task" },
+  { id: "tasksByCommit", label: "Active Tasks by Commit", group: "task" },
 
   // ----- RESOURCE SEARCHES (ONLY ACTIVE FOR NOW) -----
   {

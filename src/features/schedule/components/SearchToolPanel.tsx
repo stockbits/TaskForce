@@ -274,30 +274,92 @@ const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
 
   const ImpBlock = (
     <div className="flex flex-col">
-      {blockTitle("IMP Score")}
       <div className="flex gap-2">
-        <select
-          className="border border-gray-300 rounded-md text-[12px] px-2 h-[32px] bg-white"
-          value={filters.impCondition ?? ""}
-          onChange={(e) =>
-            setFilters((f) => ({ ...f, impCondition: e.target.value }))
-          }
-          style={{ minWidth: "clamp(100px,12vw,140px)" }}
-        >
-          <option value="">Condition</option>
-          <option value="greater">Greater Than</option>
-          <option value="less">Less Than</option>
-        </select>
+        {/* IMP Condition single-select with internal label (fixed overlay) */}
+        {(() => {
+          const impBtnRef = useRef<HTMLDivElement | null>(null);
+          const [impPos, setImpPos] = useState<{ top: number; left: number; width: number } | null>(null);
 
+          useEffect(() => {
+            if (openDropdown === "imp" && impBtnRef.current) {
+              const rect = impBtnRef.current.getBoundingClientRect();
+              setImpPos({ top: rect.bottom + 4, left: rect.left, width: rect.width });
+            }
+          }, [openDropdown]);
+
+          return (
+            <div style={{ maxWidth: "220px", width: "100%" }}>
+              <div
+                ref={impBtnRef}
+                onClick={() => setOpenDropdown(openDropdown === "imp" ? null : "imp")}
+                className="w-full h-[34px] px-3 text-[12px] border border-gray-300 rounded-md bg-white text-gray-900 shadow-sm cursor-pointer flex items-center justify-between hover:border-gray-400"
+              >
+                <span className="truncate w-full pr-3">
+                  {filters.impCondition
+                    ? filters.impCondition === "greater"
+                      ? "Greater Than"
+                      : "Less Than"
+                    : "IMP Score"}
+                </span>
+                <ChevronDown size={14} className="text-gray-600 flex-shrink-0" />
+              </div>
+
+              <AnimatePresence>
+                {openDropdown === "imp" && impPos && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.2 }}
+                    className="fixed z-[2000] p-2 text-[12px] bg-white border border-gray-300 rounded-lg shadow-2xl"
+                    style={{
+                      top: impPos.top,
+                      left: impPos.left,
+                      width: Math.min(impPos.width, 240),
+                      maxWidth: "90vw",
+                    }}
+                  >
+                    <div className="flex flex-col">
+                      <button
+                        className="text-left px-2 py-1 hover:bg-blue-50 rounded"
+                        onClick={() => {
+                          setFilters((f) => ({ ...f, impCondition: "greater" }));
+                          setOpenDropdown(null);
+                        }}
+                      >
+                        Greater Than
+                      </button>
+                      <button
+                        className="text-left px-2 py-1 hover:bg-blue-50 rounded"
+                        onClick={() => {
+                          setFilters((f) => ({ ...f, impCondition: "less" }));
+                          setOpenDropdown(null);
+                        }}
+                      >
+                        Less Than
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })()}
+
+        {/* Numeric value */}
         <input
           type="number"
           className="border border-gray-300 rounded-md text-[12px] px-2 h-[32px] bg-white"
           value={filters.impValue ?? ""}
-          onChange={(e) =>
-            setFilters((f) => ({ ...f, impValue: e.target.value }))
-          }
+          onChange={(e) => {
+            const raw = e.target.value || "";
+            const digits = raw.replace(/\D/g, "").slice(0, 3);
+            setFilters((f) => ({ ...f, impValue: digits }));
+          }}
           placeholder="Value"
-          style={{ width: "clamp(80px,8vw,100px)" }}
+          min={0}
+          max={999}
+          style={{ width: "clamp(60px,6vw,80px)" }}
         />
       </div>
     </div>
@@ -362,7 +424,10 @@ const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
       ref={containerRef}
       initial={{ opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col gap-3 w-full"
+      className="flex flex-col gap-3 w-full max-w-[min(95vw,800px)]"
+      style={{
+        overflowX: "hidden",
+      }}
     >
       {renderMode()}
 
@@ -420,6 +485,15 @@ function DropdownMultiSelect({
   const isOpen = openDropdown === id;
   const q = query[id] ?? "";
   const allSelected = options.length > 0 && selected.length === options.length;
+  const btnRef = useRef<HTMLDivElement | null>(null);
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number; width: number } | null>(null);
+
+  useEffect(() => {
+    if (isOpen && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setMenuPos({ top: rect.bottom + 4, left: rect.left, width: rect.width });
+    }
+  }, [isOpen]);
 
   // Fix: show label instead of "0 selected"
   const displayLabel =
@@ -429,6 +503,7 @@ function DropdownMultiSelect({
     <div className="relative">
       {/* DROPDOWN BUTTON */}
       <div
+        ref={btnRef}
         onClick={() => setOpenDropdown(isOpen ? null : id)}
         className="w-full h-[34px] px-3 text-[12px] border border-gray-300 rounded-md
                    bg-white text-gray-900 shadow-sm cursor-pointer flex items-center justify-between
@@ -440,15 +515,20 @@ function DropdownMultiSelect({
 
       {/* MENU */}
       <AnimatePresence>
-        {isOpen && (
+        {isOpen && menuPos && (
           <motion.div
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.2 }}
-            className="absolute z-[9999] mt-1 p-2 text-[12px] bg-white border border-gray-300
-                     rounded-lg shadow-2xl w-full"
-            style={{ minWidth: "min(90vw,320px)" }}
+            className="fixed z-[2000] p-2 text-[12px] bg-white border border-gray-300 rounded-lg shadow-2xl"
+            style={{
+              top: menuPos.top,
+              left: menuPos.left,
+              width: Math.min(menuPos.width, 380),
+              maxWidth: "90vw",
+              overflow: "visible",
+            }}
           >
             {/* SEARCH BOX */}
             <input
@@ -465,7 +545,7 @@ function DropdownMultiSelect({
             />
 
             {/* SELECT ALL */}
-            <div className="sticky top-0 flex justify-between bg-slate-50 px-2 py-1 border border-gray-200 rounded mt-1 mb-1 text-[12px] items-center">
+            <div className="flex justify-between bg-slate-50 px-2 py-1 border border-gray-200 rounded mt-1 mb-1 text-[12px] items-center">
               <span>
                 {allSelected ? "Clear All Results" : "Select All Results"}
               </span>
@@ -484,15 +564,8 @@ function DropdownMultiSelect({
               )}
             </div>
 
-            {/* LIST */}
-            <div
-              className="overflow-y-auto"
-              style={{
-                maxHeight: "calc(var(--vh, 1vh) * 40)",
-                scrollbarWidth: "thin",
-                scrollbarColor: "#9ca3af #e5e7eb",
-              }}
-            >
+            {/* LIST — show full list without internal scroll */}
+            <div>
               {options.map((o) => (
                 <label
                   key={o}

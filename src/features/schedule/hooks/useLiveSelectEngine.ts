@@ -38,6 +38,8 @@ export function useLiveSelectEngine() {
   const originRef = useRef<SelectionOrigin>(null);
   const mapSelectingRef = useRef(false);
   const mapDraggingRef = useRef(false);
+  const lastMapEventTsRef = useRef<number>(0);
+  const SUPPRESS_MS = 200; // window to ignore incidental clears
 
   // Derived singles
   const selectedTask = selectedTasks.length === 1 ? selectedTasks[0] : null;
@@ -86,6 +88,7 @@ export function useLiveSelectEngine() {
     setShouldZoom(false);
     originRef.current = "map";
     mapSelectingRef.current = true;
+    lastMapEventTsRef.current = Date.now();
 
     setSelectedTasks((prev) => {
       if (!multi) return [task];
@@ -111,13 +114,22 @@ export function useLiveSelectEngine() {
         rows.map((r) => r.taskId)
       );
 
+    // Ignore empty selection updates to preserve current selection
+    if (!rows || rows.length === 0) {
+      if (DEBUG_SELECT) console.log("TABLE SELECT TASKS ignored (empty selection)");
+      return;
+    }
+
+    // Suppress table-driven changes while map is interacting
+    const withinSuppress = Date.now() - lastMapEventTsRef.current < SUPPRESS_MS;
     if (
       mapSelectingRef.current ||
       originRef.current === "map" ||
-      mapDraggingRef.current
+      mapDraggingRef.current ||
+      withinSuppress
     ) {
       if (DEBUG_SELECT)
-        console.log("TABLE IGNORED — map is selecting/dragging");
+        console.log("TABLE IGNORED — map is selecting/dragging/suppress window");
       return;
     }
 
@@ -135,6 +147,7 @@ export function useLiveSelectEngine() {
     setShouldZoom(false);
     originRef.current = "map";
     mapSelectingRef.current = true;
+    lastMapEventTsRef.current = Date.now();
 
     setSelectedResources((prev) => {
       if (!multi) return [res];
@@ -160,13 +173,21 @@ export function useLiveSelectEngine() {
         rows.map((r) => r.resourceId)
       );
 
+    // Ignore empty selection updates to preserve current selection
+    if (!rows || rows.length === 0) {
+      if (DEBUG_SELECT) console.log("TABLE SELECT RESOURCES ignored (empty selection)");
+      return;
+    }
+
+    const withinSuppress = Date.now() - lastMapEventTsRef.current < SUPPRESS_MS;
     if (
       mapSelectingRef.current ||
       originRef.current === "map" ||
-      mapDraggingRef.current
+      mapDraggingRef.current ||
+      withinSuppress
     ) {
       if (DEBUG_SELECT)
-        console.log("TABLE IGNORED — map is selecting/dragging");
+        console.log("TABLE IGNORED — map is selecting/dragging/suppress window");
       return;
     }
 
@@ -180,6 +201,7 @@ export function useLiveSelectEngine() {
   const notifyMapDragStart = () => {
     if (DEBUG_SELECT) console.log("MAP DRAG START");
     mapDraggingRef.current = true;
+    lastMapEventTsRef.current = Date.now();
   };
 
   const notifyMapDragEnd = () => {
@@ -187,7 +209,7 @@ export function useLiveSelectEngine() {
     // Small delay to allow drag inertia
     setTimeout(() => {
       mapDraggingRef.current = false;
-      if (DEBUG_SELECT) console.log("MAP DRAG CLEAR");
+      // Do NOT clear selections on drag end; selections persist.
     }, 80);
   };
 
