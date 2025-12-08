@@ -93,7 +93,7 @@ const ALL_TASK_SECTIONS = [
   "Commitments / Customer / Location",
   "Scheduling / Resources",
   "Access Restrictions",
-  "Notes",
+  "Job Notes",
   "Progress Notes",
   "Closure",
 ];
@@ -465,7 +465,9 @@ export default function MainLayout() {
     null
   );
   // Inline popout state
-  const [inlinePopout, setInlinePopout] = useState<{ open: boolean; tasks: Record<string, any>[]; x?: number; y?: number }>({ open: false, tasks: [], x: 120, y: 120 });
+  useEffect(() => {
+    return () => closeExternalWindow();
+  }, [closeExternalWindow]);
 
   // CALLOUT LANDING (NEW)
   const [calloutLandingOpen, setCalloutLandingOpen] = useState(false);
@@ -690,10 +692,9 @@ export default function MainLayout() {
   const handleOpenPopout = useCallback(
     (tasks: Record<string, any>[], mouseX: number, mouseY: number) => {
       if (!tasks || tasks.length === 0) return;
-      // Inline-only: open in-window draggable panel with selected tasks
-      setInlinePopout({ open: true, tasks, x: mouseX, y: mouseY });
+      openExternalWindow(tasks as TaskDetails[], mouseX, mouseY);
     },
-    []
+    [openExternalWindow]
   );
 
   // Outcome → task status mapping
@@ -919,17 +920,6 @@ export default function MainLayout() {
         </div>
       </main>
 
-      {/* Inline Popout for Task Management */}
-      {inlinePopout.open && (
-        <TaskPopoutPanel
-          open={inlinePopout.open}
-          tasks={inlinePopout.tasks as any}
-          initialX={inlinePopout.x ?? 120}
-          initialY={inlinePopout.y ?? 120}
-          onClose={() => setInlinePopout({ open: false, tasks: [], x: 120, y: 120 })}
-        />
-      )}
-
       {/* ---------------------------------------------------------
     CALLOUT LANDING PAGE (NEW)
 ---------------------------------------------------------- */}
@@ -973,6 +963,10 @@ export default function MainLayout() {
           <TaskPopoutPanel
             open={true}
             tasks={externalTasks}
+            expanded={externalExpandedSections}
+            onToggleSection={handleExternalToggleSection}
+            onExpandAll={handleExternalExpandAll}
+            onCollapseAll={handleExternalCollapseAll}
             onClose={closeExternalWindow}
           />,
           externalContainer

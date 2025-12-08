@@ -7,419 +7,195 @@
 // ===============================================================
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import { X, Pin } from "lucide-react";
-import TaskDetailsModal, { TaskDetails } from "./TaskDetailsModal";
- 
-function ProgressNotesEditor({ taskId, taskStatus, onSaved, shouldReset }: { taskId: string; taskStatus?: string; onSaved?: (entry: { ts: string; status: string; text: string }) => void; shouldReset?: boolean }) {
-  const draftKey = `taskProgressNotes:${taskId}:draft`;
-  const listKey = `task:${taskId}:progressNotes`;
-  const [text, setText] = useState<string>("");
-  const [status, setStatus] = useState<"idle" | "saved">("idle");
-  const [serverOk, setServerOk] = useState<boolean>(false);
-
-  useEffect(() => {
-    fetch("http://localhost:5179/health").then(() => setServerOk(true)).catch(() => setServerOk(false));
-    setStatus("idle");
-  }, [draftKey]);
-
-  // Clear editor whenever Progress Notes tab is activated
-  useEffect(() => {
-    if (shouldReset) {
-      setText("");
-      try {
-        localStorage.removeItem(draftKey);
-      } catch {}
-    }
-  }, [shouldReset, draftKey]);
-
-  const onSave = () => {
-    const trimmed = text.trim();
-    if (!trimmed) return;
-
-    const tryServer = async () => {
-      try {
-        const resp = await fetch("http://localhost:5179/progress-notes", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ taskId, text: trimmed, taskStatus }),
-        });
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        return true;
-      } catch {
-        return false;
-      }
-    };
-
-    (async () => {
-      const ts = new Date().toISOString();
-      const entry = { ts, status: taskStatus || "", text: trimmed };
-      const savedServer = serverOk ? await tryServer() : false;
-      try {
-        const cur = JSON.parse(localStorage.getItem(listKey) || "[]");
-        const next = Array.isArray(cur) ? [...cur, entry] : [entry];
-        localStorage.setItem(listKey, JSON.stringify(next));
-      } catch {
-        localStorage.setItem(listKey, JSON.stringify([entry]));
-      }
-      localStorage.setItem(draftKey, trimmed);
-      onSaved?.(entry);
-      setStatus("saved");
-      setTimeout(() => setStatus("idle"), 1200);
-    })();
-  };
-
-  return (
-    <div className="space-y-2">
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        onDoubleClick={() => {
-          setText("");
-          try {
-            localStorage.removeItem(draftKey);
-          } catch {}
-        }}
-        placeholder="Add progress notes..."
-        className="w-full h-20 text-[12px] p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200"
-      />
-      <div className="flex items-center gap-2">
-        <button
-          onClick={onSave}
-          disabled={!text.trim()}
-          className={`px-2.5 py-1 text-xs rounded-md text-white focus:outline-none focus:ring-2 ${
-            text.trim()
-              ? "bg-[#0A4A7A] hover:bg-[#083B61] focus:ring-[#0A4A7A]/30"
-              : "bg-gray-300 cursor-not-allowed"
-          }`}
-        >
-          Save Notes
-        </button>
-        {status === "saved" && (
-          <span className="text-[11px] text-green-700">Saved</span>
-        )}
-      </div>
-    </div>
-  );
-}
+import { ChevronUp, ChevronDown } from "lucide-react";
+import TaskDetailsModal from "./TaskDetailsModal";
+import type { TaskDetails } from "@/types";
 
 interface TaskPopoutPanelProps {
   open: boolean;
   tasks: TaskDetails[];
+  expanded: string[];
+  onToggleSection: (section: string) => void;
+  onExpandAll: () => void;
+  onCollapseAll: () => void;
   onClose: () => void;
-  initialX?: number;
-  initialY?: number;
 }
 
 export default function TaskPopoutPanel({
   open,
   tasks,
+  expanded,
+  onToggleSection,
+  onExpandAll,
+  onCollapseAll,
   onClose,
-  initialX = 120,
-  initialY = 120,
 }: TaskPopoutPanelProps) {
-
-  function ProgressNotesSection({ task, shouldReset }: { task: any; shouldReset?: boolean }) {
-    const [notes, setNotes] = React.useState<any[]>(() => {
-      const base = Array.isArray(task?.progressNotes) ? task.progressNotes : [];
-      try {
-        const lsKey = `task:${task?.taskId}:progressNotes`;
-        const fromLs = JSON.parse(localStorage.getItem(lsKey) || "[]");
-        if (Array.isArray(fromLs) && fromLs.length) {
-          return [...base, ...fromLs];
-        }
-      } catch {}
-      return base;
-    });
-
-    React.useEffect(() => {
-      const base = Array.isArray(task?.progressNotes) ? task.progressNotes : [];
-      try {
-        const lsKey = `task:${task?.taskId}:progressNotes`;
-        const fromLs = JSON.parse(localStorage.getItem(lsKey) || "[]");
-        if (Array.isArray(fromLs) && fromLs.length) {
-          setNotes([...base, ...fromLs]);
-          return;
-        }
-      } catch {}
-      setNotes(base);
-    }, [task]);
-
-    return (
-      <div className="space-y-3">
-        {/* Editor first, closer to user action */}
-        <ProgressNotesEditor
-          taskId={task?.taskId}
-          taskStatus={task?.taskStatus}
-          onSaved={(entry) => setNotes((prev) => [...prev, entry])}
-          shouldReset={shouldReset}
-        />
-        {/* Saved entries below with scroll */}
-        <div className="space-y-1 max-h-44 overflow-y-auto pr-1">
-          <div className="text-[11px] text-gray-500">Saved entries</div>
-          {notes.length > 0 ? (
-            // Show only the latest three entries to keep height consistent
-            notes.slice(-3).reverse().map((entry: any, i: number) => {
-              const formatted = (() => {
-                try {
-                  return new Date(entry.ts).toLocaleString("en-GB", {
-                    year: "numeric",
-                    month: "short",
-                    day: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  });
-                } catch {
-                  return entry.ts;
-                }
-              })();
-              return (
-                <div key={i} className="text-[12px] text-gray-700 border border-gray-200 rounded-md p-2">
-                  <div className="text-[11px] text-gray-500 flex items-center justify-between">
-                    <span>{formatted}</span>
-                    <span className="text-gray-600">{entry.status || ""}</span>
-                  </div>
-                  <div className="whitespace-pre-wrap mt-1">{entry.text}</div>
-                </div>
-              );
-            })
-          ) : (
-            <div className="text-[11px] text-gray-500">No saved progress notes yet.</div>
-          )}
-        </div>
-      </div>
-    );
-  }
   if (!open) return null;
 
-  // Active tab for single-task panel
-  const [activeTab, setActiveTab] = useState<"Overview" | "FieldNotes" | "ProgressNotes">("Overview");
+  // ======================================================
+  // ACTIVE PILLS (max 3 in compare mode)
+  // ======================================================
+  const [activePills, setActivePills] = useState<string[]>([]);
 
-  // Reset tab on task change only when not pinned; must be placed after 'pinned' is declared
+  useEffect(() => {
+    if (tasks.length === 1) {
+      setActivePills([tasks[0].taskId]);
+    } else if (tasks.length >= 3) {
+      setActivePills(tasks.slice(0, 3).map((t) => t.taskId));
+    } else {
+      setActivePills(tasks.map((t) => t.taskId));
+    }
+  }, [tasks]);
 
   // ======================================================
-  // TAB CLICK HANDLER (max 3 active in compare mode)
+  // PILL CLICK HANDLER (max 3 active in compare mode)
   // ======================================================
-  // No pill click handler in single-task mode
+  const handlePillClick = (taskId: string) => {
+    const max = 3;
+
+    if (activePills.includes(taskId)) return;
+
+    setActivePills((prev) => {
+      if (prev.length < max) return [...prev, taskId];
+      return [taskId];
+    });
+  };
 
   // ======================================================
-  // Note: No select-all/unselect-all in compact mode
-  // No select-all in single-task mode
+  // SELECT ALL / UNSELECT ALL
+  // ======================================================
+  const selectAll = () => setActivePills(tasks.map((t) => t.taskId));
+
+  const unselectAll = () =>
+    setActivePills(tasks.slice(0, 3).map((t) => t.taskId));
+
+  const allSelected =
+    tasks.length > 3 && activePills.length === tasks.length;
+
+  const showSelectionControls = tasks.length > 3;
 
   // ======================================================
   // AUTO-SCROLL ACTIVE PILL
   // ======================================================
   const pillRailRef = useRef<HTMLDivElement>(null);
 
-  // No auto-scroll needed
+  useEffect(() => {
+    const last = activePills[activePills.length - 1];
+    if (!last) return;
 
-  // Outside click closes when not pinned
-  const rootRef = useRef<HTMLDivElement>(null);
+    const el = pillRailRef.current?.querySelector(
+      `[data-pill="${last}"]`
+    ) as HTMLElement | null;
+
+    el?.scrollIntoView({ behavior: "smooth", inline: "center" });
+  }, [activePills]);
 
   // ======================================================
-  // DETERMINE VISIBLE TASK CARD (single-task inline)
+  // DETERMINE VISIBLE TASK CARDS
   // ======================================================
-  const visibleTasks: TaskDetails[] = tasks && tasks.length ? [tasks[0]] : [];
-  const singleTaskMode = true;
-  // Draggable position state with pin persistence
-  const [pos, setPos] = useState<{ x: number; y: number }>({ x: initialX, y: initialY });
-  const [pinned, setPinned] = useState<boolean>(false);
-  const draggingRef = useRef(false);
-  const dragStartRef = useRef<{ mx: number; my: number; x: number; y: number }>({ mx: 0, my: 0, x: initialX, y: initialY });
-  // Run snap only when panel transitions from closed -> open
-  const prevOpenRef = useRef<boolean>(false);
+  let visibleTasks: TaskDetails[];
+
+  if (tasks.length <= 3) {
+    // For 1–3 tasks, just show all
+    visibleTasks = tasks;
+  } else if (allSelected) {
+    visibleTasks = tasks;
+  } else {
+    visibleTasks = tasks.filter((t) => activePills.includes(t.taskId));
+  }
+
+  const singleTaskMode = visibleTasks.length === 1;
 
   useEffect(() => {
-    const stored = localStorage.getItem("taskPopout.pos");
-    const storedPin = localStorage.getItem("taskPopout.pinned");
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as { x: number; y: number };
-        setPos(parsed);
-      } catch {}
-    }
-    if (storedPin) setPinned(storedPin === "true");
-  }, []);
-
-  // Outside click closes when not pinned (after pinned exists)
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (!rootRef.current) return;
-      if (pinned) return;
-      const target = e.target as Node;
-      if (!rootRef.current.contains(target)) {
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
         onClose();
       }
     };
-    document.addEventListener("mousedown", handleClick, true);
-    return () => document.removeEventListener("mousedown", handleClick, true);
-  }, [pinned, onClose]);
 
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      if (!draggingRef.current) return;
-      const dx = e.clientX - dragStartRef.current.mx;
-      const dy = e.clientY - dragStartRef.current.my;
-      setPos({ x: dragStartRef.current.x + dx, y: dragStartRef.current.y + dy });
-    };
-    const onUp = () => {
-      draggingRef.current = false;
-      document.body.style.cursor = "default";
-      // Persist latest position after any drag
-      try {
-        localStorage.setItem("taskPopout.pos", JSON.stringify(pos));
-      } catch {}
-    };
-    window.addEventListener("mousemove", onMove as EventListener);
-    window.addEventListener("mouseup", onUp as EventListener);
-    return () => {
-      window.removeEventListener("mousemove", onMove as EventListener);
-      window.removeEventListener("mouseup", onUp as EventListener);
-    };
-  }, []);
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [onClose]);
 
-  const onDragStart = (e: React.MouseEvent) => {
-    if (pinned) return; // disable drag when pinned
-    draggingRef.current = true;
-    dragStartRef.current = { mx: e.clientX, my: e.clientY, x: pos.x, y: pos.y };
-    document.body.style.cursor = "grabbing";
-  };
-
-  // When a new task triggers the panel and it's not pinned,
-  // snap the panel near the trigger coordinates.
-  useEffect(() => {
-    // Detect open transition
-    const justOpened = open && !prevOpenRef.current;
-    if (!pinned && justOpened) {
-      const margin = 8;             // viewport margin
-      const offsetX = 6;            // tighter X offset from cursor
-      const offsetY = 6;            // tighter Y offset from cursor
-      const clickX = (initialX ?? 120);
-      const clickY = (initialY ?? 120);
-      const viewportW = typeof window !== "undefined" ? window.innerWidth : 1280;
-      const viewportH = typeof window !== "undefined" ? window.innerHeight : 720;
-      const panelW = Math.min(viewportW * 0.9, 600);
-      const panelH = 360;
-      const headerH = 36;           // approximate header height for visual alignment
-      const alignY = clickY - Math.round(headerH / 2);
-
-      // Try placements in priority order: right, left, below-right, above-right
-      const candidates = [
-        { x: clickX + offsetX, y: alignY },                                        // right aligned to header
-        { x: clickX - panelW - offsetX, y: alignY },                               // left aligned to header
-        { x: clickX + offsetX, y: clickY + offsetY },                              // below-right
-        { x: clickX + offsetX, y: clickY - panelH - offsetY },                     // above-right
-      ];
-
-      const clamp = (x: number, y: number) => ({
-        x: Math.max(margin, Math.min(x, viewportW - panelW - margin)),
-        y: Math.max(margin, Math.min(y, viewportH - panelH - margin)),
-      });
-
-      let placed = clamp(candidates[0].x, candidates[0].y);
-      const fits = (p: { x: number; y: number }) =>
-        p.x >= margin && p.y >= margin && p.x + panelW <= viewportW - margin && p.y + panelH <= viewportH - margin;
-
-      for (const c of candidates) {
-        const p = clamp(c.x, c.y);
-        if (fits(p)) {
-          placed = p;
-          break;
-        }
-      }
-
-      setPos(placed);
-      prevOpenRef.current = true;
-    }
-    // Track close to allow snap next time it opens
-    if (!open) prevOpenRef.current = false;
-  }, [initialX, initialY, pinned, open]);
-
-  // Reset tab on task change only when not pinned
-  useEffect(() => {
-    if (!pinned) {
-      setActiveTab("Overview");
-    }
-  }, [tasks, pinned]);
+  // ======================================================
+  // RENDER
+  // ======================================================
 
   return (
-    <motion.div
-      className="fixed z-[9999]"
-      style={{ left: pos.x, top: pos.y, maxWidth: "min(96vw, 600px)" }}
-      initial={{ opacity: 0, scale: 0.98, y: -4 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.98, y: -4 }}
-      transition={{ duration: 0.15, ease: "easeOut" }}
-    >
-      {/* MAIN SURFACE */}
-      <div ref={rootRef} className="flex flex-col overflow-hidden bg-white rounded-lg border border-gray-200 shadow-none ring-1 ring-gray-200/70" id="task-popout-root">
-        {/* HEADER (draggable) */}
-        <div
-          className="flex items-center justify-end px-3 py-2 bg-gray-800 text-white select-none rounded-t-lg"
-          onMouseDown={onDragStart}
-        >
-          <div className="flex items-center gap-2">
+    <div className="flex h-full w-full bg-[#F5F7FA] text-gray-900">
+      <div className="flex h-full w-full flex-col overflow-hidden bg-white">
+        {/* HEADER */}
+        <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-800">
+            Task Details ({tasks.length})
+          </h2>
+
+          <div className="flex items-center gap-3">
             <button
-              onClick={() => {
-                const next = !pinned;
-                setPinned(next);
-                localStorage.setItem("taskPopout.pinned", String(next));
-                if (next) localStorage.setItem("taskPopout.pos", JSON.stringify(pos));
-              }}
-              className="px-2 py-1 bg-[#0A4A7A] hover:bg-[#083B61] text-white rounded-md text-xs flex items-center gap-1 shadow-sm"
+              onClick={() =>
+                expanded.length > 0 ? onCollapseAll() : onExpandAll()
+              }
+              className="px-3 py-1.5 rounded-md text-sm flex items-center gap-1 bg-[#0A4A7A] text-white shadow-sm transition hover:bg-[#0C5A97]"
             >
-              <Pin size={14} /> {pinned ? "Unpin" : "Pin"}
+              {expanded.length > 0 ? (
+                <>
+                  <ChevronUp size={14} /> Collapse All
+                </>
+              ) : (
+                <>
+                  <ChevronDown size={14} /> Expand All
+                </>
+              )}
             </button>
-            <button
-              onClick={onClose}
-              className="px-2 py-1 bg-[#0A4A7A] hover:bg-[#083B61] text-white rounded-md text-xs flex items-center gap-1 shadow-sm"
-            >
-              <X size={14} /> Close
-            </button>
+
+            {showSelectionControls && (
+              allSelected ? (
+                <button
+                  onClick={unselectAll}
+                  className="px-3 py-1.5 rounded-md text-sm border border-[#0A4A7A] text-[#0A4A7A] bg-white transition hover:bg-[#0A4A7A]/10"
+                >
+                  Unselect All
+                </button>
+              ) : (
+                <button
+                  onClick={selectAll}
+                  className="px-3 py-1.5 rounded-md text-sm bg-[#0A4A7A] text-white shadow-sm transition hover:bg-[#0C5A97]"
+                >
+                  Select All
+                </button>
+              )
+            )}
           </div>
         </div>
 
-        {/* COMPACT HEADER SUMMARY + TABS */}
-        <div className="px-3 py-2 bg-gray-50 border-b border-gray-200">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              {visibleTasks[0] && (
-                <div className="flex flex-col min-w-0">
-                  <div className="text-sm font-semibold text-gray-800 truncate">{(visibleTasks[0] as any).title ?? visibleTasks[0].taskId}</div>
-                  <div className="text-xs text-gray-600 truncate">
-                    {(visibleTasks[0] as any).location ?? (visibleTasks[0] as any).postCode ?? ""}
-                    {" · "}
-                    {(visibleTasks[0] as any).primarySkill ?? (visibleTasks[0] as any).taskType ?? ""}
-                    {" · "}
-                    {(visibleTasks[0] as any).status ?? (visibleTasks[0] as any).responseCode ?? ""}
-                  </div>
+        {/* PILLS */}
+        <div className="px-6 py-2 bg-gray-50 border-b border-gray-200">
+          <div
+            ref={pillRailRef}
+            className="flex flex-nowrap overflow-x-auto scrollbar-thin gap-2 pb-1"
+          >
+            {tasks.map((task) => {
+              const isActive = activePills.includes(task.taskId);
+              return (
+                <div
+                  key={task.taskId}
+                  data-pill={task.taskId}
+                  onClick={() => handlePillClick(task.taskId)}
+                  className={`px-3 py-1.5 rounded-full cursor-pointer text-xs border transition whitespace-nowrap ${
+                    isActive
+                      ? "bg-[#0A4A7A]/15 text-[#0A4A7A] border-[#0A4A7A]"
+                      : "bg-white text-gray-700 border-gray-300 hover:bg-[#0A4A7A]/10"
+                  }`}
+                >
+                  {task.taskId}
                 </div>
-              )}
-            </div>
-            <div className="hidden" />
-          </div>
-          {/* Section tabs */}
-          <div className="mt-2 flex items-center gap-1.5 text-xs">
-            {[
-              { key: "Overview", label: "Overview" },
-              { key: "FieldNotes", label: "Field Notes" },
-              { key: "ProgressNotes", label: "Progress Notes" },
-            ].map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key as any)}
-                className={`px-2.5 py-1 rounded-md border ${
-                  activeTab === tab.key ? "bg-gray-200 border-gray-300" : "bg-white border-gray-300 hover:bg-gray-50"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+              );
+            })}
           </div>
         </div>
 
         {/* BODY — scrollbars live on window, not inside cards */}
-        <div className="flex-1 px-2.5 py-2.5 bg-gray-100 overflow-x-auto overflow-y-auto scrollbar-thin">
+        <div className="flex-1 px-6 py-6 bg-gray-200/40 overflow-x-auto overflow-y-auto scrollbar-thin">
           <div
             className={`flex gap-4 ${
               singleTaskMode ? "justify-center" : "flex-nowrap"
@@ -429,42 +205,23 @@ export default function TaskPopoutPanel({
             {visibleTasks.map((task) => (
               <div
                 key={task.taskId}
-                className="bg-white border border-gray-200 rounded-md shadow-none flex-shrink-0"
+                className="bg-white border border-gray-200 rounded-xl shadow-md flex-shrink-0"
                 style={{
-                  width: singleTaskMode ? "min(92vw,480px)" : "min(92vw,360px)",
+                  width: singleTaskMode ? 720 : 520,
                 }}
               >
-                <div className="px-2.5 pb-2.5 pt-2">
-                  {activeTab === "Overview" && (
-                    <div className="text-[12px] text-gray-700 space-y-0.5">
-                      <div className="font-medium text-gray-900">{(task as any).title ?? task.taskId}</div>
-                      <div className="text-[11px] text-gray-500">Task ID: {task.taskId}</div>
-                      {(task as any).location && <div><span className="text-gray-500">Location:</span> {(task as any).location}</div>}
-                      {(task as any).postCode && <div><span className="text-gray-500">Postcode:</span> {(task as any).postCode}</div>}
-                      {(task as any).primarySkill && <div><span className="text-gray-500">Skill:</span> {(task as any).primarySkill}</div>}
-                      {(task as any).taskType && <div><span className="text-gray-500">Type:</span> {(task as any).taskType}</div>}
-                      {(task as any).status && <div><span className="text-gray-500">Status:</span> {(task as any).status}</div>}
-                      {(task as any).responseCode && <div><span className="text-gray-500">Response:</span> {(task as any).responseCode}</div>}
-                    </div>
-                  )}
-                  {activeTab === "FieldNotes" && (
-                    <div className="text-[12px] text-gray-700 space-y-1 max-h-72 overflow-y-auto pr-1">
-                      {(task as any).fieldNotes ? (
-                        <div className="whitespace-pre-wrap">{(task as any).fieldNotes}</div>
-                      ) : (
-                        <div className="text-gray-500">No field notes available.</div>
-                      )}
-                    </div>
-                  )}
-                  {activeTab === "ProgressNotes" && (
-                    <ProgressNotesSection task={task} shouldReset={true} />
-                  )}
+                <div className="px-5 pb-5 pt-6">
+                  <TaskDetailsModal
+                    task={task}
+                    expanded={expanded}
+                    onToggleSection={onToggleSection}
+                  />
                 </div>
               </div>
             ))}
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

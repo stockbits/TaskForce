@@ -35,6 +35,7 @@ export default defineConfig({
     outDir: "dist",
     sourcemap: false,
     emptyOutDir: true,
+    chunkSizeWarningLimit: 768,
 
     // ⭐ IMPORTANT: Tell Vite to build BOTH index.html and popup.html
     rollupOptions: {
@@ -42,6 +43,13 @@ export default defineConfig({
         main: path.resolve(__dirname, "index.html"),
         popup: path.resolve(__dirname, "popup.html"),
         // (OR: "public/popup.html" if you placed it in /public)
+      },
+      output: {
+        manualChunks: {
+          "vendor-react": ["react", "react-dom"],
+          "vendor-motion": ["framer-motion"],
+          "vendor-icons": ["lucide-react"],
+        },
       },
     },
   },

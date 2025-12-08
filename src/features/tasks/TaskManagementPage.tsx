@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import rawMockTasks from "@/data/mockTasks.json";
 import TaskSearchCard from "@/features/tasks/components/TaskSearchCardClean";
 import TaskTable_Advanced from "@/features/tasks/components/TaskTable_Advanced";
-import TaskPopoutPanel from "@/features/tasks/components/TaskPopoutPanel";
+import { useExternalWindow } from "@/lib/hooks/useExternalWindow";
 
 const mockTasks = rawMockTasks as Record<string, any>[];
 
@@ -74,11 +74,11 @@ export default function TaskManagementPage() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const searchRef = useRef<HTMLDivElement | null>(null);
 
-  // Popout pinned panel state
-  const [popoutOpen, setPopoutOpen] = useState(false);
-  const [popoutTasks, setPopoutTasks] = useState<Record<string, any>[]>([]);
-  const [expandedSections, setExpandedSections] = useState<string[]>([]);
-  const [initialPopout, setInitialPopout] = useState<{ x: number; y: number }>({ x: 120, y: 120 });
+  const { openExternalWindow, closeExternalWindow } = useExternalWindow();
+
+  useEffect(() => {
+    return () => closeExternalWindow();
+  }, [closeExternalWindow]);
 
   useEffect(() => {
     const updateHeight = () => {
@@ -304,18 +304,8 @@ export default function TaskManagementPage() {
           headerNames={headerNames}
           tableHeight={tableHeight}
           onOpenPopout={(tasks, mX, mY) => {
-            // Inline popout shows one task at a time
-            const first = tasks && tasks.length ? [tasks[0]] : [];
-            setPopoutTasks(first);
-            setPopoutOpen(true);
-            // Store initial position via state by passing to panel
-            setInitialPopout({ x: mX ?? 120, y: mY ?? 120 });
-          }}
-          onSelectionChange={(rows) => {
-            // If popout is open, update it live with current selection
-            if (popoutOpen && rows && rows.length > 0) {
-              setPopoutTasks([rows[0]]);
-            }
+            if (!tasks || tasks.length === 0) return;
+            openExternalWindow(tasks as any, mX, mY);
           }}
         />
       ) : (
@@ -329,20 +319,6 @@ export default function TaskManagementPage() {
             Apply filters above to populate the table.
           </p>
         </motion.div>
-      )}
-
-      {/* Pinned popout window */}
-      {popoutOpen && (
-        <TaskPopoutPanel
-          open={popoutOpen}
-          tasks={popoutTasks as any}
-          initialX={initialPopout.x}
-          initialY={initialPopout.y}
-          onClose={() => {
-            setPopoutOpen(false);
-            setPopoutTasks([]);
-          }}
-        />
       )}
     </motion.div>
   );

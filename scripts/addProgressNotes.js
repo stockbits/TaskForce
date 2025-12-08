@@ -28,10 +28,43 @@ const sampleField = (t) => {
   return `On-site observation:\n- ${pc}\n- ${type}\n- ${skill}\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.`;
 };
 
+const buildProgressNotes = (t) => {
+  if (Array.isArray(t.progressNotes) && t.progressNotes.length) {
+    return t.progressNotes;
+  }
+  if (typeof t.progressNotes === 'string' && t.progressNotes.trim()) {
+    const ts = new Date().toISOString();
+    return [
+      {
+        ts,
+        status: t.taskStatus || '',
+        text: t.progressNotes.trim(),
+        source: 'Imported',
+      },
+    ];
+  }
+
+  const baseTs = new Date().toISOString();
+  return [
+    {
+      ts: baseTs,
+      status: t.taskStatus || 'Logged',
+      text: 'Initial site review captured from legacy system.',
+      source: 'System',
+    },
+    {
+      ts: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+      status: t.taskStatus || 'Follow-up',
+      text: 'Awaiting confirmation from field engineer regarding access.',
+      source: 'Dispatcher',
+    },
+  ];
+};
+
 const updated = data.map((t) => ({
   ...t,
   fieldNotes: t.fieldNotes && t.fieldNotes.length ? t.fieldNotes : sampleField(t),
-  progressNotes: t.progressNotes ?? '',
+  progressNotes: buildProgressNotes(t),
 }));
 
 fs.writeFileSync(file, JSON.stringify(updated, null, 2) + '\n', 'utf-8');

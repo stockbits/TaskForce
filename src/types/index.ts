@@ -37,6 +37,15 @@ export interface TaskDetails {
   workId: string;
   estimateNumber: string;
   startDate: string;
+  fieldNotes?: string;
+  progressNotes?: ProgressNoteEntry[] | string;
+}
+
+export interface ProgressNoteEntry {
+  ts: string;
+  status?: string;
+  text: string;
+  source?: string;
 }
 
 /* Callout Types */

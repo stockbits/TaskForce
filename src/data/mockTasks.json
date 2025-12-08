@@ -40,7 +40,22 @@
     "lat": 51.70832,
     "lng": -3.44613,
     "expectedWindow": "8am–10:30am",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 8AU\n- Type Admin Review\n- Skill ADMIN1\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Not Assigned (ACT)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Not Assigned (ACT)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30002",
@@ -83,7 +98,22 @@
     "lat": 51.70624,
     "lng": -3.44051,
     "expectedWindow": "10am–11:30am",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7IW\n- Type Survey\n- Skill RISDN2\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Assigned (ACT)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Assigned (ACT)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30003",
@@ -126,7 +156,22 @@
     "lat": 51.7204,
     "lng": -3.44196,
     "expectedWindow": "8am–10am",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7SL\n- Type Repair\n- Skill RISDN2\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Dispatched (AWI)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Dispatched (AWI)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30004",
@@ -169,7 +214,22 @@
     "lat": 51.70576,
     "lng": -3.43954,
     "expectedWindow": "3pm–3:45pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 6IQ\n- Type Survey\n- Skill RFTTP1\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Accepted (ISS)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Accepted (ISS)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30005",
@@ -212,7 +272,22 @@
     "lat": 51.70775,
     "lng": -3.44796,
     "expectedWindow": "11am–12pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7NZ\n- Type Admin Review\n- Skill ADMIN2\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "In Progress (EXC)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "In Progress (EXC)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30006",
@@ -255,7 +330,22 @@
     "lat": 51.70737,
     "lng": -3.45195,
     "expectedWindow": "8am–9:30am",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7TJ\n- Type Admin Review\n- Skill ADMIN1\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Completed (COM)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Completed (COM)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30007",
@@ -298,7 +388,22 @@
     "lat": 51.71928,
     "lng": -3.44445,
     "expectedWindow": "2pm–4pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 6XQ\n- Type Survey\n- Skill ADMIN1\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Not Assigned (ACT)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Not Assigned (ACT)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30008",
@@ -341,7 +446,22 @@
     "lat": 51.70599,
     "lng": -3.44795,
     "expectedWindow": "2pm–3:30pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 8IN\n- Type Emergency\n- Skill RISDN3\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Assigned (ACT)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Assigned (ACT)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30009",
@@ -384,7 +504,22 @@
     "lat": 51.7155,
     "lng": -3.45247,
     "expectedWindow": "7am–9:30am",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7MH\n- Type Emergency\n- Skill RISDN1\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Dispatched (AWI)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Dispatched (AWI)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30010",
@@ -427,7 +562,22 @@
     "lat": 51.70787,
     "lng": -3.44639,
     "expectedWindow": "2pm–3:30pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 8JK\n- Type Inspection\n- Skill RISDN3\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Accepted (ISS)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Accepted (ISS)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30011",
@@ -470,7 +620,22 @@
     "lat": 51.7254,
     "lng": -3.50534,
     "expectedWindow": "2pm–3pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7JR\n- Type Admin Review\n- Skill ADMIN2\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "In Progress (EXC)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "In Progress (EXC)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30012",
@@ -513,7 +678,22 @@
     "lat": 51.72091,
     "lng": -3.52057,
     "expectedWindow": "4pm–5:30pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7DZ\n- Type Inspection\n- Skill RFTTP2\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Completed (COM)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Completed (COM)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30013",
@@ -556,7 +736,22 @@
     "lat": 51.72224,
     "lng": -3.51289,
     "expectedWindow": "11am–1pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 6EV\n- Type Inspection\n- Skill RISDN2\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Not Assigned (ACT)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Not Assigned (ACT)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30014",
@@ -599,7 +794,22 @@
     "lat": 51.71383,
     "lng": -3.44986,
     "expectedWindow": "11am–12:30pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7AV\n- Type Emergency\n- Skill RISDN3\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Assigned (ACT)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Assigned (ACT)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30015",
@@ -642,7 +852,22 @@
     "lat": 51.71159,
     "lng": -3.44429,
     "expectedWindow": "10am–11am",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 8BQ\n- Type Repair\n- Skill RISDN1\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Dispatched (AWI)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Dispatched (AWI)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30016",
@@ -685,7 +910,22 @@
     "lat": 51.71966,
     "lng": -3.44275,
     "expectedWindow": "11am–1:30pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 8WX\n- Type Survey\n- Skill RFTTP1\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Accepted (ISS)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Accepted (ISS)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30017",
@@ -728,7 +968,22 @@
     "lat": 51.7063,
     "lng": -3.50452,
     "expectedWindow": "11am–12pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 8PT\n- Type Admin Review\n- Skill ADMIN2\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "In Progress (EXC)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "In Progress (EXC)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30018",
@@ -771,7 +1026,22 @@
     "lat": 51.70622,
     "lng": -3.5041,
     "expectedWindow": "8am–10:30am",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7WA\n- Type Emergency\n- Skill RISDN1\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Completed (COM)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Completed (COM)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30019",
@@ -814,7 +1084,22 @@
     "lat": 51.70445,
     "lng": -3.4997,
     "expectedWindow": "2pm–3pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7XT\n- Type Admin Review\n- Skill ADMIN2\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Assigned (ACT)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Assigned (ACT)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30020",
@@ -857,7 +1142,22 @@
     "lat": 51.72207,
     "lng": -3.5099,
     "expectedWindow": "10am–11:15am",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7KB\n- Type Repair\n- Skill RISDN3\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Dispatched (AWI)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Dispatched (AWI)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30021",
@@ -900,7 +1200,22 @@
     "lat": 51.71882,
     "lng": -3.4518,
     "expectedWindow": "11am–12:30pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 6US\n- Type Survey\n- Skill RFTTP1\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Accepted (ISS)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Accepted (ISS)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30022",
@@ -943,7 +1258,22 @@
     "lat": 51.71277,
     "lng": -3.44368,
     "expectedWindow": "1pm–2:30pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7TT\n- Type Inspection\n- Skill RISDN3\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Not Assigned (ACT)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Not Assigned (ACT)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30023",
@@ -986,7 +1316,22 @@
     "lat": 51.70499,
     "lng": -3.44123,
     "expectedWindow": "1pm–1:40pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7ZV\n- Type Admin Review\n- Skill ADMIN1\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Assigned (ACT)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Assigned (ACT)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30024",
@@ -1029,7 +1374,22 @@
     "lat": 51.7206,
     "lng": -3.4474,
     "expectedWindow": "9am–10:30am",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 8ER\n- Type Emergency\n- Skill RFTTP2\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Dispatched (AWI)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Dispatched (AWI)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30025",
@@ -1072,7 +1432,22 @@
     "lat": 51.70871,
     "lng": -3.51393,
     "expectedWindow": "11am–1pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 8KO\n- Type Inspection\n- Skill RISDN1\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Accepted (ISS)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Accepted (ISS)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30026",
@@ -1115,7 +1490,22 @@
     "lat": 51.71019,
     "lng": -3.44802,
     "expectedWindow": "2pm–3pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 8ZX\n- Type Admin Review\n- Skill ADMIN1\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "In Progress (EXC)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "In Progress (EXC)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30027",
@@ -1158,7 +1548,22 @@
     "lat": 51.70939,
     "lng": -3.43749,
     "expectedWindow": "10am–11am",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7ZQ\n- Type Repair\n- Skill RISDN3\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Completed (COM)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Completed (COM)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30028",
@@ -1201,7 +1606,22 @@
     "lat": 51.72907,
     "lng": -3.5087,
     "expectedWindow": "8am–10:30am",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 6BZ\n- Type Survey\n- Skill RFTTP2\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Not Assigned (ACT)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Not Assigned (ACT)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30029",
@@ -1244,7 +1664,22 @@
     "lat": 51.7162,
     "lng": -3.45003,
     "expectedWindow": "3pm–4:30pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 6TK\n- Type Inspection\n- Skill RISDN2\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Assigned (ACT)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Assigned (ACT)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30030",
@@ -1287,7 +1722,22 @@
     "lat": 51.71655,
     "lng": -3.45119,
     "expectedWindow": "1pm–1:40pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7OD\n- Type Admin Review\n- Skill ADMIN2\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Dispatched (AWI)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Dispatched (AWI)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30031",
@@ -1330,7 +1780,22 @@
     "lat": 51.7242,
     "lng": -3.51178,
     "expectedWindow": "4pm–6:30pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7ED\n- Type Survey\n- Skill RFTTP2\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Accepted (ISS)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Accepted (ISS)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30032",
@@ -1373,7 +1838,22 @@
     "lat": 51.71934,
     "lng": -3.44587,
     "expectedWindow": "8am–9:30am",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 8KL\n- Type Repair\n- Skill RISDN1\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "In Progress (EXC)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "In Progress (EXC)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30033",
@@ -1416,7 +1896,22 @@
     "lat": 51.71125,
     "lng": -3.44951,
     "expectedWindow": "2pm–3pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7TR\n- Type Admin Review\n- Skill ADMIN1\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Completed (COM)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Completed (COM)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30034",
@@ -1459,7 +1954,22 @@
     "lat": 51.71377,
     "lng": -3.44688,
     "expectedWindow": "9am–10:30am",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7DK\n- Type Inspection\n- Skill RISDN3\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Not Assigned (ACT)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Not Assigned (ACT)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30035",
@@ -1502,7 +2012,22 @@
     "lat": 51.7161,
     "lng": -3.44434,
     "expectedWindow": "3pm–5:30pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7RA\n- Type Survey\n- Skill RFTTP2\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Assigned (ACT)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Assigned (ACT)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30036",
@@ -1545,7 +2070,22 @@
     "lat": 51.70823,
     "lng": -3.50376,
     "expectedWindow": "1pm–1:40pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 8DW\n- Type Admin Review\n- Skill ADMIN2\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Dispatched (AWI)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Dispatched (AWI)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30037",
@@ -1588,7 +2128,22 @@
     "lat": 51.71803,
     "lng": -3.44716,
     "expectedWindow": "11am–1:30pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7UU\n- Type Emergency\n- Skill RISDN3\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Accepted (ISS)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Accepted (ISS)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30038",
@@ -1631,7 +2186,22 @@
     "lat": 51.72651,
     "lng": -3.45205,
     "expectedWindow": "10am–12:30pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7LV\n- Type Survey\n- Skill RFTTP1\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "In Progress (EXC)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "In Progress (EXC)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30039",
@@ -1674,7 +2244,22 @@
     "lat": 51.7245,
     "lng": -3.44809,
     "expectedWindow": "2pm–3pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 6TS\n- Type Admin Review\n- Skill ADMIN1\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Completed (COM)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Completed (COM)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   },
   {
     "taskId": "RG-AB30040",
@@ -1717,6 +2302,21 @@
     "lat": 51.71294,
     "lng": -3.44307,
     "expectedWindow": "3pm–5:20pm",
-    "history": []
+    "history": [],
+    "fieldNotes": "On-site observation:\n- Postcode CF44 7QA\n- Type Repair\n- Skill RISDN2\nActions:\n- Verified equipment and recorded measurements\n- Spoke with resident; confirmed access\nNotes:\n- Minor obstruction near DP; requires follow-up.",
+    "progressNotes": [
+      {
+        "ts": "2025-12-08T20:04:05.480Z",
+        "status": "Not Assigned (ACT)",
+        "text": "Initial site review captured from legacy system.",
+        "source": "System"
+      },
+      {
+        "ts": "2025-12-08T19:19:05.480Z",
+        "status": "Not Assigned (ACT)",
+        "text": "Awaiting confirmation from field engineer regarding access.",
+        "source": "Dispatcher"
+      }
+    ]
   }
 ]
