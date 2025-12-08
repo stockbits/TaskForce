@@ -77,6 +77,7 @@ export interface ResourceHistoryEntry {
   changedAt: string; // ISO timestamp
   taskIdUsed: string | number | null;
   outcomeApplied: CalloutOutcome;
+  availableAgainAt?: string | null;
 }
 
 export interface ResourceRecord {

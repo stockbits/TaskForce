@@ -35,6 +35,10 @@ export const CalloutOutcomeConfig: Record<
   Unavailable: { label: "Unavailable", requiresAvailabilityTime: true },
 };
 
+const AVAILABLE_CALLOUT_OUTCOMES: CalloutOutcome[] = (
+  Object.keys(CalloutOutcomeConfig) as CalloutOutcome[]
+).filter((key) => key !== "AssignDispatchedAWI");
+
 /* -------------------------------------------------------
    TYPES
 ------------------------------------------------------- */
@@ -45,6 +49,7 @@ export interface ResourceHistoryEntry {
   changedAt: string; // ISO timestamp
   taskIdUsed: string | number | null;
   outcomeApplied: CalloutOutcome;
+  availableAgainAt?: string | null;
 }
 
 export interface ResourceRecord {
@@ -256,10 +261,14 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
          - Updates the “Last Outcome” column immediately
          - Does NOT trigger reorder
       -------------------------------------------------------- */
-      const now = new Date().toISOString();
-
       const res = resources.find((r) => r.resourceId === resourceId);
       if (res) {
+        const now = new Date().toISOString();
+        const availabilityTs =
+          payload.outcome === "Unavailable"
+            ? payload.availableAgainAt ?? null
+            : null;
+
         res.history = [
           ...(res.history ?? []),
           {
@@ -268,11 +277,15 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
             changedAt: now,
             taskIdUsed: taskId,
             outcomeApplied: payload.outcome,
+            availableAgainAt: availabilityTs,
           },
         ];
 
         res.lastOutcome = payload.outcome;
-        res.availableAgainAt = payload.availableAgainAt ?? null;
+        res.availableAgainAt =
+          payload.outcome === "Unavailable"
+            ? payload.availableAgainAt ?? null
+            : null;
       }
 
       setRowSaved((prev) => ({ ...prev, [resourceId]: true }));
@@ -296,6 +309,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
   const renderLastOutcomeCell = (resource: ResourceRecord) => {
     let label: string | null = null;
     let timestamp: string | null = null;
+    let isReturnTime = false;
 
     if (resource.history && resource.history.length > 0) {
       const last = resource.history[resource.history.length - 1];
@@ -303,12 +317,30 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
         CalloutOutcomeConfig[last.outcomeApplied]?.label ??
         last.outcomeApplied ??
         null;
-      timestamp = last.changedAt;
+      if (
+        last.outcomeApplied === "Unavailable" &&
+        last.availableAgainAt &&
+        last.availableAgainAt.trim()
+      ) {
+        timestamp = last.availableAgainAt;
+        isReturnTime = true;
+      } else {
+        timestamp = last.changedAt;
+      }
     } else if (resource.lastOutcome) {
       const k = resource.lastOutcome as CalloutOutcome;
       label =
         CalloutOutcomeConfig[k]?.label ?? String(resource.lastOutcome ?? "");
-      timestamp = null;
+      if (
+        resource.lastOutcome === "Unavailable" &&
+        resource.availableAgainAt &&
+        resource.availableAgainAt.trim()
+      ) {
+        timestamp = resource.availableAgainAt;
+        isReturnTime = true;
+      } else {
+        timestamp = null;
+      }
     }
 
     if (!label && !timestamp)
@@ -320,7 +352,9 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
       <div className="flex flex-col text-[11px] text-gray-800 leading-tight">
         {label && <span className="font-medium">{label}</span>}
         {timestamp && (
-          <span className="text-gray-500">{formatUkDateTime(timestamp)}</span>
+          <span className="text-gray-500">
+            {isReturnTime ? "Return:" : "Updated:"} {formatUkDateTime(timestamp)}
+          </span>
         )}
       </div>
     );
@@ -526,11 +560,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                   }
                                 >
                                   <option value="">Select outcome…</option>
-                                  {(
-                                    Object.keys(
-                                      CalloutOutcomeConfig
-                                    ) as CalloutOutcome[]
-                                  ).map((key) => (
+                                  {AVAILABLE_CALLOUT_OUTCOMES.map((key) => (
                                     <option key={key} value={key}>
                                       {CalloutOutcomeConfig[key].label}
                                     </option>

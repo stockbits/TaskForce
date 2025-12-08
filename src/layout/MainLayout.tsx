@@ -9,6 +9,7 @@ import { User } from "lucide-react";
 import {
   CalloutIncidentPanel,
   CalloutOutcome,
+  CalloutOutcomeConfig,
   ResourceRecord,
 } from "@features/callout/components/CalloutIncidentPanel";
 import {
@@ -34,7 +35,7 @@ import TaskTable_Advanced from "@/features/tasks/components/TaskTable_Advanced";
 import TaskPopoutPanel from "@/features/tasks/components/TaskPopoutPanel";
 
 import { cardMap } from "@/shared/config/menuRegistry";
-import { TaskDetails } from "@/types";
+import { TaskDetails, ProgressNoteEntry } from "@/types";
 import { useExternalWindow } from "@/lib/hooks/useExternalWindow";
 
 /* =========================================================
@@ -755,6 +756,49 @@ export default function MainLayout() {
       const { taskId, resourceId, outcome, availableAgainAt } = payload;
       const timestamp = new Date().toISOString();
 
+      const formatForNote = (iso?: string | null) => {
+        if (!iso) return null;
+        try {
+          return new Date(iso).toLocaleString("en-GB", {
+            year: "numeric",
+            month: "short",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        } catch {
+          return iso;
+        }
+      };
+
+      const appendProgressNote = (
+        task: TaskDetails,
+        entry: ProgressNoteEntry | null
+      ): ProgressNoteEntry[] | string | undefined => {
+        if (!entry) {
+          return task.progressNotes;
+        }
+
+        const baseNotes = (() => {
+          if (Array.isArray(task.progressNotes)) {
+            return [...task.progressNotes];
+          }
+          if (typeof task.progressNotes === "string" && task.progressNotes.trim()) {
+            return [
+              {
+                ts: task.taskCreated || timestamp,
+                status: "",
+                text: task.progressNotes.trim(),
+                source: "Imported",
+              } as ProgressNoteEntry,
+            ];
+          }
+          return [] as ProgressNoteEntry[];
+        })();
+
+        return [...baseNotes, entry];
+      };
+
       // Update resources + resource history
       setResources((prev) =>
         prev.map((r) => {
@@ -778,6 +822,8 @@ export default function MainLayout() {
                 changedAt: timestamp,
                 taskIdUsed: taskId ?? null,
                 outcomeApplied: outcome,
+                availableAgainAt:
+                  outcome === "Unavailable" ? availableAgainAt ?? null : null,
               },
             ],
           };
@@ -791,10 +837,38 @@ export default function MainLayout() {
 
           const previousTaskStatus = t.taskStatus;
           const previousEmployeeId = t.employeeId ?? null;
+          const nextTaskStatus = mapOutcomeToTaskStatus(t.taskStatus, outcome);
+          const resourceLabel = t.resourceName
+            ? `${t.resourceName} (${resourceId})`
+            : resourceId;
+
+          let noteEntry: ProgressNoteEntry | null = null;
+          if (taskId) {
+            if (outcome === "Unavailable") {
+              const availabilityLabel = formatForNote(availableAgainAt);
+              noteEntry = {
+                ts: timestamp,
+                status: "Unavailable",
+                text: availabilityLabel
+                  ? `${resourceLabel} marked unavailable. Next availability ${availabilityLabel}.`
+                  : `${resourceLabel} marked unavailable.`,
+                source: "Callout",
+              };
+            } else if (nextTaskStatus && nextTaskStatus.includes("AWI")) {
+              const outcomeLabel =
+                CalloutOutcomeConfig[outcome]?.label ?? "Dispatched (AWI)";
+              noteEntry = {
+                ts: timestamp,
+                status: outcome,
+                text: `${resourceLabel} set to ${outcomeLabel}.`,
+                source: "Callout",
+              };
+            }
+          }
 
           return {
             ...t,
-            taskStatus: mapOutcomeToTaskStatus(t.taskStatus, outcome),
+            taskStatus: nextTaskStatus,
             employeeId: resourceId,
             lastOutcome: outcome,
             availableAgainAt:
@@ -808,8 +882,11 @@ export default function MainLayout() {
                 changedAt: timestamp,
                 outcomeApplied: outcome,
                 resourceIdUsed: resourceId,
+                availableAgainAt:
+                  outcome === "Unavailable" ? availableAgainAt ?? null : null,
               },
             ],
+            progressNotes: appendProgressNote(t as TaskDetails, noteEntry),
           };
         });
 
