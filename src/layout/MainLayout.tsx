@@ -37,6 +37,8 @@ import TaskPopoutPanel from "@/features/tasks/components/TaskPopoutPanel";
 import { cardMap } from "@/shared/config/menuRegistry";
 import { TaskDetails, ProgressNoteEntry } from "@/types";
 import { useExternalWindow } from "@/lib/hooks/useExternalWindow";
+import { useCalloutHistory } from "@/lib/hooks/useCalloutHistory";
+import type { CalloutHistoryEntry } from "@/lib/hooks/useCalloutHistory";
 
 /* =========================================================
    ICON MAP & TABLE HEADERS
@@ -470,11 +472,70 @@ export default function MainLayout() {
     return () => closeExternalWindow();
   }, [closeExternalWindow]);
 
+  useEffect(() => {
+    const handleViewProgressNotes = (event: Event) => {
+      const custom = event as CustomEvent<{
+        taskId?: string | null;
+        workId?: string | null;
+      }>;
+
+      const detail = custom.detail || {};
+      const targetTaskId = detail.taskId;
+      const targetWorkId = detail.workId;
+
+      let targetRow: Record<string, any> | undefined;
+
+      if (targetTaskId) {
+        const compare = String(targetTaskId);
+        targetRow = allRows.find((row) => {
+          const rowTask =
+            row?.taskId ?? row?.TaskID ?? row?.TaskId ?? row?.id ?? null;
+          return rowTask != null && String(rowTask) === compare;
+        });
+      }
+
+      if (!targetRow && targetWorkId) {
+        const compare = String(targetWorkId);
+        targetRow = allRows.find((row) => {
+          const rowWork =
+            row?.workId ?? row?.WorkID ?? row?.WorkId ?? row?.workID ?? null;
+          return rowWork != null && String(rowWork) === compare;
+        });
+      }
+
+      if (!targetRow) return;
+
+      setExternalExpandedSections(["Progress Notes"]);
+      const coordsX = window.innerWidth / 2;
+      const coordsY = window.innerHeight / 2;
+      openExternalWindow([targetRow as TaskDetails], coordsX, coordsY);
+    };
+
+    window.addEventListener(
+      "taskforce:view-progress-notes",
+      handleViewProgressNotes as EventListener
+    );
+    return () => {
+      window.removeEventListener(
+        "taskforce:view-progress-notes",
+        handleViewProgressNotes as EventListener
+      );
+    };
+  }, [allRows, openExternalWindow, setExternalExpandedSections]);
+
   // CALLOUT LANDING (NEW)
   const [calloutLandingOpen, setCalloutLandingOpen] = useState(false);
   const [selectedCalloutResources, setSelectedCalloutResources] = useState<
     ResourceRecord[]
   >([]);
+
+  const {
+    history: calloutHistory,
+    loading: calloutHistoryLoading,
+    error: calloutHistoryError,
+    refresh: refreshCalloutHistory,
+    appendLocal: appendCalloutHistory,
+  } = useCalloutHistory();
 
   const handleOpenCalloutIncident = useCallback((task: Record<string, any>) => {
     setIncidentTask(task);
@@ -799,6 +860,8 @@ export default function MainLayout() {
         return [...baseNotes, entry];
       };
 
+      let calloutHistoryEntry: Omit<CalloutHistoryEntry, "id"> | null = null;
+
       // Update resources + resource history
       setResources((prev) =>
         prev.map((r) => {
@@ -841,8 +904,11 @@ export default function MainLayout() {
           const resourceLabel = t.resourceName
             ? `${t.resourceName} (${resourceId})`
             : resourceId;
+          const outcomeLabel =
+            CalloutOutcomeConfig[outcome]?.label ?? String(outcome);
 
           let noteEntry: ProgressNoteEntry | null = null;
+          let noteText = `${resourceLabel} outcome set to ${outcomeLabel}.`;
           if (taskId) {
             if (outcome === "Unavailable") {
               const availabilityLabel = formatForNote(availableAgainAt);
@@ -854,14 +920,28 @@ export default function MainLayout() {
                   : `${resourceLabel} marked unavailable.`,
                 source: "Callout",
               };
+              noteText = noteEntry.text;
             } else if (nextTaskStatus && nextTaskStatus.includes("AWI")) {
-              const outcomeLabel =
-                CalloutOutcomeConfig[outcome]?.label ?? "Dispatched (AWI)";
               noteEntry = {
                 ts: timestamp,
                 status: outcome,
                 text: `${resourceLabel} set to ${outcomeLabel}.`,
                 source: "Callout",
+              };
+              noteText = noteEntry.text;
+            }
+
+            if (!calloutHistoryEntry) {
+              calloutHistoryEntry = {
+                taskId,
+                workId: (t.workId as string | null) ?? null,
+                resourceId,
+                outcome,
+                status: nextTaskStatus ?? null,
+                availableAgainAt:
+                  outcome === "Unavailable" ? availableAgainAt ?? null : null,
+                note: noteText,
+                timestamp,
               };
             }
           }
@@ -892,8 +972,50 @@ export default function MainLayout() {
 
       setAllRows((prev) => applyToTasks(prev));
       setRows((prev) => applyToTasks(prev));
+
+      if (calloutHistoryEntry) {
+        const outboundHistoryEntry = calloutHistoryEntry as Omit<
+          CalloutHistoryEntry,
+          "id"
+        >;
+        try {
+          const response = await fetch("http://localhost:5179/callout-history", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(calloutHistoryEntry),
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          const payload = await response.json().catch(() => null);
+          const persistedEntry = (payload?.entry ?? null) as
+            | CalloutHistoryEntry
+            | null;
+
+          if (persistedEntry) {
+            appendCalloutHistory(persistedEntry);
+          } else {
+            const fallback: CalloutHistoryEntry = {
+              id: `${outboundHistoryEntry.taskId ?? "task"}-${resourceId}-${Date.now()}`,
+              taskId: outboundHistoryEntry.taskId,
+              workId: outboundHistoryEntry.workId,
+              resourceId: outboundHistoryEntry.resourceId,
+              outcome: outboundHistoryEntry.outcome,
+              status: outboundHistoryEntry.status,
+              availableAgainAt: outboundHistoryEntry.availableAgainAt,
+              note: outboundHistoryEntry.note,
+              timestamp: outboundHistoryEntry.timestamp,
+            };
+            appendCalloutHistory(fallback);
+          }
+        } catch (err) {
+          console.warn("Unable to persist callout history", err);
+        }
+      }
     },
-    []
+    [appendCalloutHistory]
   );
 
   // External panel expand handlers
@@ -1029,6 +1151,10 @@ export default function MainLayout() {
           setIncidentOpen(false);
           setSelectedCalloutResources([]);
         }}
+        history={calloutHistory}
+        historyLoading={calloutHistoryLoading}
+        historyError={calloutHistoryError}
+        onRefreshHistory={refreshCalloutHistory}
         onSaveRow={handleCalloutRowSave}
       />
 

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DATA_FILE = path.join(__dirname, '..', 'src', 'data', 'mockTasks.json');
+const CALLOUT_FILE = path.join(__dirname, '..', 'src', 'data', 'calloutHistory.json');
 const PORT = process.env.NOTES_PORT ? Number(process.env.NOTES_PORT) : 5179;
 
 function readJson() {
@@ -17,6 +18,25 @@ function readJson() {
 function writeJson(data) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2) + '\n', 'utf-8');
 }
+
+function ensureFile(filePath, fallback = '[]\n') {
+  if (!fs.existsSync(filePath)) {
+    fs.writeFileSync(filePath, fallback, 'utf-8');
+  }
+}
+
+function readCalloutHistory() {
+  ensureFile(CALLOUT_FILE);
+  const raw = fs.readFileSync(CALLOUT_FILE, 'utf-8');
+  return JSON.parse(raw || '[]');
+}
+
+function writeCalloutHistory(entries) {
+  ensureFile(CALLOUT_FILE);
+  fs.writeFileSync(CALLOUT_FILE, JSON.stringify(entries, null, 2) + '\n', 'utf-8');
+}
+
+ensureFile(CALLOUT_FILE);
 
 function send(res, status, obj) {
   const body = JSON.stringify(obj);
@@ -69,6 +89,50 @@ const server = http.createServer(async (req, res) => {
         arr.push(entry);
         data[idx].progressNotes = arr;
         writeJson(data);
+        return send(res, 200, { ok: true, entry });
+      } catch (e) {
+        return send(res, 500, { error: e.message });
+      }
+    });
+    return;
+  }
+
+  if (req.url === '/callout-history' && req.method === 'GET') {
+    try {
+      const history = readCalloutHistory();
+      return send(res, 200, { ok: true, history });
+    } catch (e) {
+      return send(res, 500, { error: e.message });
+    }
+  }
+
+  if (req.url === '/callout-history' && req.method === 'POST') {
+    let buf = '';
+    req.on('data', (chunk) => (buf += chunk));
+    req.on('end', () => {
+      try {
+        const payload = JSON.parse(buf || '{}');
+        const { taskId, workId, resourceId, outcome, availableAgainAt, note, status, timestamp } = payload;
+        if (!taskId || !resourceId || !outcome) {
+          return send(res, 400, { error: 'taskId, resourceId, and outcome are required' });
+        }
+
+        const history = readCalloutHistory();
+        const entry = {
+          id: `${taskId}-${resourceId}-${Date.now()}`,
+          taskId,
+          workId: workId ?? null,
+          resourceId,
+          outcome,
+          status: status ?? null,
+          availableAgainAt: availableAgainAt ?? null,
+          note: note ?? null,
+          timestamp: timestamp || new Date().toISOString(),
+        };
+
+        history.push(entry);
+        writeCalloutHistory(history);
+
         return send(res, 200, { ok: true, entry });
       } catch (e) {
         return send(res, 500, { error: e.message });
