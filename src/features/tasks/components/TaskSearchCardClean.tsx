@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, CheckSquare, XSquare, Star, Eye, EyeOff, Search } from "lucide-react";
+import { ChevronDown, CheckSquare, XSquare, Bookmark, Eye, EyeOff, Search } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import mockTasks from "@/data/mockTasks.json";
 
@@ -33,8 +33,8 @@ type Props = {
   canCopy?: boolean;
 };
 
-const inputBase = "border border-gray-200 rounded-md text-[12px] px-2 h-[36px] shadow-sm bg-white focus:ring-2 focus:ring-blue-500/60 focus:border-blue-500";
-const selectBase = "border border-gray-200 rounded-md text-[12px] px-2 h-[36px] shadow-sm bg-white focus:ring-2 focus:ring-blue-500/60 focus:border-blue-500";
+const inputBase = "border border-gray-200 rounded-md text-[12px] px-2 h-[32px] shadow-sm bg-white focus:ring-2 focus:ring-blue-500/60 focus:border-blue-500";
+const selectBase = "border border-gray-200 rounded-md text-[12px] px-2 h-[32px] shadow-sm bg-white focus:ring-2 focus:ring-blue-500/60 focus:border-blue-500";
 
 export default function TaskSearchCard({ onSearch, onClear, onCopy, onExport, canCopy = false }: Props) {
   const [filters, setFilters] = useState<Filters>({
@@ -163,48 +163,64 @@ export default function TaskSearchCard({ onSearch, onClear, onCopy, onExport, ca
     <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }} className="relative bg-white border border-gray-200 rounded-xl shadow-sm p-0">
       <Toaster />
       {/* Header */}
-      <div className="bg-[#0A4A7A] text-white px-5 pt-4 pb-3 rounded-t-xl shadow-sm">
+      <div className="bg-[#0A4A7A] text-white px-4 pt-3 pb-3 rounded-t-xl shadow-sm relative">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-[15px] font-semibold tracking-tight">Search Tasks</h2>
-            <p className="text-[11px] text-white/80">Use global search or set Division + Domain.</p>
+            <h2 className="text-[14px] font-semibold tracking-tight">Search Tasks</h2>
+            <p className="text-[10px] text-white/80">Use global search or set Division + Domain.</p>
           </div>
           <div className="flex items-center gap-3">
             {/* Inline compact Date/Time on right side */}
-            <div className="hidden md:flex items-end gap-3">
+            <div className="hidden md:flex items-end gap-2">
               <div className="flex flex-col">
                 <label className="text-[10px] font-semibold text-white mb-[2px]">From</label>
                 <div className="flex items-center gap-1">
-                  <input type="date" name="fromDate" value={filters.fromDate} onChange={handleChange as any} className="border border-white/30 rounded-md text-[11px] px-2 h-[30px] shadow-sm bg-white/15 text-white placeholder:text-white/70 focus:ring-2 focus:ring-white/40 focus:border-white" style={{ width: "clamp(110px,12vw,140px)" }} />
-                  <input type="time" name="fromTime" value={filters.fromTime} onChange={handleChange as any} className="border border-white/30 rounded-md text-[11px] px-2 h-[30px] shadow-sm bg-white/15 text-white placeholder:text-white/70 focus:ring-2 focus:ring-white/40 focus:border-white" style={{ width: "clamp(70px,7vw,90px)" }} />
+                  <input type="date" name="fromDate" value={filters.fromDate} onChange={handleChange as any} className="border border-white/30 rounded-md text-[11px] px-2 h-[28px] shadow-sm bg-white/15 text-white placeholder:text-white/70 focus:ring-2 focus:ring-white/40 focus:border-white" style={{ width: "clamp(100px,12vw,130px)" }} />
+                  <input type="time" name="fromTime" value={filters.fromTime} onChange={handleChange as any} className="border border-white/30 rounded-md text-[11px] px-2 h-[28px] shadow-sm bg-white/15 text-white placeholder:text-white/70 focus:ring-2 focus:ring-white/40 focus:border-white" style={{ width: "clamp(64px,7vw,84px)" }} />
                 </div>
               </div>
               <div className="flex flex-col">
                 <label className="text-[10px] font-semibold text-white mb-[2px]">To</label>
                 <div className="flex items-center gap-1">
-                  <input type="date" name="toDate" value={filters.toDate} onChange={handleChange as any} className="border border-white/30 rounded-md text-[11px] px-2 h-[30px] shadow-sm bg-white/15 text-white placeholder:text-white/70 focus:ring-2 focus:ring-white/40 focus:border-white" style={{ width: "clamp(110px,12vw,140px)" }} />
-                  <input type="time" name="toTime" value={filters.toTime} onChange={handleChange as any} className="border border-white/30 rounded-md text-[11px] px-2 h-[30px] shadow-sm bg-white/15 text-white placeholder:text-white/70 focus:ring-2 focus:ring-white/40 focus:border-white" style={{ width: "clamp(70px,7vw,90px)" }} />
+                  <input type="date" name="toDate" value={filters.toDate} onChange={handleChange as any} className="border border-white/30 rounded-md text-[11px] px-2 h-[28px] shadow-sm bg-white/15 text-white placeholder:text-white/70 focus:ring-2 focus:ring-white/40 focus:border-white" style={{ width: "clamp(100px,12vw,130px)" }} />
+                  <input type="time" name="toTime" value={filters.toTime} onChange={handleChange as any} className="border border-white/30 rounded-md text-[11px] px-2 h-[28px] shadow-sm bg-white/15 text-white placeholder:text-white/70 focus:ring-2 focus:ring-white/40 focus:border-white" style={{ width: "clamp(64px,7vw,84px)" }} />
                 </div>
               </div>
             </div>
-            {/* Header actions */}
-            <button onClick={() => setIsFavourite((p) => !p)} aria-label="Toggle favorite" className="text-white hover:text-white/90 transition"><Star size={18} fill={isFavourite ? "#facc15" : "none"} /></button>
-            <button onClick={() => setCardCollapsed((p) => !p)} aria-label="Collapse filters" className="text-white hover:text-white/90 transition">{cardCollapsed ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+            {/* Header actions moved to bottom-right */}
           </div>
         </div>
-        <div className="relative mt-3">
+        <div className="absolute right-5 bottom-2 flex items-center gap-3">
+          <button
+            onClick={() => setIsFavourite((p) => !p)}
+            aria-label="Toggle bookmark"
+            className="text-white hover:text-white/90 transition"
+            title={isFavourite ? "Remove bookmark" : "Add bookmark"}
+          >
+            <Bookmark size={18} fill={isFavourite ? "#facc15" : "none"} />
+          </button>
+          <button
+            onClick={() => setCardCollapsed((p) => !p)}
+            aria-label="Collapse filters"
+            className="text-white hover:text_white/90 transition"
+            title={cardCollapsed ? "Expand filters" : "Collapse filters"}
+          >
+            {cardCollapsed ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
+        <div className="relative mt-2">
           <input
             type="text"
             name="taskSearch"
             value={filters.taskSearch}
             onChange={handleChange}
             placeholder="Search by Work ID, Resource ID, or Task ID"
-            className="w-full h-[42px] border border-white/25 rounded-md pl-9 pr-3 text-[13px] bg-white/15 text-white placeholder:text-white/70 shadow-inner focus:ring-2 focus:ring-white/40 focus:border-white"
+            className="w-full h-[38px] border border-white/25 rounded-md pl-8 pr-3 text-[13px] bg-white/15 text-white placeholder:text-white/70 shadow-inner focus:ring-2 focus:ring-white/40 focus:border-white"
           />
-          <Search size={16} className="absolute left-2.5 top-2.5 text-white/80" />
+          <Search size={15} className="absolute left-2.5 top-2 text-white/80" />
         </div>
         {/* Quick presets */}
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-2 flex flex-wrap gap-1.5">
           {[
             { label: "My Tasks", onClick: () => toast("Preset: My Tasks") },
             { label: "Due Today", onClick: () => toast("Preset: Due Today") },
@@ -220,7 +236,14 @@ export default function TaskSearchCard({ onSearch, onClear, onCopy, onExport, ca
       {/* Filters */}
       <AnimatePresence initial={false}>
         {!cardCollapsed && (
-          <motion.div initial="collapsed" animate="open" exit="collapsed" variants={{ open: { opacity: 1, height: "auto" }, collapsed: { opacity: 0, height: 0 } }} transition={{ duration: 0.25 }} className={`px-5 pt-4 pb-5 space-y-5`}>
+          <motion.div
+            initial="collapsed"
+            animate="open"
+            exit="collapsed"
+            variants={{ open: { opacity: 1, height: "auto" }, collapsed: { opacity: 0, height: 0 } }}
+            transition={{ duration: 0.25 }}
+            className={`px-4 pt-2 pb-2 space-y-3`}
+          >
             {/* Chips under header */}
             <div className="flex gap-2 items-center min-h-[32px] h-[32px] overflow-hidden">
               {(() => {
@@ -264,16 +287,21 @@ export default function TaskSearchCard({ onSearch, onClear, onCopy, onExport, ca
             {/* Tabs */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1 border-b border-gray-200">
-                <button type="button" onClick={() => { setActiveTab('basic'); setShowAdvanced(false); }} className={`px-3 py-1.5 text-[12px] rounded-t-md ${activeTab === 'basic' ? 'bg-slate-100 text-gray-900 border-b-2 border-[#0A4A7A]' : 'text-gray-700 hover:bg-slate-50'}`}>Basic</button>
-                <button type="button" onClick={() => { setActiveTab('advanced'); setShowAdvanced(true); }} className={`px-3 py-1.5 text-[12px] rounded-t-md ${activeTab === 'advanced' ? 'bg-slate-100 text-gray-900 border-b-2 border-[#0A4A7A]' : 'text-gray-700 hover:bg-slate-50'}`}>Advanced</button>
+                <button type="button" onClick={() => { setActiveTab('basic'); setShowAdvanced(false); }} className={`px-2.5 py-1.5 text-[12px] rounded-t-md ${activeTab === 'basic' ? 'bg-slate-100 text-gray-900 border-b-2 border-[#0A4A7A]' : 'text-gray-700 hover:bg-slate-50'}`}>Basic</button>
+                <button type="button" onClick={() => { setActiveTab('advanced'); setShowAdvanced(true); }} className={`px-2.5 py-1.5 text-[12px] rounded-t-md ${activeTab === 'advanced' ? 'bg-slate-100 text-gray-900 border-b-2 border-[#0A4A7A]' : 'text-gray-700 hover:bg-slate-50'}`}>Advanced</button>
               </div>
               {/* helper text shown only in header; intentionally omitted here */}
             </div>
 
-            {/* Basic section */}
-            {activeTab === 'basic' && (
-            <div className={`space-y-3`}>
-              <div className={`grid grid-cols-12 gap-2 items-end`}>
+            {/* Tab panels container with crossfade, fixed min-height to avoid layout jump */}
+            <div className="relative">
+              <div className="min-h-[80px]">
+                {/* Basic section (kept mounted to avoid flicker) */}
+                <div
+                  className={`space-y-3 transition-opacity duration-200 ${activeTab === 'basic' ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} absolute inset-0`}
+                  aria-hidden={activeTab !== 'basic'}
+                >
+                  <div className={`grid grid-cols-12 gap-2 items-end`}>
                 <div className="col-span-12 sm:col-span-6 md:col-span-1 flex flex-col">
                   <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">Division</label>
                   <DropdownMultiSelect refObj={divisionRef} open={openDropdown === 'division'} setOpen={(o) => setOpenDropdown(o ? 'division' : null)} query={queries.division} setQuery={(v) => setQuery('division', v)} label="Division *" options={filteredDivisions} selected={filters.division} toggle={(v: string) => toggleArrayValue('division', v)} handleSelectAll={() => handleSelectAll('division', filteredDivisions)} />
@@ -299,13 +327,14 @@ export default function TaskSearchCard({ onSearch, onClear, onCopy, onExport, ca
                   <DropdownMultiSelect refObj={capabilityRef} open={openDropdown === 'capabilities'} setOpen={(o) => setOpenDropdown(o ? 'capabilities' : null)} query={queries.capabilities} setQuery={(v) => setQuery('capabilities', v)} label="Select Capabilities" options={filteredCapabilities} selected={filters.capabilities} toggle={(v: string) => toggleArrayValue('capabilities', v)} handleSelectAll={() => handleSelectAll('capabilities', filteredCapabilities)} />
                 </div>
                 
-              </div>
-            </div>
-            )}
-
-            {activeTab === 'advanced' && (
-              <div className={`space-y-3`}>
-                <div className={`grid grid-cols-12 lg:grid-cols-16 gap-2 items-end`}>
+                  </div>
+                </div>
+                {/* Advanced section (kept mounted to avoid flicker) */}
+                <div
+                  className={`space-y-3 transition-opacity duration-200 ${activeTab === 'advanced' ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} absolute inset-0`}
+                  aria-hidden={activeTab !== 'advanced'}
+                >
+                  <div className={`grid grid-cols-12 lg:grid-cols-16 gap-2 items-end`}>
                   <div className="col-span-12 sm:col-span-6 md:col-span-2 lg:col-span-2 flex flex-col">
                     <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">Requester</label>
                     <FilterInput name="requester" value={filters.requester} onChange={handleChange as any} placeholder="Type to match requester (partial)" />
@@ -330,15 +359,16 @@ export default function TaskSearchCard({ onSearch, onClear, onCopy, onExport, ca
                     <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">IMP Value</label>
                     <FilterInput name="scoreValue" value={filters.scoreValue} onChange={handleChange} placeholder="Value" />
                   </div>
+                  </div>
                 </div>
               </div>
-            )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Footer */}
-      <div className={`sticky bottom-0 z-20 flex justify-between items-center pt-2 border-t border-gray-200 px-4 pb-3 bg-slate-50 rounded-b-xl`}>
+      <div className={`sticky bottom-0 z-20 flex justify-between items-center pt-2 border-t border-gray-200 px-4 pb-1 bg-slate-50 rounded-b-xl`}>
         <div className="relative flex items-center gap-2">
           {/* More menu styled like dropdown */}
           <div className="relative">
@@ -358,7 +388,14 @@ export default function TaskSearchCard({ onSearch, onClear, onCopy, onExport, ca
         </div>
         <div className="flex gap-2 items-center">
           {!canSearch && (<span className="text-[11px] text-gray-500">Select Division and Domain ID, or type in the global search.</span>)}
-          <button onClick={handleSearch} className={`text-xs px-3 py-1.5 border border-[#0A4A7A] bg-[#0A4A7A] text-white rounded-md hover:bg-[#08385E] shadow-sm disabled:opacity-50`} disabled={!canSearch}>Search</button>
+          <button
+            onClick={handleSearch}
+            title="Select Division and Domain ID, or type in the global search."
+            className={`text-xs px-3 py-1.5 border border-[#0A4A7A] bg-[#0A4A7A] text-white rounded-md hover:bg-[#08385E] shadow-sm disabled:opacity-50`}
+            disabled={!canSearch}
+          >
+            Search
+          </button>
           <button onClick={handleClearLocal} className={`text-xs px-3 py-1.5 border border-gray-300 rounded-md bg-white hover:bg-gray-100 shadow-sm`}>Clear</button>
         </div>
       </div>

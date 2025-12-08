@@ -156,6 +156,19 @@ export default function TaskTable_Advanced({
   // Column menu filter
   const [columnFilter, setColumnFilter] = useState("");
 
+  // Responsive menu list height
+  const [windowHeight, setWindowHeight] = useState<number>(() => window.innerHeight || 900);
+  useEffect(() => {
+    const onResize = () => setWindowHeight(window.innerHeight);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  const menuListMaxHeight = useMemo(() => {
+    if (windowHeight < 600) return `calc(var(--vh, 1vh) * 20)`;
+    if (windowHeight < 800) return `calc(var(--vh, 1vh) * 22)`;
+    return `calc(var(--vh, 1vh) * 24)`;
+  }, [windowHeight]);
+
   const containerRef = useRef<HTMLDivElement | null>(null);
   const columnMenuRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement | null>(null);
@@ -977,7 +990,7 @@ export default function TaskTable_Advanced({
 
             <div
               className="overflow-y-auto"
-              style={{ maxHeight: "calc(var(--vh, 1vh) * 24)", paddingBottom: 8 }}
+              style={{ maxHeight: menuListMaxHeight, paddingBottom: 8 }}
             >
               {allColumns
                 .filter((key) => {
