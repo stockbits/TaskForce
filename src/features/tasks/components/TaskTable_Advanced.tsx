@@ -153,6 +153,9 @@ export default function TaskTable_Advanced({
     key: string | null;
   }>({ x: 0, y: 0, visible: false, key: null });
 
+  // Column menu filter
+  const [columnFilter, setColumnFilter] = useState("");
+
   const containerRef = useRef<HTMLDivElement | null>(null);
   const columnMenuRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement | null>(null);
@@ -734,9 +737,7 @@ export default function TaskTable_Advanced({
                     }}
                     className="w-full flex items-center justify-between gap-2 text-left cursor-pointer"
                   >
-                    <span className="truncate px-2">
-                      {headerNames[key] ?? key}
-                    </span>
+                    <span className="truncate px-2">{headerNames[key] ?? key}</span>
                     <span className="text-[9px] text-gray-500 pr-[14px]">
                       {sortKey === key ? (sortDir === "asc" ? "▲" : "▼") : ""}
                     </span>
@@ -748,11 +749,11 @@ export default function TaskTable_Advanced({
                       onClick={(e) => openColumnMenu(key, e)}
                       title="Column options"
                       aria-label={`Column options for ${headerNames[key] ?? key}`}
-                      className="h-[18px] w-[18px] flex items-center justify-center cursor-pointer text-gray-700 hover:text-gray-900"
+                      className="column-dots-button h-[18px] w-[10px] flex flex-col items-center justify-center cursor-pointer"
                     >
-                      <span className="inline-block w-[12px] h-[12px] rounded-full border border-current relative">
-                        <span className="absolute inset-[3px] rounded-full border-t-2 border-current rotate-45" />
-                      </span>
+                      <span className="w-[2px] h-[2px] rounded-full bg-black mb-[1px]" />
+                      <span className="w-[2px] h-[2px] rounded-full bg-black mb-[1px]" />
+                      <span className="w-[2px] h-[2px] rounded-full bg-black" />
                     </button>
 
                     <div
@@ -886,15 +887,21 @@ export default function TaskTable_Advanced({
 
       {rows.length > 0 && (
         <div className="flex flex-wrap justify-between items-center border-t border-gray-200 bg-gray-50 text-xs text-gray-700 px-4 py-2 gap-3">
-          <div className="flex items-center gap-2">
-            <span>
-              Showing <b>{(page - 1) * rowsPerPage + 1}</b> –{" "}
-              <b>{Math.min(page * rowsPerPage, rows.length)}</b> of{" "}
-              <b>{rows.length}</b>
-            </span>
-
-            <div className="flex items-center gap-1">
-              <label htmlFor="rowsPerPage">Rows per page:</label>
+          {/* Left: density + rows per page */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <label className="text-gray-700">Density:</label>
+              <select
+                value={density}
+                onChange={(e) => setDensity(e.target.value as any)}
+                className="border border-gray-300 rounded-md px-2 py-1 bg-white text-gray-800"
+              >
+                <option value="compact">Compact</option>
+                <option value="comfortable">Comfortable</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <label htmlFor="rowsPerPage" className="text-gray-700">Rows:</label>
               <select
                 id="rowsPerPage"
                 value={rowsPerPage}
@@ -905,14 +912,13 @@ export default function TaskTable_Advanced({
                 className="border border-gray-300 rounded-md px-2 py-1 bg-white text-gray-800"
               >
                 {[25, 50, 100, 500].map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
+                  <option key={n} value={n}>{n}</option>
                 ))}
               </select>
             </div>
           </div>
 
+          {/* Right: page info + controls */}
           <div className="flex items-center gap-3">
             <span>
               Page {page} of {totalPages}
@@ -933,90 +939,6 @@ export default function TaskTable_Advanced({
                 Next
               </button>
             </div>
-            <div className="flex items-center gap-2 ml-4">
-              <label className="text-gray-700">Preset:</label>
-              <select
-                onChange={(e) => {
-                  const preset = e.target.value;
-                  const views: Record<string, string[]> = {
-                    Default: Object.keys(headerNames),
-                    Dispatch: ['taskId','taskStatus','taskType','primarySkill','importanceScore','startDate','location','responseCode'],
-                    Scheduling: ['taskId','commitmentDate','commitmentType','expectedStartDate','expectedFinishDate','resourceName','postCode','groupCode'],
-                    Customer: ['taskId','customerAddress','assetName','description','requester','appointmentStartDate'],
-                  };
-                  const next = views[preset] || views.Default;
-                  setVisibleColumns(next.filter((k) => headerNames[k]));
-                  localStorage.setItem('taskTablePreset', preset);
-                }}
-                defaultValue={localStorage.getItem('taskTablePreset') || 'Default'}
-                className="border border-gray-300 rounded-md px-2 py-1 bg-white text-gray-800"
-              >
-                <option>Default</option>
-                <option>Dispatch</option>
-                <option>Scheduling</option>
-                <option>Customer</option>
-              </select>
-              <button
-                type="button"
-                className="px-2 py-1 border rounded-md bg-white hover:bg-gray-100 text-gray-700"
-                onClick={() => {
-                  const name = prompt('Save preset as:');
-                  if (!name) return;
-                  const key = `taskTablePreset:${name}`;
-                  localStorage.setItem(key, JSON.stringify(visibleColumns));
-                  try {
-                    const saved = JSON.parse(localStorage.getItem('taskTableCustomPresets') || '[]');
-                    const list = Array.isArray(saved) ? saved : [];
-                    if (!list.includes(name)) {
-                      localStorage.setItem('taskTableCustomPresets', JSON.stringify([...list, name]));
-                    }
-                  } catch {
-                    localStorage.setItem('taskTableCustomPresets', JSON.stringify([name]));
-                  }
-                }}
-              >
-                Save Preset
-              </button>
-              <select
-                onChange={(e) => {
-                  const name = e.target.value;
-                  if (!name) return;
-                  const key = `taskTablePreset:${name}`;
-                  const json = localStorage.getItem(key);
-                  if (!json) return;
-                  try {
-                    const cols = JSON.parse(json);
-                    if (Array.isArray(cols)) setVisibleColumns(cols.filter((k) => headerNames[k]));
-                  } catch {}
-                }}
-                defaultValue=""
-                className="border border-gray-300 rounded-md px-2 py-1 bg-white text-gray-800"
-              >
-                <option value="" disabled hidden>Load preset…</option>
-                {(() => {
-                  try {
-                    const list = JSON.parse(localStorage.getItem('taskTableCustomPresets') || '[]');
-                    if (Array.isArray(list)) {
-                      return list.map((n: string) => (
-                        <option key={n} value={n}>{n}</option>
-                      ));
-                    }
-                  } catch {}
-                  return null;
-                })()}
-              </select>
-            </div>
-            <div className="flex items-center gap-2 ml-4">
-              <label className="text-gray-700">Density:</label>
-              <select
-                value={density}
-                onChange={(e) => setDensity(e.target.value as any)}
-                className="border border-gray-300 rounded-md px-2 py-1 bg-white text-gray-800"
-              >
-                <option value="compact">Compact</option>
-                <option value="comfortable">Comfortable</option>
-              </select>
-            </div>
           </div>
         </div>
       )}
@@ -1033,20 +955,37 @@ export default function TaskTable_Advanced({
             style={{
               top: columnMenu.y,
               left: columnMenu.x,
-              width: "clamp(160px,18vw,220px)",
+              width: "clamp(220px,22vw,320px)",
             }}
-            className="absolute z-[9999] rounded-lg border border-gray-200 bg-white shadow-xl text-xs text-gray-800 py-2"
+            className="absolute z-[99999] rounded-lg border border-gray-200 bg-white shadow-xl text-xs text-gray-800 py-3"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
               Header Settings
             </div>
 
+            {/* Search filter */}
+            <div className="px-3 pb-2">
+              <input
+                type="text"
+                placeholder="Filter columns…"
+                value={columnFilter}
+                onChange={(e) => setColumnFilter(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-2 py-1 text-xs bg-white"
+              />
+            </div>
+
             <div
               className="overflow-y-auto"
-              style={{ maxHeight: "calc(var(--vh, 1vh) * 35)" }}
+              style={{ maxHeight: "calc(var(--vh, 1vh) * 28)" }}
             >
-              {allColumns.map((key) => {
+              {allColumns
+                .filter((key) => {
+                  if (!columnFilter.trim()) return true;
+                  const name = headerNames[key] ?? key;
+                  return name.toLowerCase().includes(columnFilter.toLowerCase());
+                })
+                .map((key) => {
                 const enabled = visibleColumns.includes(key);
                 return (
                   <label
@@ -1065,13 +1004,20 @@ export default function TaskTable_Advanced({
               })}
             </div>
 
-            <div className="mt-2 pt-2 border-t border-gray-200 flex items-center justify-between px-3 gap-2">
+            <div className="sticky bottom-0 mt-2 pt-2 pb-2 border-t border-gray-200 flex items-center justify-end px-3 gap-2 bg-white shadow-[0_-2px_6px_rgba(0,0,0,0.06)] rounded-b-lg">
               <button
                 type="button"
-                onClick={showAllColumns}
+                onClick={() => {
+                  const anyEnabled = visibleColumns.length > 0;
+                  if (anyEnabled) {
+                    setVisibleColumns([]);
+                  } else {
+                    setVisibleColumns(allColumns);
+                  }
+                }}
                 className="px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-100 text-[11px]"
               >
-                Show All
+                {visibleColumns.length > 0 ? "Unselect All" : "Select All"}
               </button>
               <button
                 type="button"
