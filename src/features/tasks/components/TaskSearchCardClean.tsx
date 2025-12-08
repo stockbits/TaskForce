@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useCallback } from "react";
+import React, { useState, useRef, useMemo, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, CheckSquare, XSquare, Bookmark, Eye, EyeOff, Search } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
@@ -74,6 +74,8 @@ export default function TaskSearchCard({ onSearch, onClear, onCopy, onExport, ca
     capabilities: "",
     pwa: "",
   });
+
+  const moreMenuRef = useRef<HTMLDivElement | null>(null);
 
   const setQuery = (key: string, value: string) => setQueries((q) => ({ ...q, [key]: value }));
 
@@ -158,6 +160,22 @@ export default function TaskSearchCard({ onSearch, onClear, onCopy, onExport, ca
   };
 
   const canSearch = filters.taskSearch.trim().length > 0 || (filters.division.length > 0 && filters.domainId.length > 0);
+
+  useEffect(() => {
+    if (openDropdown !== "more") return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!moreMenuRef.current) return;
+      if (!moreMenuRef.current.contains(event.target as Node)) {
+        setOpenDropdown(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+    };
+  }, [openDropdown]);
 
   return (
     <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }} className="relative bg-white border border-gray-200 rounded-xl shadow-sm p-0">
@@ -371,7 +389,7 @@ export default function TaskSearchCard({ onSearch, onClear, onCopy, onExport, ca
       <div className={`sticky bottom-0 z-20 flex justify-between items-center pt-2 border-t border-gray-200 px-4 pb-1 bg-slate-50 rounded-b-xl`}>
         <div className="relative flex items-center gap-2">
           {/* More menu styled like dropdown */}
-          <div className="relative">
+          <div className="relative" ref={moreMenuRef}>
             <button type="button" onClick={() => setOpenDropdown(openDropdown === 'more' ? null : 'more')} className="w-full h-[30px] px-3 text-[12px] border border-gray-300 rounded-md bg-white text-gray-900 shadow-sm cursor-pointer flex items-center justify-between hover:border-gray-400">
               <span>More</span>
               <ChevronDown size={14} className="text-gray-600" />
@@ -379,8 +397,34 @@ export default function TaskSearchCard({ onSearch, onClear, onCopy, onExport, ca
             <AnimatePresence>
               {openDropdown === 'more' && (
                 <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }} className="absolute z-30 mt-1 p-2 text-[12px] bg-white border border-gray-300 rounded-lg shadow-2xl min-w-[180px]">
-                  <button onClick={() => canCopy && onCopy ? onCopy() : toast.error('No data to copy')} disabled={!canCopy} className={`w-full text-left px-2 py-1 rounded ${canCopy ? 'hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'}`}>Copy</button>
-                  <button onClick={() => canCopy && onExport ? onExport() : toast.error('No data to export')} disabled={!canCopy} className={`w-full text-left px-2 py-1 rounded ${canCopy ? 'hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'}`}>Export</button>
+                  <button
+                    onClick={() => {
+                      if (canCopy && onCopy) {
+                        onCopy();
+                      } else {
+                        toast.error('No data to copy');
+                      }
+                      setOpenDropdown(null);
+                    }}
+                    disabled={!canCopy}
+                    className={`w-full text-left px-2 py-1 rounded ${canCopy ? 'hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'}`}
+                  >
+                    Copy
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (canCopy && onExport) {
+                        onExport();
+                      } else {
+                        toast.error('No data to export');
+                      }
+                      setOpenDropdown(null);
+                    }}
+                    disabled={!canCopy}
+                    className={`w-full text-left px-2 py-1 rounded ${canCopy ? 'hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'}`}
+                  >
+                    Export
+                  </button>
                 </motion.div>
               )}
             </AnimatePresence>

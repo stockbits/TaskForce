@@ -37,10 +37,10 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
       animate={{ opacity: 1, y: 0 }}
       className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm"
     >
-      <div className="w-full max-w-3xl mx-auto rounded-2xl bg-white shadow-2xl border border-gray-200 p-8">
+      <div className="w-full max-w-3xl mx-auto rounded-2xl bg-white shadow-[0_24px_55px_rgba(10,74,122,0.28)] border border-[#0A4A7A]/15 p-8">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="h-10 w-10 flex items-center justify-center rounded-full bg-blue-600 text-white">
+          <div className="h-10 w-10 flex items-center justify-center rounded-full bg-[#0A4A7A] text-white shadow-sm">
             <Users size={20} />
           </div>
 
@@ -56,12 +56,12 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
 
         {/* Group selector */}
         <div className="mb-6">
-          <label className="text-xs font-semibold text-gray-700">
+          <label className="text-xs font-semibold text-[#0A4A7A] uppercase tracking-wide">
             Callout Group
           </label>
 
           <select
-            className="mt-1 w-full px-3 py-2 text-sm border rounded-lg"
+            className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A4A7A]/40"
             value={selectedGroup}
             onChange={(e) => {
               setSelectedGroup(e.target.value);
@@ -79,7 +79,7 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
 
         {/* Resource count preview */}
         {selectedGroup && (
-          <div className="mb-6 text-sm text-gray-700 border rounded-lg bg-gray-50 px-4 py-3">
+          <div className="mb-6 text-sm text-[#0A4A7A] border border-[#0A4A7A]/25 rounded-lg bg-[#0A4A7A]/10 px-4 py-3">
             <b>{resourcesForGroup.length}</b> resources in this callout group.
           </div>
         )}
@@ -91,8 +91,8 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
             disabled={startDisabled}
             className={`
               inline-flex items-center gap-2 px-4 py-2 text-sm rounded-lg 
-              text-white bg-blue-600 hover:bg-blue-700
-              disabled:bg-gray-300 disabled:cursor-not-allowed
+              text-white bg-[#0A4A7A] hover:bg-[#0C5A97]
+              disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed
             `}
           >
             Continue

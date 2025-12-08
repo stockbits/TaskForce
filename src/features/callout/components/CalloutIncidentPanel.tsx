@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   X,
@@ -326,6 +326,17 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
     );
   };
 
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+
+  const handleOverlayMouseDown = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (event.target === overlayRef.current) {
+        onClose();
+      }
+    },
+    [onClose]
+  );
+
   /* -----------------------------------------------------
      JSX
   ----------------------------------------------------- */
@@ -334,10 +345,12 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
     <AnimatePresence>
       {open && (
         <motion.div
+          ref={overlayRef}
           className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/55 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          onMouseDown={handleOverlayMouseDown}
         >
           {/* PANEL */}
           <motion.div
@@ -353,9 +366,9 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
             transition={{ duration: 0.18 }}
           >
             {/* HEADER */}
-            <div className="flex items-center justify-between px-7 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 relative">
+            <div className="flex items-center justify-between px-7 py-4 border-b border-[#0A4A7A]/10 bg-gradient-to-r from-[#0A4A7A]/12 via-[#0C5A97]/10 to-[#1280BF]/8 relative">
               <div className="flex items-center gap-3">
-                <div className="h-9 w-9 flex items-center justify-center rounded-full bg-blue-600 text-white">
+                <div className="h-9 w-9 flex items-center justify-center rounded-full bg-[#0A4A7A] text-white shadow-sm">
                   <AlertTriangle size={18} />
                 </div>
 
@@ -375,7 +388,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
 
               <button
                 onClick={onClose}
-                className="p-2 rounded-full hover:bg-gray-100 text-gray-500"
+                className="p-2 rounded-full text-gray-500 hover:bg-[#0A4A7A]/10"
               >
                 <X size={18} />
               </button>
@@ -393,8 +406,8 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
             {/* BODY */}
             <div className="flex-1 overflow-auto px-7 py-4 space-y-4">
               {/* INFO BOX */}
-              <div className="text-xs text-gray-600 border border-blue-50 bg-blue-50/70 rounded-lg px-3 py-2 flex items-start gap-2">
-                <ClipboardList size={14} className="mt-[2px] text-blue-600" />
+              <div className="text-xs text-[#0A4A7A] border border-[#0A4A7A]/20 bg-[#0A4A7A]/10 rounded-lg px-3 py-2 flex items-start gap-2">
+                <ClipboardList size={14} className="mt-[2px] text-[#0A4A7A]" />
                 <p>
                   Choose an <b>Outcome</b> for each tech. If selecting{" "}
                   <b>Unavailable</b>, set a return time. Press <b>Save</b> to
@@ -404,7 +417,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
 
               {/* RESOURCE TABLE */}
               <div className="border border-gray-200 rounded-xl overflow-hidden">
-                <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 flex items-center justify-between">
+                <div className="bg-[#0A4A7A]/5 px-4 py-2 border-b border-[#0A4A7A]/15 flex items-center justify-between">
                   <span className="text-sm font-semibold text-gray-800">
                     Callout Resource List
                   </span>
@@ -416,7 +429,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                 <div className="max-h-[68vh] overflow-auto">
                   <table className="w-full text-xs text-left text-gray-800 border-separate border-spacing-0">
                     <thead>
-                      <tr className="bg-gray-100 text-gray-900 border-b border-gray-200">
+                      <tr className="bg-white text-gray-900 border-b border-[#0A4A7A]/10">
                         <th className="px-4 py-2 w-[150px]">Tech ID</th>
                         <th className="px-4 py-2 w-[260px]">Outcome</th>
                         <th className="px-4 py-2 w-[260px]">
@@ -491,7 +504,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                     onClick={() =>
                                       handleCopyId(resource.resourceId)
                                     }
-                                    className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-700"
+                                    className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-md border border-[#0A4A7A]/30 text-[#0A4A7A] hover:bg-[#0A4A7A]/10"
                                   >
                                     <Copy size={11} />
                                     ID
@@ -503,7 +516,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                               <td className="px-4 py-2 align-top">
                                 <select
                                   className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs bg-white
-                                    focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400"
+                                    focus:outline-none focus:ring-1 focus:ring-[#0A4A7A] disabled:bg-gray-100 disabled:text-gray-400"
                                   disabled={rowLocked}
                                   value={draft.outcome || ""}
                                   onChange={(e) =>
@@ -532,14 +545,14 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                     size={14}
                                     className={
                                       requiresUnavailable && !rowLocked
-                                        ? "text-blue-600"
+                                        ? "text-[#0A4A7A]"
                                         : "text-gray-400"
                                     }
                                   />
                                   <input
                                     type="datetime-local"
                                     className="flex-1 rounded-lg border border-gray-300 px-2 py-1.5 text-xs 
-                                      focus:outline-none focus:ring-1 focus:ring-blue-500 
+                                      focus:outline-none focus:ring-1 focus:ring-[#0A4A7A] 
                                       disabled:bg-gray-100 disabled:text-gray-400"
                                     disabled={!requiresUnavailable || rowLocked}
                                     value={draft.availableAgainAt || ""}
@@ -571,7 +584,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                     ${
                                       rowLocked
                                         ? "border-green-600 bg-green-50 text-green-700"
-                                        : "border-blue-600 text-blue-600 hover:bg-blue-50"
+                                        : "border-[#0A4A7A] text-[#0A4A7A] hover:bg-[#0A4A7A]/10"
                                     }
                                     disabled:opacity-50 disabled:cursor-not-allowed
                                   `}
@@ -595,10 +608,10 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
               </div>
             </div>
             {/* FOOTER */}
-            <div className="flex items-center justify-end px-7 py-3 border-t border-gray-200 bg-gray-50">
+            <div className="flex items-center justify-end px-7 py-3 border-t border-[#0A4A7A]/10 bg-[#0A4A7A]/5">
               <button
                 onClick={onClose}
-                className="px-3 py-1.5 text-xs sm:text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
+                className="px-3 py-1.5 text-xs sm:text-sm rounded-lg border border-[#0A4A7A]/30 text-[#0A4A7A] hover:bg-[#0A4A7A]/10"
               >
                 Close
               </button>
