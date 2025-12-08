@@ -977,7 +977,7 @@ export default function TaskTable_Advanced({
 
             <div
               className="overflow-y-auto"
-              style={{ maxHeight: "calc(var(--vh, 1vh) * 28)" }}
+              style={{ maxHeight: "calc(var(--vh, 1vh) * 24)", paddingBottom: 8 }}
             >
               {allColumns
                 .filter((key) => {
