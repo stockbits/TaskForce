@@ -416,6 +416,66 @@
           "homePostCode": "CF44 9NH",
           "homeLat": 51.72982,
           "homeLng": -3.50008
+        },
+        {
+          "resourceId": "FJNEW28",
+          "name": "Eleri Hopkins",
+          "division": "Service Delivery",
+          "primarySkill": "RISDN2",
+          "secondarySkill": "RISDN1",
+          "status": "Available",
+          "pwa": "ZB-ALPHA-18",
+          "calloutGroup": "FJ",
+          "lastOutcome": null,
+          "availableAgainAt": null,
+          "contactNumber": "07700900137",
+          "notes": "",
+          "history": [],
+          "updatedAt": null,
+
+          "homePostCode": "CF44 7LS",
+          "homeLat": 51.71743,
+          "homeLng": -3.45271
+        },
+        {
+          "resourceId": "FJNEW29",
+          "name": "Geraint Morgan",
+          "division": "Service Delivery",
+          "primarySkill": "RISDN3",
+          "secondarySkill": null,
+          "status": "Available",
+          "pwa": "ZB-GAMMA-25",
+          "calloutGroup": "FJ",
+          "lastOutcome": null,
+          "availableAgainAt": null,
+          "contactNumber": "07700900138",
+          "notes": "",
+          "history": [],
+          "updatedAt": null,
+
+          "homePostCode": "CF44 8PD",
+          "homeLat": 51.72288,
+          "homeLng": -3.45934
+        },
+        {
+          "resourceId": "FJNEW30",
+          "name": "Non Davies",
+          "division": "Service Delivery",
+          "primarySkill": "RISDN2",
+          "secondarySkill": "RISDN3",
+          "status": "On Task",
+          "pwa": "ZB-DELTA-14",
+          "calloutGroup": "FJ",
+          "lastOutcome": "Dispatched",
+          "availableAgainAt": null,
+          "contactNumber": "07700900139",
+          "notes": "",
+          "history": [],
+          "updatedAt": "2025-01-18T15:10:00Z",
+
+          "homePostCode": "CF44 6QH",
+          "homeLat": 51.70412,
+          "homeLng": -3.42566
         }
       ]
       

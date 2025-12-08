@@ -528,6 +528,9 @@ export default function MainLayout() {
   const [selectedCalloutResources, setSelectedCalloutResources] = useState<
     ResourceRecord[]
   >([]);
+  const [selectedCalloutGroup, setSelectedCalloutGroup] = useState<string | null>(
+    null
+  );
 
   const {
     history: calloutHistory,
@@ -820,13 +823,16 @@ export default function MainLayout() {
       const formatForNote = (iso?: string | null) => {
         if (!iso) return null;
         try {
-          return new Date(iso).toLocaleString("en-GB", {
-            year: "numeric",
-            month: "short",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-          });
+          const date = new Date(iso);
+          if (Number.isNaN(date.getTime())) {
+            return iso;
+          }
+          const day = String(date.getDate()).padStart(2, "0");
+          const month = String(date.getMonth() + 1).padStart(2, "0");
+          const year = date.getFullYear();
+          const hours = String(date.getHours()).padStart(2, "0");
+          const minutes = String(date.getMinutes()).padStart(2, "0");
+          return `${day}/${month}/${year} ${hours}:${minutes}`;
         } catch {
           return iso;
         }
@@ -978,41 +984,11 @@ export default function MainLayout() {
           CalloutHistoryEntry,
           "id"
         >;
-        try {
-          const response = await fetch("http://localhost:5179/callout-history", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(calloutHistoryEntry),
-          });
-
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-          }
-
-          const payload = await response.json().catch(() => null);
-          const persistedEntry = (payload?.entry ?? null) as
-            | CalloutHistoryEntry
-            | null;
-
-          if (persistedEntry) {
-            appendCalloutHistory(persistedEntry);
-          } else {
-            const fallback: CalloutHistoryEntry = {
-              id: `${outboundHistoryEntry.taskId ?? "task"}-${resourceId}-${Date.now()}`,
-              taskId: outboundHistoryEntry.taskId,
-              workId: outboundHistoryEntry.workId,
-              resourceId: outboundHistoryEntry.resourceId,
-              outcome: outboundHistoryEntry.outcome,
-              status: outboundHistoryEntry.status,
-              availableAgainAt: outboundHistoryEntry.availableAgainAt,
-              note: outboundHistoryEntry.note,
-              timestamp: outboundHistoryEntry.timestamp,
-            };
-            appendCalloutHistory(fallback);
-          }
-        } catch (err) {
-          console.warn("Unable to persist callout history", err);
-        }
+        const entry: CalloutHistoryEntry = {
+          id: `SESSION-${resourceId}-${Date.now()}`,
+          ...outboundHistoryEntry,
+        };
+        appendCalloutHistory(entry);
       }
     },
     [appendCalloutHistory]
@@ -1130,8 +1106,10 @@ export default function MainLayout() {
           onStart={(group: string) => {
             // auto-load all resources belonging to that group
             const list = resources.filter((r) => r.calloutGroup === group);
+            const mainList = list.slice(0, 6);
 
-            setSelectedCalloutResources(list);
+            setSelectedCalloutResources(mainList);
+            setSelectedCalloutGroup(group);
             setCalloutLandingOpen(false);
             setIncidentOpen(true);
           }}
@@ -1144,12 +1122,13 @@ export default function MainLayout() {
       <CalloutIncidentPanel
         open={incidentOpen}
         task={incidentTask}
-        resources={
-          selectedCalloutResources.length ? selectedCalloutResources : resources
-        }
+        resources={resources}
+        primaryResourceIds={selectedCalloutResources.map((r) => r.resourceId)}
+        selectedGroup={selectedCalloutGroup}
         onClose={() => {
           setIncidentOpen(false);
           setSelectedCalloutResources([]);
+          setSelectedCalloutGroup(null);
         }}
         history={calloutHistory}
         historyLoading={calloutHistoryLoading}

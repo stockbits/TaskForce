@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import seedHistory from "@/data/calloutHistory.json";
 import type { CalloutOutcome } from "@/types";
 
 export interface CalloutHistoryEntry {
@@ -44,58 +45,44 @@ function normalizeEntry(raw: any): CalloutHistoryEntry | null {
   };
 }
 
+function buildSeedHistory(): CalloutHistoryEntry[] {
+  const raw = Array.isArray(seedHistory) ? seedHistory : [];
+  const entries = raw
+    .map((entry: any) => normalizeEntry(entry))
+    .filter((entry): entry is CalloutHistoryEntry => Boolean(entry));
+
+  entries.sort((a, b) => {
+    const aTime = Date.parse(a.timestamp);
+    const bTime = Date.parse(b.timestamp);
+
+    const aValid = !Number.isNaN(aTime);
+    const bValid = !Number.isNaN(bTime);
+
+    if (aValid && bValid) return bTime - aTime;
+    if (aValid) return -1;
+    if (bValid) return 1;
+    return 0;
+  });
+
+  return entries;
+}
+
 export function useCalloutHistory(): UseCalloutHistoryResult {
-  const [history, setHistory] = useState<CalloutHistoryEntry[]>([]);
+  const [history, setHistory] = useState<CalloutHistoryEntry[]>(() => buildSeedHistory());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const hasFetchedRef = useRef(false);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     setError(null);
-    try {
-      const response = await fetch("http://localhost:5179/callout-history");
-      if (!response.ok) {
-        throw new Error(`Request failed: ${response.status}`);
-      }
-
-      const payload = await response.json();
-      const items: CalloutHistoryEntry[] = Array.isArray(payload?.history)
-        ? (payload.history as unknown[])
-          .map((entry) => normalizeEntry(entry))
-            .filter((entry): entry is CalloutHistoryEntry => Boolean(entry))
-        : [];
-
-      items.sort((a, b) => {
-        const aTime = Date.parse(a.timestamp);
-        const bTime = Date.parse(b.timestamp);
-
-        const aValid = !Number.isNaN(aTime);
-        const bValid = !Number.isNaN(bTime);
-
-        if (aValid && bValid) return bTime - aTime;
-        if (aValid) return -1;
-        if (bValid) return 1;
-        return 0;
-      });
-
-      setHistory(items);
-    } catch (err: any) {
-      console.warn("Unable to load callout history", err);
-      setError(err?.message || "Unable to load history");
-    } finally {
-      setLoading(false);
-      hasFetchedRef.current = true;
-    }
+    return new Promise<void>((resolve) => {
+      setTimeout(() => {
+        setHistory(buildSeedHistory());
+        setLoading(false);
+        resolve();
+      }, 120);
+    });
   }, []);
-
-  useEffect(() => {
-    if (!hasFetchedRef.current) {
-      refresh().catch(() => {
-        /* handled above */
-      });
-    }
-  }, [refresh]);
 
   const appendLocal = useCallback((entry: CalloutHistoryEntry) => {
     setHistory((prev) => {
