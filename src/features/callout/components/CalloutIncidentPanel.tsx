@@ -15,6 +15,7 @@ import {
   Copy,
   ExternalLink,
   RotateCcw,
+  User,
 } from "lucide-react";
 import { type CalloutHistoryEntry } from "@/lib/hooks/useCalloutHistory";
 
@@ -108,6 +109,7 @@ interface CalloutIncidentPanelProps {
     resource: ResourceRecord,
     history: CalloutHistoryEntry[]
   ) => void;
+  onOpenTaskPopout?: () => void;
 
   onSaveRow?: (payload: {
     taskId: string | number | null;
@@ -158,6 +160,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
   onRefreshHistory,
   onSaveRow,
   onOpenResourcePopout,
+  onOpenTaskPopout,
 }) => {
   const taskId =
     task?.TaskID ?? task?.taskId ?? task?.id ?? task?.TaskId ?? null;
@@ -675,7 +678,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
           {/* PANEL */}
           <motion.div
             className="relative 
-                       w-[min(1420px,100%-40px)]   /* wider */
+                       w-[min(1520px,100%-40px)]   /* wider */
                        max-h-[96vh] 
                        rounded-2xl bg-white 
                        shadow-2xl border border-gray-200 
@@ -771,14 +774,14 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                     <table className="w-full text-xs text-left text-gray-800 border-separate border-spacing-0">
                       <thead>
                         <tr className="bg-white text-gray-900 border-b border-[#0A4A7A]/10">
-                          <th className="px-4 py-2 w-[150px]">Tech ID</th>
-                          <th className="px-4 py-2 w-[260px]">Outcome</th>
-                          <th className="px-4 py-2 w-[260px]">
+                          <th className="px-4 py-2 min-w-[140px]">Tech ID</th>
+                          <th className="px-4 py-2 min-w-[210px]">Outcome</th>
+                          <th className="px-4 py-2 min-w-[210px]">
                             Unavailable Until
                           </th>
-                          <th className="px-4 py-2 w-[220px]">Last Outcome</th>
-                          <th className="px-4 py-2 w-[120px] text-center">
-                            Save
+                          <th className="px-4 py-2 min-w-[190px]">Last Outcome</th>
+                          <th className="px-4 py-2 min-w-[220px] text-center">
+                            Actions
                           </th>
                         </tr>
                       </thead>
@@ -872,29 +875,18 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                           event.stopPropagation();
                                           handleCopyId(resource.resourceId);
                                         }}
-                                        className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-md border border-[#0A4A7A]/30 text-[#0A4A7A] hover:bg-[#0A4A7A]/10"
+                                        title="Copy ID"
+                                        aria-label="Copy ID"
+                                        className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[#0A4A7A]/30 text-[#0A4A7A] hover:bg-[#0A4A7A]/10"
                                       >
-                                        <Copy size={11} />
-                                        ID
-                                      </button>
-
-                                      <button
-                                        type="button"
-                                        onClick={(event) => {
-                                          event.stopPropagation();
-                                          handleOpenResourceDetails(resource.resourceId);
-                                        }}
-                                        className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-md border border-[#0A4A7A]/30 text-[#0A4A7A] hover:bg-[#0A4A7A]/10"
-                                      >
-                                        <ExternalLink size={11} />
-                                        View
+                                        <Copy size={13} />
                                       </button>
                                     </div>
                                   </div>
                                 </td>
 
                                 {/* OUTCOME SELECT */}
-                                <td className="px-4 py-2 align-top">
+                                <td className="px-4 py-2 align-top min-w-[210px]">
                                   <select
                                     className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs bg-white
                                     focus:outline-none focus:ring-1 focus:ring-[#0A4A7A] disabled:bg-gray-100 disabled:text-gray-400"
@@ -916,7 +908,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                 </td>
 
                                 {/* UNAVAILABLE UNTIL */}
-                                <td className="px-4 py-2 align-top">
+                                <td className="px-4 py-2 align-top min-w-[210px]">
                                   <div className="flex items-center gap-2">
                                     <Clock
                                       size={14}
@@ -950,37 +942,69 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                 </td>
 
                                 {/* LAST OUTCOME */}
-                                <td className="px-4 py-2 align-top">
+                                <td className="px-4 py-2 align-top min-w-[190px]">
                                   {renderLastOutcomeCell(resource)}
                                 </td>
 
-                                {/* SAVE BUTTON */}
-                                <td className="px-4 py-2 align-top text-center">
-                                  <button
-                                    type="button"
-                                    disabled={saveDisabled || saving}
-                                    onClick={() =>
-                                      handleRowSave(resource.resourceId)
-                                    }
-                                    className={`
-                                    inline-flex items-center justify-center gap-1 
-                                    text-[11px] px-3 py-1.5 rounded-md border  
-                                    ${
-                                      rowLocked
-                                        ? "border-green-600 bg-green-50 text-green-700"
-                                        : "border-[#0A4A7A] text-[#0A4A7A] hover:bg-[#0A4A7A]/10"
-                                    }
-                                    disabled:opacity-50 disabled:cursor-not-allowed
-                                  `}
-                                  >
-                                    {saving && (
-                                      <Loader2
-                                        size={12}
-                                        className="animate-spin"
-                                      />
-                                    )}
-                                    {rowLocked ? "Saved" : "Save"}
-                                  </button>
+                                {/* ACTION BUTTONS */}
+                                <td className="px-4 py-2 align-top min-w-[220px]">
+                                  <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end sm:items-center">
+                                    <button
+                                      type="button"
+                                      disabled={saveDisabled || saving}
+                                      onClick={() =>
+                                        handleRowSave(resource.resourceId)
+                                      }
+                                      className={`
+                                      inline-flex items-center justify-center gap-1 whitespace-nowrap
+                                      w-full sm:w-auto text-[11px] px-3 py-1.5 rounded-md border  
+                                      ${
+                                        rowLocked
+                                          ? "border-green-600 bg-green-50 text-green-700"
+                                          : "border-[#0A4A7A] text-[#0A4A7A] hover:bg-[#0A4A7A]/10"
+                                      }
+                                      disabled:opacity-50 disabled:cursor-not-allowed
+                                    `}
+                                    >
+                                      {saving && (
+                                        <Loader2
+                                          size={12}
+                                          className="animate-spin"
+                                        />
+                                      )}
+                                      {rowLocked ? "Saved" : "Save"}
+                                    </button>
+
+                                    <div className="flex items-center gap-2 sm:gap-1">
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          handleOpenResourceDetails(
+                                            resource.resourceId
+                                          )
+                                        }
+                                        title="Resource"
+                                        aria-label="Resource"
+                                        className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[#0A4A7A]/30 text-[#0A4A7A] hover:bg-[#0A4A7A]/10"
+                                      >
+                                        <User size={14} />
+                                        <span className="sr-only">Resource</span>
+                                      </button>
+
+                                      {task && onOpenTaskPopout && (
+                                        <button
+                                          type="button"
+                                          onClick={onOpenTaskPopout}
+                                          title="Task"
+                                          aria-label="Task"
+                                          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[#0A4A7A]/30 text-[#0A4A7A] hover:bg-[#0A4A7A]/10"
+                                        >
+                                          <ExternalLink size={14} />
+                                          <span className="sr-only">Task</span>
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
                                 </td>
                               </tr>
                             );

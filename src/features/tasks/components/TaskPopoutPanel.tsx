@@ -165,6 +165,13 @@ export default function TaskPopoutPanel({
                 </button>
               )
             )}
+
+            <button
+              type="button"
+              className="px-3 py-1.5 rounded-md text-sm flex items-center gap-1 border border-[#0A4A7A] text-[#0A4A7A] bg-white shadow-sm transition hover:bg-[#0A4A7A]/10"
+            >
+              Edit
+            </button>
           </div>
         </div>
 

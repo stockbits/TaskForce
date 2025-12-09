@@ -778,6 +778,14 @@ export default function MainLayout() {
     [calloutHistory, openResourceWindow]
   );
 
+  const handleOpenIncidentTaskPopout = useCallback(() => {
+    if (!incidentTask) return;
+
+    const coordsX = window.innerWidth / 2;
+    const coordsY = window.innerHeight / 2;
+    openExternalWindow([incidentTask as TaskDetails], coordsX, coordsY);
+  }, [incidentTask, openExternalWindow]);
+
   // Outcome → task status mapping
   const mapOutcomeToTaskStatus = (
     current: string,
@@ -1142,6 +1150,7 @@ export default function MainLayout() {
         primaryResourceIds={selectedCalloutResources.map((r) => r.resourceId)}
         selectedGroup={selectedCalloutGroup}
         onOpenResourcePopout={handleOpenResourcePopout}
+        onOpenTaskPopout={handleOpenIncidentTaskPopout}
         onClose={() => {
           setIncidentOpen(false);
           setSelectedCalloutResources([]);

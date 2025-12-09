@@ -49,16 +49,22 @@ function PopupApp() {
   // ------------------------------
   const [expanded, setExpanded] = useState<string[]>(data.expanded ?? []);
   const [uiScale, setUiScale] = useState(1);
+  const [viewportSize, setViewportSize] = useState(() => ({
+    width: typeof window === "undefined" ? 0 : window.innerWidth,
+    height: typeof window === "undefined" ? 0 : window.innerHeight,
+  }));
 
   // Mirror main app compact scaling rules so the popup stays dense on
   // shorter viewports and respects mobile-safe 100vh handling.
   useEffect(() => {
     const applyViewportMetrics = () => {
-      const vh = window.innerHeight * 0.01;
+      const currentHeight = window.innerHeight;
+      const currentWidth = window.innerWidth;
+
+      const vh = currentHeight * 0.01;
       document.documentElement.style.setProperty("--vh", `${vh}px`);
 
-      const height = window.innerHeight;
-      const computedScale = Math.max(0.75, Math.min(1, height / 900));
+      const computedScale = Math.max(0.75, Math.min(1, currentHeight / 900));
       const roundedScale = Number(computedScale.toFixed(2));
       setUiScale(roundedScale);
       document.documentElement.style.setProperty(
@@ -66,16 +72,23 @@ function PopupApp() {
         String(computedScale)
       );
 
-      const fontSize = Math.max(13, Math.min(16, Math.round(height / 60)));
+      const fontSize = Math.max(
+        13,
+        Math.min(16, Math.round(currentHeight / 60))
+      );
       document.documentElement.style.fontSize = `${fontSize}px`;
+
+      setViewportSize({ width: currentWidth, height: currentHeight });
     };
 
     // Remove default body margin for a flush canvas and align palette
     // with the primary application.
     const previousMargin = document.body.style.margin;
     const previousBg = document.body.style.backgroundColor;
+    const previousOverflow = document.body.style.overflow;
     document.body.style.margin = "0";
     document.body.style.backgroundColor = "#F5F7FA";
+    document.body.style.overflow = "hidden";
 
     applyViewportMetrics();
     window.addEventListener("resize", applyViewportMetrics);
@@ -84,6 +97,7 @@ function PopupApp() {
       window.removeEventListener("resize", applyViewportMetrics);
       document.body.style.margin = previousMargin;
       document.body.style.backgroundColor = previousBg;
+      document.body.style.overflow = previousOverflow;
     };
   }, []);
 
@@ -118,8 +132,14 @@ function PopupApp() {
     <div
       className="min-h-screen w-screen overflow-hidden"
       style={{
-        height: `calc(var(--vh, 1vh) * 100 / ${uiScale})`,
-        width: `${100 / uiScale}vw`,
+        height:
+          viewportSize.height === 0
+            ? "100%"
+            : `${viewportSize.height / uiScale}px`,
+        width:
+          viewportSize.width === 0
+            ? "100%"
+            : `${viewportSize.width / uiScale}px`,
         transform: `scale(${uiScale})`,
         transformOrigin: "top left",
       }}

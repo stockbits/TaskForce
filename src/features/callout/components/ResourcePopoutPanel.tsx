@@ -143,34 +143,58 @@ export default function ResourcePopoutPanel({
   ];
 
   return (
-    <div className="flex h-full w-full bg-[#F5F7FA] text-gray-900">
+    <div className="flex h-full w-full bg-[#F5F7FA] text-gray-900 overflow-hidden">
       <div className="flex h-full w-full flex-col overflow-hidden bg-white">
         {/* HEADER */}
         <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
           <div>
-            <h2 className="text-lg font-semibold text-gray-800">Resource Details</h2>
+            <h2 className="text-lg font-semibold text-gray-800">Resource Details (1)</h2>
             <p className="text-xs text-gray-500">Explore current status, contact details, and callout history.</p>
           </div>
-          <button
-            onClick={() => (expanded.length ? onCollapseAll() : onExpandAll())}
-            className="px-3 py-1.5 rounded-md text-sm flex items-center gap-2 bg-[#0A4A7A] text-white shadow-sm transition hover:bg-[#0C5A97]"
-          >
-            {expanded.length ? (
-              <>
-                <ChevronUp size={14} /> Collapse All
-              </>
-            ) : (
-              <>
-                <ChevronDown size={14} /> Expand All
-              </>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => (expanded.length ? onCollapseAll() : onExpandAll())}
+              className="px-3 py-1.5 rounded-md text-sm flex items-center gap-1 bg-[#0A4A7A] text-white shadow-sm transition hover:bg-[#0C5A97]"
+            >
+              {expanded.length ? (
+                <>
+                  <ChevronUp size={14} /> Collapse All
+                </>
+              ) : (
+                <>
+                  <ChevronDown size={14} /> Expand All
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              className="px-3 py-1.5 rounded-md text-sm flex items-center gap-1 border border-[#0A4A7A] text-[#0A4A7A] bg-white shadow-sm transition hover:bg-[#0A4A7A]/10"
+            >
+              Edit
+            </button>
+          </div>
+        </div>
+
+        <div className="px-6 py-2 bg-gray-50 border-b border-gray-200">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="px-3 py-1.5 rounded-full text-xs font-semibold text-[#0A4A7A] border border-[#0A4A7A] bg-[#0A4A7A]/15">
+              {resource.resourceId}
+            </div>
+            {resource.name && (
+              <div className="px-3 py-1.5 rounded-full text-xs text-gray-600 border border-gray-300 bg-white">
+                {resource.name}
+              </div>
             )}
-          </button>
+          </div>
         </div>
 
         {/* BODY */}
-        <div className="flex-1 px-6 py-6 bg-gray-200/40 overflow-y-auto">
-          <div className="flex justify-center">
-            <div className="w-full max-w-[720px] bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden">
+        <div className="flex-1 px-6 py-6 bg-gray-200/40 overflow-y-auto overflow-x-auto scrollbar-thin">
+          <div className="flex justify-center" style={{ paddingBottom: "1rem" }}>
+            <div
+              className="bg-white border border-gray-200 rounded-xl shadow-md flex-shrink-0 overflow-hidden"
+              style={{ width: 720 }}
+            >
               <div className="px-6 pt-6 pb-6 space-y-5">
                 {/* Resource Summary */}
                 <section className="border border-gray-200 rounded-lg overflow-hidden">
@@ -371,16 +395,6 @@ export default function ResourcePopoutPanel({
               </div>
             </div>
           </div>
-        </div>
-
-        {/* FOOTER */}
-        <div className="flex items-center justify-end px-6 py-3 border-t border-gray-200 bg-white">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm rounded-md border border-[#0A4A7A]/30 text-[#0A4A7A] hover:bg-[#0A4A7A]/10"
-          >
-            Close
-          </button>
         </div>
       </div>
     </div>
