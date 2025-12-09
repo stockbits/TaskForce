@@ -60,7 +60,6 @@ export default function TaskSearchCard({ onSearch, onClear, onCopy, onExport, ca
 
   const [cardCollapsed, setCardCollapsed] = useState(false);
   const [isFavourite, setIsFavourite] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [activeTab, setActiveTab] = useState<'basic' | 'advanced'>('basic');
   const [showTimeInputs, setShowTimeInputs] = useState(true);
   
@@ -305,81 +304,93 @@ export default function TaskSearchCard({ onSearch, onClear, onCopy, onExport, ca
             {/* Tabs */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1 border-b border-gray-200">
-                <button type="button" onClick={() => { setActiveTab('basic'); setShowAdvanced(false); }} className={`px-2.5 py-1.5 text-[12px] rounded-t-md ${activeTab === 'basic' ? 'bg-slate-100 text-gray-900 border-b-2 border-[#0A4A7A]' : 'text-gray-700 hover:bg-slate-50'}`}>Basic</button>
-                <button type="button" onClick={() => { setActiveTab('advanced'); setShowAdvanced(true); }} className={`px-2.5 py-1.5 text-[12px] rounded-t-md ${activeTab === 'advanced' ? 'bg-slate-100 text-gray-900 border-b-2 border-[#0A4A7A]' : 'text-gray-700 hover:bg-slate-50'}`}>Advanced</button>
+                <button type="button" onClick={() => setActiveTab('basic')} className={`px-2.5 py-1.5 text-[12px] rounded-t-md ${activeTab === 'basic' ? 'bg-slate-100 text-gray-900 border-b-2 border-[#0A4A7A]' : 'text-gray-700 hover:bg-slate-50'}`}>Basic</button>
+                <button type="button" onClick={() => setActiveTab('advanced')} className={`px-2.5 py-1.5 text-[12px] rounded-t-md ${activeTab === 'advanced' ? 'bg-slate-100 text-gray-900 border-b-2 border-[#0A4A7A]' : 'text-gray-700 hover:bg-slate-50'}`}>Advanced</button>
               </div>
               {/* helper text shown only in header; intentionally omitted here */}
             </div>
 
             {/* Tab panels container with crossfade, fixed min-height to avoid layout jump */}
-            <div className="relative">
-              <div className="min-h-[80px]">
-                {/* Basic section (kept mounted to avoid flicker) */}
-                <div
-                  className={`space-y-3 transition-opacity duration-200 ${activeTab === 'basic' ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} absolute inset-0`}
-                  aria-hidden={activeTab !== 'basic'}
-                >
-                  <div className={`grid grid-cols-12 gap-2 items-end`}>
-                <div className="col-span-12 sm:col-span-6 md:col-span-1 flex flex-col">
-                  <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">Division</label>
-                  <DropdownMultiSelect refObj={divisionRef} open={openDropdown === 'division'} setOpen={(o) => setOpenDropdown(o ? 'division' : null)} query={queries.division} setQuery={(v) => setQuery('division', v)} label="Division *" options={filteredDivisions} selected={filters.division} toggle={(v: string) => toggleArrayValue('division', v)} handleSelectAll={() => handleSelectAll('division', filteredDivisions)} />
-                </div>
-                <div className="col-span-12 sm:col-span-6 md:col-span-1 flex flex-col">
-                  <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">Domain ID</label>
-                  <DropdownMultiSelect refObj={domainRef} open={openDropdown === 'domainId'} setOpen={(o) => setOpenDropdown(o ? 'domainId' : null)} query={queries.domainId} setQuery={(v) => setQuery('domainId', v)} label="Domain ID *" options={filteredDomains} selected={filters.domainId} toggle={(v: string) => toggleArrayValue('domainId', v)} handleSelectAll={() => handleSelectAll('domainId', filteredDomains)} />
-                </div>
-                <div className="col-span-12 sm:col-span-6 md:col-span-1 flex flex-col">
-                  <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">Task Status</label>
-                  <DropdownMultiSelect refObj={statusRef} open={openDropdown === 'taskStatuses'} setOpen={(o) => setOpenDropdown(o ? 'taskStatuses' : null)} query={queries.taskStatuses} setQuery={(v) => setQuery('taskStatuses', v)} label="Task Status" options={filteredStatuses} selected={filters.taskStatuses} toggle={(v: string) => toggleArrayValue('taskStatuses', v)} handleSelectAll={() => handleSelectAll('taskStatuses', filteredStatuses)} />
-                </div>
-                <div className="col-span-12 sm:col-span-6 md:col-span-1 flex flex-col">
-                  <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">Commit Type</label>
-                  <DropdownMultiSelect refObj={commitRef} open={openDropdown === 'commitType'} setOpen={(o) => setOpenDropdown(o ? 'commitType' : null)} query={queries.commitType} setQuery={(v) => setQuery('commitType', v)} label="Commit Type" options={filteredCommits} selected={filters.commitType} toggle={(v: string) => toggleArrayValue('commitType', v)} handleSelectAll={() => handleSelectAll('commitType', filteredCommits)} />
-                </div>
-                <div className="col-span-12 sm:col-span-6 md:col-span-2 flex flex-col">
-                  <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">PWA Selector</label>
-                  <DropdownMultiSelect refObj={pwaRef} open={openDropdown === 'pwa'} setOpen={(o) => setOpenDropdown(o ? 'pwa' : null)} query={queries.pwa} setQuery={(v) => setQuery('pwa', v)} label="PWA Selector" options={filteredPwa} selected={filters.pwa} toggle={(v: string) => toggleArrayValue('pwa', v)} handleSelectAll={() => handleSelectAll('pwa', filteredPwa)} />
-                </div>
-                <div className="col-span-12 sm:col-span-6 md:col-span-2 flex flex-col">
-                  <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">Capabilities</label>
-                  <DropdownMultiSelect refObj={capabilityRef} open={openDropdown === 'capabilities'} setOpen={(o) => setOpenDropdown(o ? 'capabilities' : null)} query={queries.capabilities} setQuery={(v) => setQuery('capabilities', v)} label="Select Capabilities" options={filteredCapabilities} selected={filters.capabilities} toggle={(v: string) => toggleArrayValue('capabilities', v)} handleSelectAll={() => handleSelectAll('capabilities', filteredCapabilities)} />
-                </div>
-                
-                  </div>
-                </div>
-                {/* Advanced section (kept mounted to avoid flicker) */}
-                <div
-                  className={`space-y-3 transition-opacity duration-200 ${activeTab === 'advanced' ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} absolute inset-0`}
-                  aria-hidden={activeTab !== 'advanced'}
-                >
-                  <div className={`grid grid-cols-12 lg:grid-cols-16 gap-2 items-end`}>
-                  <div className="col-span-12 sm:col-span-6 md:col-span-2 lg:col-span-2 flex flex-col">
-                    <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">Requester</label>
-                    <FilterInput name="requester" value={filters.requester} onChange={handleChange as any} placeholder="Type to match requester (partial)" />
-                  </div>
-                  <div className="col-span-12 sm:col-span-6 md:col-span-2 lg:col-span-2 flex flex-col">
-                    <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">Job Type</label>
-                    <FilterInput name="jobType" value={filters.jobType} onChange={handleChange as any} placeholder="Type to match job type (partial)" />
-                  </div>
-                  <div className="col-span-12 sm:col-span-6 md:col-span-1 lg:col-span-1 flex flex-col">
-                    <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">Location Type</label>
-                    <FilterSelect name="locationType" value={filters.locationType} onChange={handleChange} placeholder="Type" options={[{ value: 'postCode', label: 'Postcode' }, { value: 'location', label: 'Location' }, { value: 'groupCode', label: 'Group Code' }]} />
-                  </div>
-                  <div className="col-span-12 sm:col-span-6 md:col-span-1 lg:col-span-1 flex flex-col">
-                    <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">Location Value</label>
-                    <FilterInput name="locationValue" value={filters.locationValue} onChange={handleChange} placeholder="Value" />
-                  </div>
-                  <div className="col-span-12 sm:col-span-6 md:col-span-1 lg:col-span-1 flex flex-col">
-                    <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">IMP Condition</label>
-                    <FilterSelect name="scoreCondition" value={filters.scoreCondition} onChange={handleChange} placeholder="Condition" options={[{ value: 'greater', label: 'Greater Than' }, { value: 'less', label: 'Less Than' }]} />
-                  </div>
-                  <div className="col-span-12 sm:col-span-6 md:col-span-1 lg:col-span-1 flex flex-col">
-                    <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">IMP Value</label>
-                    <FilterInput name="scoreValue" value={filters.scoreValue} onChange={handleChange} placeholder="Value" />
-                  </div>
-                  </div>
-                </div>
-              </div>
+            <div className="relative min-h-[120px]">
+              <AnimatePresence mode="wait">
+                {activeTab === 'basic' ? (
+                  <motion.div
+                    key="basic"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-3"
+                  >
+                    <div className={`grid grid-cols-12 gap-2 items-end`}>
+                      <div className="col-span-12 sm:col-span-6 md:col-span-1 flex flex-col">
+                        <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">Division</label>
+                        <DropdownMultiSelect refObj={divisionRef} open={openDropdown === 'division'} setOpen={(o) => setOpenDropdown(o ? 'division' : null)} query={queries.division} setQuery={(v) => setQuery('division', v)} label="Division *" options={filteredDivisions} selected={filters.division} toggle={(v: string) => toggleArrayValue('division', v)} handleSelectAll={() => handleSelectAll('division', filteredDivisions)} />
+                      </div>
+                      <div className="col-span-12 sm:col-span-6 md:col-span-1 flex flex-col">
+                        <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">Domain ID</label>
+                        <DropdownMultiSelect refObj={domainRef} open={openDropdown === 'domainId'} setOpen={(o) => setOpenDropdown(o ? 'domainId' : null)} query={queries.domainId} setQuery={(v) => setQuery('domainId', v)} label="Domain ID *" options={filteredDomains} selected={filters.domainId} toggle={(v: string) => toggleArrayValue('domainId', v)} handleSelectAll={() => handleSelectAll('domainId', filteredDomains)} />
+                      </div>
+                      <div className="col-span-12 sm:col-span-6 md:col-span-1 flex flex-col">
+                        <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">Task Status</label>
+                        <DropdownMultiSelect refObj={statusRef} open={openDropdown === 'taskStatuses'} setOpen={(o) => setOpenDropdown(o ? 'taskStatuses' : null)} query={queries.taskStatuses} setQuery={(v) => setQuery('taskStatuses', v)} label="Task Status" options={filteredStatuses} selected={filters.taskStatuses} toggle={(v: string) => toggleArrayValue('taskStatuses', v)} handleSelectAll={() => handleSelectAll('taskStatuses', filteredStatuses)} />
+                      </div>
+                      <div className="col-span-12 sm:col-span-6 md:col-span-1 flex flex-col">
+                        <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">Commit Type</label>
+                        <DropdownMultiSelect refObj={commitRef} open={openDropdown === 'commitType'} setOpen={(o) => setOpenDropdown(o ? 'commitType' : null)} query={queries.commitType} setQuery={(v) => setQuery('commitType', v)} label="Commit Type" options={filteredCommits} selected={filters.commitType} toggle={(v: string) => toggleArrayValue('commitType', v)} handleSelectAll={() => handleSelectAll('commitType', filteredCommits)} />
+                      </div>
+                      <div className="col-span-12 sm:col-span-6 md:col-span-1 flex flex-col">
+                        <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">Response Code</label>
+                        <DropdownMultiSelect refObj={responseRef} open={openDropdown === 'responseCode'} setOpen={(o) => setOpenDropdown(o ? 'responseCode' : null)} query={queries.responseCode} setQuery={(v) => setQuery('responseCode', v)} label="Response Code" options={filteredResponses} selected={filters.responseCode} toggle={(v: string) => toggleArrayValue('responseCode', v)} handleSelectAll={() => handleSelectAll('responseCode', filteredResponses)} />
+                      </div>
+                      <div className="col-span-12 sm:col-span-6 md:col-span-2 flex flex-col">
+                        <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">PWA Selector</label>
+                        <DropdownMultiSelect refObj={pwaRef} open={openDropdown === 'pwa'} setOpen={(o) => setOpenDropdown(o ? 'pwa' : null)} query={queries.pwa} setQuery={(v) => setQuery('pwa', v)} label="PWA Selector" options={filteredPwa} selected={filters.pwa} toggle={(v: string) => toggleArrayValue('pwa', v)} handleSelectAll={() => handleSelectAll('pwa', filteredPwa)} />
+                      </div>
+                      <div className="col-span-12 sm:col-span-6 md:col-span-2 flex flex-col">
+                        <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">Capabilities</label>
+                        <DropdownMultiSelect refObj={capabilityRef} open={openDropdown === 'capabilities'} setOpen={(o) => setOpenDropdown(o ? 'capabilities' : null)} query={queries.capabilities} setQuery={(v) => setQuery('capabilities', v)} label="Select Capabilities" options={filteredCapabilities} selected={filters.capabilities} toggle={(v: string) => toggleArrayValue('capabilities', v)} handleSelectAll={() => handleSelectAll('capabilities', filteredCapabilities)} />
+                      </div>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="advanced"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-3"
+                  >
+                    <div className={`grid grid-cols-12 lg:grid-cols-16 gap-2 items-end`}>
+                      <div className="col-span-12 sm:col-span-6 md:col-span-2 lg:col-span-2 flex flex-col">
+                        <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">Requester</label>
+                        <FilterInput name="requester" value={filters.requester} onChange={handleChange as any} placeholder="Type to match requester (partial)" />
+                      </div>
+                      <div className="col-span-12 sm:col-span-6 md:col-span-2 lg:col-span-2 flex flex-col">
+                        <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">Job Type</label>
+                        <FilterInput name="jobType" value={filters.jobType} onChange={handleChange as any} placeholder="Type to match job type (partial)" />
+                      </div>
+                      <div className="col-span-12 sm:col-span-6 md:col-span-1 lg:col-span-1 flex flex-col">
+                        <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">Location Type</label>
+                        <FilterSelect name="locationType" value={filters.locationType} onChange={handleChange} placeholder="Type" options={[{ value: 'postCode', label: 'Postcode' }, { value: 'location', label: 'Location' }, { value: 'groupCode', label: 'Group Code' }]} />
+                      </div>
+                      <div className="col-span-12 sm:col-span-6 md:col-span-1 lg:col-span-1 flex flex-col">
+                        <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">Location Value</label>
+                        <FilterInput name="locationValue" value={filters.locationValue} onChange={handleChange} placeholder="Value" />
+                      </div>
+                      <div className="col-span-12 sm:col-span-6 md:col-span-1 lg:col-span-1 flex flex-col">
+                        <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">IMP Condition</label>
+                        <FilterSelect name="scoreCondition" value={filters.scoreCondition} onChange={handleChange} placeholder="Condition" options={[{ value: 'greater', label: 'Greater Than' }, { value: 'less', label: 'Less Than' }]} />
+                      </div>
+                      <div className="col-span-12 sm:col-span-6 md:col-span-1 lg:col-span-1 flex flex-col">
+                        <label className="text-[11px] font-semibold text-gray-800 mb-[2px] leading-tight">IMP Value</label>
+                        <FilterInput name="scoreValue" value={filters.scoreValue} onChange={handleChange} placeholder="Value" />
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
         )}
