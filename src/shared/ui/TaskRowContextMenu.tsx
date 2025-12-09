@@ -166,22 +166,6 @@ export default function TaskRowContextMenu({
           onMouseDown={(e) => e.stopPropagation()}
         >
           {/* ---------------------------
-              PROGRESS TASKS (QUICK NOTE)
-          --------------------------- */}
-          {actionableRows.length > 0 && onProgressTasks && (
-            <li
-              onClick={handleProgressTasks}
-              className="px-4 py-2.5 flex items-center gap-3 cursor-pointer 
-                         hover:bg-gray-50 transition-all"
-            >
-              <ListChecks size={15} className="text-[#0A4A7A]" />
-              <span className="font-medium text-gray-800">
-                {multiCount > 1 ? `Progress Tasks (${multiCount})` : "Progress Task"}
-              </span>
-            </li>
-          )}
-
-          {/* ---------------------------
               COPY VALUE
           --------------------------- */}
           {clickedColumnKey && clickedRow && (
@@ -194,6 +178,22 @@ export default function TaskRowContextMenu({
               <span className="text-gray-800">
                 Copy value:{" "}
                 <span className="font-semibold">{previewValue}</span>
+              </span>
+            </li>
+          )}
+
+          {/* ---------------------------
+              PROGRESS TASKS (QUICK NOTE)
+          --------------------------- */}
+          {actionableRows.length > 0 && onProgressTasks && (
+            <li
+              onClick={handleProgressTasks}
+              className="px-4 py-2.5 flex items-center gap-3 cursor-pointer 
+                         hover:bg-gray-50 transition-all"
+            >
+              <ListChecks size={15} className="text-[#0A4A7A]" />
+              <span className="font-medium text-gray-800">
+                {multiCount > 1 ? `Progress Tasks (${multiCount})` : "Progress Task"}
               </span>
             </li>
           )}

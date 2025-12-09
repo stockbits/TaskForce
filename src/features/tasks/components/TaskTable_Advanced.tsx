@@ -2065,7 +2065,7 @@ export default function TaskTable_Advanced({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 18, scale: 0.96 }}
                   transition={{ duration: 0.18 }}
-                  className="w-full max-w-3xl rounded-3xl bg-white shadow-[0_32px_90px_rgba(8,58,97,0.34)] border border-[#0A4A7A]/12 p-8"
+                  className="w-full max-w-4xl rounded-3xl bg-white shadow-[0_32px_90px_rgba(8,58,97,0.34)] border border-[#0A4A7A]/12 p-8"
                   onClick={(event) => event.stopPropagation()}
                 >
                   <div className="flex items-center justify-between mb-6">
@@ -2090,60 +2090,84 @@ export default function TaskTable_Advanced({
                     </button>
                   </div>
 
-                  <div className="mb-5 grid gap-4 lg:grid-cols-[1.2fr_1fr]">
-                    <div>
-                      <span className="text-xs font-semibold text-[#0A4A7A] uppercase tracking-wide">
-                        Timeline
-                      </span>
-                      <div className="mt-2 flex flex-col gap-3 max-h-56 overflow-y-auto rounded-xl border border-gray-200/80 bg-gray-50/60 p-3">
-                        {singleNoteDialog.notes.length === 0 ? (
-                          <span className="text-gray-400 text-sm">No progress notes captured yet.</span>
-                        ) : (
-                          singleNoteDialog.notes.map((note, index) => (
-                            <div
-                              key={`${note.ts}-${index}`}
-                              className="border border-gray-200 bg-white rounded-lg p-3 shadow-sm"
-                            >
-                              <div className="flex items-center justify-between gap-3 text-xs text-gray-600">
-                                <span className="font-medium text-gray-800">{formatNoteTimestamp(note.ts)}</span>
-                                <span className="px-2 py-0.5 rounded bg-[#0A4A7A]/10 text-[#0A4A7A] whitespace-nowrap">
-                                  {note.status || "Logged"}
-                                </span>
-                              </div>
-                              {note.source && (
-                                <div className="mt-1 text-[11px] text-gray-500 uppercase tracking-wide">
-                                  Source: {note.source}
+                  <div className="mb-6 grid gap-5 lg:grid-cols-[1.6fr_1fr]">
+                    <div className="flex flex-col gap-4">
+                      <div>
+                        <span className="text-xs font-semibold text-[#0A4A7A] uppercase tracking-wide">
+                          Existing Notes
+                        </span>
+                        <div className="mt-2 flex flex-col gap-2 max-h-60 overflow-y-auto rounded-xl border border-gray-200/80 bg-gray-50/60 p-3">
+                          {singleNoteDialog.notes.length === 0 ? (
+                            <span className="text-gray-400 text-sm">No progress notes captured yet.</span>
+                          ) : (
+                            singleNoteDialog.notes.map((note, index) => (
+                              <div
+                                key={`${note.ts}-${index}`}
+                                className="flex flex-col gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm"
+                              >
+                                <div className="flex items-center justify-between gap-3 text-xs text-gray-600">
+                                  <span className="font-medium text-gray-800">{formatNoteTimestamp(note.ts)}</span>
+                                  <span className="px-2 py-0.5 rounded bg-[#0A4A7A]/10 text-[#0A4A7A] whitespace-nowrap">
+                                    {note.status || "Logged"}
+                                  </span>
                                 </div>
-                              )}
-                              <div className="whitespace-pre-wrap mt-2 text-sm text-gray-700">
-                                {note.text}
+                                {note.source && (
+                                  <div className="text-[11px] text-gray-500 uppercase tracking-wide">
+                                    Source: {note.source}
+                                  </div>
+                                )}
+                                <div className="whitespace-pre-wrap text-sm text-gray-700">
+                                  {note.text}
+                                </div>
                               </div>
-                            </div>
-                          ))
-                        )}
+                            ))
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    <div>
+                    <div className="flex flex-col gap-4">
+                      <div>
+                        <span className="text-xs font-semibold text-[#0A4A7A] uppercase tracking-wide">
+                          Selected Task
+                        </span>
+                        <div className="mt-2 flex flex-col gap-2 rounded-xl border border-gray-200/80 bg-gray-50/60 p-3">
+                          <div className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2">
+                            <span className="font-semibold text-[#0A4A7A] text-xs whitespace-nowrap">
+                              {singleNoteSummary.id ?? "Unknown Task"}
+                            </span>
+                            <span className="text-[11px] text-gray-600 whitespace-nowrap">
+                              {singleNoteSummary.status || "—"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
                       <div className="rounded-xl border border-dashed border-[#0A4A7A]/25 bg-[#0A4A7A]/5 p-4">
                         <p className="text-xs text-[#0A4A7A]">
-                          Current status: <span className="font-semibold">{singleNoteSummary.status || "Unknown"}</span>
+                          Current status remains <span className="font-semibold">{singleNoteSummary.status || "Unknown"}</span>.
                         </p>
                         <p className="mt-2 text-[11px] text-gray-500">
-                          Add a quick note to the timeline without changing the task's status.
+                          Add a quick note without progressing the task status.
                         </p>
                       </div>
-                      <label className="mt-4 text-xs font-semibold text-[#0A4A7A] uppercase tracking-wide flex items-center gap-2">
-                        <StickyNote size={14} className="text-[#0A4A7A]" />
-                        Quick Note
-                      </label>
-                      <textarea
-                        value={singleNoteText}
-                        onChange={(event) => setSingleNoteText(event.target.value)}
-                        placeholder="Share new updates, blockers, or field activity…"
-                        className="mt-2 w-full h-32 text-sm p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A4A7A]/30"
-                      />
                     </div>
+                  </div>
+
+                  <div className="mb-5">
+                    <label className="text-xs font-semibold text-[#0A4A7A] uppercase tracking-wide flex items-center gap-2">
+                      <StickyNote size={14} className="text-[#0A4A7A]" />
+                      Quick Note
+                    </label>
+                    <textarea
+                      value={singleNoteText}
+                      onChange={(event) => setSingleNoteText(event.target.value)}
+                      placeholder="Share new updates, blockers, or field activity…"
+                      className="mt-2 w-full h-32 text-sm p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A4A7A]/30"
+                    />
+                    <p className="mt-2 text-[11px] text-gray-500">
+                      This note will be appended to the task timeline immediately.
+                    </p>
                   </div>
 
                   {(singleNoteError || singleNoteSuccess) && (
