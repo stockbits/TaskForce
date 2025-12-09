@@ -57,6 +57,7 @@ const LIST_SCOPE_LABELS: Record<CalloutListScope, string> = {
   all: "All Lists",
 };
 
+
 /* -------------------------------------------------------
    TYPES
 ------------------------------------------------------- */
@@ -689,7 +690,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
             transition={{ duration: 0.18 }}
           >
             {/* HEADER */}
-            <div className="flex items-center justify-between px-7 py-4 border-b border-[#0A4A7A]/12 bg-white/90 backdrop-blur-sm">
+            <div className="relative flex items-center justify-between px-7 py-4 border-b border-[#0A4A7A]/12 bg-white/90 backdrop-blur-sm">
               <div className="flex items-center gap-3">
                 <div className="h-9 w-9 flex items-center justify-center rounded-full bg-[#0A4A7A] text-white shadow-md">
                   <AlertTriangle size={18} />
@@ -712,7 +713,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
               <div className="flex items-center gap-3">
                 <select
                   aria-label="Select callout list"
-                  className="text-xs font-semibold text-[#0A4A7A] border border-[#0A4A7A]/30 rounded-lg px-3 py-1.5 bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-[#0A4A7A]"
+                  className="w-[152px] rounded-lg border border-[#0A4A7A]/30 px-3 py-1.5 text-xs font-semibold text-[#0A4A7A] bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-[#0A4A7A]"
                   value={listScope}
                   onChange={(event) =>
                     setListScope(event.target.value as CalloutListScope)
@@ -733,9 +734,9 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                 </button>
               </div>
 
-              {/* TOAST (Y-aligned with X) */}
+              {/* TOAST (centre top) */}
               {toastMsg && (
-                <div className="absolute right-16 top-1/2 -translate-y-1/2 z-[10100]">
+                <div className="pointer-events-none absolute left-1/2 top-2 z-[10100] -translate-x-1/2">
                   <div className="rounded-lg bg-gray-900 text-white text-xs px-3 py-2 shadow-lg max-w-xs">
                     {toastMsg}
                   </div>
@@ -762,14 +763,25 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                     <span className="text-sm font-semibold text-gray-800">
                       Callout Resource List — {listScopeLabel}
                     </span>
-                    <span className="text-xs text-gray-500">
-                      {panelResourceCount} {panelResourceLabel}
-                    </span>
+                    <AnimatePresence mode="wait">
+                      <motion.span
+                        key={`${listScope}-${panelResourceCount}`}
+                        className="text-xs text-gray-500"
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.16 }}
+                      >
+                        {panelResourceCount} {panelResourceLabel}
+                      </motion.span>
+                    </AnimatePresence>
                   </div>
 
-                  <div
+                  <motion.div
+                    layout
                     className="flex-1 overflow-auto px-2 py-3"
                     style={{ maxHeight: panelContentMaxHeight, minHeight: 260 }}
+                    transition={{ duration: 0.22, ease: "easeInOut" }}
                   >
                     <table className="w-full text-xs text-left text-gray-800 border-separate border-spacing-0">
                       <thead>
@@ -788,14 +800,14 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
 
                       <tbody>
                         {orderedResourceIds.length === 0 ? (
-                          <tr>
+                          <motion.tr layout>
                             <td
                               colSpan={5}
                               className="px-4 py-6 text-center text-gray-500"
                             >
                               No resources for this list.
                             </td>
-                          </tr>
+                          </motion.tr>
                         ) : (
                           orderedResourceIds.map((id) => {
                             if (!panelResourceIds.has(id)) return null;
@@ -829,7 +841,8 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                   draft.availableAgainAt.trim() === ""));
 
                             return (
-                              <tr
+                              <motion.tr
+                                layout
                                 key={id}
                                 className={`border-b border-gray-100 last:border-b-0 transition-colors ${
                                   rowLocked ? "bg-green-50" : ""
@@ -886,7 +899,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                 </td>
 
                                 {/* OUTCOME SELECT */}
-                                <td className="px-4 py-2 align-top min-w-[210px]">
+                                <td className="px-4 py-2 align-top min-w-[220px]">
                                   <select
                                     className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs bg-white
                                     focus:outline-none focus:ring-1 focus:ring-[#0A4A7A] disabled:bg-gray-100 disabled:text-gray-400"
@@ -1006,13 +1019,13 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                     </div>
                                   </div>
                                 </td>
-                              </tr>
+                              </motion.tr>
                             );
                           })
                         )}
                       </tbody>
                     </table>
-                  </div>
+                  </motion.div>
                 </div>
 
                 {/* HISTORY SIDEBAR */}

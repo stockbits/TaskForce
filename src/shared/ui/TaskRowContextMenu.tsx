@@ -1,7 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, Copy, AlertTriangle } from "lucide-react";
+import { Eye, Copy, AlertTriangle, ListChecks, StickyNote } from "lucide-react";
 
 interface TaskRowContextMenuProps {
   visible: boolean;
@@ -21,6 +21,8 @@ interface TaskRowContextMenuProps {
   ) => void;
 
   onOpenCalloutIncident: (task: Record<string, any>) => void;
+  onProgressTasks?: (tasks: Record<string, any>[]) => void;
+  onProgressNotes?: (tasks: Record<string, any>[]) => void;
 
   mouseScreenX: number;
   mouseScreenY: number;
@@ -36,12 +38,20 @@ export default function TaskRowContextMenu({
   onClose,
   onOpenPopout,
   onOpenCalloutIncident,
+  onProgressTasks,
+  onProgressNotes,
   mouseScreenX,
   mouseScreenY,
 }: TaskRowContextMenuProps) {
   if (!visible) return null;
 
-  const multiCount = selectedRows.length;
+  const actionableRows = selectedRows.length
+    ? selectedRows
+    : clickedRow
+    ? [clickedRow]
+    : [];
+
+  const multiCount = actionableRows.length;
 
   const viewLabel =
     multiCount > 1 ? `Open Viewer (${multiCount})` : `Open Viewer`;
@@ -50,16 +60,40 @@ export default function TaskRowContextMenu({
      OPEN TASK VIEWER
   --------------------------- */
   const handleOpen = () => {
-    if (!selectedRows?.length) return;
+    if (!actionableRows.length) return;
 
     try {
-      onOpenPopout(selectedRows, mouseScreenX, mouseScreenY);
+      onOpenPopout(actionableRows, mouseScreenX, mouseScreenY);
     } catch (err) {
       console.error("ContextMenu → onOpenPopout error:", err);
     }
 
     onClose();
   };
+  const handleProgressTasks = () => {
+    if (!actionableRows.length || !onProgressTasks) return;
+
+    try {
+      onProgressTasks(actionableRows);
+    } catch (err) {
+      console.error("ContextMenu → onProgressTasks error:", err);
+    }
+
+    onClose();
+  };
+
+  const handleProgressNotes = () => {
+    if (!actionableRows.length || !onProgressNotes) return;
+
+    try {
+      onProgressNotes(actionableRows);
+    } catch (err) {
+      console.error("ContextMenu → onProgressNotes error:", err);
+    }
+
+    onClose();
+  };
+
 
   /* ---------------------------
      COPY CELL VALUE
@@ -132,16 +166,20 @@ export default function TaskRowContextMenu({
           onMouseDown={(e) => e.stopPropagation()}
         >
           {/* ---------------------------
-              OPEN EXTERNAL VIEWER
+              PROGRESS TASKS (QUICK NOTE)
           --------------------------- */}
-          <li
-            onClick={handleOpen}
-            className="px-4 py-2.5 flex items-center gap-3 cursor-pointer 
-                       hover:bg-gray-50 transition-all"
-          >
-            <Eye size={15} className="text-gray-700" />
-            <span className="font-medium text-gray-800">{viewLabel}</span>
-          </li>
+          {actionableRows.length > 0 && onProgressTasks && (
+            <li
+              onClick={handleProgressTasks}
+              className="px-4 py-2.5 flex items-center gap-3 cursor-pointer 
+                         hover:bg-gray-50 transition-all"
+            >
+              <ListChecks size={15} className="text-[#0A4A7A]" />
+              <span className="font-medium text-gray-800">
+                {multiCount > 1 ? `Progress Tasks (${multiCount})` : "Progress Task"}
+              </span>
+            </li>
+          )}
 
           {/* ---------------------------
               COPY VALUE
@@ -159,6 +197,36 @@ export default function TaskRowContextMenu({
               </span>
             </li>
           )}
+
+          {/* ---------------------------
+              PROGRESS NOTES QUICK ACTION
+          --------------------------- */}
+          {actionableRows.length > 0 && onProgressNotes && (
+            <li
+              onClick={handleProgressNotes}
+              className="px-4 py-2.5 flex items-center gap-3 cursor-pointer 
+                         hover:bg-gray-50 transition-all"
+            >
+              <StickyNote size={15} className="text-[#0A4A7A]" />
+              <span className="font-medium text-gray-800">
+                {multiCount > 1
+                  ? `Progress Notes (${multiCount})`
+                  : "Progress Notes"}
+              </span>
+            </li>
+          )}
+
+          {/* ---------------------------
+              OPEN EXTERNAL VIEWER
+          --------------------------- */}
+          <li
+            onClick={handleOpen}
+            className="px-4 py-2.5 flex items-center gap-3 cursor-pointer 
+                       hover:bg-gray-50 transition-all"
+          >
+            <Eye size={15} className="text-gray-700" />
+            <span className="font-medium text-gray-800">{viewLabel}</span>
+          </li>
 
           {/* ---------------------------
               CALLOUT INCIDENT

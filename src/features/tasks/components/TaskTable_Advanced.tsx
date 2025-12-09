@@ -7,7 +7,103 @@ import React, {
   MouseEvent,
   useCallback,
 } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { ListChecks, Loader2, StickyNote, X } from "lucide-react";
+import type { ProgressNoteEntry } from "@/types";
+
+const TASK_PROGRESS_ORDER = [
+  "Not Assigned (ACT)",
+  "Assigned (ACT)",
+  "Dispatched (AWI)",
+];
+
+const ADDITIONAL_STATUS_OPTIONS = [
+  "Held Pending Details (HPD)",
+  "Held Linked Task (HLD)",
+  "Common (COMN)",
+];
+
+const STATUS_OPTIONS = [...TASK_PROGRESS_ORDER, ...ADDITIONAL_STATUS_OPTIONS];
+
+const normalizeStatus = (status: string | null | undefined) =>
+  status ? status.trim().toLowerCase() : "";
+
+const resolveNextStatus = (current: string | null | undefined) => {
+  const normalized = normalizeStatus(current);
+  if (!normalized) {
+    return {
+      nextStatus: STATUS_OPTIONS[0],
+      progressed: true,
+    };
+  }
+
+  const index = TASK_PROGRESS_ORDER.findIndex(
+    (status) => status.toLowerCase() === normalized
+  );
+
+  if (index === -1) {
+    return {
+      nextStatus: current && STATUS_OPTIONS.includes(current)
+        ? current
+        : STATUS_OPTIONS[0],
+      progressed: !current,
+    };
+  }
+
+  if (index >= TASK_PROGRESS_ORDER.length - 1) {
+    return {
+      nextStatus: TASK_PROGRESS_ORDER[index],
+      progressed: false,
+    };
+  }
+
+  return {
+    nextStatus: TASK_PROGRESS_ORDER[index + 1],
+    progressed: true,
+  };
+};
+
+const normalizeProgressNotesArray = (value: unknown): ProgressNoteEntry[] => {
+  if (Array.isArray(value)) {
+    const mapped = value
+      .map((entry) => {
+        if (!entry) return null;
+        const text = typeof (entry as any).text === "string" ? (entry as any).text.trim() : "";
+        if (!text) return null;
+        const tsSource = (entry as any).ts;
+        const ts = typeof tsSource === "string" && tsSource
+          ? tsSource
+          : new Date().toISOString();
+        return {
+          ts,
+          status: typeof (entry as any).status === "string" ? (entry as any).status : undefined,
+          text,
+          source: typeof (entry as any).source === "string" ? (entry as any).source : undefined,
+        } as ProgressNoteEntry;
+      })
+      .filter((entry): entry is ProgressNoteEntry => Boolean(entry));
+
+    return mapped.sort((a, b) => {
+      const aTime = new Date(a.ts).getTime();
+      const bTime = new Date(b.ts).getTime();
+      return bTime - aTime;
+    });
+  }
+
+  if (typeof value === "string" && value.trim()) {
+    return [
+      {
+        ts: new Date().toISOString(),
+        status: undefined,
+        text: value.trim(),
+        source: "Imported",
+      },
+    ];
+  }
+
+  return [];
+};
 import TaskRowContextMenu from "@/shared/ui/TaskRowContextMenu";
 
 type SortDir = "asc" | "desc" | null;
@@ -102,6 +198,7 @@ export default function TaskTable_Advanced({
   rowIdKey,
   controlledSelectedRowIds,
 }: TaskTableAdvancedProps) {
+  const hasDom = typeof window !== "undefined" && typeof document !== "undefined";
   /* ------------------- SORTING ------------------- */
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>(null);
@@ -145,6 +242,35 @@ export default function TaskTable_Advanced({
     clickedRow: null,
     clickedColumnKey: null,
   });
+
+  const [progressDialog, setProgressDialog] = useState<{
+    open: boolean;
+    tasks: Record<string, any>[];
+  }>({ open: false, tasks: [] });
+  const [targetStatus, setTargetStatus] = useState<string>(STATUS_OPTIONS[0]);
+  const [progressNote, setProgressNote] = useState<string>("");
+  const [progressSaving, setProgressSaving] = useState(false);
+  const [progressError, setProgressError] = useState<string | null>(null);
+  const [progressSuccess, setProgressSuccess] = useState<string | null>(null);
+
+  const [multiNoteDialog, setMultiNoteDialog] = useState<{
+    open: boolean;
+    tasks: Record<string, any>[];
+  }>({ open: false, tasks: [] });
+  const [multiNoteText, setMultiNoteText] = useState<string>("");
+  const [multiNoteSaving, setMultiNoteSaving] = useState(false);
+  const [multiNoteError, setMultiNoteError] = useState<string | null>(null);
+  const [multiNoteSuccess, setMultiNoteSuccess] = useState<string | null>(null);
+
+  const [singleNoteDialog, setSingleNoteDialog] = useState<{
+    open: boolean;
+    task: Record<string, any> | null;
+    notes: ProgressNoteEntry[];
+  }>({ open: false, task: null, notes: [] });
+  const [singleNoteText, setSingleNoteText] = useState<string>("");
+  const [singleNoteSaving, setSingleNoteSaving] = useState(false);
+  const [singleNoteError, setSingleNoteError] = useState<string | null>(null);
+  const [singleNoteSuccess, setSingleNoteSuccess] = useState<string | null>(null);
 
   const [columnMenu, setColumnMenu] = useState<{
     x: number;
@@ -528,6 +654,524 @@ export default function TaskTable_Advanced({
     }));
   }, []);
 
+  const getTaskId = useCallback((task: Record<string, any> | null | undefined) => {
+    if (!task) return null;
+    return (
+      task.taskId ??
+      task.TaskID ??
+      task.TaskId ??
+      task.id ??
+      task.ID ??
+      task.Id ??
+      null
+    );
+  }, []);
+
+  const getTaskStatus = useCallback((task: Record<string, any> | null | undefined) => {
+    if (!task) return "";
+    return (
+      task.taskStatus ??
+      task.TaskStatus ??
+      task.status ??
+      task.Status ??
+      ""
+    );
+  }, []);
+
+  const dedupeTasks = useCallback((tasks: Record<string, any>[]) => {
+    if (!tasks?.length) return [];
+    const deduped: Record<string, any>[] = [];
+    const seen = new Set<string>();
+
+    for (const task of tasks) {
+      if (!task) continue;
+      const id = getTaskId(task);
+      if (id != null) {
+        const key = String(id);
+        if (seen.has(key)) continue;
+        seen.add(key);
+      }
+      deduped.push(task);
+    }
+
+    return deduped.length ? deduped : tasks;
+  }, [getTaskId]);
+
+  const extractProgressNotes = useCallback((task: Record<string, any> | null | undefined) => {
+    if (!task) return [] as ProgressNoteEntry[];
+    const raw =
+      task.progressNotes ??
+      task.ProgressNotes ??
+      task.progress_notes ??
+      task.quickNotes ??
+      [];
+    return normalizeProgressNotesArray(raw);
+  }, []);
+
+  const openProgressDialog = useCallback(
+    (tasks: Record<string, any>[]) => {
+      if (!tasks?.length) return;
+      const normalised = dedupeTasks(tasks);
+      const first = normalised[0];
+      const nextDefault = (() => {
+        if (!first) return STATUS_OPTIONS[0];
+        const firstStatus = getTaskStatus(first);
+        const candidate = resolveNextStatus(firstStatus).nextStatus;
+        if (STATUS_OPTIONS.includes(candidate)) return candidate;
+        if (firstStatus && STATUS_OPTIONS.includes(firstStatus)) return firstStatus;
+        return STATUS_OPTIONS[0];
+      })();
+
+      setTargetStatus(nextDefault);
+      setProgressDialog({ open: true, tasks: normalised });
+      setProgressNote("");
+      setProgressError(null);
+      setProgressSuccess(null);
+    },
+    [dedupeTasks, getTaskStatus]
+  );
+
+  const closeProgressDialog = useCallback(() => {
+    setProgressDialog({ open: false, tasks: [] });
+    setProgressNote("");
+    setProgressError(null);
+    setProgressSuccess(null);
+    setTargetStatus(STATUS_OPTIONS[0]);
+  }, []);
+
+  const openSingleNoteDialog = useCallback((task: Record<string, any>) => {
+    const notes = extractProgressNotes(task);
+    setSingleNoteDialog({ open: true, task, notes });
+    setSingleNoteText("");
+    setSingleNoteError(null);
+    setSingleNoteSuccess(null);
+  }, [extractProgressNotes]);
+
+  const closeSingleNoteDialog = useCallback(() => {
+    setSingleNoteDialog({ open: false, task: null, notes: [] });
+    setSingleNoteText("");
+    setSingleNoteError(null);
+    setSingleNoteSuccess(null);
+  }, []);
+
+  const openMultiNoteDialog = useCallback((tasks: Record<string, any>[]) => {
+    const normalised = dedupeTasks(tasks);
+    if (!normalised.length) return;
+
+    setMultiNoteDialog({ open: true, tasks: normalised });
+    setMultiNoteText("");
+    setMultiNoteError(null);
+    setMultiNoteSuccess(null);
+  }, [dedupeTasks]);
+
+  const closeMultiNoteDialog = useCallback(() => {
+    setMultiNoteDialog({ open: false, tasks: [] });
+    setMultiNoteText("");
+    setMultiNoteError(null);
+    setMultiNoteSuccess(null);
+  }, []);
+
+  const handleProgressTasks = useCallback(
+    (tasks: Record<string, any>[]) => {
+      openProgressDialog(tasks);
+    },
+    [openProgressDialog]
+  );
+
+  const handleProgressNotesAction = useCallback(
+    (tasks: Record<string, any>[]) => {
+      const normalised = dedupeTasks(tasks);
+      if (!normalised.length) return;
+
+      if (normalised.length === 1) {
+        openSingleNoteDialog(normalised[0]);
+        return;
+      }
+
+      openMultiNoteDialog(normalised);
+    },
+    [dedupeTasks, openMultiNoteDialog, openSingleNoteDialog]
+  );
+
+  const handleSaveQuickNote = useCallback(async () => {
+    const note = progressNote.trim();
+    if (!note) {
+      setProgressError("Enter a quick note before saving.");
+      return;
+    }
+    if (progressSaving) return;
+
+    setProgressSaving(true);
+    setProgressError(null);
+    setProgressSuccess(null);
+
+    const failures: string[] = [];
+    const successes: string[] = [];
+    const updates: Array<{
+      taskId: string;
+      previousStatus: string;
+      nextStatus: string;
+      note: string;
+      timestamp: string;
+    }> = [];
+
+    for (const task of progressDialog.tasks) {
+      const rawId = getTaskId(task);
+      if (!rawId) {
+        failures.push("(missing id)");
+        continue;
+      }
+
+      const taskId = String(rawId);
+
+      const currentStatus = getTaskStatus(task);
+      const chosenStatus = targetStatus && targetStatus.trim()
+        ? targetStatus
+        : resolveNextStatus(currentStatus).nextStatus;
+      const statusToPersist = chosenStatus || currentStatus;
+      const timestamp = new Date().toISOString();
+      const noteBody =
+        normalizeStatus(currentStatus) !== normalizeStatus(statusToPersist)
+          ? `${note} (Status → ${statusToPersist})`
+          : note;
+
+      try {
+        const resp = await fetch("http://localhost:5179/progress-notes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            taskId,
+            text: noteBody,
+            taskStatus: statusToPersist,
+          }),
+        });
+
+        if (!resp.ok) {
+          throw new Error(`HTTP ${resp.status}`);
+        }
+
+        successes.push(taskId);
+
+        updates.push({
+          taskId,
+          previousStatus: currentStatus,
+          nextStatus: statusToPersist,
+          note: noteBody,
+          timestamp,
+        });
+
+      } catch (err) {
+        console.warn("Quick note sync failed", err);
+        failures.push(taskId);
+      }
+    }
+
+    setProgressSaving(false);
+
+    if (failures.length) {
+      setProgressError(
+        `Unable to update ${failures.length} task${
+          failures.length === 1 ? "" : "s"
+        }: ${failures.join(",")}`
+      );
+      if (successes.length) {
+        setProgressSuccess(
+          `Saved ${successes.length} task${successes.length === 1 ? "" : "s"}`
+        );
+      }
+      return;
+    }
+
+    if (updates.length && typeof window !== "undefined") {
+      document.dispatchEvent(
+        new CustomEvent("taskforce:tasks-progressed", {
+          detail: { items: updates },
+        })
+      );
+    }
+
+    if (successes.length) {
+      const progressedCount = updates.filter(
+        (entry) =>
+          normalizeStatus(entry.previousStatus) !==
+          normalizeStatus(entry.nextStatus)
+      ).length;
+
+      if (progressedCount > 0) {
+        setProgressSuccess(
+          `Updated ${successes.length} task${
+            successes.length === 1 ? "" : "s"
+          } (${progressedCount} progressed)`
+        );
+      } else {
+        setProgressSuccess(
+          `Saved ${successes.length} task${
+            successes.length === 1 ? "" : "s"
+          }`
+        );
+      }
+    } else {
+      setProgressSuccess("Saved");
+    }
+    setProgressNote("");
+
+    setTimeout(() => {
+      closeProgressDialog();
+    }, 900);
+  }, [
+    closeProgressDialog,
+    getTaskId,
+    getTaskStatus,
+    progressDialog.tasks,
+    progressNote,
+    progressSaving,
+    targetStatus,
+  ]);
+
+  const handleSaveSingleNote = useCallback(async () => {
+    const note = singleNoteText.trim();
+    if (!note) {
+      setSingleNoteError("Enter a note before saving.");
+      return;
+    }
+    if (singleNoteSaving || !singleNoteDialog.task) return;
+
+    setSingleNoteSaving(true);
+    setSingleNoteError(null);
+    setSingleNoteSuccess(null);
+
+    const rawId = getTaskId(singleNoteDialog.task);
+    if (!rawId) {
+      setSingleNoteSaving(false);
+      setSingleNoteError("Task identifier missing.");
+      return;
+    }
+
+    const taskId = String(rawId);
+    const currentStatus = getTaskStatus(singleNoteDialog.task);
+    const statusForNote = currentStatus || "Updated";
+    const timestamp = new Date().toISOString();
+
+    try {
+      const resp = await fetch("http://localhost:5179/progress-notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          taskId,
+          text: note,
+          taskStatus: statusForNote,
+        }),
+      });
+
+      if (!resp.ok) {
+        throw new Error(`HTTP ${resp.status}`);
+      }
+
+      const newEntry: ProgressNoteEntry = {
+        ts: timestamp,
+        status: statusForNote,
+        text: note,
+        source: "Quick Progress",
+      };
+
+      setSingleNoteDialog((prev) => {
+        if (!prev.task) return prev;
+        return {
+          open: prev.open,
+          task: {
+            ...prev.task,
+            progressNotes: [
+              newEntry,
+              ...(Array.isArray(prev.task.progressNotes) ? prev.task.progressNotes : []),
+            ],
+          },
+          notes: [newEntry, ...prev.notes],
+        };
+      });
+
+      if (typeof document !== "undefined") {
+        document.dispatchEvent(
+          new CustomEvent("taskforce:tasks-progressed", {
+            detail: {
+              items: [
+                {
+                  taskId,
+                  previousStatus: currentStatus,
+                  nextStatus: statusForNote,
+                  note,
+                  timestamp,
+                },
+              ],
+            },
+          })
+        );
+      }
+
+      setSingleNoteSuccess("Saved note");
+      setSingleNoteText("");
+    } catch (err) {
+      console.warn("Single progress note sync failed", err);
+      setSingleNoteError("Unable to save note. Try again.");
+    } finally {
+      setSingleNoteSaving(false);
+    }
+  }, [
+    getTaskId,
+    getTaskStatus,
+    singleNoteDialog.task,
+    singleNoteSaving,
+    singleNoteText,
+  ]);
+  
+  const handleSaveMultiNote = useCallback(async () => {
+    const note = multiNoteText.trim();
+    if (!note) {
+      setMultiNoteError("Enter a note before saving.");
+      return;
+    }
+    if (multiNoteSaving) return;
+
+    setMultiNoteSaving(true);
+    setMultiNoteError(null);
+    setMultiNoteSuccess(null);
+
+    const failures: string[] = [];
+    const successes: string[] = [];
+    const updates: Array<{
+      taskId: string;
+      previousStatus: string;
+      nextStatus: string;
+      note: string;
+      timestamp: string;
+    }> = [];
+
+    for (const task of multiNoteDialog.tasks) {
+      const rawId = getTaskId(task);
+      if (!rawId) {
+        failures.push("(missing id)");
+        continue;
+      }
+
+      const taskId = String(rawId);
+      const currentStatus = getTaskStatus(task);
+      const statusForNote = currentStatus || "Updated";
+      const timestamp = new Date().toISOString();
+
+      try {
+        const resp = await fetch("http://localhost:5179/progress-notes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            taskId,
+            text: note,
+            taskStatus: statusForNote,
+          }),
+        });
+
+        if (!resp.ok) {
+          throw new Error(`HTTP ${resp.status}`);
+        }
+
+        successes.push(taskId);
+        updates.push({
+          taskId,
+          previousStatus: currentStatus,
+          nextStatus: statusForNote,
+          note,
+          timestamp,
+        });
+      } catch (err) {
+        console.warn("Bulk progress note sync failed", err);
+        failures.push(taskId);
+      }
+    }
+
+    setMultiNoteSaving(false);
+
+    if (failures.length) {
+      setMultiNoteError(
+        `Unable to update ${failures.length} task${
+          failures.length === 1 ? "" : "s"
+        }: ${failures.join(",")}`
+      );
+      if (successes.length) {
+        setMultiNoteSuccess(
+          `Saved ${successes.length} task${
+            successes.length === 1 ? "" : "s"
+          }`
+        );
+      }
+      return;
+    }
+
+    if (updates.length && typeof document !== "undefined") {
+      document.dispatchEvent(
+        new CustomEvent("taskforce:tasks-progressed", {
+          detail: { items: updates },
+        })
+      );
+    }
+
+    if (successes.length) {
+      setMultiNoteSuccess(
+        `Saved ${successes.length} task${
+          successes.length === 1 ? "" : "s"
+        }`
+      );
+    } else {
+      setMultiNoteSuccess("Saved");
+    }
+
+    setMultiNoteText("");
+
+    setTimeout(() => {
+      closeMultiNoteDialog();
+    }, 900);
+  }, [
+    closeMultiNoteDialog,
+    getTaskId,
+    getTaskStatus,
+    multiNoteDialog.tasks,
+    multiNoteSaving,
+    multiNoteText,
+  ]);
+
+  useEffect(() => {
+    if (!progressDialog.open) return;
+    const listener = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeProgressDialog();
+      }
+    };
+
+    window.addEventListener("keydown", listener);
+    return () => window.removeEventListener("keydown", listener);
+  }, [closeProgressDialog, progressDialog.open]);
+
+  useEffect(() => {
+    if (!multiNoteDialog.open) return;
+    const listener = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeMultiNoteDialog();
+      }
+    };
+
+    window.addEventListener("keydown", listener);
+    return () => window.removeEventListener("keydown", listener);
+  }, [closeMultiNoteDialog, multiNoteDialog.open]);
+
+  useEffect(() => {
+    if (!singleNoteDialog.open) return;
+    const listener = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeSingleNoteDialog();
+      }
+    };
+
+    window.addEventListener("keydown", listener);
+    return () => window.removeEventListener("keydown", listener);
+  }, [closeSingleNoteDialog, singleNoteDialog.open]);
+
   /* ---------------- CLEAR SELECTION ---------------- */
   useEffect(() => {
     if (clearSelectionTrigger === undefined) return;
@@ -641,6 +1285,58 @@ export default function TaskTable_Advanced({
   }, [selectedTasksForContext, onSelectionChange]);
 
   const clickedRowForContext = contextMenu.clickedRow ?? null;
+
+  const progressPreview = useMemo(() => {
+    const previewTarget = targetStatus && targetStatus.trim()
+      ? targetStatus
+      : STATUS_OPTIONS[0];
+
+    return progressDialog.tasks.map((task) => {
+      const id = getTaskId(task);
+      const currentStatus = getTaskStatus(task);
+      return {
+        id,
+        currentStatus,
+        nextStatus: previewTarget,
+        willChange:
+          normalizeStatus(currentStatus) !== normalizeStatus(previewTarget),
+      };
+    });
+  }, [getTaskId, getTaskStatus, progressDialog.tasks, targetStatus]);
+
+  const multiNotePreview = useMemo(() => {
+    return multiNoteDialog.tasks.map((task) => {
+      const id = getTaskId(task);
+      const currentStatus = getTaskStatus(task);
+      return {
+        id,
+        currentStatus,
+      };
+    });
+  }, [getTaskId, getTaskStatus, multiNoteDialog.tasks]);
+
+  const singleNoteSummary = useMemo(() => {
+    if (!singleNoteDialog.task) {
+      return { id: null as string | null, status: "" };
+    }
+    const id = getTaskId(singleNoteDialog.task);
+    const status = getTaskStatus(singleNoteDialog.task);
+    return { id: id ? String(id) : null, status };
+  }, [getTaskId, getTaskStatus, singleNoteDialog.task]);
+
+  const formatNoteTimestamp = useCallback((value: string) => {
+    try {
+      return new Date(value).toLocaleString("en-GB", {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return value;
+    }
+  }, []);
 
   // Keep selected row visible during keyboard navigation
   useEffect(() => {
@@ -1061,7 +1757,431 @@ export default function TaskTable_Advanced({
         onOpenCalloutIncident={(task: any) => {
           if (onOpenCalloutIncident) onOpenCalloutIncident(task);
         }}
+        onProgressTasks={handleProgressTasks}
+        onProgressNotes={handleProgressNotesAction}
       />
+
+      {hasDom &&
+        createPortal(
+          <AnimatePresence>
+            {progressDialog.open && (
+              <motion.div
+                key="progress-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                className="fixed inset-0 z-[120000] flex items-center justify-center bg-black/45 backdrop-blur-sm px-4"
+                onClick={closeProgressDialog}
+              >
+                <motion.div
+                  key="progress-dialog"
+                  initial={{ opacity: 0, y: 18, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 18, scale: 0.96 }}
+                  transition={{ duration: 0.18 }}
+                  className="w-full max-w-4xl rounded-3xl bg-white shadow-[0_32px_90px_rgba(8,58,97,0.34)] border border-[#0A4A7A]/12 p-8"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="h-12 w-12 flex items-center justify-center rounded-full bg-[#0A4A7A] text-white shadow-sm">
+                        <ListChecks size={22} />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900">Progress Tasks</h3>
+                        <p className="text-sm text-gray-500">
+                          {progressDialog.tasks.length} task{progressDialog.tasks.length === 1 ? "" : "s"} selected
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={closeProgressDialog}
+                      className="p-2 rounded-full text-gray-500 hover:bg-gray-100"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+
+                  <div className="mb-6 grid gap-5 lg:grid-cols-[1.6fr_1fr]">
+                    <div>
+                      <span className="text-xs font-semibold text-[#0A4A7A] uppercase tracking-wide">
+                        Selected Tasks
+                      </span>
+                      <div className="mt-2 flex flex-col gap-2 max-h-44 overflow-y-auto rounded-xl border border-gray-200/80 bg-gray-50/60 p-3">
+                        {progressPreview.length === 0 ? (
+                          <span className="text-gray-400 text-xs">No task identifiers</span>
+                        ) : (
+                          progressPreview.map(({ id, currentStatus, nextStatus }, index) => (
+                            <div
+                              key={id ?? `task-${index}`}
+                              className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2"
+                            >
+                              <span className="font-semibold text-[#0A4A7A] text-xs whitespace-nowrap">
+                                {id ?? "Unknown Task"}
+                              </span>
+                              <span className="text-[11px] text-gray-600 whitespace-nowrap">
+                                {currentStatus ? currentStatus : "—"}
+                                <span className="mx-1 text-gray-400">→</span>
+                                {nextStatus}
+                              </span>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-semibold text-[#0A4A7A] uppercase tracking-wide">
+                        Target Status
+                      </label>
+                      <select
+                        value={targetStatus}
+                        onChange={(event) => setTargetStatus(event.target.value)}
+                        className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0A4A7A]/35"
+                      >
+                        <optgroup label="Core progression">
+                          {TASK_PROGRESS_ORDER.map((status) => (
+                            <option key={status} value={status}>
+                              {status}
+                            </option>
+                          ))}
+                        </optgroup>
+                        <optgroup label="Additional statuses">
+                          {ADDITIONAL_STATUS_OPTIONS.map((status) => (
+                            <option key={status} value={status}>
+                              {status}
+                            </option>
+                          ))}
+                        </optgroup>
+                      </select>
+
+                      <div className="mt-3 rounded-xl border border-dashed border-[#0A4A7A]/25 bg-[#0A4A7A]/5 p-3">
+                        <p className="text-xs text-[#0A4A7A]">
+                          Selected tasks will be stamped with the note below and updated to <span className="font-semibold">{targetStatus}</span> unless they already match.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mb-5">
+                    <label className="text-xs font-semibold text-[#0A4A7A] uppercase tracking-wide flex items-center gap-2">
+                      <StickyNote size={14} className="text-[#0A4A7A]" />
+                      Quick Note
+                    </label>
+                    <textarea
+                      value={progressNote}
+                      onChange={(event) => setProgressNote(event.target.value)}
+                      placeholder="Share the next steps, blockers, or field updates for these tasks…"
+                      className="mt-2 w-full h-32 text-sm p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A4A7A]/30"
+                    />
+                  </div>
+
+                  {(progressError || progressSuccess) && (
+                    <div className="mb-4 space-y-1 text-sm">
+                      {progressError && (
+                        <p className="text-red-600">{progressError}</p>
+                      )}
+                      {progressSuccess && (
+                        <p className="text-green-600">{progressSuccess}</p>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-end gap-3">
+                    <button
+                      type="button"
+                      className="px-4 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+                      onClick={closeProgressDialog}
+                      disabled={progressSaving}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className={`px-4 py-2 text-sm rounded-md text-white flex items-center gap-2 ${
+                        progressNote.trim() && !progressSaving
+                          ? "bg-[#0A4A7A] hover:bg-[#083B61]"
+                          : "bg-gray-300 cursor-not-allowed"
+                      }`}
+                      onClick={handleSaveQuickNote}
+                      disabled={!progressNote.trim() || progressSaving}
+                    >
+                      {progressSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+                      Save Note
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
+
+      {hasDom &&
+        createPortal(
+          <AnimatePresence>
+            {multiNoteDialog.open && (
+              <motion.div
+                key="progress-note-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                className="fixed inset-0 z-[120000] flex items-center justify-center bg-black/45 backdrop-blur-sm px-4"
+                onClick={closeMultiNoteDialog}
+              >
+                <motion.div
+                  key="progress-note-dialog"
+                  initial={{ opacity: 0, y: 18, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 18, scale: 0.96 }}
+                  transition={{ duration: 0.18 }}
+                  className="w-full max-w-3xl rounded-3xl bg-white shadow-[0_32px_90px_rgba(8,58,97,0.34)] border border-[#0A4A7A]/12 p-8"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="h-12 w-12 flex items-center justify-center rounded-full bg-[#0A4A7A] text-white shadow-sm">
+                        <StickyNote size={22} />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900">Bulk Progress Notes</h3>
+                        <p className="text-sm text-gray-500">
+                          {multiNoteDialog.tasks.length} task{multiNoteDialog.tasks.length === 1 ? "" : "s"} selected
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={closeMultiNoteDialog}
+                      className="p-2 rounded-full text-gray-500 hover:bg-gray-100"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+
+                  <div className="mb-5">
+                    <span className="text-xs font-semibold text-[#0A4A7A] uppercase tracking-wide">
+                      Selected Tasks
+                    </span>
+                    <div className="mt-2 flex flex-col gap-2 max-h-44 overflow-y-auto rounded-xl border border-gray-200/80 bg-gray-50/60 p-3">
+                      {multiNotePreview.length === 0 ? (
+                        <span className="text-gray-400 text-xs">No task identifiers</span>
+                      ) : (
+                        multiNotePreview.map(({ id, currentStatus }, index) => (
+                          <div
+                            key={id ?? `multi-note-${index}`}
+                            className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2"
+                          >
+                            <span className="font-semibold text-[#0A4A7A] text-xs whitespace-nowrap">
+                              {id ?? "Unknown Task"}
+                            </span>
+                            <span className="text-[11px] text-gray-600 whitespace-nowrap">
+                              {currentStatus || "—"}
+                            </span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mb-5">
+                    <label className="text-xs font-semibold text-[#0A4A7A] uppercase tracking-wide flex items-center gap-2">
+                      <StickyNote size={14} className="text-[#0A4A7A]" />
+                      Quick Note
+                    </label>
+                    <textarea
+                      value={multiNoteText}
+                      onChange={(event) => setMultiNoteText(event.target.value)}
+                      placeholder="Share context that applies to all selected tasks…"
+                      className="mt-2 w-full h-32 text-sm p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A4A7A]/30"
+                    />
+                    <p className="mt-2 text-[11px] text-gray-500">
+                      This note will be added to each selected task without changing its current status.
+                    </p>
+                  </div>
+
+                  {(multiNoteError || multiNoteSuccess) && (
+                    <div className="mb-4 space-y-1 text-sm">
+                      {multiNoteError && (
+                        <p className="text-red-600">{multiNoteError}</p>
+                      )}
+                      {multiNoteSuccess && (
+                        <p className="text-green-600">{multiNoteSuccess}</p>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-end gap-3">
+                    <button
+                      type="button"
+                      className="px-4 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+                      onClick={closeMultiNoteDialog}
+                      disabled={multiNoteSaving}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className={`px-4 py-2 text-sm rounded-md text-white flex items-center gap-2 ${
+                        multiNoteText.trim() && !multiNoteSaving
+                          ? "bg-[#0A4A7A] hover:bg-[#083B61]"
+                          : "bg-gray-300 cursor-not-allowed"
+                      }`}
+                      onClick={handleSaveMultiNote}
+                      disabled={!multiNoteText.trim() || multiNoteSaving}
+                    >
+                      {multiNoteSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+                      Save Note
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
+
+      {hasDom &&
+        createPortal(
+          <AnimatePresence>
+            {singleNoteDialog.open && (
+              <motion.div
+                key="progress-note-single-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                className="fixed inset-0 z-[120000] flex items-center justify-center bg-black/45 backdrop-blur-sm px-4"
+                onClick={closeSingleNoteDialog}
+              >
+                <motion.div
+                  key="progress-note-single-dialog"
+                  initial={{ opacity: 0, y: 18, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 18, scale: 0.96 }}
+                  transition={{ duration: 0.18 }}
+                  className="w-full max-w-3xl rounded-3xl bg-white shadow-[0_32px_90px_rgba(8,58,97,0.34)] border border-[#0A4A7A]/12 p-8"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="h-12 w-12 flex items-center justify-center rounded-full bg-[#0A4A7A] text-white shadow-sm">
+                        <StickyNote size={22} />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900">Progress Notes</h3>
+                        <p className="text-sm text-gray-500">
+                          {singleNoteSummary.id ? `Task ${singleNoteSummary.id}` : "Selected task"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={closeSingleNoteDialog}
+                      className="p-2 rounded-full text-gray-500 hover:bg-gray-100"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+
+                  <div className="mb-5 grid gap-4 lg:grid-cols-[1.2fr_1fr]">
+                    <div>
+                      <span className="text-xs font-semibold text-[#0A4A7A] uppercase tracking-wide">
+                        Timeline
+                      </span>
+                      <div className="mt-2 flex flex-col gap-3 max-h-56 overflow-y-auto rounded-xl border border-gray-200/80 bg-gray-50/60 p-3">
+                        {singleNoteDialog.notes.length === 0 ? (
+                          <span className="text-gray-400 text-sm">No progress notes captured yet.</span>
+                        ) : (
+                          singleNoteDialog.notes.map((note, index) => (
+                            <div
+                              key={`${note.ts}-${index}`}
+                              className="border border-gray-200 bg-white rounded-lg p-3 shadow-sm"
+                            >
+                              <div className="flex items-center justify-between gap-3 text-xs text-gray-600">
+                                <span className="font-medium text-gray-800">{formatNoteTimestamp(note.ts)}</span>
+                                <span className="px-2 py-0.5 rounded bg-[#0A4A7A]/10 text-[#0A4A7A] whitespace-nowrap">
+                                  {note.status || "Logged"}
+                                </span>
+                              </div>
+                              {note.source && (
+                                <div className="mt-1 text-[11px] text-gray-500 uppercase tracking-wide">
+                                  Source: {note.source}
+                                </div>
+                              )}
+                              <div className="whitespace-pre-wrap mt-2 text-sm text-gray-700">
+                                {note.text}
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="rounded-xl border border-dashed border-[#0A4A7A]/25 bg-[#0A4A7A]/5 p-4">
+                        <p className="text-xs text-[#0A4A7A]">
+                          Current status: <span className="font-semibold">{singleNoteSummary.status || "Unknown"}</span>
+                        </p>
+                        <p className="mt-2 text-[11px] text-gray-500">
+                          Add a quick note to the timeline without changing the task's status.
+                        </p>
+                      </div>
+                      <label className="mt-4 text-xs font-semibold text-[#0A4A7A] uppercase tracking-wide flex items-center gap-2">
+                        <StickyNote size={14} className="text-[#0A4A7A]" />
+                        Quick Note
+                      </label>
+                      <textarea
+                        value={singleNoteText}
+                        onChange={(event) => setSingleNoteText(event.target.value)}
+                        placeholder="Share new updates, blockers, or field activity…"
+                        className="mt-2 w-full h-32 text-sm p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A4A7A]/30"
+                      />
+                    </div>
+                  </div>
+
+                  {(singleNoteError || singleNoteSuccess) && (
+                    <div className="mb-4 space-y-1 text-sm">
+                      {singleNoteError && <p className="text-red-600">{singleNoteError}</p>}
+                      {singleNoteSuccess && <p className="text-green-600">{singleNoteSuccess}</p>}
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-end gap-3">
+                    <button
+                      type="button"
+                      className="px-4 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+                      onClick={closeSingleNoteDialog}
+                      disabled={singleNoteSaving}
+                    >
+                      Close
+                    </button>
+                    <button
+                      type="button"
+                      className={`px-4 py-2 text-sm rounded-md text-white flex items-center gap-2 ${
+                        singleNoteText.trim() && !singleNoteSaving
+                          ? "bg-[#0A4A7A] hover:bg-[#083B61]"
+                          : "bg-gray-300 cursor-not-allowed"
+                      }`}
+                      onClick={handleSaveSingleNote}
+                      disabled={!singleNoteText.trim() || singleNoteSaving}
+                    >
+                      {singleNoteSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+                      Save Note
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
     </div>
   );
 }

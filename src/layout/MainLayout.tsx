@@ -524,6 +524,107 @@ export default function MainLayout() {
     };
   }, [allRows, openExternalWindow, setExternalExpandedSections]);
 
+  useEffect(() => {
+    const handleTasksProgressed = (event: Event) => {
+      const custom = event as CustomEvent<{
+        items?: Array<{
+          taskId: string;
+          previousStatus?: string;
+          nextStatus?: string;
+          note: string;
+          timestamp: string;
+        }>;
+      }>;
+
+      const updates = custom.detail?.items ?? [];
+      if (!updates.length) return;
+
+      const updateMap = new Map<string, (typeof updates)[number]>();
+      for (const update of updates) {
+        if (!update?.taskId) continue;
+        updateMap.set(String(update.taskId), update);
+      }
+
+      if (!updateMap.size) return;
+
+      const appendQuickNote = (
+        task: Record<string, any>,
+        update: (typeof updates)[number]
+      ): ProgressNoteEntry[] => {
+        const entry: ProgressNoteEntry = {
+          ts: update.timestamp,
+          status: update.nextStatus || update.previousStatus || "Updated",
+          text: update.note,
+          source: "Quick Progress",
+        };
+
+        const existing = task.progressNotes;
+
+        if (Array.isArray(existing)) {
+          return [...existing, entry];
+        }
+
+        if (typeof existing === "string" && existing.trim()) {
+          return [
+            {
+              ts:
+                (task.taskCreated as string | undefined) ??
+                update.timestamp,
+              status: task.taskStatus ?? task.status ?? "",
+              text: existing.trim(),
+              source: "Imported",
+            },
+            entry,
+          ];
+        }
+
+        return [entry];
+      };
+
+      const applyUpdates = (list: Record<string, any>[]) =>
+        list.map((task) => {
+          const rawId =
+            task?.taskId ??
+            task?.TaskID ??
+            task?.TaskId ??
+            task?.id ??
+            task?.ID ??
+            task?.Id ??
+            null;
+
+          if (rawId == null) return task;
+
+          const match = updateMap.get(String(rawId));
+          if (!match) return task;
+
+          const nextStatus = match.nextStatus || task.taskStatus || task.status;
+
+          return {
+            ...task,
+            taskStatus: nextStatus,
+            lastProgression: nextStatus || task.lastProgression,
+            updatedAt: match.timestamp,
+            progressNotes: appendQuickNote(task, match),
+          };
+        });
+
+      setAllRows((prev) => applyUpdates(prev));
+      setRows((prev) => applyUpdates(prev));
+    };
+
+    document.addEventListener(
+      "taskforce:tasks-progressed",
+      handleTasksProgressed as EventListener
+    );
+
+    return () => {
+      document.removeEventListener(
+        "taskforce:tasks-progressed",
+        handleTasksProgressed as EventListener
+      );
+    };
+  }, [setAllRows, setRows]);
+
   // CALLOUT LANDING (NEW)
   const [calloutLandingOpen, setCalloutLandingOpen] = useState(false);
   const [selectedCalloutResources, setSelectedCalloutResources] = useState<
@@ -1136,6 +1237,11 @@ export default function MainLayout() {
             setSelectedCalloutGroup(group);
             setCalloutLandingOpen(false);
             setIncidentOpen(true);
+          }}
+          onDismiss={() => {
+            setCalloutLandingOpen(false);
+            setSelectedCalloutResources([]);
+            setSelectedCalloutGroup(null);
           }}
         />
       )}
