@@ -8,6 +8,23 @@
 
 import { useState, useRef, useCallback } from "react";
 import { TaskDetails } from "@/types";
+import type { ResourceRecord } from "@/features/callout/components/CalloutIncidentPanel";
+import type { CalloutHistoryEntry } from "./useCalloutHistory";
+
+type PopupMode = "tasks" | "resource";
+
+type PopupData =
+  | {
+      mode: "tasks";
+      tasks: TaskDetails[];
+      expanded: string[];
+    }
+  | {
+      mode: "resource";
+      resource: ResourceRecord;
+      history: CalloutHistoryEntry[];
+      expanded: string[];
+    };
 
 export function useExternalWindow() {
   const externalWindowRef = useRef<Window | null>(null);
@@ -31,13 +48,21 @@ export function useExternalWindow() {
   const MAX_WIDTH = 1900;
   const MAX_HEIGHT = 1000;
   const SINGLE_HEIGHT = 900;
+  const RESOURCE_WIDTH = 760;
+  const RESOURCE_HEIGHT = 820;
 
-  const getPopupSize = (taskCount: number) => {
+  const getPopupSize = (mode: PopupMode, count: number) => {
     const screenW = window.screen.availWidth;
     const screenH = window.screen.availHeight;
 
+    if (mode === "resource") {
+      const width = Math.min(RESOURCE_WIDTH, screenW - 40, MAX_WIDTH);
+      const height = Math.min(RESOURCE_HEIGHT, screenH - 80, MAX_HEIGHT);
+      return { width, height };
+    }
+
     // ----- SINGLE TASK -----
-    if (taskCount === 1) {
+    if (count === 1) {
       const width = Math.min(
         SINGLE_CARD_WIDTH + OUTER_PADDING_X * 2,
         screenW - 40,
@@ -48,7 +73,7 @@ export function useExternalWindow() {
     }
 
     // ----- 2–3 TASKS (ALL VISIBLE, NO SCROLL) -----
-    const visibleCards = Math.min(taskCount, 3);
+    const visibleCards = Math.min(count, 3);
     const contentWidth =
       CARD_WIDTH * visibleCards +
       CARD_GAP * (visibleCards - 1) +
@@ -86,7 +111,7 @@ export function useExternalWindow() {
         externalWindowRef.current.close();
       }
 
-      const { width, height } = getPopupSize(tasks.length);
+      const { width, height } = getPopupSize("tasks", tasks.length);
 
       const screenW = window.screen.availWidth;
       const screenH = window.screen.availHeight;
@@ -113,20 +138,20 @@ export function useExternalWindow() {
 
       externalWindowRef.current = newWin;
 
-      // Pass popup data
-      newWin.__POPUP_DATA__ = {
+      const payload: PopupData = {
+        mode: "tasks",
         tasks,
         expanded: externalExpandedSections,
       };
+
+      // Pass popup data
+      newWin.__POPUP_DATA__ = payload;
 
       newWin.__POPUP_CLOSE__ = () => closeExternalWindow();
 
       newWin.onload = () => {
         try {
-          newWin.__POPUP_DATA__ = {
-            tasks,
-            expanded: externalExpandedSections,
-          };
+          newWin.__POPUP_DATA__ = payload;
         } catch {}
       };
 
@@ -137,11 +162,67 @@ export function useExternalWindow() {
     [externalExpandedSections, closeExternalWindow]
   );
 
+  const openResourceWindow = useCallback(
+    (resource: ResourceRecord, history: CalloutHistoryEntry[]) => {
+      if (!resource) return;
+
+      if (externalWindowRef.current && !externalWindowRef.current.closed) {
+        externalWindowRef.current.close();
+      }
+
+      const { width, height } = getPopupSize("resource", 1);
+      const screenW = window.screen.availWidth;
+      const screenH = window.screen.availHeight;
+
+      const left = Math.max(0, (screenW - width) / 2);
+      const top = Math.max(0, (screenH - height) / 2);
+
+      const features = `
+        width=${width},
+        height=${height},
+        left=${left},
+        top=${top},
+        toolbar=0,
+        menubar=0,
+        location=0,
+        status=0,
+        scrollbars=1,
+        resizable=1
+      `;
+
+      const newWin = window.open("/popup.html", "_blank", features);
+      if (!newWin) return;
+
+      externalWindowRef.current = newWin;
+
+      const payload: PopupData = {
+        mode: "resource",
+        resource,
+        history,
+        expanded: [],
+      };
+
+      newWin.__POPUP_DATA__ = payload;
+      newWin.__POPUP_CLOSE__ = () => closeExternalWindow();
+      newWin.onload = () => {
+        try {
+          newWin.__POPUP_DATA__ = payload;
+        } catch {}
+      };
+
+      setExternalTasks(null);
+      setExternalExpandedSections([]);
+      setExternalContainer(null);
+    },
+    [closeExternalWindow]
+  );
+
   return {
     externalContainer,
     externalTasks,
     externalExpandedSections,
     openExternalWindow,
+    openResourceWindow,
     closeExternalWindow,
     setExternalExpandedSections,
   };

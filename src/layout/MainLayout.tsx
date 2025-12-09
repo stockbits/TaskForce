@@ -459,6 +459,7 @@ export default function MainLayout() {
     externalTasks,
     externalExpandedSections,
     openExternalWindow,
+    openResourceWindow,
     closeExternalWindow,
     setExternalExpandedSections,
   } = useExternalWindow();
@@ -760,6 +761,21 @@ export default function MainLayout() {
       openExternalWindow(tasks as TaskDetails[], mouseX, mouseY);
     },
     [openExternalWindow]
+  );
+
+  const handleOpenResourcePopout = useCallback(
+    (resource: ResourceRecord, resourceHistory: CalloutHistoryEntry[]) => {
+      if (!resource) return;
+
+      const mergedHistory = resourceHistory.length
+        ? resourceHistory
+        : calloutHistory.filter(
+            (entry) => entry.resourceId === resource.resourceId
+          );
+
+      openResourceWindow(resource, mergedHistory);
+    },
+    [calloutHistory, openResourceWindow]
   );
 
   // Outcome → task status mapping
@@ -1125,6 +1141,7 @@ export default function MainLayout() {
         resources={resources}
         primaryResourceIds={selectedCalloutResources.map((r) => r.resourceId)}
         selectedGroup={selectedCalloutGroup}
+        onOpenResourcePopout={handleOpenResourcePopout}
         onClose={() => {
           setIncidentOpen(false);
           setSelectedCalloutResources([]);

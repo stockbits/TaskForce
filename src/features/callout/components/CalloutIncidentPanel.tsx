@@ -80,6 +80,17 @@ export interface ResourceRecord {
   notes?: string;
   history?: ResourceHistoryEntry[];
   updatedAt?: string | null;
+  division?: string | null;
+  primarySkill?: string | null;
+  secondarySkill?: string | null;
+  pwa?: string | null;
+  dispatchMode?: string | null;
+  evDriver?: string | null;
+  signOn?: string | null;
+  signOff?: string | null;
+  homePostCode?: string | null;
+  homeLat?: number | null;
+  homeLng?: number | null;
 }
 
 interface CalloutIncidentPanelProps {
@@ -93,6 +104,10 @@ interface CalloutIncidentPanelProps {
   historyLoading?: boolean;
   historyError?: string | null;
   onRefreshHistory?: () => Promise<void> | void;
+  onOpenResourcePopout?: (
+    resource: ResourceRecord,
+    history: CalloutHistoryEntry[]
+  ) => void;
 
   onSaveRow?: (payload: {
     taskId: string | number | null;
@@ -142,6 +157,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
   historyError = null,
   onRefreshHistory,
   onSaveRow,
+  onOpenResourcePopout,
 }) => {
   const taskId =
     task?.TaskID ?? task?.taskId ?? task?.id ?? task?.TaskId ?? null;
@@ -213,6 +229,21 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
     return map;
   }, [resources]);
 
+  const handleOpenResourceDetails = useCallback(
+    (resourceId: string) => {
+      if (!onOpenResourcePopout) return;
+      const resource = resourceMap.get(resourceId);
+      if (!resource) return;
+
+      const resourceHistory = history.filter(
+        (entry) => entry.resourceId === resourceId
+      );
+
+      onOpenResourcePopout(resource, resourceHistory);
+    },
+    [history, onOpenResourcePopout, resourceMap]
+  );
+
   const primaryResourceSet = useMemo(() => {
     return new Set(primaryResourceIds.filter(Boolean));
   }, [primaryResourceIds]);
@@ -262,6 +293,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
   const panelResourceLabel = panelResourceCount === 1 ? "resource" : "resources";
   const hasBackupResources = backupResources.length > 0;
   const listScopeLabel = LIST_SCOPE_LABELS[listScope];
+  const panelContentMaxHeight = "calc(96vh - 320px)";
 
   /* ------------------------------------------------------------------
      INITIALISE ON OPEN
@@ -722,7 +754,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
 
               <div className="flex flex-col xl:flex-row gap-4 min-h-0">
                 {/* RESOURCE TABLE */}
-                <div className="flex-1 min-w-0 border border-gray-200 rounded-xl overflow-hidden">
+                <div className="flex-1 min-w-0 min-h-0 border border-gray-200 rounded-xl overflow-hidden flex flex-col">
                   <div className="bg-[#0A4A7A]/5 px-4 py-2 border-b border-[#0A4A7A]/15 flex items-center justify-between">
                     <span className="text-sm font-semibold text-gray-800">
                       Callout Resource List — {listScopeLabel}
@@ -732,7 +764,10 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                     </span>
                   </div>
 
-                  <div className="max-h-[360px] min-h-[260px] md:min-h-[320px] overflow-auto">
+                  <div
+                    className="flex-1 overflow-auto px-2 py-3"
+                    style={{ maxHeight: panelContentMaxHeight, minHeight: 260 }}
+                  >
                     <table className="w-full text-xs text-left text-gray-800 border-separate border-spacing-0">
                       <thead>
                         <tr className="bg-white text-gray-900 border-b border-[#0A4A7A]/10">
@@ -830,17 +865,31 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                       {resource.resourceId}
                                     </div>
 
-                                    <button
-                                      type="button"
-                                      onClick={(event) => {
-                                        event.stopPropagation();
-                                        handleCopyId(resource.resourceId);
-                                      }}
-                                      className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-md border border-[#0A4A7A]/30 text-[#0A4A7A] hover:bg-[#0A4A7A]/10"
-                                    >
-                                      <Copy size={11} />
-                                      ID
-                                    </button>
+                                    <div className="flex items-center gap-1">
+                                      <button
+                                        type="button"
+                                        onClick={(event) => {
+                                          event.stopPropagation();
+                                          handleCopyId(resource.resourceId);
+                                        }}
+                                        className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-md border border-[#0A4A7A]/30 text-[#0A4A7A] hover:bg-[#0A4A7A]/10"
+                                      >
+                                        <Copy size={11} />
+                                        ID
+                                      </button>
+
+                                      <button
+                                        type="button"
+                                        onClick={(event) => {
+                                          event.stopPropagation();
+                                          handleOpenResourceDetails(resource.resourceId);
+                                        }}
+                                        className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-md border border-[#0A4A7A]/30 text-[#0A4A7A] hover:bg-[#0A4A7A]/10"
+                                      >
+                                        <ExternalLink size={11} />
+                                        View
+                                      </button>
+                                    </div>
                                   </div>
                                 </td>
 
@@ -943,7 +992,10 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                 </div>
 
                 {/* HISTORY SIDEBAR */}
-                <div className="xl:w-[340px] w-full border border-[#0A4A7A]/20 rounded-xl bg-white shadow-sm flex flex-col min-h-[320px] max-h-[68vh]">
+                <div
+                  className="xl:w-[340px] w-full border border-[#0A4A7A]/20 rounded-xl bg-white shadow-sm flex flex-col"
+                  style={{ height: panelContentMaxHeight, minHeight: 260 }}
+                >
                   <div className="px-4 py-3 border-b border-[#0A4A7A]/15 flex items-center justify-between">
                     <div className="flex items-center gap-2 text-[#0A4A7A]">
                       <Clock size={16} />
@@ -997,7 +1049,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                     </p>
                   </div>
 
-                  <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-0 max-h-[240px]">
+                  <div className="flex-1 overflow-y-auto px-4 pt-4 pb-5 space-y-3 min-h-0">
                     {historyError && (
                       <div className="text-xs text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                         {historyError}

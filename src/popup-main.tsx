@@ -5,14 +5,25 @@
 import React, { useState, useCallback, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import TaskPopoutPanel from "@/features/tasks/components/TaskPopoutPanel";
+import ResourcePopoutPanel from "@/features/callout/components/ResourcePopoutPanel";
 import { TaskDetails } from "@/types";
+import type { ResourceRecord } from "@/features/callout/components/CalloutIncidentPanel";
+import type { CalloutHistoryEntry } from "@/lib/hooks/useCalloutHistory";
 
 declare global {
   interface Window {
-    __POPUP_DATA__?: {
-      tasks: TaskDetails[];
-      expanded: string[];
-    };
+    __POPUP_DATA__?:
+      | {
+          mode: "tasks";
+          tasks: TaskDetails[];
+          expanded: string[];
+        }
+      | {
+          mode: "resource";
+          resource: ResourceRecord;
+          history: CalloutHistoryEntry[];
+          expanded: string[];
+        };
     __POPUP_CLOSE__?: () => void;
   }
 }
@@ -28,7 +39,10 @@ function PopupApp() {
     );
   }
 
-  const { tasks } = data;
+  const isTaskMode = data.mode === "tasks";
+  const tasks = isTaskMode ? data.tasks : [];
+  const resource = !isTaskMode ? data.resource : null;
+  const resourceHistory = !isTaskMode ? data.history ?? [] : [];
 
   // ------------------------------
   // Local expand/collapse state
@@ -110,15 +124,37 @@ function PopupApp() {
         transformOrigin: "top left",
       }}
     >
-      <TaskPopoutPanel
-        open={true}
-        tasks={tasks}
-        expanded={expanded}
-        onToggleSection={onToggleSection}
-        onExpandAll={onExpandAll}
-        onCollapseAll={onCollapseAll}
-        onClose={() => window.__POPUP_CLOSE__?.()}
-      />
+      {isTaskMode && (
+        <TaskPopoutPanel
+          open={true}
+          tasks={tasks}
+          expanded={expanded}
+          onToggleSection={onToggleSection}
+          onExpandAll={onExpandAll}
+          onCollapseAll={onCollapseAll}
+          onClose={() => window.__POPUP_CLOSE__?.()}
+        />
+      )}
+
+      {!isTaskMode && resource && (
+        <ResourcePopoutPanel
+          open={true}
+          resource={resource}
+          history={resourceHistory}
+          expanded={expanded}
+          onToggleSection={onToggleSection}
+          onExpandAll={() => {
+            setExpanded([
+              "Resource Summary",
+              "Availability",
+              "Callout History",
+              "Capabilities",
+            ]);
+          }}
+          onCollapseAll={onCollapseAll}
+          onClose={() => window.__POPUP_CLOSE__?.()}
+        />
+      )}
     </div>
   );
 }
