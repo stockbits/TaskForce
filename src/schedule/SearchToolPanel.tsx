@@ -338,18 +338,18 @@ const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
       transition={{ duration: 0.2 }}
       elevation={0}
       sx={{
-        width: "100%",
-        maxWidth: "min(95vw, 800px)",
+        width: '100%',
+        maxWidth: { xs: '95vw', sm: theme.spacing(100) }, // 800px at sm+
         borderRadius: 3,
         px: 3,
         py: 3,
-        display: "flex",
-        flexDirection: "column",
+        display: 'flex',
+        flexDirection: 'column',
         gap: 3,
         border: `1px solid ${alpha(theme.palette.primary.main, 0.18)}`,
-        boxShadow: "0 18px 46px rgba(8,58,97,0.18)",
-        backgroundImage: "none",
-        overflowX: "hidden",
+        boxShadow: '0 18px 46px rgba(8,58,97,0.18)',
+        backgroundImage: 'none',
+        overflowX: 'hidden',
       }}
     >
       {renderMode()}

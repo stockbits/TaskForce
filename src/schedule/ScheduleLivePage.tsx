@@ -492,7 +492,7 @@ export default function ScheduleLivePage() {
         label="Division"
         value={division}
         onChange={(e) => handleDivisionChange(e.target.value)}
-        sx={{ minWidth: 140 }}
+        sx={{ minWidth: { xs: theme.spacing(14), sm: theme.spacing(18) } }}
       >
         <MenuItem value="">All</MenuItem>
         {divisionOptions.map((d) => (
@@ -508,7 +508,7 @@ export default function ScheduleLivePage() {
         label="Domain"
         value={domain}
         onChange={(e) => handleDomainChange(e.target.value)}
-        sx={{ minWidth: 140 }}
+        sx={{ minWidth: { xs: theme.spacing(14), sm: theme.spacing(18) } }}
       >
         <MenuItem value="">All</MenuItem>
         {domainOptions.map((d) => (
@@ -524,7 +524,7 @@ export default function ScheduleLivePage() {
         onChange={(e) => setSearchAnywhere(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && runGlobalSearch()}
         placeholder="Search anywhere…"
-        sx={{ minWidth: 240 }}
+        sx={{ minWidth: { xs: theme.spacing(20), sm: theme.spacing(30) } }}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start" sx={{ color: alpha(theme.palette.text.primary, 0.6) }}>

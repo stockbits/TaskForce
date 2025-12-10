@@ -330,7 +330,7 @@ const ProgressNotesList = ({ notes }: { notes: ProgressNoteEntry[] }) => {
   }
 
   return (
-    <Stack spacing={1.5} sx={{ maxHeight: 240, overflowY: "auto", pr: 0.5 }}>
+    <Stack spacing={1.5} sx={{ maxHeight: theme.spacing(30), overflowY: 'auto', pr: 0.5 }}>
       {notes.map((note, index) => {
         const visuals = getStatusVisuals(note.status || "", theme);
 
@@ -522,7 +522,7 @@ export default function TaskDetailsModal({
               label="Pin ResourceId"
               size="small"
               variant="outlined"
-              sx={{ minWidth: 180 }}
+              sx={{ minWidth: { xs: theme.spacing(18), sm: theme.spacing(22.5) } }}
               value={task.employeeId || ''}
               onChange={e => {
                 // Update employeeId and resourceName if found in ResourceMock

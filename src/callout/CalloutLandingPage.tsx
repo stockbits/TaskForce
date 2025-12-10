@@ -112,8 +112,8 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
         elevation={18}
         onClick={(event) => event.stopPropagation()}
         sx={{
-          width: "100%",
-          maxWidth: 960,
+          width: '100%',
+          maxWidth: { xs: '100vw', md: theme.spacing(120) }, // 960px at md+
           mx: 2,
           borderRadius: 4,
           px: { xs: 3, md: 6 },
@@ -128,8 +128,8 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
           <Stack direction="row" spacing={3} alignItems="center">
             <Box
               sx={{
-                height: 44,
-                width: 44,
+                height: theme.spacing(5.5), // 44px
+                width: theme.spacing(5.5),
                 borderRadius: "50%",
                 display: "flex",
                 alignItems: "center",
@@ -221,7 +221,7 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
                       spacing={1.5}
                       alignItems="center"
                       justifyContent="space-between"
-                      sx={{ width: "100%" }}
+                      sx={{ width: '100%' }}
                     >
                       <Typography variant="body2" color="text.primary">
                         {option}

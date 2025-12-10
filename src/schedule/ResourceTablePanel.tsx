@@ -42,7 +42,7 @@ export default function ResourceTablePanel({
   const theme = useTheme();
 
   const panelStyles = {
-    height: "100%",
+    height: '100%',
     display: "flex",
     flexDirection: "column" as const,
     borderRadius: 3,
@@ -103,7 +103,7 @@ export default function ResourceTablePanel({
         <TaskTableAdvanced
           rows={data}
           headerNames={headerNames}
-          sx={{ height: "100%" }}
+          sx={{ height: '100%' }}
           tableHeight="100%"
           rowIdKey="resourceId"
           controlledSelectedRowIds={selectedRowIds}

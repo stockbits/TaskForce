@@ -47,7 +47,7 @@ export default function TaskTablePanel({
   const theme = useTheme();
 
   const panelStyles = {
-    height: "100%",
+    height: '100%',
     display: "flex",
     flexDirection: "column" as const,
     borderRadius: 3,
@@ -109,7 +109,7 @@ export default function TaskTablePanel({
         <TaskTableAdvanced
           rows={data}
           headerNames={headerNames}
-          sx={{ height: "100%" }}
+          sx={{ height: '100%' }}
           tableHeight="100%"
           rowIdKey="taskId"
           controlledSelectedRowIds={selectedRowIds}

@@ -405,7 +405,7 @@ export default function TaskSearchCard({
                   size="small"
                   InputLabelProps={{ shrink: true }}
                   sx={{
-                    width: 150,
+                    width: theme.spacing(18.75), // 150px
                     '& .MuiInputBase-input': { color: "inherit" },
                     '& .MuiOutlinedInput-notchedOutline': {
                       borderColor: "rgba(255,255,255,0.35)",
@@ -425,7 +425,7 @@ export default function TaskSearchCard({
                   onChange={handleFieldChange}
                   size="small"
                   sx={{
-                    width: 110,
+                    width: theme.spacing(13.75), // 110px
                     '& .MuiInputBase-input': { color: "inherit" },
                     '& .MuiOutlinedInput-notchedOutline': {
                       borderColor: "rgba(255,255,255,0.35)",
@@ -703,7 +703,7 @@ export default function TaskSearchCard({
                 </Stack>
 
                 <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-                  <FormControl size="small" sx={{ minWidth: 160 }}>
+                  <FormControl size="small" sx={{ minWidth: { xs: theme.spacing(16), sm: theme.spacing(20) } }}>
                     <InputLabel id="imp-condition-label">IMP Condition</InputLabel>
                     <Select
                       labelId="imp-condition-label"

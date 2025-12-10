@@ -160,7 +160,7 @@ export default function TaskRowContextMenu({
             position: "fixed",
             top: mouseScreenY,
             left: mouseScreenX,
-            minWidth: "min(90vw,340px)",
+            minWidth: `min(90vw, ${24 * 14.1667}px)`, // 340px, use theme.spacing(42.5) if available
             zIndex: 99999,
           }}
           className="rounded-xl border border-gray-200 bg-white shadow-xl text-sm text-gray-800 py-1 overflow-hidden"

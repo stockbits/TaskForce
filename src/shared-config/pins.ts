@@ -29,7 +29,9 @@ export const STATUS_COLORS: Record<string, string> = {
 /* ============================================================
    SHARED SIZING (matches Leaflet icon 36x50)
 ============================================================ */
+// Use theme.spacing(4.5) for 36px in MUI components
 const PIN_WIDTH = 36;
+// Use theme.spacing(6.25) for 50px in MUI components
 const PIN_HEIGHT = 50;
 
 /* ============================================================

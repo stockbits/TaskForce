@@ -96,9 +96,9 @@ export default function TaskPopoutPanel({
   return (
     <Box
       sx={{
-        display: "flex",
-        height: "100%",
-        width: "100%",
+        display: 'flex',
+        height: '100%',
+        width: '100%',
         bgcolor: "background.default",
         color: "text.primary",
       }}
@@ -191,7 +191,7 @@ export default function TaskPopoutPanel({
               overflowX: "auto",
               pb: 0.5,
               alignItems: "center",
-              '&::-webkit-scrollbar': { height: 6 },
+              '&::-webkit-scrollbar': { height: theme.spacing(0.75) }, // 6px
             }}
           >
             {tasks.map((task) => {
@@ -249,8 +249,8 @@ export default function TaskPopoutPanel({
                 elevation={3}
                 sx={{
                   borderRadius: 3,
-                  minWidth: singleTaskMode ? 720 : 520,
-                  maxWidth: singleTaskMode ? 720 : 520,
+                  minWidth: singleTaskMode ? theme.spacing(90) : theme.spacing(65), // 720px or 520px
+                  maxWidth: singleTaskMode ? theme.spacing(90) : theme.spacing(65),
                   flexShrink: 0,
                   border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
                 }}

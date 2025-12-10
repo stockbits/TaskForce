@@ -302,12 +302,12 @@ const Header: React.FC<HeaderProps> = memo(
               edge="start"
               onClick={onToggleSidebar}
               sx={{
-                width: 44,
-                height: 44,
+                width: theme.spacing(5.5), // 44px
+                height: theme.spacing(5.5),
                 borderRadius: 2,
                 bgcolor: alpha(theme.palette.common.white, 0.12),
                 color: theme.palette.common.white,
-                "&:hover": {
+                '&:hover': {
                   bgcolor: alpha(theme.palette.common.white, 0.2),
                 },
               }}
@@ -328,7 +328,7 @@ const Header: React.FC<HeaderProps> = memo(
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
-            <Box sx={{ position: "relative", minWidth: 190 }}>
+            <Box sx={{ position: "relative", minWidth: { xs: theme.spacing(20), sm: theme.spacing(24) } }}>
               <TextField
                 value={searchQuery}
                 size="small"
@@ -413,11 +413,11 @@ const Header: React.FC<HeaderProps> = memo(
 
             <Avatar
               sx={{
-                width: 42,
-                height: 42,
+                width: theme.spacing(5.25), // 42px
+                height: theme.spacing(5.25),
                 bgcolor: alpha(theme.palette.common.black, 0.85),
                 border: `1px solid ${alpha(theme.palette.common.white, 0.25)}`,
-                boxShadow: "0px 0px 0px 2px rgba(255,255,255,0.08)",
+                boxShadow: '0px 0px 0px 2px rgba(255,255,255,0.08)',
               }}
             >
               <Users size={18} color="#FFFFFF" />
@@ -450,9 +450,9 @@ const MainContent: React.FC<MainContentProps> = memo(
     return (
       <Box
         sx={{
-          width: "100%",
-          maxWidth: 1200,
-          mx: "auto",
+          width: '100%',
+          maxWidth: { xs: '100vw', md: theme.spacing(150) }, // 1200px at md+
+          mx: 'auto',
           px: { xs: 3, sm: 6, md: 8 },
           py: { xs: 6, md: 8 },
         }}

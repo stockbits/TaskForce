@@ -177,8 +177,8 @@ export default function ResourcePopoutPanel({
     <Box
       sx={{
         display: "flex",
-        height: "100%",
-        width: "100%",
+        height: '100%',
+        width: '100%',
         bgcolor: alpha(theme.palette.primary.main, 0.06),
         color: "text.primary",
         overflow: "hidden",
@@ -301,7 +301,7 @@ export default function ResourcePopoutPanel({
             <Paper
               elevation={10}
               sx={{
-                width: "min(100%, 720px)",
+                width: { xs: '100%', sm: 'min(100%, 720px)' },
                 borderRadius: 3,
                 border: `1px solid ${alpha(theme.palette.primary.main, 0.14)}`,
                 boxShadow: "0 24px 48px rgba(8,58,97,0.18)",
@@ -481,7 +481,7 @@ export default function ResourcePopoutPanel({
                   expanded={expanded.includes("Callout History")}
                   onToggle={() => onToggleSection("Callout History")}
                 >
-                  <Stack spacing={2.5} sx={{ maxHeight: 320, overflowY: "auto", pr: 1 }}>
+                  <Stack spacing={2.5} sx={{ maxHeight: theme.spacing(40), overflowY: 'auto', pr: 1 }}>
                     {sortedHistory.length === 0 && (
                       <Paper
                         variant="outlined"
@@ -585,7 +585,7 @@ export default function ResourcePopoutPanel({
                       component={Paper}
                       variant="outlined"
                       sx={{
-                        maxHeight: 280,
+                        maxHeight: theme.spacing(35), // 280px
                         borderRadius: 2,
                         borderColor: alpha(theme.palette.primary.main, 0.12),
                       }}

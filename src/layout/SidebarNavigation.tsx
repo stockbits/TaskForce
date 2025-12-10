@@ -142,7 +142,8 @@ export const Sidebar = memo(function Sidebar({
       ModalProps={{ keepMounted: true }}
       PaperProps={{
         sx: {
-          width: 300,
+          width: { xs: '80vw', sm: theme.spacing(40) }, // 320px at sm+, 80vw on xs
+          maxWidth: theme.spacing(48), // 384px max
           backgroundColor: "background.paper",
           borderRight: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
           boxShadow: "8px 0 24px rgba(0,0,0,0.16)",
@@ -251,7 +252,7 @@ const SectionBlock = memo(function SectionBlock({
                     }),
               }}
             >
-              <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>
+              <ListItemIcon sx={{ minWidth: theme.spacing(4.5), color: "inherit" }}>
                 {React.createElement(Icon, { size: 18, strokeWidth: 2.2 })}
               </ListItemIcon>
               <ListItemText

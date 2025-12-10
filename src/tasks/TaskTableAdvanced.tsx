@@ -1,3 +1,21 @@
+// Core progression statuses for tasks (edit as needed for your workflow)
+const TASK_PROGRESS_ORDER = [
+  "Assigned",
+  "Dispatched",
+  "Accepted",
+  "In Progress",
+  "Incomplete",
+  "Complete",
+];
+
+// Additional statuses that may be used in your app
+const ADDITIONAL_STATUS_OPTIONS = [
+  "On Hold",
+  "Cancelled",
+  "Deferred",
+  "Rejected",
+  "Other",
+];
 // src/A-Navigation_Container/TaskTable_Advanced.tsx
 import React, {
   useMemo,
@@ -38,24 +56,12 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import type { SelectChangeEvent } from "@mui/material/Select";
-import { alpha, useTheme } from "@mui/material/styles";
+import { useTheme, alpha } from "@mui/material/styles";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { ListChecks, MoreVertical, Search, StickyNote, X } from "lucide-react";
-import type { ProgressNoteEntry } from "@/types";
+import { MoreVertical, Search, ListChecks, StickyNote, X } from "lucide-react";
 import TaskRowContextMenu from "@/shared-ui/TaskRowContextMenu";
-
-const TASK_PROGRESS_ORDER = [
-  "Not Assigned (ACT)",
-  "Assigned (ACT)",
-  "Dispatched (AWI)",
-];
-
-const ADDITIONAL_STATUS_OPTIONS = [
-  "Held Pending Details (HPD)",
-  "Held Linked Task (HLD)",
-  "Common (COMN)",
-];
+import type { ProgressNoteEntry } from "@/types";
+import type { SelectChangeEvent } from "@mui/material/Select";
 
 const STATUS_OPTIONS = [...TASK_PROGRESS_ORDER, ...ADDITIONAL_STATUS_OPTIONS];
 
@@ -168,7 +174,7 @@ export interface TaskTableAdvancedProps {
 }
 
 const AUTO_WIDTH_PADDING = 70;
-const COLUMN_MENU_WIDTH = 220;
+const COLUMN_MENU_WIDTH = 28 * 8; // theme.spacing(28) = 224px
 
 function detectType(v: any): "number" | "date" | "string" {
   if (v == null) return "string";
@@ -1689,7 +1695,7 @@ export default function TaskTable_Advanced({
                 label="Density"
                 value={density}
                 onChange={(event: SelectChangeEvent) => setDensity(event.target.value as any)}
-                sx={{ minWidth: 140 }}
+                sx={{ minWidth: { xs: theme.spacing(14), sm: theme.spacing(18) } }}
               >
                 <MenuItem value="compact">Compact</MenuItem>
                 <MenuItem value="comfortable">Comfortable</MenuItem>
@@ -1705,7 +1711,7 @@ export default function TaskTable_Advanced({
                   setRowsPerPage(Number(event.target.value));
                   setPage(1);
                 }}
-                sx={{ minWidth: 120 }}
+                sx={{ minWidth: { xs: theme.spacing(12), sm: theme.spacing(15) } }}
               >
                 {[25, 50, 100, 500].map((n) => (
                   <MenuItem key={n} value={String(n)}>

@@ -232,7 +232,7 @@ export default function MapPanel({
         <MapContainer
           center={[51.713, -3.449]}
           zoom={12}
-          style={{ width: "100%", height: "100%" }}
+          style={{ width: '100%', height: '100%' }} // Already dynamic, but ensure MUI system props are used for parent containers
         >
           {/* Auto-fix for panel resizing */}
           <AutoResize />

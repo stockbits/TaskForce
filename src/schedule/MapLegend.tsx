@@ -31,7 +31,7 @@ export default function MapLegend({ visible, onClose }: MapLegendProps) {
       <Paper
         elevation={14}
         sx={{
-          width: 288,
+          width: theme.spacing(36), // 288px
           borderRadius: 3,
           px: 3,
           py: 2.5,

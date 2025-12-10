@@ -722,17 +722,17 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
             variant="outlined"
             elevation={18}
             sx={{
-              position: "relative",
-              width: { xs: "calc(100% - 32px)", md: "calc(100% - 40px)" },
-              maxWidth: 1520,
-              maxHeight: "96vh",
+              position: 'relative',
+              width: { xs: 'calc(100% - 32px)', md: 'calc(100% - 40px)' },
+              maxWidth: { xs: '98vw', md: theme.spacing(190) }, // 1520px at md+
+              maxHeight: '96vh',
               borderRadius: 4,
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
               borderColor: alpha(theme.palette.primary.main, 0.16),
-              boxShadow: "0 24px 64px rgba(8,58,97,0.25)",
-              backgroundImage: "none",
+              boxShadow: '0 24px 64px rgba(8,58,97,0.25)',
+              backgroundImage: 'none',
             }}
             initial={{ opacity: 0, scale: 0.9, y: 24 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -757,8 +757,8 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
               <Stack direction="row" spacing={2} alignItems="center">
                 <Box
                   sx={{
-                    height: 36,
-                    width: 36,
+                    height: theme.spacing(4.5), // 36px
+                    width: theme.spacing(4.5),
                     borderRadius: "50%",
                     bgcolor: theme.palette.primary.main,
                     color: theme.palette.primary.contrastText,
@@ -782,7 +782,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
               </Stack>
 
               <Stack direction="row" spacing={2} alignItems="center">
-                <FormControl size="small" sx={{ minWidth: 160 }}>
+                <FormControl size="small" sx={{ minWidth: { xs: theme.spacing(16), sm: theme.spacing(20) } }}>
                   <Select
                     value={listScope}
                     onChange={(event: SelectChangeEvent) =>
