@@ -100,14 +100,7 @@ button,
 /* ===================================================================
    6️⃣ Glassmorphism Defaults
 =================================================================== */
-.glass {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 1rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-}
+
 
 /* ===================================================================
    7️⃣ Text Selection Highlight

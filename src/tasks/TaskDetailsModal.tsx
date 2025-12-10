@@ -19,6 +19,7 @@ import { alpha } from "@mui/material/styles";
 import type { Theme } from "@mui/material/styles";
 import { User, Truck, ThumbsUp, Play, Wrench, Check } from "lucide-react";
 import type { TaskDetails, ProgressNoteEntry } from "@/types";
+import ResourceMock from "@/data/ResourceMock.json";
 import ExpandableSectionCard from "@/shared-ui/ExpandableSectionCard";
 
 export interface TaskDetailsModalProps {
@@ -515,6 +516,62 @@ export default function TaskDetailsModal({
       name: "Progress Notes",
       content: (
         <Stack spacing={2.5}>
+          {/* Resource Pinning Box */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+            <TextField
+              label="Pin ResourceId"
+              size="small"
+              variant="outlined"
+              sx={{ minWidth: 180 }}
+              value={task.employeeId || ''}
+              onChange={e => {
+                // Update employeeId and resourceName if found in ResourceMock
+                const val = e.target.value.trim();
+                const found = (ResourceMock as any[]).find((r) => r.resourceId === val);
+                if (found) {
+                  task.employeeId = found.resourceId;
+                  task.resourceName = found.name;
+                } else {
+                  task.employeeId = val;
+                  task.resourceName = '';
+                }
+              }}
+              placeholder="Enter resourceId to pin"
+            />
+            <Button
+              variant="contained"
+              size="small"
+              sx={{ borderRadius: 2, textTransform: 'none' }}
+              onClick={() => {
+                // Optionally show a toast or feedback
+              }}
+            >
+              Pin
+            </Button>
+            {task.resourceName && (
+              <Typography variant="body2" color="text.secondary">
+                Pinned: {task.resourceName}
+              </Typography>
+            )}
+          </Box>
+          {/* One-click Progress Task button */}
+          <Button
+            variant="contained"
+            color="success"
+            sx={{ borderRadius: 2, textTransform: 'none', mb: 1 }}
+            onClick={() => {
+              // Mark as In Progress and add a quick note
+              task.taskStatus = "In Progress";
+              handleAddNote({
+                ts: new Date().toISOString(),
+                status: "In Progress",
+                text: "Task progressed by user.",
+                source: "Quick Progress"
+              });
+            }}
+          >
+            Progress Task
+          </Button>
           <ProgressNotesEditor
             taskId={task.taskId}
             taskStatus={task.taskStatus}
@@ -538,7 +595,7 @@ export default function TaskDetailsModal({
   ];
 
   return (
-    <Box sx={{ p: 1 }}>
+    <Box sx={{ p: 1, backdropFilter: 'none !important' }}>
       <Stack spacing={2.5}>
         {sections.map((section) => {
           const open = expanded.includes(section.name);

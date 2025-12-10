@@ -1373,7 +1373,7 @@ export default function TaskTable_Advanced({
     border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
     boxShadow: "0 20px 50px rgba(8, 58, 97, 0.12)",
     backgroundColor: alpha(theme.palette.background.paper, 0.94),
-    backdropFilter: "blur(6px)",
+    // backdropFilter: "blur(6px)",
     outline: "none",
   }), [theme]);
 
@@ -1464,7 +1464,7 @@ export default function TaskTable_Advanced({
             position: "sticky",
             top: 0,
             zIndex: 1,
-            backdropFilter: "blur(6px)",
+            // backdropFilter: "blur(6px)",
           },
           '& th, & td': {
             color: theme.palette.text.primary,
@@ -1913,7 +1913,6 @@ export default function TaskTable_Advanced({
                   alignItems: "center",
                   justifyContent: "center",
                   backgroundColor: "rgba(0,0,0,0.45)",
-                  backdropFilter: "blur(6px)",
                   padding: "16px",
                 }}
               >
@@ -2136,7 +2135,6 @@ export default function TaskTable_Advanced({
                   alignItems: "center",
                   justifyContent: "center",
                   backgroundColor: "rgba(0,0,0,0.45)",
-                  backdropFilter: "blur(6px)",
                   padding: "16px",
                 }}
               >
@@ -2332,7 +2330,6 @@ export default function TaskTable_Advanced({
                   alignItems: "center",
                   justifyContent: "center",
                   backgroundColor: "rgba(0,0,0,0.45)",
-                  backdropFilter: "blur(6px)",
                   padding: "16px",
                 }}
               >

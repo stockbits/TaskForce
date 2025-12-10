@@ -163,7 +163,7 @@ export default function TaskRowContextMenu({
             minWidth: "min(90vw,340px)",
             zIndex: 99999,
           }}
-          className="rounded-xl border border-gray-200 bg-white shadow-xl backdrop-blur-md text-sm text-gray-800 py-1 overflow-hidden"
+          className="rounded-xl border border-gray-200 bg-white shadow-xl text-sm text-gray-800 py-1 overflow-hidden"
           onMouseDown={(e) => e.stopPropagation()}
         >
           {/* ---------------------------
