@@ -1,6 +1,6 @@
 import React from "react";
-import MainLayout from "./layout/MainLayout";
+import AppLayout from "./layout/AppLayout";
 
 export default function App() {
-  return <MainLayout />;
+  return <AppLayout />;
 }

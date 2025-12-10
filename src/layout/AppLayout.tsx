@@ -25,6 +25,8 @@ import { CalloutLandingPage } from "@/callout/CalloutLandingPage";
 import mockTasks from "@/data/mockTasks.json";
 import ResourceMock from "@/data/ResourceMock.json";
 import ScheduleLivePage from "@/schedule/ScheduleLivePage";
+import { User } from "lucide-react";
+
 import {
   CalloutIncidentPanel,
   CalloutOutcome,
@@ -48,7 +50,7 @@ import {
 import { Toaster, toast } from "react-hot-toast";
 import { createPortal } from "react-dom";
 
-import { SidebarNavigation as Sidebar } from "./SidebarNavigation";
+import { SidebarNavigation } from "./SidebarNavigation";
 import TaskSearchCard from "@/tasks/TaskSearchCardClean";
 import TaskTableAdvanced from "@/tasks/TaskTableAdvanced";
 import TaskPopoutPanel from "@/tasks/TaskPopoutPanel";
@@ -1133,8 +1135,6 @@ export default function MainLayout() {
 
       let calloutHistoryEntry: Omit<CalloutHistoryEntry, "id"> | null = null;
 
-      let calloutHistoryEntry: Omit<CalloutHistoryEntry, "id"> | null = null;
-
       // Update resources + resource history
       setResources((prev) =>
         prev.map((r) => {
@@ -1301,11 +1301,11 @@ export default function MainLayout() {
       <Toaster position="top-center" />
 
       {/* SIDEBAR */}
-      <Sidebar
+        <SidebarNavigation
         currentMenu={currentMenu}
         onMenuClick={handleMenuClick}
         activeSubPage={activeSubPage}
-      />
+        />
 
       {/* MAIN */}
       <Box
@@ -1369,7 +1369,7 @@ export default function MainLayout() {
                   <Typography variant="body2">Loading task data...</Typography>
                 </Paper>
               ) : rows.length > 0 ? (
-                <TaskTable_Advanced
+                <TaskTableAdvanced
                   rows={rows}
                   headerNames={headerNames}
                   onOpenPopout={handleOpenPopout}
