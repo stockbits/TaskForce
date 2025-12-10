@@ -1409,38 +1409,7 @@ export default function TaskTable_Advanced({
       tabIndex={0}
       sx={containerSx}
       onKeyDown={(e) => {
-        if (contextMenu.visible) return; // let menu own keys
-        const maxIndex = pagedRows.length - 1;
-        if (maxIndex < 0) return;
-
-        const current = lastSelectedIndex ?? (selectedRows.size ? Math.min(...Array.from(selectedRows)) : 0);
-
-        if (e.key === 'ArrowDown') {
-          e.preventDefault();
-          const nextIndex = Math.min(maxIndex, (current ?? -1) + 1);
-          userSelectingRef.current = true;
-          setSelectedRows(new Set([nextIndex]));
-          setLastSelectedIndex(nextIndex);
-          if (onSelectionChange) onSelectionChange([pagedRows[nextIndex]]);
-        } else if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          const nextIndex = Math.max(0, (current ?? 0) - 1);
-          userSelectingRef.current = true;
-          setSelectedRows(new Set([nextIndex]));
-          setLastSelectedIndex(nextIndex);
-          if (onSelectionChange) onSelectionChange([pagedRows[nextIndex]]);
-        } else if (e.key === 'Enter') {
-          e.preventDefault();
-          const index = current ?? 0;
-          if (onOpenPopout && pagedRows[index]) {
-            onOpenPopout([pagedRows[index]], mouseScreenX, mouseScreenY);
-          } else if (onOpenTask && pagedRows[index]) {
-            onOpenTask(pagedRows[index]);
-          }
-        } else if (e.key === 'Escape') {
-          closeMenu();
-          closeColumnMenu();
-        }
+        // ...existing code...
       }}
       onClick={(e) => e.stopPropagation()}
     >
@@ -1448,7 +1417,8 @@ export default function TaskTable_Advanced({
         ref={scrollWrapperRef}
         sx={{
           flexGrow: 1,
-          overflow: "auto",
+          overflowX: "auto",
+          overflowY: "auto",
           filter: tableFilter,
           transition: "filter 150ms ease",
           height: fixedTableHeight,
@@ -1457,7 +1427,8 @@ export default function TaskTable_Advanced({
         }}
       >
         <Table stickyHeader size="small" padding="checkbox" ref={tableRef} sx={{
-          tableLayout: "fixed",
+          tableLayout: "auto",
+          minWidth: 600,
           width: "100%",
           borderSpacing: 0,
           opacity: tableOpacity,
@@ -1470,12 +1441,16 @@ export default function TaskTable_Advanced({
             position: "sticky",
             top: 0,
             zIndex: 1,
-            // backdropFilter: "blur(6px)",
           },
           '& th, & td': {
             color: theme.palette.text.primary,
             borderRight: `1px solid ${alpha(theme.palette.primary.main, 0.08)}`,
             '&:last-of-type': { borderRight: "none" },
+            minWidth: 120,
+            maxWidth: 320,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
           },
         }}>
           <TableHead>
@@ -1486,9 +1461,6 @@ export default function TaskTable_Advanced({
                   sortDirection={sortKey === key ? sortDir ?? false : false}
                   sx={{
                     position: "relative",
-                    width: columnWidths[key] ?? 180,
-                    maxWidth: columnWidths[key] ?? 180,
-                    minWidth: columnWidths[key] ?? 180,
                     px: 1,
                     py: 1,
                     '&.drag-over': {
@@ -1655,9 +1627,6 @@ export default function TaskTable_Advanced({
                         key={key}
                         data-colkey={key}
                         sx={{
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
                           px: 2,
                           py: density === "comfortable" ? 1.5 : 1,
                         }}
