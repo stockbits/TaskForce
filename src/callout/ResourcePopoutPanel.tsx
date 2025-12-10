@@ -31,7 +31,7 @@ import {
 import type { ResourceRecord } from "./CalloutIncidentPanel";
 import { CalloutOutcomeConfig } from "./CalloutIncidentPanel";
 import type { CalloutHistoryEntry } from "@/hooks/useCalloutHistory";
-import ExpandableSectionCard from "@/shared/ui/ExpandableSectionCard";
+import ExpandableSectionCard from "@/shared-ui/ExpandableSectionCard";
 
 interface ResourcePopoutPanelProps {
   open: boolean;

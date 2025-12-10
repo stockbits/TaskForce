@@ -19,7 +19,7 @@ import { alpha } from "@mui/material/styles";
 import type { Theme } from "@mui/material/styles";
 import { User, Truck, ThumbsUp, Play, Wrench, Check } from "lucide-react";
 import type { TaskDetails, ProgressNoteEntry } from "@/types";
-import ExpandableSectionCard from "@shared/ui/ExpandableSectionCard";
+import ExpandableSectionCard from "@/shared-ui/ExpandableSectionCard";
 
 export interface TaskDetailsModalProps {
   task: TaskDetails;
