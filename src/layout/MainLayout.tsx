@@ -420,7 +420,7 @@ const Header: React.FC<HeaderProps> = memo(
                 boxShadow: "0px 0px 0px 2px rgba(255,255,255,0.08)",
               }}
             >
-              <User size={18} color="#FFFFFF" />
+              <Users size={18} color="#FFFFFF" />
             </Avatar>
           </Box>
         </Toolbar>
@@ -1133,8 +1133,6 @@ export default function MainLayout() {
 
       let calloutHistoryEntry: Omit<CalloutHistoryEntry, "id"> | null = null;
 
-      let calloutHistoryEntry: Omit<CalloutHistoryEntry, "id"> | null = null;
-
       // Update resources + resource history
       setResources((prev) =>
         prev.map((r) => {
@@ -1369,7 +1367,7 @@ export default function MainLayout() {
                   <Typography variant="body2">Loading task data...</Typography>
                 </Paper>
               ) : rows.length > 0 ? (
-                <TaskTable_Advanced
+                <TaskTableAdvanced
                   rows={rows}
                   headerNames={headerNames}
                   onOpenPopout={handleOpenPopout}
