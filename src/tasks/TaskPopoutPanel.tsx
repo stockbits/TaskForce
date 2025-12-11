@@ -7,10 +7,11 @@
 // ===============================================================
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Box, Button, Chip, Paper, Stack, Typography, useTheme } from "@mui/material";
+import { Box, Button, Paper, Stack, Typography, useTheme } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import TaskDetailsModal from "./TaskDetailsModal";
+import PillGroup, { /* for types */ } from "@/shared-ui/PillGroup";
 import type { TaskDetails } from "@/types";
 
 interface TaskPopoutPanelProps {
@@ -194,34 +195,12 @@ export default function TaskPopoutPanel({
               '&::-webkit-scrollbar': { height: theme.spacing(0.75) }, // 6px
             }}
           >
-            {tasks.map((task) => {
-              const isActive = activePills.includes(task.taskId);
-              return (
-                <Box key={task.taskId} data-pill={task.taskId} sx={{ flexShrink: 0 }}>
-                  <Chip
-                    label={task.taskId}
-                    clickable
-                    onClick={() => handlePillClick(task.taskId)}
-                    variant="outlined"
-                    sx={{
-                      borderRadius: 999,
-                      fontSize: "0.7rem",
-                      px: 1.5,
-                      py: 0.5,
-                      bgcolor: isActive
-                        ? alpha(theme.palette.primary.main, 0.15)
-                        : theme.palette.background.paper,
-                      color: isActive
-                        ? theme.palette.primary.main
-                        : theme.palette.text.secondary,
-                      borderColor: isActive
-                        ? alpha(theme.palette.primary.main, 0.6)
-                        : alpha(theme.palette.text.primary, 0.2),
-                    }}
-                  />
-                </Box>
-              );
-            })}
+            <PillGroup
+              items={tasks.map((t) => ({ id: t.taskId, label: String(t.taskId) }))}
+              activeIds={activePills}
+              maxVisible={6}
+              onToggle={(id) => handlePillClick(id)}
+            />
           </Stack>
         </Box>
 

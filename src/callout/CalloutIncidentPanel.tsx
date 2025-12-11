@@ -209,6 +209,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
       {
         outcome: CalloutOutcome | "";
         availableAgainAt: string;
+        assignedResourceId?: string;
         saving?: boolean;
       }
     >
@@ -368,6 +369,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
           next[r.resourceId] = {
             outcome: "",
             availableAgainAt: "",
+            assignedResourceId: r.resourceId,
           };
         }
       }
@@ -412,13 +414,14 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
 
   const handleDraftChange = (
     resourceId: string,
-    changes: Partial<{ outcome: CalloutOutcome | ""; availableAgainAt: string }>
+    changes: Partial<{ outcome: CalloutOutcome | ""; availableAgainAt: string; assignedResourceId?: string }>
   ) => {
     setRowDrafts((prev) => ({
       ...prev,
       [resourceId]: {
         outcome: prev[resourceId]?.outcome ?? "",
         availableAgainAt: prev[resourceId]?.availableAgainAt ?? "",
+        assignedResourceId: prev[resourceId]?.assignedResourceId ?? resourceId,
         ...changes,
       },
     }));
@@ -443,9 +446,13 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
       return;
     }
 
+    const assigned = draft.assignedResourceId && String(draft.assignedResourceId).trim()
+      ? draft.assignedResourceId
+      : resourceId;
+
     const payload = {
       taskId,
-      resourceId,
+      resourceId: assigned,
       outcome: outcomeValue as CalloutOutcome,
       availableAgainAt:
         outcomeValue === "Unavailable"
@@ -1124,6 +1131,14 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                     justifyContent="flex-end"
                                     alignItems={{ xs: "stretch", sm: "center" }}
                                   >
+                                      <TextField
+                                        size="small"
+                                        placeholder="Assign resource ID"
+                                        value={draft.assignedResourceId ?? resource.resourceId}
+                                        disabled={rowLocked}
+                                        onChange={(e) => handleDraftChange(resource.resourceId, { assignedResourceId: e.target.value })}
+                                        sx={{ width: { xs: '100%', sm: 160 }, mr: { sm: 1 } }}
+                                      />
                                     <Button
                                       variant={rowLocked ? "contained" : "outlined"}
                                       color={rowLocked ? "success" : "primary"}

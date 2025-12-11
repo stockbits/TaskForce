@@ -365,14 +365,17 @@ export default function TaskSearchCard({
         borderRadius: 3,
         boxShadow: "0 18px 35px rgba(10, 74, 122, 0.12)",
         overflow: "hidden",
+        width: "100%",
+        maxWidth: { xs: '100%', sm: 700, md: 1000 },
+        mx: "auto",
       }}
     >
       <Box
         sx={{
           position: "relative",
-          px: 3,
-          pt: 3,
-          pb: 3,
+          px: { xs: 2, md: 3 },
+          pt: 4,
+          pb: 4,
           background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
           color: theme.palette.primary.contrastText,
         }}
@@ -540,7 +543,7 @@ export default function TaskSearchCard({
           }}
         />
 
-        <Stack direction="row" spacing={1} mt={2} flexWrap="wrap">
+        <Stack direction="row" spacing={1.5} mt={2} flexWrap="wrap">
           {quickPresets.map((preset) => (
             <Chip
               key={preset.label}
@@ -584,55 +587,75 @@ export default function TaskSearchCard({
 
           {activeTab === "basic" && (
             <Box mt={3}>
-              <Stack spacing={2}>
-                <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-                  <MultiSelectField
-                    label="Division"
-                    options={divisionOptions}
-                    value={filters.division}
-                    onChange={(value) => handleMultiChange("division", value)}
-                    required
-                  />
-                  <MultiSelectField
-                    label="Domain ID"
-                    options={domainOptions}
-                    value={filters.domainId}
-                    onChange={(value) => handleMultiChange("domainId", value)}
-                    required
-                  />
-                  <MultiSelectField
-                    label="Task Status"
-                    options={statusOptions}
-                    value={filters.taskStatuses}
-                    onChange={(value) => handleMultiChange("taskStatuses", value)}
-                  />
-                  <MultiSelectField
-                    label="Commit Type"
-                    options={commitOptions}
-                    value={filters.commitType}
-                    onChange={(value) => handleMultiChange("commitType", value)}
-                  />
+              <Stack spacing={3}>
+                <Stack direction={{ xs: "column", md: "row" }} spacing={3}>
+                  <Box sx={{ flex: 1, minWidth: 220 }}>
+                    <MultiSelectField
+                      label="Division"
+                      options={divisionOptions}
+                      value={filters.division}
+                      onChange={(value) => handleMultiChange("division", value)}
+                      required
+                    />
+                  </Box>
+
+                  <Box sx={{ flex: 1, minWidth: 220 }}>
+                    <MultiSelectField
+                      label="Domain ID"
+                      options={domainOptions}
+                      value={filters.domainId}
+                      onChange={(value) => handleMultiChange("domainId", value)}
+                      required
+                    />
+                  </Box>
+
+                  <Box sx={{ flex: 1, minWidth: 220 }}>
+                    <MultiSelectField
+                      label="Task Status"
+                      options={statusOptions}
+                      value={filters.taskStatuses}
+                      onChange={(value) => handleMultiChange("taskStatuses", value)}
+                    />
+                  </Box>
+
+                  <Box sx={{ flex: 1, minWidth: 220 }}>
+                    <MultiSelectField
+                      label="Commit Type"
+                      options={commitOptions}
+                      value={filters.commitType}
+                      onChange={(value) => handleMultiChange("commitType", value)}
+                    />
+                  </Box>
                 </Stack>
 
-                <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-                  <MultiSelectField
-                    label="Response Code"
-                    options={responseOptions}
-                    value={filters.responseCode}
-                    onChange={(value) => handleMultiChange("responseCode", value)}
-                  />
-                  <MultiSelectField
-                    label="PWA Selector"
-                    options={pwaOptions}
-                    value={filters.pwa}
-                    onChange={(value) => handleMultiChange("pwa", value)}
-                  />
-                  <MultiSelectField
-                    label="Capabilities"
-                    options={capabilityOptions}
-                    value={filters.capabilities}
-                    onChange={(value) => handleMultiChange("capabilities", value)}
-                  />
+                <Stack direction={{ xs: "column", md: "row" }} spacing={3}>
+                  <Box sx={{ flex: 1, minWidth: 220 }}>
+                    <MultiSelectField
+                      label="Response Code"
+                      options={responseOptions}
+                      value={filters.responseCode}
+                      onChange={(value) => handleMultiChange("responseCode", value)}
+                    />
+                  </Box>
+
+                  <Box sx={{ flex: 1, minWidth: 220 }}>
+                    <MultiSelectField
+                      label="PWA Selector"
+                      options={pwaOptions}
+                      value={filters.pwa}
+                      onChange={(value) => handleMultiChange("pwa", value)}
+                    />
+                  </Box>
+
+                  <Box sx={{ flex: 1, minWidth: 220 }}>
+                    <MultiSelectField
+                      label="Capabilities"
+                      options={capabilityOptions}
+                      value={filters.capabilities}
+                      onChange={(value) => handleMultiChange("capabilities", value)}
+                    />
+                  </Box>
+
                 </Stack>
               </Stack>
             </Box>

@@ -286,6 +286,7 @@ export default function TaskTable_Advanced({
     tasks: Record<string, any>[];
   }>({ open: false, tasks: [] });
   const [targetStatus, setTargetStatus] = useState<string>(STATUS_OPTIONS[0]);
+  const [targetResourceId, setTargetResourceId] = useState<string>("");
   const [progressNote, setProgressNote] = useState<string>("");
   const [progressSaving, setProgressSaving] = useState(false);
   const [progressError, setProgressError] = useState<string | null>(null);
@@ -871,14 +872,20 @@ export default function TaskTable_Advanced({
           : note;
 
       try {
+        const bodyPayload: any = {
+          taskId,
+          text: noteBody,
+          taskStatus: statusToPersist,
+        };
+
+        if (targetResourceId && String(targetResourceId).trim()) {
+          bodyPayload.resourceId = String(targetResourceId).trim();
+        }
+
         const resp = await fetch("http://localhost:5179/progress-notes", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            taskId,
-            text: noteBody,
-            taskStatus: statusToPersist,
-          }),
+          body: JSON.stringify(bodyPayload),
         });
 
         if (!resp.ok) {
@@ -1428,7 +1435,7 @@ export default function TaskTable_Advanced({
       >
         <Table stickyHeader size="small" padding="checkbox" ref={tableRef} sx={{
           tableLayout: "auto",
-          minWidth: 600,
+          minWidth: '100%',
           width: "100%",
           borderSpacing: 0,
           opacity: tableOpacity,
@@ -1446,11 +1453,12 @@ export default function TaskTable_Advanced({
             color: theme.palette.text.primary,
             borderRight: `1px solid ${alpha(theme.palette.primary.main, 0.08)}`,
             '&:last-of-type': { borderRight: "none" },
-            minWidth: 120,
-            maxWidth: 320,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
+            minWidth: 80,
+            maxWidth: 'none',
+            whiteSpace: 'normal',
+            overflow: 'visible',
+            textOverflow: 'initial',
+            wordBreak: 'break-word',
           },
         }}>
           <TableHead>
@@ -1904,6 +1912,9 @@ export default function TaskTable_Advanced({
                     open
                     onClose={closeProgressDialog}
                     maxWidth="lg"
+                    hideBackdrop
+                    disablePortal
+                    keepMounted
                     PaperProps={{
                       sx: {
                         borderRadius: 4,
@@ -2038,6 +2049,14 @@ export default function TaskTable_Advanced({
                           <strong> {targetStatus} </strong>
                           unless they already match.
                         </Alert>
+                        <TextField
+                          size="small"
+                          label="Assign to Resource ID (optional)"
+                          placeholder="Enter resource ID to assign"
+                          value={targetResourceId}
+                          onChange={(e) => setTargetResourceId(e.target.value)}
+                          helperText="If set, this resource will be associated with the progress update."
+                        />
                       </Stack>
 
                       <Stack spacing={1.5} sx={{ gridColumn: "1 / -1" }}>
