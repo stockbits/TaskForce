@@ -142,8 +142,10 @@ export const Sidebar = memo(function Sidebar({
       ModalProps={{ keepMounted: true }}
       PaperProps={{
         sx: {
-          width: { xs: '80vw', sm: theme.spacing(40) }, // 320px at sm+, 80vw on xs
-          maxWidth: theme.spacing(48), // 384px max
+          width: { xs: '80vw', sm: theme.spacing(40) },
+          maxWidth: '100vw',
+          minWidth: 0,
+          minHeight: 0,
           backgroundColor: "background.paper",
           borderRight: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
           boxShadow: "8px 0 24px rgba(0,0,0,0.16)",

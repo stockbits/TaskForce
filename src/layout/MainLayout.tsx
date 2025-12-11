@@ -1290,10 +1290,12 @@ export default function MainLayout() {
         color: "text.primary",
         fontFamily:
           '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        width: "100%",
-        height: `calc(var(--vh, 1vh) * 100 / ${uiScale})`,
-        transform: `scale(${uiScale})`,
-        transformOrigin: "top left",
+        width: "100vw",
+        height: "100vh",
+        minHeight: 0,
+        minWidth: 0,
+        display: "flex",
+        flexDirection: "row",
       }}
     >
       <Toaster position="top-center" />

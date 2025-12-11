@@ -285,7 +285,8 @@ export default function TaskManagementPage() {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
       transition={{ duration: 0.35 }}
-      className="flex flex-col p-4 w-full max-w-[97vw] mx-auto space-y-4 overflow-hidden"
+      className="flex flex-col p-4 w-full max-w-full h-full min-h-0 mx-auto space-y-4 overflow-hidden"
+      style={{ flex: 1 }}
     >
       <Toaster />
 
