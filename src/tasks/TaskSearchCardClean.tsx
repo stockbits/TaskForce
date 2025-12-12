@@ -372,20 +372,20 @@ export default function TaskSearchCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
       sx={{
-        borderRadius: 3,
+        borderRadius: '12px 12px 0 0',
         boxShadow: "0 18px 35px rgba(10, 74, 122, 0.12)",
         overflow: "hidden",
         width: "100%",
-        maxWidth: { xs: '100%', sm: 700, md: 1000 },
-        mx: "auto",
+        maxWidth: '100%',
+        mx: 0,
       }}
     >
       <Box
         sx={{
           position: "relative",
           px: { xs: 2, md: 3 },
-          pt: 4,
-          pb: 4,
+          pt: 1,
+          pb: 1,
           background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
           color: theme.palette.primary.contrastText,
         }}
@@ -418,16 +418,7 @@ export default function TaskSearchCard({
           >
             <Bookmark size={18} fill={isFavourite ? "#facc15" : "none"} />
           </IconButton>
-          <IconButton
-            onClick={() => setCardCollapsed((prev) => !prev)}
-            sx={{
-              color: "inherit",
-              '&:hover': { backgroundColor: "rgba(255,255,255,0.12)" },
-            }}
-            size="small"
-          >
-            {cardCollapsed ? <EyeOff size={18} /> : <Eye size={18} />}
-          </IconButton>
+          {/* collapse toggle removed — search should remain open */}
         </Stack>
 
         <TextField
@@ -438,7 +429,7 @@ export default function TaskSearchCard({
           placeholder="Search by Work ID, Resource ID, or Task ID"
           size="small"
           sx={{
-            mt: 3,
+            mt: 1,
             '& .MuiOutlinedInput-root': {
               color: "inherit",
               backgroundColor: "rgba(255,255,255,0.18)",
@@ -466,31 +457,14 @@ export default function TaskSearchCard({
           }}
         />
 
-          <Stack direction="row" spacing={1} mt={1.25} flexWrap="wrap">
-          {quickPresets.map((preset) => (
-            <Chip
-              key={preset.label}
-              label={preset.label}
-              onClick={preset.action}
-              size="small"
-              sx={{
-                color: theme.palette.primary.contrastText,
-                borderColor: "rgba(255,255,255,0.35)",
-                backgroundColor: "rgba(255,255,255,0.18)",
-                '&:hover': { backgroundColor: "rgba(255,255,255,0.26)" },
-              }}
-              variant="outlined"
-            />
-          ))}
-        </Stack>
+          {/* Removed quick preset chips to keep the header focused on global search */}
       </Box>
 
-      <Collapse in={!cardCollapsed} timeout={220} unmountOnExit>
         <CardContent
           sx={{
-            pt: 3,
-            pb: 1,
-            px: 3,
+            pt: 1,
+            pb: 0,
+            px: 2,
             maxHeight: 'none',
             overflowY: 'visible',
           }}
@@ -540,16 +514,15 @@ export default function TaskSearchCard({
           <Tabs
             value={activeTab}
             onChange={(_event, value) => setActiveTab(value)}
-            sx={{ mt: 2 }}
+            sx={{ mt: 0.5 }}
           >
             <Tab value="basic" label="Basic" />
             <Tab value="advanced" label="Advanced" />
           </Tabs>
 
           {activeTab === "basic" && (
-            <Box mt={3}>
-              <Stack spacing={2}>
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+            <Box mt={1}>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 0.5 }}>
                   <IconButton
                     onClick={(e) => setDateMenuAnchor(e.currentTarget)}
                     size="small"
@@ -607,8 +580,8 @@ export default function TaskSearchCard({
                     </Box>
                   </Menu>
                 </Box>
-                <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-                    <Box sx={{ flex: 1, minWidth: 140 }}>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                  <Box sx={{ flex: '1 1 clamp(180px,18vw,320px)', minWidth: { xs: '100%', sm: 140 } }}>
                     <MultiSelectField
                       label="Division"
                       options={divisionOptions}
@@ -618,7 +591,7 @@ export default function TaskSearchCard({
                     />
                   </Box>
 
-                  <Box sx={{ flex: 1, minWidth: 140 }}>
+                    <Box sx={{ flex: '1 1 clamp(160px,16vw,280px)', minWidth: { xs: '100%', sm: 140 } }}>
                     <MultiSelectField
                       label="Domain ID"
                       options={domainOptions}
@@ -628,7 +601,7 @@ export default function TaskSearchCard({
                     />
                   </Box>
 
-                  <Box sx={{ flex: 1, minWidth: 140 }}>
+                  <Box sx={{ flex: '1 1 clamp(160px,16vw,280px)', minWidth: { xs: '100%', sm: 140 } }}>
                     <MultiSelectField
                       label="Task Status"
                       options={statusOptions}
@@ -637,7 +610,7 @@ export default function TaskSearchCard({
                     />
                   </Box>
 
-                  <Box sx={{ flex: 1, minWidth: 140 }}>
+                  <Box sx={{ flex: '1 1 clamp(160px,16vw,280px)', minWidth: { xs: '100%', sm: 140 } }}>
                     <MultiSelectField
                       label="Commit Type"
                       options={commitOptions}
@@ -645,10 +618,8 @@ export default function TaskSearchCard({
                       onChange={(value) => handleMultiChange("commitType", value)}
                     />
                   </Box>
-                </Stack>
 
-                <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-                  <Box sx={{ flex: 1, minWidth: 220 }}>
+                  <Box sx={{ flex: '1 1 clamp(180px,18vw,320px)', minWidth: { xs: '100%', sm: 160 } }}>
                     <MultiSelectField
                       label="Response Code"
                       options={responseOptions}
@@ -657,7 +628,7 @@ export default function TaskSearchCard({
                     />
                   </Box>
 
-                  <Box sx={{ flex: 1, minWidth: 220 }}>
+                  <Box sx={{ flex: '1 1 clamp(180px,18vw,320px)', minWidth: { xs: '100%', sm: 160 } }}>
                     <MultiSelectField
                       label="PWA Selector"
                       options={pwaOptions}
@@ -666,7 +637,7 @@ export default function TaskSearchCard({
                     />
                   </Box>
 
-                  <Box sx={{ flex: 1, minWidth: 220 }}>
+                  <Box sx={{ flex: '1 1 clamp(180px,18vw,320px)', minWidth: { xs: '100%', sm: 160 } }}>
                     <MultiSelectField
                       label="Capabilities"
                       options={capabilityOptions}
@@ -674,16 +645,14 @@ export default function TaskSearchCard({
                       onChange={(value) => handleMultiChange("capabilities", value)}
                     />
                   </Box>
-
-                </Stack>
-              </Stack>
-            </Box>
+                </Box>
+              </Box>
           )}
 
           {activeTab === "advanced" && (
-            <Box mt={3}>
-              <Stack spacing={2}>
-                <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
+            <Box mt={1}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                <Box sx={{ flex: '1 1 clamp(200px,20vw,340px)', minWidth: { xs: '100%', sm: 160 } }}>
                   <Autocomplete
                     options={requesterOptions}
                     value={filters.requester}
@@ -699,6 +668,9 @@ export default function TaskSearchCard({
                       <TextField {...params} label="Requester" size="small" />
                     )}
                   />
+                </Box>
+
+                <Box sx={{ flex: '1 1 clamp(200px,20vw,340px)', minWidth: { xs: '100%', sm: 160 } }}>
                   <Autocomplete
                     options={jobTypeOptions}
                     value={filters.jobType}
@@ -714,7 +686,10 @@ export default function TaskSearchCard({
                       <TextField {...params} label="Job Type" size="small" />
                     )}
                   />
-                  <FormControl size="small" sx={{ minWidth: 160 }}>
+                </Box>
+
+                <Box sx={{ flex: '1 1 clamp(160px,16vw,280px)', minWidth: { xs: '100%', sm: 140 } }}>
+                  <FormControl size="small" sx={{ minWidth: 120 }}>
                     <InputLabel id="location-type-label">Location Type</InputLabel>
                     <Select
                       labelId="location-type-label"
@@ -735,6 +710,9 @@ export default function TaskSearchCard({
                       <MenuItem value="groupCode">Group Code</MenuItem>
                     </Select>
                   </FormControl>
+                </Box>
+
+                <Box sx={{ flex: '1 1 clamp(160px,16vw,280px)', minWidth: { xs: '100%', sm: 140 } }}>
                   <TextField
                     label="Location Value"
                     name="locationValue"
@@ -742,10 +720,10 @@ export default function TaskSearchCard({
                     onChange={handleFieldChange}
                     size="small"
                   />
-                </Stack>
+                </Box>
 
-                <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-                  <FormControl size="small" sx={{ minWidth: { xs: theme.spacing(16), sm: theme.spacing(20) } }}>
+                <Box sx={{ flex: '1 1 clamp(160px,16vw,280px)', minWidth: { xs: '100%', sm: 140 } }}>
+                  <FormControl size="small" sx={{ minWidth: 120 }}>
                     <InputLabel id="imp-condition-label">IMP Condition</InputLabel>
                     <Select
                       labelId="imp-condition-label"
@@ -765,6 +743,9 @@ export default function TaskSearchCard({
                       <MenuItem value="less">Less Than</MenuItem>
                     </Select>
                   </FormControl>
+                </Box>
+
+                <Box sx={{ flex: '1 1 clamp(100px,10vw,140px)', minWidth: { xs: '100%', sm: 100 } }}>
                   <TextField
                     label="IMP Value"
                     name="scoreValue"
@@ -772,19 +753,18 @@ export default function TaskSearchCard({
                     onChange={handleFieldChange}
                     size="small"
                   />
-                </Stack>
-              </Stack>
+                </Box>
+              </Box>
             </Box>
           )}
         </CardContent>
-      </Collapse>
 
       <Divider />
 
       <CardActions
         sx={{
-          px: 3,
-          py: 2,
+          px: 2,
+          py: 1,
           bgcolor: theme.palette.grey[50],
           display: "flex",
           justifyContent: "space-between",
@@ -816,7 +796,7 @@ export default function TaskSearchCard({
           </Menu>
         </Box>
 
-        <Stack direction="row" spacing={2} alignItems="center">
+        <Stack direction="row" spacing={1} alignItems="center">
           {!canSearch && (
             <Typography variant="caption" color="text.secondary">
               Select Division and Domain ID, or type in the global search.

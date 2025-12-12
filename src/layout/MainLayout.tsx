@@ -451,7 +451,7 @@ const MainContent: React.FC<MainContentProps> = memo(
       <Box
         sx={{
           width: '100%',
-          maxWidth: { xs: '100vw', md: theme.spacing(150) }, // 1200px at md+
+          maxWidth: { xs: '100%', md: '1200px' },
           mx: 'auto',
           px: { xs: 3, sm: 6, md: 8 },
           py: { xs: 6, md: 8 },
@@ -1290,12 +1290,13 @@ export default function MainLayout() {
         color: "text.primary",
         fontFamily:
           '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        width: "100vw",
+        width: "100%",
         height: "100vh",
         minHeight: 0,
         minWidth: 0,
         display: "flex",
         flexDirection: "row",
+        overflowX: "hidden",
       }}
     >
       <Toaster position="top-center" />

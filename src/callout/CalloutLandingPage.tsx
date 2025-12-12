@@ -113,7 +113,7 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
         onClick={(event) => event.stopPropagation()}
         sx={{
           width: '100%',
-          maxWidth: { xs: '100vw', md: theme.spacing(120) }, // 960px at md+
+          maxWidth: { xs: '100%', md: theme.spacing(120) }, // 960px at md+
           mx: 2,
           borderRadius: 4,
           px: { xs: 3, md: 6 },

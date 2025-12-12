@@ -1433,7 +1433,7 @@ export default function TaskTable_Advanced({
           maxHeight: fixedTableHeight,
         }}
       >
-        <Table stickyHeader size="small" padding="checkbox" ref={tableRef} sx={{
+        <Table stickyHeader size="small" padding="none" ref={tableRef} sx={{
           tableLayout: "auto",
           minWidth: '100%',
           width: "100%",
@@ -1448,6 +1448,9 @@ export default function TaskTable_Advanced({
             position: "sticky",
             top: 0,
             zIndex: 1,
+            px: 0.5,
+            py: 0.5,
+            fontSize: '0.75rem'
           },
           '& th, & td': {
             color: theme.palette.text.primary,
@@ -1626,10 +1629,10 @@ export default function TaskTable_Advanced({
                         key={key}
                         data-colkey={key}
                         sx={{
-                              px: density === "comfortable" ? 2 : 1,
-                              py: density === "comfortable" ? 1.5 : 0.5,
-                              fontSize: density === "comfortable" ? '0.95rem' : '0.78rem',
-                              lineHeight: density === "comfortable" ? 1.4 : 1.2,
+                              px: density === "comfortable" ? 1.5 : 0.75,
+                              py: density === "comfortable" ? 1.25 : 0.25,
+                              fontSize: density === "comfortable" ? '0.9rem' : '0.72rem',
+                              lineHeight: density === "comfortable" ? 1.25 : 1.0,
                         }}
                       >
                             <Box sx={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis' }}>

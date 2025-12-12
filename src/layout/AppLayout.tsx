@@ -453,7 +453,7 @@ const MainContent: React.FC<MainContentProps> = memo(
       <Box
         sx={{
           width: '100%',
-          maxWidth: { xs: '100vw', md: theme.spacing(150) }, // 1200px at md+
+          maxWidth: { xs: '100%', md: '1200px' },
           mx: 'auto',
           px: { xs: 3, sm: 6, md: 8 },
           py: { xs: 6, md: 8 },
@@ -1294,12 +1294,13 @@ export default function MainLayout() {
         color: "text.primary",
         fontFamily:
           '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        width: "100vw",
+        width: "100%",
         height: "100vh",
         minHeight: 0,
         minWidth: 0,
         display: "flex",
         flexDirection: "row",
+        overflowX: "hidden",
       }}
     >
       <Toaster position="top-center" />
@@ -1319,6 +1320,7 @@ export default function MainLayout() {
           flexDirection: "column",
           minWidth: 0,
           height: "100%",
+          width: "100%",
         }}
       >
         <Header
@@ -1350,11 +1352,11 @@ export default function MainLayout() {
             <Box
               component="section"
               sx={{
-                py: { xs: 4, md: 6 },
-                px: { xs: 3, md: 6 },
+                py: { xs: 3, md: 5 },
+                px: { xs: 2, md: 4 },
                 display: "flex",
                 flexDirection: "column",
-                gap: 3,
+                gap: 0,
               }}
             >
               <TaskSearchCard
@@ -1378,6 +1380,7 @@ export default function MainLayout() {
                   headerNames={headerNames}
                   onOpenPopout={handleOpenPopout}
                   onOpenCalloutIncident={handleOpenCalloutIncident}
+                  sx={{ borderRadius: '0 0 12px 12px', mt: 0 }}
                 />
               ) : (
                 <Paper
@@ -1403,12 +1406,12 @@ export default function MainLayout() {
 
           {/* DEFAULT HOMEPAGE (cards grid) */}
           {!activeSubPage && (
-            <MainContent
-              currentMenu={currentMenu}
-              filteredItems={cards}
-              windowWidth={windowWidth}
-              onCardClick={handleCardClick}
-            />
+                  <MainContent
+                    currentMenu={currentMenu}
+                    filteredItems={cards}
+                    windowWidth={windowWidth}
+                    onCardClick={handleCardClick}
+                  />
           )}
         </Box>
       </Box>

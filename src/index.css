@@ -9,6 +9,15 @@
   --vh: 1vh;
 }
 
+/* Ensure the app and root element can size to viewport heights correctly */
+html,
+body,
+#root {
+  height: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
 /* =====================================
    0️⃣.A — Leaflet Z-Index Override Fix
 ===================================== */
