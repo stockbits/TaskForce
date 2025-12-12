@@ -4,6 +4,7 @@ import { ChevronDown, CheckSquare, XSquare } from "lucide-react";
 import {
   Box,
   Button,
+  Chip,
   Checkbox,
   ClickAwayListener,
   Divider,
@@ -19,6 +20,7 @@ import {
   Typography,
 } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
+import MultiSelectField from "../shared-ui/MultiSelectField";
 
 export interface SearchToolFilters {
   statuses: string[];
@@ -150,107 +152,50 @@ const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
     ),
   };
 
-  const toggleArray = (field: keyof SearchToolFilters, value: string) => {
-    setFilters((prev) => {
-      const current = Array.isArray(prev[field])
-        ? (prev[field] as string[])
-        : [];
-      const exists = current.includes(value);
-      const next = exists
-        ? current.filter((item) => item !== value)
-        : [...current, value];
-      return { ...prev, [field]: next };
-    });
-  };
-
-  const handleSelectAll = (field: keyof SearchToolFilters, list: string[]) => {
-    setFilters((prev) => {
-      const current = Array.isArray(prev[field])
-        ? (prev[field] as string[])
-        : [];
-      const allSelected = current.length === list.length && list.length > 0;
-      return { ...prev, [field]: allSelected ? [] : [...list] };
-    });
-  };
+  // Use MultiSelectField's internal filtering and select-all behavior.
 
   const StatusBlock = (
-    <DropdownMultiSelect
-      id="statuses"
+    <MultiSelectField
       label="Task Status"
       options={filtered.statuses}
-      selected={filters.statuses}
-      openDropdown={openDropdown}
-      setOpenDropdown={setOpenDropdown}
-      query={query}
-      setQuery={setQuery}
-      onToggle={(value) => toggleArray("statuses", value)}
-      onSelectAll={() => handleSelectAll("statuses", filtered.statuses)}
+      value={filters.statuses}
+      onChange={(next) => setFilters((prev) => ({ ...prev, statuses: next }))}
     />
   );
 
   const PwaBlock = (
-    <DropdownMultiSelect
-      id="pwa"
+    <MultiSelectField
       label="PWA"
       options={filtered.pwa}
-      selected={filters.pwa}
-      openDropdown={openDropdown}
-      setOpenDropdown={setOpenDropdown}
-      query={query}
-      setQuery={setQuery}
-      onToggle={(value) => toggleArray("pwa", value)}
-      onSelectAll={() => handleSelectAll("pwa", filtered.pwa)}
+      value={filters.pwa}
+      onChange={(next) => setFilters((prev) => ({ ...prev, pwa: next }))}
     />
   );
 
   const CapBlock = (
-    <DropdownMultiSelect
-      id="capabilities"
+    <MultiSelectField
       label="Capabilities"
       options={filtered.capabilities}
-      selected={filters.capabilities}
-      openDropdown={openDropdown}
-      setOpenDropdown={setOpenDropdown}
-      query={query}
-      setQuery={setQuery}
-      onToggle={(value) => toggleArray("capabilities", value)}
-      onSelectAll={() =>
-        handleSelectAll("capabilities", filtered.capabilities)
-      }
+      value={filters.capabilities}
+      onChange={(next) => setFilters((prev) => ({ ...prev, capabilities: next }))}
     />
   );
 
   const CommitBlock = (
-    <DropdownMultiSelect
-      id="commitmentTypes"
+    <MultiSelectField
       label="Commit Type"
       options={filtered.commitmentTypes}
-      selected={filters.commitmentTypes}
-      openDropdown={openDropdown}
-      setOpenDropdown={setOpenDropdown}
-      query={query}
-      setQuery={setQuery}
-      onToggle={(value) => toggleArray("commitmentTypes", value)}
-      onSelectAll={() =>
-        handleSelectAll("commitmentTypes", filtered.commitmentTypes)
-      }
+      value={filters.commitmentTypes}
+      onChange={(next) => setFilters((prev) => ({ ...prev, commitmentTypes: next }))}
     />
   );
 
   const ResponseBlock = (
-    <DropdownMultiSelect
-      id="responseCodes"
+    <MultiSelectField
       label="Response Code"
       options={filtered.responseCodes}
-      selected={filters.responseCodes ?? []}
-      openDropdown={openDropdown}
-      setOpenDropdown={setOpenDropdown}
-      query={query}
-      setQuery={setQuery}
-      onToggle={(value) => toggleArray("responseCodes", value)}
-      onSelectAll={() =>
-        handleSelectAll("responseCodes", filtered.responseCodes)
-      }
+      value={filters.responseCodes ?? []}
+      onChange={(next) => setFilters((prev) => ({ ...prev, responseCodes: next }))}
     />
   );
 
@@ -270,19 +215,11 @@ const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
   );
 
   const ResourceStatusBlock = (
-    <DropdownMultiSelect
-      id="resourceStatuses"
+    <MultiSelectField
       label="Status"
       options={filtered.resourceStatuses}
-      selected={filters.statuses}
-      openDropdown={openDropdown}
-      setOpenDropdown={setOpenDropdown}
-      query={query}
-      setQuery={setQuery}
-      onToggle={(value) => toggleArray("statuses", value)}
-      onSelectAll={() =>
-        handleSelectAll("statuses", safe(dropdownData.resourceStatuses))
-      }
+      value={filters.statuses}
+      onChange={(next) => setFilters((prev) => ({ ...prev, statuses: next }))}
     />
   );
 
@@ -405,236 +342,7 @@ const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
 
 export default SearchToolPanel;
 
-interface DropdownMultiSelectProps {
-  id: string;
-  label: string;
-  options: string[];
-  selected: string[];
-  openDropdown: string | null;
-  setOpenDropdown: (id: string | null) => void;
-  query: Record<string, string>;
-  setQuery: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-  onToggle: (value: string) => void;
-  onSelectAll: () => void;
-}
 
-function DropdownMultiSelect({
-  id,
-  label,
-  options,
-  selected,
-  openDropdown,
-  setOpenDropdown,
-  query,
-  setQuery,
-  onToggle,
-  onSelectAll,
-}: DropdownMultiSelectProps) {
-  const theme = useTheme();
-  const isOpen = openDropdown === id;
-  const q = query[id] ?? "";
-  const allSelected = options.length > 0 && selected.length === options.length;
-  const anchorRef = useRef<HTMLButtonElement | null>(null);
-  const [menuWidth, setMenuWidth] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (isOpen && anchorRef.current) {
-      const rect = anchorRef.current.getBoundingClientRect();
-      setMenuWidth(rect.width);
-    }
-    if (!isOpen) {
-      setMenuWidth(null);
-    }
-  }, [isOpen]);
-
-  const displayLabel =
-    selected.length > 0 ? `${selected.length} selected` : label;
-
-  const handleToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    setOpenDropdown(isOpen ? null : id);
-  };
-
-  const handleClose = () => setOpenDropdown(null);
-
-  return (
-    <Box sx={{ position: "relative" }}>
-      <Button
-        ref={anchorRef}
-        onClick={handleToggle}
-        variant="outlined"
-        size="small"
-        endIcon={<ChevronDown size={14} />}
-        sx={{
-          width: "100%",
-          justifyContent: "space-between",
-          textTransform: "none",
-          fontSize: 12,
-          fontWeight: 500,
-          height: 36,
-          borderRadius: 1.5,
-          borderColor: alpha(theme.palette.primary.main, 0.22),
-          color: theme.palette.text.primary,
-          px: 2,
-          "&:hover": {
-            borderColor: theme.palette.primary.main,
-            backgroundColor: alpha(theme.palette.primary.main, 0.06),
-          },
-        }}
-      >
-        <Typography
-          variant="caption"
-          component="span"
-          sx={{
-            flexGrow: 1,
-            textAlign: "left",
-            pr: 1.5,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {displayLabel}
-        </Typography>
-      </Button>
-
-      <Popper
-        open={isOpen}
-        anchorEl={anchorRef.current}
-        placement="bottom-start"
-        transition
-        modifiers={[{ name: "offset", options: { offset: [0, 8] } }]}
-        sx={{ zIndex: 2000 }}
-      >
-        {({ TransitionProps }) => (
-          <Fade {...TransitionProps} timeout={160}>
-            <Box>
-              <ClickAwayListener onClickAway={handleClose} mouseEvent="onMouseUp">
-                <Paper
-                  elevation={12}
-                  sx={{
-                    p: 1.5,
-                    width: menuWidth ? Math.min(menuWidth, 380) : 320,
-                    maxWidth: "90vw",
-                    borderRadius: 2,
-                    border: `1px solid ${alpha(theme.palette.primary.main, 0.18)}`,
-                    boxShadow: "0 18px 46px rgba(8,58,97,0.18)",
-                    backgroundImage: "none",
-                  }}
-                >
-                  <Stack spacing={1.5}>
-                    <TextField
-                      size="small"
-                      value={q}
-                      autoFocus
-                      onChange={(event) =>
-                        setQuery((prev) => ({ ...prev, [id]: event.target.value }))
-                      }
-                      placeholder={`Filter ${label.toLowerCase()}…`}
-                      fullWidth
-                      inputProps={{
-                        style: {
-                          textAlign: "left",
-                          fontSize: 12,
-                          padding: "6px 10px",
-                        },
-                      }}
-                    />
-
-                    <Stack
-                      direction="row"
-                      alignItems="center"
-                      justifyContent="space-between"
-                      sx={{
-                        px: 1.5,
-                        py: 0.75,
-                        borderRadius: 1.5,
-                        border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
-                        backgroundColor: alpha(theme.palette.primary.main, 0.05),
-                      }}
-                    >
-                      <Typography variant="caption" color="text.secondary">
-                        {allSelected ? "Clear All Results" : "Select All Results"}
-                      </Typography>
-                      <IconButton
-                        size="small"
-                        onClick={(event) => {
-                          event.preventDefault();
-                          onSelectAll();
-                        }}
-                        sx={{
-                          color: theme.palette.primary.main,
-                        }}
-                      >
-                        {allSelected ? <XSquare size={16} /> : <CheckSquare size={16} />}
-                      </IconButton>
-                    </Stack>
-
-                    <Divider sx={{ my: 0.5 }} />
-
-                    <Stack spacing={0.5}>
-                      {options.map((option) => (
-                        <Box
-                          key={option}
-                          onClick={() => onToggle(option)}
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 1,
-                            px: 1.5,
-                            py: 0.75,
-                            borderRadius: 1.5,
-                            cursor: "pointer",
-                            transition: "background-color 0.2s ease",
-                            "&:hover": {
-                              backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                            },
-                          }}
-                        >
-                          <Checkbox
-                            size="small"
-                            checked={selected.includes(option)}
-                            onChange={(event) => {
-                              event.stopPropagation();
-                              onToggle(option);
-                            }}
-                            sx={{
-                              padding: 0,
-                              color: alpha(theme.palette.primary.main, 0.6),
-                              "&.Mui-checked": {
-                                color: theme.palette.primary.main,
-                              },
-                            }}
-                          />
-                          <Typography
-                            variant="body2"
-                            sx={{ fontSize: 12, color: theme.palette.text.primary }}
-                          >
-                            {option}
-                          </Typography>
-                        </Box>
-                      ))}
-
-                      {options.length === 0 && (
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ px: 1.5, py: 0.5, fontStyle: "italic" }}
-                        >
-                          No results
-                        </Typography>
-                      )}
-                    </Stack>
-                  </Stack>
-                </Paper>
-              </ClickAwayListener>
-            </Box>
-          </Fade>
-        )}
-      </Popper>
-    </Box>
-  );
-}
 
 interface ImpConditionControlProps {
   condition: string;

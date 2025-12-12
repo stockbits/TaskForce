@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from "react";
-import { Box, Chip, Popover, List, ListItemButton, ListItemText, Typography, useTheme } from "@mui/material";
+import { Box, Chip, Popover, List, ListItemButton, ListItemText, Typography, useTheme, Stack } from "@mui/material";
 import type { SxProps } from "@mui/material";
 
 export type PillItem = {
@@ -12,10 +12,12 @@ interface PillGroupProps {
   activeIds?: string[];
   maxVisible?: number; // fixed limit for visible pills
   onToggle?: (id: string) => void;
+  onSelectAll?: () => void;
+  onClearAll?: () => void;
   sx?: SxProps;
 }
 
-export default function PillGroup({ items, activeIds = [], maxVisible = 5, onToggle, sx }: PillGroupProps) {
+export default function PillGroup({ items, activeIds = [], maxVisible = 5, onToggle, onSelectAll, onClearAll, sx }: PillGroupProps) {
   const theme = useTheme();
   const visible = items.slice(0, maxVisible);
   const overflow = items.length > maxVisible ? items.slice(maxVisible) : [];
@@ -73,7 +75,18 @@ export default function PillGroup({ items, activeIds = [], maxVisible = 5, onTog
             transformOrigin={{ vertical: "top", horizontal: "left" }}
             PaperProps={{ sx: { minWidth: 200, maxWidth: 360 } }}
           >
-            <List dense>
+            <Box sx={{ p: 1 }}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 1, pb: 1 }}>
+                <Typography variant="caption" color="text.secondary">Overflow items</Typography>
+                <Box>
+                  {activeIds.length === items.length ? (
+                    <Chip label="Clear" size="small" clickable onClick={() => { if (onClearAll) onClearAll(); handleClose(); }} sx={{ ml: 1 }} />
+                  ) : (
+                    <Chip label="Select" size="small" clickable onClick={() => { if (onSelectAll) onSelectAll(); handleClose(); }} sx={{ ml: 1 }} />
+                  )}
+                </Box>
+              </Stack>
+              <List dense>
               {overflow.map((it) => (
                 <ListItemButton
                   key={it.id}
@@ -86,6 +99,7 @@ export default function PillGroup({ items, activeIds = [], maxVisible = 5, onTog
                 </ListItemButton>
               ))}
             </List>
+            </Box>
           </Popover>
         </>
       )}

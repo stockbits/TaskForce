@@ -18,6 +18,7 @@ import {
   InputAdornment,
   InputLabel,
   ListItemIcon,
+  ListItem,
   ListItemText,
   Menu,
   MenuItem,
@@ -31,12 +32,9 @@ import {
   Tooltip,
   useTheme,
 } from "@mui/material";
-import type {
-  AutocompleteChangeDetails,
-  AutocompleteChangeReason,
-} from "@mui/material/Autocomplete";
 import { Bookmark, ChevronDown, Eye, EyeOff, Search } from "lucide-react";
 import FilterListIcon from '@mui/icons-material/FilterList';
+import MultiSelectField from '@/shared-ui/MultiSelectField';
 
 type Filters = {
   taskSearch: string;
@@ -191,28 +189,197 @@ export default function TaskSearchCard({
     []
   );
 
-  // Standard box width (in `ch`) used across filter controls to keep consistent sizing.
-  // If you later want per-field sizing, adjust `STANDARD_BOX_CH` or replace with
-  // a mapping derived from server-side metadata.
-  const STANDARD_BOX_CH = 18;
+  // helper: get the maximum option string length for a given field key
+  const getMaxOptionLength = (key: string) => {
+    const arrFor = (k: string): string[] | undefined => {
+      switch (k) {
+        case "division":
+          return divisionOptions;
+        case "domainId":
+          return domainOptions;
+        case "taskStatuses":
+          return statusOptions;
+        case "responseCode":
+          return responseOptions;
+        case "commitType":
+          return commitOptions;
+        case "capabilities":
+          return capabilityOptions;
+        case "pwa":
+          return pwaOptions;
+        case "requester":
+          return requesterOptions;
+        case "jobType":
+          return jobTypeOptions;
+        default:
+          return undefined;
+      }
+    };
 
-  const expectedMaxChars: Record<string, number> = {
-    division: 30,
-    domainId: 8,
-    taskStatuses: 20,
-    commitType: 18,
-    responseCode: 8,
-    pwa: 18,
-    capabilities: 24,
+    const arr = arrFor(key);
+    if (!arr || !arr.length) return 0;
+    return arr.reduce((max, s) => Math.max(max, String(s).length), 0);
+  };
+
+  // Use a responsive standard width for all boxes, but allow per-field
+  // expansion based on the measured DB values (or overrides) so default
+  // prompt/placeholder values (plus breathing room and the select-all icon)
+  // are visible on load without forcing the control to resize later.
+  // Measured pixel widths (client-only). We'll compute these on mount so the
+  // box widths match the actual rendered prompt text + icon precisely.
+  const [measuredPx, setMeasuredPx] = React.useState<Record<string, number>>({});
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      const bodyStyle = getComputedStyle(document.body);
+      ctx.font = bodyStyle.font || "14px Roboto, sans-serif";
+
+      const keys = [
+        "division",
+        "domainId",
+        "taskStatuses",
+        "commitType",
+        "responseCode",
+        "pwa",
+        "capabilities",
+        "requester",
+        "jobType",
+        "locationValue",
+      ];
+
+      const ICON_CHARS = 6; // spacing reserved for icon
+      const extra = 6; // breathing room in characters
+
+      const measureFor = (k: string) => {
+        const override = expectedMaxCharsOverrides[k];
+        // prefer an explicit override numeric width if provided (in chars)
+        if (override) {
+          const sample = "0".repeat(override + ICON_CHARS + extra);
+          return Math.ceil(ctx.measureText(sample).width);
+        }
+
+        // otherwise pick a representative string from options or label
+        const arrFor = (kk: string): string[] | undefined => {
+          switch (kk) {
+            case "division":
+              return divisionOptions;
+            case "domainId":
+              return domainOptions;
+            case "taskStatuses":
+              return statusOptions;
+            case "responseCode":
+              return responseOptions;
+            case "commitType":
+              return commitOptions;
+            case "capabilities":
+              return capabilityOptions;
+            case "pwa":
+              return pwaOptions;
+            case "requester":
+              return requesterOptions;
+            case "jobType":
+              return jobTypeOptions;
+            default:
+              return undefined;
+          }
+        };
+
+        const arr = arrFor(k);
+        let sampleText = (friendlyNames as Record<string, string>)[k] ?? k;
+        if (arr && arr.length) {
+          // choose the longest option as representative
+          sampleText = arr.reduce((cur, s) => (String(s).length > cur.length ? String(s) : cur), sampleText);
+        }
+
+        const sample = sampleText + " ".repeat(ICON_CHARS + extra);
+        return Math.ceil(ctx.measureText(sample).width);
+      };
+
+      const result: Record<string, number> = {};
+      keys.forEach((k) => {
+        try {
+          result[k] = measureFor(k);
+        } catch (e) {
+          // ignore
+        }
+      });
+
+      setMeasuredPx(result);
+    } catch (e) {
+      // ignore measurement errors
+    }
+  }, [divisionOptions, domainOptions, statusOptions, responseOptions, commitOptions, capabilityOptions, pwaOptions, requesterOptions, jobTypeOptions]);
+
+  const maxWidthFor = (key: string) => {
+    const extra = 6; // breathing room in characters
+    const labelPadding = 4; // extra chars to ensure label/placeholder fits
+
+    const override = expectedMaxCharsOverrides[key];
+    const measured = getMaxOptionLength(key);
+
+    const label = (friendlyNames as Record<string, string>)[key] ?? "";
+    const labelLen = label.length;
+
+    const toNum = (s: string) => parseInt(String(s).replace(/[^0-9]/g, ""), 10) || 0;
+
+    const baseXs = toNum(STANDARD_BOX.xs);
+    const baseSm = toNum(STANDARD_BOX.sm);
+    const baseMd = toNum(STANDARD_BOX.md);
+
+    const ICON_CHARS = 6; // reserve ~6ch for the select-all icon + spacing
+
+    // If we have a measured pixel width for this key, prefer it (client-only).
+    if (measuredPx && measuredPx[key]) {
+      const px = measuredPx[key];
+      // cap by STANDARD_BOX converted to px using approximate 'ch' -> px via body font
+      if (typeof window !== "undefined") {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const bodyStyle = getComputedStyle(document.body);
+        ctx && (ctx.font = bodyStyle.font || "14px Roboto, sans-serif");
+        const chWidth = ctx ? ctx.measureText("0").width : 8;
+        const capPx = Math.max(baseXs, baseSm, baseMd) * chWidth;
+        const finalPx = Math.min(capPx, px);
+        return { xs: `${Math.round(finalPx)}px`, sm: `${Math.round(finalPx)}px`, md: `${Math.round(finalPx)}px` };
+      }
+    }
+
+    const source = override ?? (measured ? measured : labelLen);
+    const desired = Math.max(source + extra + ICON_CHARS, labelLen + labelPadding + ICON_CHARS);
+
+    const xs = Math.min(baseMd, Math.max(desired, baseXs));
+    const sm = Math.min(baseMd, Math.max(desired, baseSm));
+    const md = Math.min(baseMd, Math.max(desired, baseMd));
+
+    return { xs: `${xs}ch`, sm: `${sm}ch`, md: `${md}ch` };
+  };
+
+  // Standard box width used across filter controls to keep consistent sizing.
+  // Increased responsive values to give more breathing room so pills/numbers
+  // and default placeholder text don't feel cramped.
+  const STANDARD_BOX = { xs: "24ch", sm: "36ch", md: "48ch" };
+  // We'll compute per-field widths after we have the options loaded so we can
+  // measure the prompt/DB-derived values. `expectedMaxCharsOverrides` is for
+  // manual tweaks; measurements from options will be used as the primary
+  // driver for prompt width.
+  const expectedMaxCharsOverrides: Record<string, number> = {
+    division: 36,
+    domainId: 14,
+    taskStatuses: 24,
+    commitType: 22,
+    responseCode: 10,
+    pwa: 20,
+    capabilities: 28,
     requester: 28,
     jobType: 22,
     locationValue: 32,
     locationType: 16,
     scoreValue: 6,
   };
-
-  // Use a single standard width for all boxes so they align uniformly.
-  const maxWidthFor = (_key: string) => `${STANDARD_BOX_CH}ch`;
 
   const canSearch = useMemo(() => {
     if (filters.taskSearch.trim().length > 0) return true;
@@ -302,27 +469,7 @@ export default function TaskSearchCard({
     []
   );
 
-  const handleChipDelete = useCallback((key: keyof Filters) => {
-    setFilters((prev) => {
-      const next: Filters = { ...prev };
-      const current = next[key];
-      if (Array.isArray(current)) {
-        (next[key] as unknown as string[]) = [];
-      } else {
-        (next[key] as string) = "";
-      }
-
-      if (key === "fromDate") {
-        next.fromTime = "";
-      }
-
-      if (key === "toDate") {
-        next.toTime = "";
-      }
-
-      return next;
-    });
-  }, []);
+  // removed handleChipDelete — top prefill chips were removed per UX request
 
   const handleSearch = useCallback(() => {
     onSearch(filters);
@@ -454,47 +601,7 @@ export default function TaskSearchCard({
             overflowY: 'visible',
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, maxHeight: 40, overflow: 'hidden', py: 0.5 }}>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              {(() => {
-                const maxVisible = 1;
-                const visible = activeChips.slice(0, maxVisible);
-                const hidden = activeChips.slice(maxVisible);
-                return (
-                  <>
-                    {visible.map((chip) => (
-                      <Chip
-                        key={`${chip.key}-${chip.displayValue}`}
-                        label={`${chip.label}: ${chip.displayValue}`}
-                        onDelete={() => handleChipDelete(chip.key)}
-                        size="small"
-                        variant="outlined"
-                        sx={{ height: 28, fontSize: '0.75rem', '& .MuiChip-label': { px: 1 } }}
-                      />
-                    ))}
-
-                    {hidden.length > 0 && (
-                      <Tooltip
-                        title={
-                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, p: 0.25 }}>
-                            {hidden.map((c) => (
-                              <Box key={`${c.key}-${c.displayValue}`} sx={{ px: 0.5 }}>
-                                <Typography variant="caption">{`${c.label}: ${c.displayValue}`}</Typography>
-                              </Box>
-                            ))}
-                          </Box>
-                        }
-                        arrow
-                        placement="bottom"
-                      >
-                        <Chip label={`+${hidden.length}`} size="small" sx={{ height: 28 }} />
-                      </Tooltip>
-                    )}
-                  </>
-                );
-              })()}
-            </Box>
-          </Box>
+          {/* top prefill chips removed — not providing value in this UI */}
 
           {/* Tabs moved to top compact header row */}
 
@@ -551,82 +658,89 @@ export default function TaskSearchCard({
                     </Box>
                   </Menu>
                 </Box>
-                <Grid container spacing={1} alignItems="center">
+                <Grid container spacing={1.5} alignItems="center">
                   <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('division'), px: 0.5, py: 0.25 }}>
+                          <Box sx={{ width: '100%', maxWidth: maxWidthFor('division'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="Division"
                         options={divisionOptions}
                         value={filters.division}
-                        onChange={(value) => handleMultiChange("division", value)}
+                          onChange={(value) => handleMultiChange("division", value)}
+                          showSelectAllIcon
                         required
                       />
                     </Box>
                   </Grid>
 
                   <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('domainId'), px: 0.5, py: 0.25 }}>
+                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('domainId'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="Domain ID"
                         options={domainOptions}
                         value={filters.domainId}
                         onChange={(value) => handleMultiChange("domainId", value)}
+                        showSelectAllIcon
                         required
                       />
                     </Box>
                   </Grid>
 
                   <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('taskStatuses'), px: 0.5, py: 0.25 }}>
+                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('taskStatuses'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="Task Status"
                         options={statusOptions}
                         value={filters.taskStatuses}
                         onChange={(value) => handleMultiChange("taskStatuses", value)}
+                        showSelectAllIcon
                       />
                     </Box>
                   </Grid>
 
                   <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('commitType'), px: 0.5, py: 0.25 }}>
+                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('commitType'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="Commit Type"
                         options={commitOptions}
                         value={filters.commitType}
                         onChange={(value) => handleMultiChange("commitType", value)}
+                        showSelectAllIcon
                       />
                     </Box>
                   </Grid>
 
                   <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('responseCode'), px: 0.5, py: 0.25 }}>
+                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('responseCode'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="Response Code"
                         options={responseOptions}
                         value={filters.responseCode}
                         onChange={(value) => handleMultiChange("responseCode", value)}
+                        showSelectAllIcon
                       />
                     </Box>
                   </Grid>
 
                   <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('pwa'), px: 0.5, py: 0.25 }}>
+                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('pwa'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="PWA Selector"
                         options={pwaOptions}
                         value={filters.pwa}
                         onChange={(value) => handleMultiChange("pwa", value)}
+                        showSelectAllIcon
                       />
                     </Box>
                   </Grid>
 
                   <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('capabilities'), px: 0.5, py: 0.25 }}>
+                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('capabilities'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="Capabilities"
                         options={capabilityOptions}
                         value={filters.capabilities}
                         onChange={(value) => handleMultiChange("capabilities", value)}
+                        showSelectAllIcon
                       />
                     </Box>
                   </Grid>
@@ -636,9 +750,9 @@ export default function TaskSearchCard({
 
           {activeTab === "advanced" && (
             <Box mt={1}>
-                <Grid container spacing={1} alignItems="center">
+                <Grid container spacing={1.5} alignItems="center">
                 <Grid item xs={12} sm="auto" md="auto">
-                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('requester') }}>
+                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('requester'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                     <Autocomplete
                     options={requesterOptions}
                     value={filters.requester}
@@ -651,14 +765,20 @@ export default function TaskSearchCard({
                     }
                     freeSolo
                     renderInput={(params) => (
-                      <TextField {...params} label="Requester" size="small" fullWidth />
+                      <TextField
+                        {...params}
+                        placeholder={filters.requester ? "" : "Requester"}
+                        size="small"
+                        fullWidth
+                        aria-label="Requester"
+                      />
                     )}
                     />
                   </Box>
                 </Grid>
 
                 <Grid item xs={12} sm="auto" md="auto">
-                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('jobType') }}>
+                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('jobType'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                     <Autocomplete
                     options={jobTypeOptions}
                     value={filters.jobType}
@@ -671,14 +791,20 @@ export default function TaskSearchCard({
                     }
                     freeSolo
                     renderInput={(params) => (
-                      <TextField {...params} label="Job Type" size="small" fullWidth />
+                      <TextField
+                        {...params}
+                        placeholder={filters.jobType ? "" : "Job Type"}
+                        size="small"
+                        fullWidth
+                        aria-label="Job Type"
+                      />
                     )}
                     />
                   </Box>
                 </Grid>
 
                 <Grid item xs={12} sm="auto" md="auto">
-                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('locationType') }}>
+                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('locationType'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                     <FormControl size="small" sx={{ minWidth: 120 }}>
                     <InputLabel id="location-type-label">Location Type</InputLabel>
                     <Select
@@ -704,20 +830,21 @@ export default function TaskSearchCard({
                 </Grid>
 
                 <Grid item xs={12} sm="auto" md="auto">
-                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('locationValue') }}>
+                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('locationValue'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                     <TextField
-                      label="Location Value"
                       name="locationValue"
                       value={filters.locationValue}
                       onChange={handleFieldChange}
                       size="small"
                       fullWidth
+                      placeholder={filters.locationValue ? "" : "Location Value"}
+                      aria-label="Location Value"
                     />
                   </Box>
                 </Grid>
 
                 <Grid item xs={12} sm="auto" md="auto">
-                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('scoreValue') }}>
+                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('scoreValue'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                     <FormControl size="small" sx={{ minWidth: 120 }}>
                     <InputLabel id="imp-condition-label">IMP Condition</InputLabel>
                     <Select
@@ -742,14 +869,15 @@ export default function TaskSearchCard({
                 </Grid>
 
                 <Grid item xs={12} sm="auto" md="auto">
-                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('scoreValue') }}>
+                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('scoreValue'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                     <TextField
-                      label="IMP Value"
                       name="scoreValue"
                       value={filters.scoreValue}
                       onChange={handleFieldChange}
                       size="small"
                       fullWidth
+                      placeholder={filters.scoreValue ? "" : "IMP Value"}
+                      aria-label="IMP Value"
                     />
                   </Box>
                 </Grid>
@@ -828,149 +956,4 @@ export default function TaskSearchCard({
   );
 }
 
-interface MultiSelectFieldProps {
-  label: string;
-  options: string[];
-  value: string[];
-  onChange: (value: string[]) => void;
-  required?: boolean;
-}
-
-const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
-  label,
-  options,
-  value,
-  onChange,
-  required = false,
-}) => {
-  const [inputValue, setInputValue] = useState("");
-  const normalizedQuery = inputValue.trim().toLowerCase();
-
-  const filteredOptions = useMemo(() => {
-    if (!normalizedQuery) return options;
-    return options.filter((option) =>
-      option.toLowerCase().includes(normalizedQuery)
-    );
-  }, [normalizedQuery, options]);
-
-  const filteredSelectionCount = filteredOptions.filter((option) =>
-    value.includes(option)
-  ).length;
-
-  const allFilteredSelected =
-    filteredOptions.length > 0 &&
-    filteredSelectionCount === filteredOptions.length;
-
-  const partiallyFilteredSelected =
-    filteredSelectionCount > 0 && !allFilteredSelected;
-
-  const handleChange = (
-    _event: React.SyntheticEvent,
-    newValue: string[],
-    _reason: AutocompleteChangeReason,
-    details?: AutocompleteChangeDetails<string>
-  ) => {
-    if (details?.option === SELECT_ALL_VALUE) {
-      if (!filteredOptions.length) {
-        return;
-      }
-
-      const next = allFilteredSelected
-        ? value.filter((option) => !filteredOptions.includes(option))
-        : Array.from(new Set([...value, ...filteredOptions]));
-
-      onChange(next);
-      return;
-    }
-
-    const cleaned = newValue.filter((option) => option !== SELECT_ALL_VALUE);
-    onChange(cleaned);
-  };
-
-  return (
-    <Autocomplete
-      multiple
-      disableCloseOnSelect
-      options={[SELECT_ALL_VALUE, ...options]}
-      value={value}
-      inputValue={inputValue}
-      onInputChange={(_event, newInput) => setInputValue(newInput)}
-      filterOptions={(opts) =>
-        opts.filter(
-          (option) =>
-            option === SELECT_ALL_VALUE ||
-            option.toLowerCase().includes(normalizedQuery)
-        )
-      }
-      onChange={handleChange}
-      getOptionLabel={(option) =>
-        option === SELECT_ALL_VALUE ? "Select Filtered" : option
-      }
-      renderOption={(props, option) => {
-        if (option === SELECT_ALL_VALUE) {
-          return (
-            <li {...props}>
-              <ListItemIcon sx={{ minWidth: 32 }}>
-                <Checkbox
-                  edge="start"
-                  checked={allFilteredSelected}
-                  indeterminate={partiallyFilteredSelected}
-                  size="small"
-                />
-              </ListItemIcon>
-              <ListItemText
-                primary={
-                  allFilteredSelected ? "Clear Filtered" : "Select Filtered"
-                }
-              />
-            </li>
-          );
-        }
-
-        return (
-          <li {...props}>
-            <ListItemIcon sx={{ minWidth: 32 }}>
-              <Checkbox
-                edge="start"
-                checked={value.includes(option)}
-                size="small"
-              />
-            </ListItemIcon>
-            <ListItemText primary={option} />
-          </li>
-        );
-      }}
-      renderTags={(tagValue, getTagProps) => {
-        const visible = tagValue.slice(0, 1);
-        const chips = visible.map((option, index) => (
-          <Chip
-            {...getTagProps({ index })}
-            key={option}
-            label={option}
-            size="small"
-          />
-        ));
-
-        if (tagValue.length > 1) {
-          chips.push(
-            <Chip key="more" label={`+${tagValue.length - 1}`} size="small" />
-          );
-        }
-
-        return chips;
-      }}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label={label}
-          placeholder={label}
-          size="small"
-          required={required}
-        />
-      )}
-      ListboxProps={{
-        sx: { maxHeight: 320 },
-      }}
-    />
-  );
-};
+/* MultiSelectField moved to src/shared-ui/MultiSelectField.tsx */

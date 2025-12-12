@@ -200,6 +200,8 @@ export default function TaskPopoutPanel({
               activeIds={activePills}
               maxVisible={6}
               onToggle={(id) => handlePillClick(id)}
+              onSelectAll={selectAll}
+              onClearAll={unselectAll}
             />
           </Stack>
         </Box>

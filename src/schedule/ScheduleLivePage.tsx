@@ -489,10 +489,10 @@ export default function ScheduleLivePage() {
       <TextField
         select
         size="small"
-        label="Division"
         value={division}
         onChange={(e) => handleDivisionChange(e.target.value)}
         sx={{ minWidth: { xs: theme.spacing(14), sm: theme.spacing(18) } }}
+        SelectProps={{ displayEmpty: true, renderValue: (selected) => (selected ? String(selected) : 'Division') }}
       >
         <MenuItem value="">All</MenuItem>
         {divisionOptions.map((d) => (
@@ -505,10 +505,10 @@ export default function ScheduleLivePage() {
       <TextField
         select
         size="small"
-        label="Domain"
         value={domain}
         onChange={(e) => handleDomainChange(e.target.value)}
         sx={{ minWidth: { xs: theme.spacing(14), sm: theme.spacing(18) } }}
+        SelectProps={{ displayEmpty: true, renderValue: (selected) => (selected ? String(selected) : 'Domain') }}
       >
         <MenuItem value="">All</MenuItem>
         {domainOptions.map((d) => (
