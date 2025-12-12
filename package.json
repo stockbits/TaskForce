@@ -12,9 +12,10 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
-    "@types/node": "24.10.0",
     "@mui/icons-material": "^6.1.7",
     "@mui/material": "^6.1.7",
+    "@mui/x-data-grid": "^6.1.0",
+    "@types/node": "24.10.0",
     "framer-motion": "12.23.24",
     "leaflet": "^1.9.4",
     "lucide-react": "0.552.0",

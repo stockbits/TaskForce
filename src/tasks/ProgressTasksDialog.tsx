@@ -94,7 +94,7 @@ export default function ProgressTasksDialog({
             </Select>
           </FormControl>
           <Alert severity="info" variant="outlined" sx={{ borderRadius: 3 }}>Selected tasks will be stamped with the note below and updated to <strong> {targetStatus} </strong> unless they already match.</Alert>
-          <TextField size="small" label="Assign to Resource ID (optional)" placeholder="Enter resource ID to assign" value={targetResourceId} onChange={(e) => setTargetResourceId(e.target.value)} helperText="If set, this resource will be associated with the progress update." />
+          {/* Assign to Resource ID removed — pins handled elsewhere */}
         </Stack>
 
         <Stack spacing={1.5} sx={{ gridColumn: "1 / -1" }}>

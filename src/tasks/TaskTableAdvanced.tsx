@@ -1616,17 +1616,8 @@ export default function TaskTable_Advanced({
                       '&:hover': {
                         backgroundColor: alpha(theme.palette.primary.main, 0.12),
                       },
-                      '&::before': isSelected
-                        ? {
-                            content: '""',
-                            position: "absolute",
-                            top: 4,
-                            bottom: 4,
-                            left: 2,
-                            width: 3,
-                            borderRadius: 999,
-                            backgroundColor: theme.palette.primary.main,
-                          }
+                      boxShadow: isSelected
+                        ? `inset 6px 0 0 0 ${theme.palette.primary.main}`
                         : undefined,
                     }}
                   >
@@ -1635,11 +1626,15 @@ export default function TaskTable_Advanced({
                         key={key}
                         data-colkey={key}
                         sx={{
-                          px: 2,
-                          py: density === "comfortable" ? 1.5 : 1,
+                              px: density === "comfortable" ? 2 : 1,
+                              py: density === "comfortable" ? 1.5 : 0.5,
+                              fontSize: density === "comfortable" ? '0.95rem' : '0.78rem',
+                              lineHeight: density === "comfortable" ? 1.4 : 1.2,
                         }}
                       >
-                        {String(row[key] ?? "")}
+                            <Box sx={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {String(row[key] ?? "")}
+                            </Box>
                       </TableCell>
                     ))}
                   </TableRow>
@@ -2049,14 +2044,7 @@ export default function TaskTable_Advanced({
                           <strong> {targetStatus} </strong>
                           unless they already match.
                         </Alert>
-                        <TextField
-                          size="small"
-                          label="Assign to Resource ID (optional)"
-                          placeholder="Enter resource ID to assign"
-                          value={targetResourceId}
-                          onChange={(e) => setTargetResourceId(e.target.value)}
-                          helperText="If set, this resource will be associated with the progress update."
-                        />
+                        {/* Assign-to-resource input removed — pins are shown at start */}
                       </Stack>
 
                       <Stack spacing={1.5} sx={{ gridColumn: "1 / -1" }}>

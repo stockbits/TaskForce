@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { motion } from "framer-motion";
 import rawMockTasks from "@/data/mockTasks.json";
 import TaskSearchCard from "@/tasks/TaskSearchCardClean";
 import TaskTableAdvanced from "@/tasks/TaskTableAdvanced";
+import TaskTableMUI from "@/tasks/TaskTableMUI";
 import { useExternalWindow } from "@/hooks/useExternalWindow";
 import { Box, Paper, Typography, Stack } from "@mui/material";
 
@@ -88,7 +88,7 @@ export default function TaskManagementPage() {
         const paginationHeight = 56;
         const available =
           window.innerHeight - searchRect.bottom - paginationHeight - 24;
-        const newHeight = Math.min(Math.max(350, available), 720);
+        const newHeight = Math.min(Math.max(220, available), 900);
         setTableHeight(newHeight);
       }
     };
@@ -102,6 +102,14 @@ export default function TaskManagementPage() {
       window.removeEventListener("resize", updateHeight);
       resizeObs.disconnect();
     };
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("taskTableDensity", "compact");
+    } catch (err) {
+      // ignore
+    }
   }, []);
 
   const applyFilters = useCallback((filters: Record<string, any> = {}) => {
@@ -279,29 +287,37 @@ export default function TaskManagementPage() {
   }, [canCopy, filteredTasks]);
 
   return (
-    <motion.div
+    <Box
       ref={containerRef}
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -15 }}
-      transition={{ duration: 0.35 }}
-      className="flex flex-col p-4 w-full max-w-full h-full min-h-0 mx-auto space-y-4 overflow-hidden"
-      style={{ flex: 1 }}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        p: 4,
+        width: "100%",
+        maxWidth: "100%",
+        height: "100%",
+        minHeight: 0,
+        mx: "auto",
+        gap: 3,
+        overflow: "hidden",
+        flex: 1,
+      }}
     >
       <Toaster />
 
-      <div ref={searchRef}>
+      <Box ref={searchRef}>
         <TaskSearchCard
           onSearch={applyFilters}
           onClear={handleClear}
           onCopy={copyAll}
           onExport={exportCSV}
           canCopy={canCopy}
+          forceCollapsed={filteredTasks.length > 0}
         />
-      </div>
+      </Box>
 
       {filteredTasks.length > 0 ? (
-        <TaskTableAdvanced
+        <TaskTableMUI
           rows={filteredTasks}
           headerNames={headerNames}
           tableHeight={tableHeight}
@@ -311,17 +327,27 @@ export default function TaskManagementPage() {
           }}
         />
       ) : (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex flex-col items-center justify-center py-20 text-center text-gray-500 flex-grow"
+        <Paper
+          elevation={0}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            py: 8,
+            textAlign: "center",
+            color: (theme) => theme.palette.text.secondary,
+            flexGrow: 1,
+          }}
         >
-          <p className="text-sm mb-2">No results yet</p>
-          <p className="text-xs text-gray-400">
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            No results yet
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
             Apply filters above to populate the table.
-          </p>
-        </motion.div>
+          </Typography>
+        </Paper>
       )}
-    </motion.div>
+    </Box>
   );
 }

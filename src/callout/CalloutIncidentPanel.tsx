@@ -791,22 +791,20 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
               <Stack direction="row" spacing={2} alignItems="center">
                 <FormControl size="small" sx={{ minWidth: { xs: theme.spacing(16), sm: theme.spacing(20) } }}>
                   <Select
+                    native
                     value={listScope}
-                    onChange={(event: SelectChangeEvent) =>
+                    onChange={((event: any) =>
                       setListScope(event.target.value as CalloutListScope)
-                    }
-                    displayEmpty
+                    ) as any}
                     sx={{
                       fontWeight: 600,
                       color: theme.palette.primary.main,
                       '& .MuiSelect-select': { py: 1 },
                     }}
                   >
-                    <MenuItem value="main">Main List</MenuItem>
-                    <MenuItem value="backup" disabled={!hasBackupResources}>
-                      Backup List
-                    </MenuItem>
-                    <MenuItem value="all">All Lists</MenuItem>
+                    <option value="main">Main List</option>
+                    <option value="backup" disabled={!hasBackupResources}>Backup List</option>
+                    <option value="all">All Lists</option>
                   </Select>
                 </FormControl>
 
@@ -1069,21 +1067,21 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                 </TableCell>
 
                                 <TableCell>
-                                  <FormControl fullWidth size="small" disabled={rowLocked}>
+                                    <FormControl fullWidth size="small" disabled={rowLocked}>
                                     <Select
+                                      native
                                       value={draft.outcome || ""}
-                                      onChange={(event: SelectChangeEvent) =>
+                                      onChange={((event: any) =>
                                         handleDraftChange(resource.resourceId, {
                                           outcome: event.target.value as CalloutOutcome,
                                         })
-                                      }
-                                      displayEmpty
+                                      ) as any}
                                     >
-                                      <MenuItem value="">Select outcome…</MenuItem>
+                                      <option value="">Select outcome…</option>
                                       {AVAILABLE_CALLOUT_OUTCOMES.map((key) => (
-                                        <MenuItem key={key} value={key}>
+                                        <option key={key} value={key}>
                                           {CalloutOutcomeConfig[key].label}
-                                        </MenuItem>
+                                        </option>
                                       ))}
                                     </Select>
                                   </FormControl>
@@ -1131,14 +1129,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                     justifyContent="flex-end"
                                     alignItems={{ xs: "stretch", sm: "center" }}
                                   >
-                                      <TextField
-                                        size="small"
-                                        placeholder="Assign resource ID"
-                                        value={draft.assignedResourceId ?? resource.resourceId}
-                                        disabled={rowLocked}
-                                        onChange={(e) => handleDraftChange(resource.resourceId, { assignedResourceId: e.target.value })}
-                                        sx={{ width: { xs: '100%', sm: 160 }, mr: { sm: 1 } }}
-                                      />
+                                      {/* assignedResourceId removed — pins shown at start */}
                                     <Button
                                       variant={rowLocked ? "contained" : "outlined"}
                                       color={rowLocked ? "success" : "primary"}

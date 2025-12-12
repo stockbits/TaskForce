@@ -27,6 +27,7 @@ import {
   Tabs,
   TextField,
   Typography,
+  Tooltip,
   useTheme,
 } from "@mui/material";
 import type {
@@ -34,6 +35,7 @@ import type {
   AutocompleteChangeReason,
 } from "@mui/material/Autocomplete";
 import { Bookmark, ChevronDown, Eye, EyeOff, Search } from "lucide-react";
+import FilterListIcon from '@mui/icons-material/FilterList';
 
 type Filters = {
   taskSearch: string;
@@ -62,6 +64,7 @@ type Props = {
   onCopy?: () => void;
   onExport?: () => void;
   canCopy?: boolean;
+  forceCollapsed?: boolean;
 };
 
 type ArrayFilterKey =
@@ -131,6 +134,7 @@ export default function TaskSearchCard({
   onCopy,
   onExport,
   canCopy = false,
+  forceCollapsed = false,
 }: Props) {
   const theme = useTheme();
   const [filters, setFilters] = useState<Filters>(() => ({ ...INITIAL_FILTERS }));
@@ -138,6 +142,7 @@ export default function TaskSearchCard({
   const [isFavourite, setIsFavourite] = useState(false);
   const [activeTab, setActiveTab] = useState<"basic" | "advanced">("basic");
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [dateMenuAnchor, setDateMenuAnchor] = useState<null | HTMLElement>(null);
 
   const uniq = (arr: (string | null | undefined)[]) =>
     Array.from(new Set(arr.filter(Boolean) as string[]));
@@ -304,6 +309,11 @@ export default function TaskSearchCard({
     onClear();
   }, [onClear]);
 
+  // auto-collapse when parent requests it (e.g., results visible)
+  React.useEffect(() => {
+    if (forceCollapsed) setCardCollapsed(true);
+  }, [forceCollapsed]);
+
   const handleMenuOpen = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       setMenuAnchorEl(event.currentTarget);
@@ -389,94 +399,7 @@ export default function TaskSearchCard({
               Use global search or set Division + Domain.
             </Typography>
           </Box>
-          <Stack
-            direction="row"
-            spacing={2}
-            sx={{ display: { xs: "none", md: "flex" } }}
-            alignItems="flex-end"
-          >
-            <Stack spacing={0.5}>
-              <Typography variant="caption" fontWeight={600}>
-                From
-              </Typography>
-              <Stack direction="row" spacing={1}>
-                <TextField
-                  type="date"
-                  name="fromDate"
-                  value={filters.fromDate}
-                  onChange={handleFieldChange}
-                  size="small"
-                  InputLabelProps={{ shrink: true }}
-                  sx={{
-                    width: theme.spacing(18.75), // 150px
-                    '& .MuiInputBase-input': { color: "inherit" },
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: "rgba(255,255,255,0.35)",
-                    },
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: "rgba(255,255,255,0.55)",
-                    },
-                    '& .MuiInputBase-input::placeholder': {
-                      color: "rgba(255,255,255,0.65)",
-                    },
-                  }}
-                />
-                <TextField
-                  type="time"
-                  name="fromTime"
-                  value={filters.fromTime}
-                  onChange={handleFieldChange}
-                  size="small"
-                  sx={{
-                    width: theme.spacing(13.75), // 110px
-                    '& .MuiInputBase-input': { color: "inherit" },
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: "rgba(255,255,255,0.35)",
-                    },
-                  }}
-                />
-              </Stack>
-            </Stack>
-            <Stack spacing={0.5}>
-              <Typography variant="caption" fontWeight={600}>
-                To
-              </Typography>
-              <Stack direction="row" spacing={1}>
-                <TextField
-                  type="date"
-                  name="toDate"
-                  value={filters.toDate}
-                  onChange={handleFieldChange}
-                  size="small"
-                  InputLabelProps={{ shrink: true }}
-                  sx={{
-                    width: 150,
-                    '& .MuiInputBase-input': { color: "inherit" },
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: "rgba(255,255,255,0.35)",
-                    },
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: "rgba(255,255,255,0.55)",
-                    },
-                  }}
-                />
-                <TextField
-                  type="time"
-                  name="toTime"
-                  value={filters.toTime}
-                  onChange={handleFieldChange}
-                  size="small"
-                  sx={{
-                    width: 110,
-                    '& .MuiInputBase-input': { color: "inherit" },
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: "rgba(255,255,255,0.35)",
-                    },
-                  }}
-                />
-              </Stack>
-            </Stack>
-          </Stack>
+          <Box />
         </Stack>
 
         <Stack
@@ -543,7 +466,7 @@ export default function TaskSearchCard({
           }}
         />
 
-        <Stack direction="row" spacing={1.5} mt={2} flexWrap="wrap">
+          <Stack direction="row" spacing={1} mt={1.25} flexWrap="wrap">
           {quickPresets.map((preset) => (
             <Chip
               key={preset.label}
@@ -563,18 +486,56 @@ export default function TaskSearchCard({
       </Box>
 
       <Collapse in={!cardCollapsed} timeout={220} unmountOnExit>
-        <CardContent sx={{ pt: 3, pb: 1, px: 3 }}>
-          <Stack direction="row" flexWrap="wrap" gap={1} minHeight={32}>
-            {activeChips.map((chip) => (
-              <Chip
-                key={`${chip.key}-${chip.displayValue}`}
-                label={`${chip.label}: ${chip.displayValue}`}
-                onDelete={() => handleChipDelete(chip.key)}
-                size="small"
-                variant="outlined"
-              />
-            ))}
-          </Stack>
+        <CardContent
+          sx={{
+            pt: 3,
+            pb: 1,
+            px: 3,
+            maxHeight: 'none',
+            overflowY: 'visible',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, maxHeight: 40, overflow: 'hidden', py: 0.5 }}>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              {(() => {
+                const maxVisible = 1;
+                const visible = activeChips.slice(0, maxVisible);
+                const hidden = activeChips.slice(maxVisible);
+                return (
+                  <>
+                    {visible.map((chip) => (
+                      <Chip
+                        key={`${chip.key}-${chip.displayValue}`}
+                        label={`${chip.label}: ${chip.displayValue}`}
+                        onDelete={() => handleChipDelete(chip.key)}
+                        size="small"
+                        variant="outlined"
+                        sx={{ height: 28, fontSize: '0.75rem', '& .MuiChip-label': { px: 1 } }}
+                      />
+                    ))}
+
+                    {hidden.length > 0 && (
+                      <Tooltip
+                        title={
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, p: 0.25 }}>
+                            {hidden.map((c) => (
+                              <Box key={`${c.key}-${c.displayValue}`} sx={{ px: 0.5 }}>
+                                <Typography variant="caption">{`${c.label}: ${c.displayValue}`}</Typography>
+                              </Box>
+                            ))}
+                          </Box>
+                        }
+                        arrow
+                        placement="bottom"
+                      >
+                        <Chip label={`+${hidden.length}`} size="small" sx={{ height: 28 }} />
+                      </Tooltip>
+                    )}
+                  </>
+                );
+              })()}
+            </Box>
+          </Box>
 
           <Tabs
             value={activeTab}
@@ -587,9 +548,67 @@ export default function TaskSearchCard({
 
           {activeTab === "basic" && (
             <Box mt={3}>
-              <Stack spacing={3}>
-                <Stack direction={{ xs: "column", md: "row" }} spacing={3}>
-                  <Box sx={{ flex: 1, minWidth: 220 }}>
+              <Stack spacing={2}>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+                  <IconButton
+                    onClick={(e) => setDateMenuAnchor(e.currentTarget)}
+                    size="small"
+                    aria-label="date-filter"
+                  >
+                    <FilterListIcon fontSize="small" />
+                  </IconButton>
+                  <Menu
+                    anchorEl={dateMenuAnchor}
+                    open={Boolean(dateMenuAnchor)}
+                    onClose={() => setDateMenuAnchor(null)}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                  >
+                    <Box sx={{ p: 1, display: 'flex', flexDirection: 'column', gap: 1, minWidth: 220 }}>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <TextField
+                          type="date"
+                          name="fromDate"
+                          label="From"
+                          value={filters.fromDate}
+                          onChange={handleFieldChange}
+                          size="small"
+                          InputLabelProps={{ shrink: true }}
+                        />
+                        <TextField
+                          type="time"
+                          name="fromTime"
+                          value={filters.fromTime}
+                          onChange={handleFieldChange}
+                          size="small"
+                        />
+                      </Stack>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <TextField
+                          type="date"
+                          name="toDate"
+                          label="To"
+                          value={filters.toDate}
+                          onChange={handleFieldChange}
+                          size="small"
+                          InputLabelProps={{ shrink: true }}
+                        />
+                        <TextField
+                          type="time"
+                          name="toTime"
+                          value={filters.toTime}
+                          onChange={handleFieldChange}
+                          size="small"
+                        />
+                      </Stack>
+                      <Button variant="contained" size="small" onClick={() => setDateMenuAnchor(null)}>
+                        Apply
+                      </Button>
+                    </Box>
+                  </Menu>
+                </Box>
+                <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
+                    <Box sx={{ flex: 1, minWidth: 140 }}>
                     <MultiSelectField
                       label="Division"
                       options={divisionOptions}
@@ -599,7 +618,7 @@ export default function TaskSearchCard({
                     />
                   </Box>
 
-                  <Box sx={{ flex: 1, minWidth: 220 }}>
+                  <Box sx={{ flex: 1, minWidth: 140 }}>
                     <MultiSelectField
                       label="Domain ID"
                       options={domainOptions}
@@ -609,7 +628,7 @@ export default function TaskSearchCard({
                     />
                   </Box>
 
-                  <Box sx={{ flex: 1, minWidth: 220 }}>
+                  <Box sx={{ flex: 1, minWidth: 140 }}>
                     <MultiSelectField
                       label="Task Status"
                       options={statusOptions}
@@ -618,7 +637,7 @@ export default function TaskSearchCard({
                     />
                   </Box>
 
-                  <Box sx={{ flex: 1, minWidth: 220 }}>
+                  <Box sx={{ flex: 1, minWidth: 140 }}>
                     <MultiSelectField
                       label="Commit Type"
                       options={commitOptions}
@@ -628,7 +647,7 @@ export default function TaskSearchCard({
                   </Box>
                 </Stack>
 
-                <Stack direction={{ xs: "column", md: "row" }} spacing={3}>
+                <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
                   <Box sx={{ flex: 1, minWidth: 220 }}>
                     <MultiSelectField
                       label="Response Code"
@@ -943,7 +962,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
         );
       }}
       renderTags={(tagValue, getTagProps) => {
-        const visible = tagValue.slice(0, 2);
+        const visible = tagValue.slice(0, 1);
         const chips = visible.map((option, index) => (
           <Chip
             {...getTagProps({ index })}
@@ -953,9 +972,9 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
           />
         ));
 
-        if (tagValue.length > 2) {
+        if (tagValue.length > 1) {
           chips.push(
-            <Chip key="more" label={`+${tagValue.length - 2}`} size="small" />
+            <Chip key="more" label={`+${tagValue.length - 1}`} size="small" />
           );
         }
 
