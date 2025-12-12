@@ -21,6 +21,7 @@ import {
   ListItemText,
   Menu,
   MenuItem,
+  Grid,
   Select,
   Stack,
   Tab,
@@ -189,6 +190,25 @@ export default function TaskSearchCard({
     () => uniq(mockTasks.map((t) => t.taskType)).sort(),
     []
   );
+
+  // Estimated maximum visible characters for key fields (used to cap box widths).
+  // These should ideally come from server metadata (max lengths), but we use sensible defaults.
+  const expectedMaxChars: Record<string, number> = {
+    division: 30,
+    domainId: 8,
+    taskStatuses: 20,
+    commitType: 18,
+    responseCode: 8,
+    pwa: 18,
+    capabilities: 24,
+    requester: 28,
+    jobType: 22,
+    locationValue: 32,
+    locationType: 16,
+    scoreValue: 6,
+  };
+
+  const maxWidthFor = (key: string) => `${expectedMaxChars[key] ?? 24}ch`;
 
   const canSearch = useMemo(() => {
     if (filters.taskSearch.trim().length > 0) return true;
@@ -380,89 +400,50 @@ export default function TaskSearchCard({
         mx: 0,
       }}
     >
-      <Box
-        sx={{
-          position: "relative",
-          px: { xs: 2, md: 3 },
-          pt: 1,
-          pb: 1,
-          background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-          color: theme.palette.primary.contrastText,
-        }}
-      >
-        <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={2}>
-          <Box>
-            <Typography variant="subtitle1" fontWeight={600} sx={{ letterSpacing: 0.4 }}>
-              Search Tasks
-            </Typography>
-            <Typography variant="caption" sx={{ opacity: 0.8 }}>
-              Use global search or set Division + Domain.
-            </Typography>
-          </Box>
-          <Box />
-        </Stack>
-
-        <Stack
-          direction="row"
-          spacing={1}
-          alignItems="center"
-          sx={{ position: "absolute", top: 16, right: 16 }}
-        >
-          <IconButton
-            onClick={() => setIsFavourite((prev) => !prev)}
-            sx={{
-              color: "inherit",
-              '&:hover': { backgroundColor: "rgba(255,255,255,0.12)" },
-            }}
-            size="small"
+      <Box sx={{ px: { xs: 2, md: 3 }, py: 0.5, bgcolor: 'transparent' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Tabs
+            value={activeTab}
+            onChange={(_e, v) => setActiveTab(v)}
+            variant="standard"
+            sx={{ minHeight: 36 }}
           >
-            <Bookmark size={18} fill={isFavourite ? "#facc15" : "none"} />
+            <Tab value="basic" label="Basic" sx={{ minHeight: 36, px: 1 }} />
+            <Tab value="advanced" label="Advanced" sx={{ minHeight: 36, px: 1 }} />
+          </Tabs>
+
+          <Box sx={{ flex: 1 }} />
+
+          <Box sx={{ width: { xs: 140, sm: 260, md: 360 } }}>
+            <TextField
+              name="taskSearch"
+              value={filters.taskSearch}
+              onChange={handleFieldChange}
+              placeholder="Global search"
+              size="small"
+              fullWidth
+              InputProps={{ startAdornment: (<InputAdornment position="start"><Search size={16} /></InputAdornment>) }}
+            />
+          </Box>
+
+          <IconButton
+            onClick={(e) => setDateMenuAnchor(e.currentTarget)}
+            size="small"
+            sx={{ ml: 1 }}
+            aria-label="date-filter"
+          >
+            <FilterListIcon fontSize="small" />
           </IconButton>
-          {/* collapse toggle removed — search should remain open */}
-        </Stack>
 
-        <TextField
-          fullWidth
-          name="taskSearch"
-          value={filters.taskSearch}
-          onChange={handleFieldChange}
-          placeholder="Search by Work ID, Resource ID, or Task ID"
-          size="small"
-          sx={{
-            mt: 1,
-            '& .MuiOutlinedInput-root': {
-              color: "inherit",
-              backgroundColor: "rgba(255,255,255,0.18)",
-              borderRadius: 2,
-              '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: "rgba(255,255,255,0.25)",
-              },
-              '&:hover .MuiOutlinedInput-notchedOutline': {
-                borderColor: "rgba(255,255,255,0.4)",
-              },
-              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                borderColor: "rgba(255,255,255,0.6)",
-              },
-            },
-            '& .MuiInputBase-input::placeholder': {
-              color: "rgba(255,255,255,0.75)",
-            },
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search size={16} color="rgba(255,255,255,0.75)" />
-              </InputAdornment>
-            ),
-          }}
-        />
-
-          {/* Removed quick preset chips to keep the header focused on global search */}
+          <IconButton onClick={() => setIsFavourite((p) => !p)} size="small" sx={{ ml: 1 }} aria-label="favourite">
+            <Bookmark size={16} fill={isFavourite ? "#facc15" : "none"} />
+          </IconButton>
+        </Box>
       </Box>
 
         <CardContent
           sx={{
-            pt: 1,
+            pt: 0.5,
             pb: 0,
             px: 2,
             maxHeight: 'none',
@@ -511,25 +492,11 @@ export default function TaskSearchCard({
             </Box>
           </Box>
 
-          <Tabs
-            value={activeTab}
-            onChange={(_event, value) => setActiveTab(value)}
-            sx={{ mt: 0.5 }}
-          >
-            <Tab value="basic" label="Basic" />
-            <Tab value="advanced" label="Advanced" />
-          </Tabs>
+          {/* Tabs moved to top compact header row */}
 
           {activeTab === "basic" && (
             <Box mt={1}>
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 0.5 }}>
-                  <IconButton
-                    onClick={(e) => setDateMenuAnchor(e.currentTarget)}
-                    size="small"
-                    aria-label="date-filter"
-                  >
-                    <FilterListIcon fontSize="small" />
-                  </IconButton>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 0.25 }}>
                   <Menu
                     anchorEl={dateMenuAnchor}
                     open={Boolean(dateMenuAnchor)}
@@ -580,80 +547,95 @@ export default function TaskSearchCard({
                     </Box>
                   </Menu>
                 </Box>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  <Box sx={{ flex: '1 1 clamp(180px,18vw,320px)', minWidth: { xs: '100%', sm: 140 } }}>
-                    <MultiSelectField
-                      label="Division"
-                      options={divisionOptions}
-                      value={filters.division}
-                      onChange={(value) => handleMultiChange("division", value)}
-                      required
-                    />
-                  </Box>
+                <Grid container spacing={1} alignItems="center">
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('division') }}>
+                      <MultiSelectField
+                        label="Division"
+                        options={divisionOptions}
+                        value={filters.division}
+                        onChange={(value) => handleMultiChange("division", value)}
+                        required
+                      />
+                    </Box>
+                  </Grid>
 
-                    <Box sx={{ flex: '1 1 clamp(160px,16vw,280px)', minWidth: { xs: '100%', sm: 140 } }}>
-                    <MultiSelectField
-                      label="Domain ID"
-                      options={domainOptions}
-                      value={filters.domainId}
-                      onChange={(value) => handleMultiChange("domainId", value)}
-                      required
-                    />
-                  </Box>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('domainId') }}>
+                      <MultiSelectField
+                        label="Domain ID"
+                        options={domainOptions}
+                        value={filters.domainId}
+                        onChange={(value) => handleMultiChange("domainId", value)}
+                        required
+                      />
+                    </Box>
+                  </Grid>
 
-                  <Box sx={{ flex: '1 1 clamp(160px,16vw,280px)', minWidth: { xs: '100%', sm: 140 } }}>
-                    <MultiSelectField
-                      label="Task Status"
-                      options={statusOptions}
-                      value={filters.taskStatuses}
-                      onChange={(value) => handleMultiChange("taskStatuses", value)}
-                    />
-                  </Box>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('taskStatuses') }}>
+                      <MultiSelectField
+                        label="Task Status"
+                        options={statusOptions}
+                        value={filters.taskStatuses}
+                        onChange={(value) => handleMultiChange("taskStatuses", value)}
+                      />
+                    </Box>
+                  </Grid>
 
-                  <Box sx={{ flex: '1 1 clamp(160px,16vw,280px)', minWidth: { xs: '100%', sm: 140 } }}>
-                    <MultiSelectField
-                      label="Commit Type"
-                      options={commitOptions}
-                      value={filters.commitType}
-                      onChange={(value) => handleMultiChange("commitType", value)}
-                    />
-                  </Box>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('commitType') }}>
+                      <MultiSelectField
+                        label="Commit Type"
+                        options={commitOptions}
+                        value={filters.commitType}
+                        onChange={(value) => handleMultiChange("commitType", value)}
+                      />
+                    </Box>
+                  </Grid>
 
-                  <Box sx={{ flex: '1 1 clamp(180px,18vw,320px)', minWidth: { xs: '100%', sm: 160 } }}>
-                    <MultiSelectField
-                      label="Response Code"
-                      options={responseOptions}
-                      value={filters.responseCode}
-                      onChange={(value) => handleMultiChange("responseCode", value)}
-                    />
-                  </Box>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('responseCode') }}>
+                      <MultiSelectField
+                        label="Response Code"
+                        options={responseOptions}
+                        value={filters.responseCode}
+                        onChange={(value) => handleMultiChange("responseCode", value)}
+                      />
+                    </Box>
+                  </Grid>
 
-                  <Box sx={{ flex: '1 1 clamp(180px,18vw,320px)', minWidth: { xs: '100%', sm: 160 } }}>
-                    <MultiSelectField
-                      label="PWA Selector"
-                      options={pwaOptions}
-                      value={filters.pwa}
-                      onChange={(value) => handleMultiChange("pwa", value)}
-                    />
-                  </Box>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('pwa') }}>
+                      <MultiSelectField
+                        label="PWA Selector"
+                        options={pwaOptions}
+                        value={filters.pwa}
+                        onChange={(value) => handleMultiChange("pwa", value)}
+                      />
+                    </Box>
+                  </Grid>
 
-                  <Box sx={{ flex: '1 1 clamp(180px,18vw,320px)', minWidth: { xs: '100%', sm: 160 } }}>
-                    <MultiSelectField
-                      label="Capabilities"
-                      options={capabilityOptions}
-                      value={filters.capabilities}
-                      onChange={(value) => handleMultiChange("capabilities", value)}
-                    />
-                  </Box>
-                </Box>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('capabilities') }}>
+                      <MultiSelectField
+                        label="Capabilities"
+                        options={capabilityOptions}
+                        value={filters.capabilities}
+                        onChange={(value) => handleMultiChange("capabilities", value)}
+                      />
+                    </Box>
+                  </Grid>
+                </Grid>
               </Box>
           )}
 
           {activeTab === "advanced" && (
             <Box mt={1}>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                <Box sx={{ flex: '1 1 clamp(200px,20vw,340px)', minWidth: { xs: '100%', sm: 160 } }}>
-                  <Autocomplete
+                <Grid container spacing={1} alignItems="center">
+                <Grid item xs={12} sm={6} md={6}>
+                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('requester') }}>
+                    <Autocomplete
                     options={requesterOptions}
                     value={filters.requester}
                     inputValue={filters.requester}
@@ -665,13 +647,15 @@ export default function TaskSearchCard({
                     }
                     freeSolo
                     renderInput={(params) => (
-                      <TextField {...params} label="Requester" size="small" />
+                      <TextField {...params} label="Requester" size="small" fullWidth />
                     )}
-                  />
-                </Box>
+                    />
+                  </Box>
+                </Grid>
 
-                <Box sx={{ flex: '1 1 clamp(200px,20vw,340px)', minWidth: { xs: '100%', sm: 160 } }}>
-                  <Autocomplete
+                <Grid item xs={12} sm={6} md={6}>
+                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('jobType') }}>
+                    <Autocomplete
                     options={jobTypeOptions}
                     value={filters.jobType}
                     inputValue={filters.jobType}
@@ -683,13 +667,15 @@ export default function TaskSearchCard({
                     }
                     freeSolo
                     renderInput={(params) => (
-                      <TextField {...params} label="Job Type" size="small" />
+                      <TextField {...params} label="Job Type" size="small" fullWidth />
                     )}
-                  />
-                </Box>
+                    />
+                  </Box>
+                </Grid>
 
-                <Box sx={{ flex: '1 1 clamp(160px,16vw,280px)', minWidth: { xs: '100%', sm: 140 } }}>
-                  <FormControl size="small" sx={{ minWidth: 120 }}>
+                <Grid item xs={12} sm={6} md={3}>
+                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('locationType') }}>
+                    <FormControl size="small" sx={{ minWidth: 120 }}>
                     <InputLabel id="location-type-label">Location Type</InputLabel>
                     <Select
                       labelId="location-type-label"
@@ -710,20 +696,25 @@ export default function TaskSearchCard({
                       <MenuItem value="groupCode">Group Code</MenuItem>
                     </Select>
                   </FormControl>
-                </Box>
+                  </Box>
+                </Grid>
 
-                <Box sx={{ flex: '1 1 clamp(160px,16vw,280px)', minWidth: { xs: '100%', sm: 140 } }}>
-                  <TextField
-                    label="Location Value"
-                    name="locationValue"
-                    value={filters.locationValue}
-                    onChange={handleFieldChange}
-                    size="small"
-                  />
-                </Box>
+                <Grid item xs={12} sm={6} md={5}>
+                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('locationValue') }}>
+                    <TextField
+                      label="Location Value"
+                      name="locationValue"
+                      value={filters.locationValue}
+                      onChange={handleFieldChange}
+                      size="small"
+                      fullWidth
+                    />
+                  </Box>
+                </Grid>
 
-                <Box sx={{ flex: '1 1 clamp(160px,16vw,280px)', minWidth: { xs: '100%', sm: 140 } }}>
-                  <FormControl size="small" sx={{ minWidth: 120 }}>
+                <Grid item xs={12} sm={6} md={2}>
+                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('scoreValue') }}>
+                    <FormControl size="small" sx={{ minWidth: 120 }}>
                     <InputLabel id="imp-condition-label">IMP Condition</InputLabel>
                     <Select
                       labelId="imp-condition-label"
@@ -743,18 +734,22 @@ export default function TaskSearchCard({
                       <MenuItem value="less">Less Than</MenuItem>
                     </Select>
                   </FormControl>
-                </Box>
+                  </Box>
+                </Grid>
 
-                <Box sx={{ flex: '1 1 clamp(100px,10vw,140px)', minWidth: { xs: '100%', sm: 100 } }}>
-                  <TextField
-                    label="IMP Value"
-                    name="scoreValue"
-                    value={filters.scoreValue}
-                    onChange={handleFieldChange}
-                    size="small"
-                  />
-                </Box>
-              </Box>
+                <Grid item xs={12} sm={6} md={2}>
+                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('scoreValue') }}>
+                    <TextField
+                      label="IMP Value"
+                      name="scoreValue"
+                      value={filters.scoreValue}
+                      onChange={handleFieldChange}
+                      size="small"
+                      fullWidth
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Box>
           )}
         </CardContent>

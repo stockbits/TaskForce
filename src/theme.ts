@@ -1,33 +1,37 @@
 import { createTheme } from "@mui/material/styles";
 
-const trimbleBlue = "#003F87";
-const trimbleYellow = "#FFC20E";
-const neutralBackground = "#F5F7FA";
+// Palette matched to provided logo (navy + mint ring)
+const primaryNavy = "#0F2740"; // logo background
+const primaryNavyLight = "#304862";
+const primaryNavyDark = "#0A1A2A";
+const accentMint = "#3BE089"; // mint ring
+const accentMintDark = "#1EA46A";
+const neutralBackground = "#F3F6F8";
 
-export const trimbleTheme = createTheme({
+export const appTheme = createTheme({
   palette: {
     mode: "light",
     primary: {
-      main: trimbleBlue,
-      light: "#2E68A6",
-      dark: "#001E4D",
+      main: primaryNavy,
+      light: primaryNavyLight,
+      dark: primaryNavyDark,
       contrastText: "#FFFFFF",
     },
     secondary: {
-      main: trimbleYellow,
-      light: "#FFD54A",
-      dark: "#C79400",
-      contrastText: trimbleBlue,
+      main: accentMint,
+      light: "#7FF2B6",
+      dark: accentMintDark,
+      contrastText: "#052035",
     },
     background: {
       default: neutralBackground,
       paper: "#FFFFFF",
     },
     text: {
-      primary: "#1F2933",
-      secondary: "#52606D",
+      primary: "#0B2233",
+      secondary: "#475569",
     },
-    divider: "rgba(0, 63, 135, 0.12)",
+    divider: "rgba(15, 39, 64, 0.08)",
   },
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
@@ -39,7 +43,7 @@ export const trimbleTheme = createTheme({
     subtitle2: { color: "#52606D" },
   },
   shape: {
-    borderRadius: 12,
+    borderRadius: 6,
   },
   components: {
     MuiCssBaseline: {
@@ -52,29 +56,29 @@ export const trimbleTheme = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          borderRadius: 16,
+          borderRadius: 6,
         },
       },
     },
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 999,
+          borderRadius: 6,
         },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 18,
-          boxShadow: "0 10px 25px rgba(0, 63, 135, 0.08)",
+          borderRadius: 8,
+          boxShadow: "0 6px 18px rgba(45, 24, 88, 0.06)",
         },
       },
     },
     MuiAppBar: {
       styleOverrides: {
         root: {
-          boxShadow: "0 10px 24px rgba(0, 0, 0, 0.18)",
+          boxShadow: "0 6px 12px rgba(0, 0, 0, 0.08)",
         },
       },
     },

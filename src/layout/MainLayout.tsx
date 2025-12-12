@@ -239,6 +239,8 @@ interface HeaderProps {
   setShowDropdown: (v: boolean) => void;
   onSelectResult: (item: any) => void;
   onToggleSidebar: () => void;
+  overrideTitle?: string | null;
+  whiteBackground?: boolean;
 }
 
 /* =========================================================
@@ -256,9 +258,12 @@ const Header: React.FC<HeaderProps> = memo(
     setShowDropdown,
     onSelectResult,
     onToggleSidebar,
+    overrideTitle,
+    whiteBackground = false,
   }) => {
     const theme = useTheme();
     const displayLabel = useMemo(() => {
+      if (overrideTitle) return overrideTitle;
       if (!currentMenu?.label) return "Dashboard";
       if (windowWidth < 950) {
         return currentMenu.label.split(" ")[0];
@@ -269,23 +274,26 @@ const Header: React.FC<HeaderProps> = memo(
     return (
       <AppBar
         position="sticky"
-        color="primary"
+        color={whiteBackground ? "default" : "primary"}
         sx={{
           zIndex: theme.zIndex.drawer + 1,
-          boxShadow: "0 18px 35px rgba(0,0,0,0.22)",
-          "&::after": {
-            content: '""',
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: -10,
-            height: 10,
-            background: `linear-gradient(to bottom, ${alpha(
-              theme.palette.common.black,
-              0.18
-            )}, transparent)`,
-            pointerEvents: "none",
-          },
+          boxShadow: whiteBackground ? "0 4px 10px rgba(2,6,23,0.06)" : "0 18px 35px rgba(0,0,0,0.22)",
+          backgroundColor: whiteBackground ? theme.palette.background.paper : undefined,
+          "&::after": whiteBackground
+            ? undefined
+            : {
+                content: '""',
+                position: "absolute",
+                left: 0,
+                right: 0,
+                bottom: -10,
+                height: 10,
+                background: `linear-gradient(to bottom, ${alpha(
+                  theme.palette.common.black,
+                  0.18
+                )}, transparent)`,
+                pointerEvents: "none",
+              },
         }}
       >
         <Toolbar
@@ -305,10 +313,10 @@ const Header: React.FC<HeaderProps> = memo(
                 width: theme.spacing(5.5), // 44px
                 height: theme.spacing(5.5),
                 borderRadius: 2,
-                bgcolor: alpha(theme.palette.common.white, 0.12),
-                color: theme.palette.common.white,
+                bgcolor: whiteBackground ? alpha(theme.palette.text.primary, 0.06) : alpha(theme.palette.common.white, 0.12),
+                color: whiteBackground ? theme.palette.text.primary : theme.palette.common.white,
                 '&:hover': {
-                  bgcolor: alpha(theme.palette.common.white, 0.2),
+                  bgcolor: whiteBackground ? alpha(theme.palette.text.primary, 0.08) : alpha(theme.palette.common.white, 0.2),
                 },
               }}
             >
@@ -341,25 +349,25 @@ const Header: React.FC<HeaderProps> = memo(
                     <InputAdornment position="start">
                       <Search
                         size={18}
-                        color={alpha(theme.palette.common.white, 0.75)}
+                        color={whiteBackground ? alpha(theme.palette.text.primary, 0.45) : alpha(theme.palette.common.white, 0.75)}
                       />
                     </InputAdornment>
                   ),
                   sx: {
-                    color: theme.palette.common.white,
+                    color: whiteBackground ? theme.palette.text.primary : theme.palette.common.white,
                     "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: alpha(theme.palette.common.white, 0.3),
+                      borderColor: whiteBackground ? alpha(theme.palette.text.primary, 0.12) : alpha(theme.palette.common.white, 0.3),
                     },
                     "&:hover .MuiOutlinedInput-notchedOutline": {
-                      borderColor: alpha(theme.palette.common.white, 0.5),
+                      borderColor: whiteBackground ? alpha(theme.palette.text.primary, 0.2) : alpha(theme.palette.common.white, 0.5),
                     },
                     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: alpha(theme.palette.common.white, 0.6),
+                      borderColor: whiteBackground ? alpha(theme.palette.primary.main, 0.32) : alpha(theme.palette.common.white, 0.6),
                     },
                     "& input::placeholder": {
-                      color: alpha(theme.palette.common.white, 0.7),
+                      color: whiteBackground ? alpha(theme.palette.text.primary, 0.45) : alpha(theme.palette.common.white, 0.7),
                     },
-                    backgroundColor: alpha(theme.palette.common.white, 0.1),
+                    backgroundColor: whiteBackground ? alpha(theme.palette.background.paper, 0.92) : alpha(theme.palette.common.white, 0.1),
                     borderRadius: 2,
                   },
                 }}
@@ -1330,6 +1338,8 @@ export default function MainLayout() {
           onToggleSidebar={() =>
             window.dispatchEvent(new CustomEvent("toggleSidebar"))
           }
+          overrideTitle={activeSubPage === "TaskManagement" ? "Task Management" : undefined}
+          whiteBackground={activeSubPage === "TaskManagement"}
         />
 
         {/* PAGE BODY */}
@@ -1375,6 +1385,7 @@ export default function MainLayout() {
                   headerNames={headerNames}
                   onOpenPopout={handleOpenPopout}
                   onOpenCalloutIncident={handleOpenCalloutIncident}
+                  sx={{ borderRadius: '0 0 12px 12px', mt: 0, borderTop: 'none' }}
                 />
               ) : (
                 <Paper

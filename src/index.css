@@ -172,8 +172,8 @@ html {
 .leaflet-tooltip.leaflet-tooltip-surface {
   background-color: #ffffff;
   border: 1px solid rgba(8, 58, 97, 0.16);
-  border-radius: 12px;
-  box-shadow: 0 12px 30px rgba(8, 58, 97, 0.16);
+  border-radius: 6px;
+  box-shadow: 0 8px 20px rgba(8, 58, 97, 0.12);
   color: #0f172a;
   padding: 8px 12px;
 }
