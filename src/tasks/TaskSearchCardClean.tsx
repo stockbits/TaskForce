@@ -191,8 +191,11 @@ export default function TaskSearchCard({
     []
   );
 
-  // Estimated maximum visible characters for key fields (used to cap box widths).
-  // These should ideally come from server metadata (max lengths), but we use sensible defaults.
+  // Standard box width (in `ch`) used across filter controls to keep consistent sizing.
+  // If you later want per-field sizing, adjust `STANDARD_BOX_CH` or replace with
+  // a mapping derived from server-side metadata.
+  const STANDARD_BOX_CH = 18;
+
   const expectedMaxChars: Record<string, number> = {
     division: 30,
     domainId: 8,
@@ -208,7 +211,8 @@ export default function TaskSearchCard({
     scoreValue: 6,
   };
 
-  const maxWidthFor = (key: string) => `${expectedMaxChars[key] ?? 24}ch`;
+  // Use a single standard width for all boxes so they align uniformly.
+  const maxWidthFor = (_key: string) => `${STANDARD_BOX_CH}ch`;
 
   const canSearch = useMemo(() => {
     if (filters.taskSearch.trim().length > 0) return true;
@@ -548,8 +552,8 @@ export default function TaskSearchCard({
                   </Menu>
                 </Box>
                 <Grid container spacing={1} alignItems="center">
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('division') }}>
+                  <Grid item xs={12} sm="auto" md="auto">
+                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('division'), px: 0.5, py: 0.25 }}>
                       <MultiSelectField
                         label="Division"
                         options={divisionOptions}
@@ -560,8 +564,8 @@ export default function TaskSearchCard({
                     </Box>
                   </Grid>
 
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('domainId') }}>
+                  <Grid item xs={12} sm="auto" md="auto">
+                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('domainId'), px: 0.5, py: 0.25 }}>
                       <MultiSelectField
                         label="Domain ID"
                         options={domainOptions}
@@ -572,8 +576,8 @@ export default function TaskSearchCard({
                     </Box>
                   </Grid>
 
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('taskStatuses') }}>
+                  <Grid item xs={12} sm="auto" md="auto">
+                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('taskStatuses'), px: 0.5, py: 0.25 }}>
                       <MultiSelectField
                         label="Task Status"
                         options={statusOptions}
@@ -583,8 +587,8 @@ export default function TaskSearchCard({
                     </Box>
                   </Grid>
 
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('commitType') }}>
+                  <Grid item xs={12} sm="auto" md="auto">
+                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('commitType'), px: 0.5, py: 0.25 }}>
                       <MultiSelectField
                         label="Commit Type"
                         options={commitOptions}
@@ -594,8 +598,8 @@ export default function TaskSearchCard({
                     </Box>
                   </Grid>
 
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('responseCode') }}>
+                  <Grid item xs={12} sm="auto" md="auto">
+                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('responseCode'), px: 0.5, py: 0.25 }}>
                       <MultiSelectField
                         label="Response Code"
                         options={responseOptions}
@@ -605,8 +609,8 @@ export default function TaskSearchCard({
                     </Box>
                   </Grid>
 
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('pwa') }}>
+                  <Grid item xs={12} sm="auto" md="auto">
+                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('pwa'), px: 0.5, py: 0.25 }}>
                       <MultiSelectField
                         label="PWA Selector"
                         options={pwaOptions}
@@ -616,8 +620,8 @@ export default function TaskSearchCard({
                     </Box>
                   </Grid>
 
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('capabilities') }}>
+                  <Grid item xs={12} sm="auto" md="auto">
+                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('capabilities'), px: 0.5, py: 0.25 }}>
                       <MultiSelectField
                         label="Capabilities"
                         options={capabilityOptions}
@@ -633,7 +637,7 @@ export default function TaskSearchCard({
           {activeTab === "advanced" && (
             <Box mt={1}>
                 <Grid container spacing={1} alignItems="center">
-                <Grid item xs={12} sm={6} md={6}>
+                <Grid item xs={12} sm="auto" md="auto">
                   <Box sx={{ width: '100%', maxWidth: maxWidthFor('requester') }}>
                     <Autocomplete
                     options={requesterOptions}
@@ -653,7 +657,7 @@ export default function TaskSearchCard({
                   </Box>
                 </Grid>
 
-                <Grid item xs={12} sm={6} md={6}>
+                <Grid item xs={12} sm="auto" md="auto">
                   <Box sx={{ width: '100%', maxWidth: maxWidthFor('jobType') }}>
                     <Autocomplete
                     options={jobTypeOptions}
@@ -673,7 +677,7 @@ export default function TaskSearchCard({
                   </Box>
                 </Grid>
 
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm="auto" md="auto">
                   <Box sx={{ width: '100%', maxWidth: maxWidthFor('locationType') }}>
                     <FormControl size="small" sx={{ minWidth: 120 }}>
                     <InputLabel id="location-type-label">Location Type</InputLabel>
@@ -699,7 +703,7 @@ export default function TaskSearchCard({
                   </Box>
                 </Grid>
 
-                <Grid item xs={12} sm={6} md={5}>
+                <Grid item xs={12} sm="auto" md="auto">
                   <Box sx={{ width: '100%', maxWidth: maxWidthFor('locationValue') }}>
                     <TextField
                       label="Location Value"
@@ -712,7 +716,7 @@ export default function TaskSearchCard({
                   </Box>
                 </Grid>
 
-                <Grid item xs={12} sm={6} md={2}>
+                <Grid item xs={12} sm="auto" md="auto">
                   <Box sx={{ width: '100%', maxWidth: maxWidthFor('scoreValue') }}>
                     <FormControl size="small" sx={{ minWidth: 120 }}>
                     <InputLabel id="imp-condition-label">IMP Condition</InputLabel>
@@ -737,7 +741,7 @@ export default function TaskSearchCard({
                   </Box>
                 </Grid>
 
-                <Grid item xs={12} sm={6} md={2}>
+                <Grid item xs={12} sm="auto" md="auto">
                   <Box sx={{ width: '100%', maxWidth: maxWidthFor('scoreValue') }}>
                     <TextField
                       label="IMP Value"
