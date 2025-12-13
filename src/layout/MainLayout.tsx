@@ -1362,6 +1362,8 @@ export default function MainLayout() {
                 display: "flex",
                 flexDirection: "column",
                 gap: 3,
+                flex: 1,
+                minHeight: 0,
               }}
             >
               <TaskSearchCard

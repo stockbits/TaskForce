@@ -3,7 +3,7 @@ import toast, { Toaster } from "react-hot-toast";
 import rawMockTasks from "@/data/mockTasks.json";
 import TaskSearchCard from "@/tasks/TaskSearchCardClean";
 import TaskTableAdvanced from "@/tasks/TaskTableAdvanced";
-import TaskTableMUI from "@/tasks/TaskTableMUI";
+import TaskTableMUI from "@/shared-ui/ResponsiveTable/TaskTableMUI";
 import { useExternalWindow } from "@/hooks/useExternalWindow";
 import { Box, Paper, Typography, Stack } from "@mui/material";
 
@@ -152,6 +152,8 @@ export default function TaskManagementPage() {
             [
               task.taskId,
               task.workId,
+              task.estimateNumber,
+              task.employeeId,
               task.resourceName,
               task.assetName,
               task.description,
@@ -321,7 +323,7 @@ export default function TaskManagementPage() {
           rows={filteredTasks}
           headerNames={headerNames}
           tableHeight={tableHeight}
-          onOpenPopout={(tasks, mX, mY) => {
+          onOpenPopout={(tasks: any[], mX: number, mY: number) => {
             if (!tasks || tasks.length === 0) return;
             openExternalWindow(tasks as any, mX, mY);
           }}

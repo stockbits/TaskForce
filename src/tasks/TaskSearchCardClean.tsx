@@ -31,8 +31,13 @@ import {
   Tooltip,
   useTheme,
 } from "@mui/material";
-import { Bookmark, ChevronDown, Eye, EyeOff, Search } from "lucide-react";
+import { ChevronDown, Eye, EyeOff, Search } from "lucide-react";
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import TodayIcon from '@mui/icons-material/Today';
+import TodayOutlinedIcon from '@mui/icons-material/TodayOutlined';
+import DateTimePopover from '@/shared-ui/DateTimePopover';
 import { MultiSelectField, SingleSelectField, FreeTypeSelectField } from '@/shared-ui';
 
 type Filters = {
@@ -188,15 +193,9 @@ export default function TaskSearchCard({
     []
   );
 
-  // Build a small prefill prompt from the first task row to show examples
+  // Prefill header describing what users can search (no example values)
   const prefillPrompt = useMemo(() => {
-    const sample = (mockTasks as any[])[0];
-    if (!sample) return "Task ID, Resource, Postcode";
-    const pieces: string[] = [];
-    if (sample.taskId) pieces.push(String(sample.taskId));
-    if (sample.resourceName) pieces.push(String(sample.resourceName));
-    if (sample.postCode) pieces.push(String(sample.postCode));
-    return pieces.length ? `e.g. ${pieces.slice(0, 3).join(', ')}` : 'e.g. Task ID, Resource, Postcode';
+    return "Search by Task ID, Work ID, Estimate Number, Employee ID";
   }, []);
 
   // helper: get the maximum option string length for a given field key
@@ -589,7 +588,7 @@ export default function TaskSearchCard({
 
           <Box sx={{ flex: 1 }} />
 
-          <Box sx={{ width: { xs: 140, sm: 260, md: 360 } }}>
+          <Box sx={{ width: { xs: '100%', sm: 420, md: 720 } }}>
             <TextField
                 name="taskSearch"
                 value={filters.taskSearch}
@@ -597,7 +596,11 @@ export default function TaskSearchCard({
                 placeholder={prefillPrompt}
                 size="small"
                 fullWidth
-                InputProps={{ startAdornment: (<InputAdornment position="start"><Search size={16} /></InputAdornment>) }}
+                sx={{ '& input::placeholder': { color: theme.palette.text.secondary }, '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, fontSize: 13, lineHeight: '32px' } }}
+                InputProps={{
+                  startAdornment: (<InputAdornment position="start"><Search size={16} /></InputAdornment>),
+                  sx: { height: 48 }
+                }}
               />
           </Box>
 
@@ -607,11 +610,19 @@ export default function TaskSearchCard({
             sx={{ ml: 1 }}
             aria-label="date-filter"
           >
-            <FilterListIcon fontSize="small" />
+            { (filters.fromDate || filters.toDate || filters.fromTime || filters.toTime) ? (
+              <TodayIcon sx={{ fontSize: 20, color: theme.palette.primary.main }} />
+            ) : (
+              <TodayOutlinedIcon sx={{ fontSize: 20 }} />
+            )}
           </IconButton>
 
           <IconButton onClick={() => setIsFavourite((p) => !p)} size="small" sx={{ ml: 1 }} aria-label="favourite">
-            <Bookmark size={16} fill={isFavourite ? "#facc15" : "none"} />
+            {isFavourite ? (
+              <BookmarkIcon sx={{ fontSize: 20, color: theme.palette.primary.main }} />
+            ) : (
+              <BookmarkBorderIcon sx={{ fontSize: 20 }} />
+            )}
           </IconButton>
         </Box>
       </Box>
@@ -631,57 +642,7 @@ export default function TaskSearchCard({
 
           {activeTab === "basic" && (
             <Box mt={1}>
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 0.25 }}>
-                  <Menu
-                    anchorEl={dateMenuAnchor}
-                    open={Boolean(dateMenuAnchor)}
-                    onClose={() => setDateMenuAnchor(null)}
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-                  >
-                    <Box sx={{ p: 1, display: 'flex', flexDirection: 'column', gap: 1, minWidth: 220 }}>
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <TextField
-                          type="date"
-                          name="fromDate"
-                          label="From"
-                          value={filters.fromDate}
-                          onChange={handleFieldChange}
-                          size="small"
-                          InputLabelProps={{ shrink: true }}
-                        />
-                        <TextField
-                          type="time"
-                          name="fromTime"
-                          value={filters.fromTime}
-                          onChange={handleFieldChange}
-                          size="small"
-                        />
-                      </Stack>
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <TextField
-                          type="date"
-                          name="toDate"
-                          label="To"
-                          value={filters.toDate}
-                          onChange={handleFieldChange}
-                          size="small"
-                          InputLabelProps={{ shrink: true }}
-                        />
-                        <TextField
-                          type="time"
-                          name="toTime"
-                          value={filters.toTime}
-                          onChange={handleFieldChange}
-                          size="small"
-                        />
-                      </Stack>
-                      <Button variant="contained" size="small" onClick={() => setDateMenuAnchor(null)}>
-                        Apply
-                      </Button>
-                    </Box>
-                  </Menu>
-                </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 0.25 }} />
                 <Grid container spacing={1.5} alignItems="center">
                     <Grid item xs={12} sm="auto" md="auto">
                         <MultiSelectField
@@ -767,7 +728,6 @@ export default function TaskSearchCard({
                       options={requesterOptions}
                       value={filters.requester}
                       onChange={(next: string) => setFilters((prev) => ({ ...prev, requester: next }))}
-                      placeholder={prefillPrompt}
                     />
                 </Grid>
 
@@ -777,7 +737,6 @@ export default function TaskSearchCard({
                       options={jobTypeOptions}
                       value={filters.jobType}
                       onChange={(next: string) => setFilters((prev) => ({ ...prev, jobType: next }))}
-                      placeholder={prefillPrompt}
                     />
                 </Grid>
 
@@ -800,7 +759,6 @@ export default function TaskSearchCard({
                       options={[]}
                       value={filters.locationValue}
                       onChange={(next: string) => setFilters((prev) => ({ ...prev, locationValue: next }))}
-                      placeholder={prefillPrompt}
                     />
                 </Grid>
 
@@ -822,13 +780,24 @@ export default function TaskSearchCard({
                       options={[]}
                       value={filters.scoreValue}
                       onChange={(next: string) => setFilters((prev) => ({ ...prev, scoreValue: next }))}
-                      placeholder={prefillPrompt}
                     />
                 </Grid>
               </Grid>
             </Box>
           )}
         </CardContent>
+
+      <DateTimePopover
+        anchorEl={dateMenuAnchor}
+        open={Boolean(dateMenuAnchor)}
+        onClose={() => setDateMenuAnchor(null)}
+        fromDate={filters.fromDate}
+        fromTime={filters.fromTime}
+        toDate={filters.toDate}
+        toTime={filters.toTime}
+        onChangeField={(name, value) => setFilters((prev) => ({ ...prev, [name]: value }))}
+        onClear={() => setFilters((prev) => ({ ...prev, fromDate: '', fromTime: '', toDate: '', toTime: '' }))}
+      />
 
       <Divider />
 
