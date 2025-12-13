@@ -102,6 +102,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
 
   return (
     <Autocomplete
+      disableClearable
       multiple
       disableCloseOnSelect
       componentsProps={{ popper: { style: { minWidth: '32ch' } } }}
