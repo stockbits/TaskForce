@@ -172,27 +172,16 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
           </ListItem>
         );
       }}
-      renderTags={(tagValue, getTagProps) => {
-        const visible = tagValue.slice(0, 1);
-        const chips = visible.map((option, index) => (
-          <Chip
-            {...getTagProps({ index })}
-            key={option}
-            label={option}
-            size="small"
-            sx={{ maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', mr: 0.5 }}
-          />
-        ));
-
-        if (tagValue.length > 1) {
-          chips.push(
-            <Chip key="more" label={`+${tagValue.length - 1}`} size="small" sx={{ flex: '0 0 auto', ml: 0.5 }} />
-          );
-        }
+      renderTags={(tagValue) => {
+        if (!tagValue || tagValue.length === 0) return null;
 
         return (
           <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', overflow: 'hidden', height: '100%', pr: '8px' }}>
-            {chips}
+            <Chip
+              label={`${tagValue.length}`}
+              size="small"
+              sx={{ flex: '0 0 auto' }}
+            />
           </Box>
         );
       }}
