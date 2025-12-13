@@ -1,8 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import toast, { Toaster } from "react-hot-toast";
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import InfoIcon from '@mui/icons-material/Info';
+import toast from "react-hot-toast";
 import rawMockTasks from "@/data/mockTasks.json";
 import TaskSearchCard from "@/tasks/TaskSearchCardClean";
 import TaskTableAdvanced from "@/tasks/TaskTableAdvanced";
@@ -308,20 +305,7 @@ export default function TaskManagementPage() {
         flex: 1,
       }}
     >
-      <Toaster
-        position="top-center"
-        containerStyle={{ top: 72 }}
-        toastOptions={{
-          // default options for all toasts
-          duration: 4000,
-          style: { fontSize: 13 },
-          // use MUI icons for the different types
-          success: { icon: <CheckCircleIcon fontSize="small" color="success" /> },
-          error: { icon: <ErrorOutlineIcon fontSize="small" color="error" /> },
-          // generic icon for other types
-          icon: <InfoIcon fontSize="small" />,
-        }}
-      />
+      {/* Toaster provided at Layout level */}
 
       <Box ref={searchRef}>
         <TaskSearchCard

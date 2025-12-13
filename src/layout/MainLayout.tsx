@@ -45,7 +45,7 @@ import {
   Calendar,
   Cog,
 } from "lucide-react";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { createPortal } from "react-dom";
 
 import { SidebarNavigation as Sidebar } from "./SidebarNavigation";
@@ -579,6 +579,7 @@ export default function MainLayout() {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
   const [uiScale, setUiScale] = useState(1);
+  
 
   /* ---------------------- Data ---------------------- */
   const [allRows, setAllRows] = useState<Record<string, any>[]>([]);
@@ -850,6 +851,8 @@ export default function MainLayout() {
     window.addEventListener("resize", resize);
     return () => window.removeEventListener("resize", resize);
   }, []);
+
+  
 
   // Global menu-card search across cardMap
   const allCardsFlattened = useMemo(
@@ -1307,7 +1310,7 @@ export default function MainLayout() {
         overflowX: "hidden",
       }}
     >
-      <Toaster position="top-center" />
+      {/* Global Toaster provided by AppLayout */}
 
       {/* SIDEBAR */}
       <Sidebar
@@ -1372,6 +1375,7 @@ export default function MainLayout() {
                 onCopy={handleCopyAll}
                 onExport={handleExportCSV}
                 canCopy={canCopy}
+                hasResults={rows.length > 0}
               />
 
               {!dataLoaded ? (

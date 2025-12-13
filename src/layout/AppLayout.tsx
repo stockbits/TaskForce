@@ -48,6 +48,9 @@ import {
   Cog,
 } from "lucide-react";
 import { Toaster, toast } from "react-hot-toast";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import InfoIcon from '@mui/icons-material/Info';
 import { createPortal } from "react-dom";
 
 import { SidebarNavigation } from "./SidebarNavigation";
@@ -581,6 +584,7 @@ export default function MainLayout() {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
   const [uiScale, setUiScale] = useState(1);
+  const [toastTop, setToastTop] = useState<number>(72);
 
   /* ---------------------- Data ---------------------- */
   const [allRows, setAllRows] = useState<Record<string, any>[]>([]);
@@ -853,6 +857,23 @@ export default function MainLayout() {
 
     window.addEventListener("resize", resize);
     return () => window.removeEventListener("resize", resize);
+  }, []);
+
+  useEffect(() => {
+    const computeTop = () => {
+      try {
+        const el = document.querySelector('.MuiAppBar-root') as HTMLElement | null;
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          setToastTop(Math.round(rect.bottom + 8));
+          return;
+        }
+      } catch (err) {}
+      setToastTop(72);
+    };
+    computeTop();
+    window.addEventListener('resize', computeTop);
+    return () => window.removeEventListener('resize', computeTop);
   }, []);
 
   // Global menu-card search across cardMap
@@ -1311,7 +1332,17 @@ export default function MainLayout() {
         overflowX: "hidden",
       }}
     >
-      <Toaster position="top-center" />
+      <Toaster
+        position="top-center"
+        containerStyle={{ top: toastTop }}
+        toastOptions={{
+          duration: 4000,
+          style: { fontSize: 13 },
+          success: { icon: <CheckCircleIcon fontSize="small" color="success" /> },
+          error: { icon: <ErrorOutlineIcon fontSize="small" color="error" /> },
+          icon: <InfoIcon fontSize="small" />,
+        }}
+      />
 
       {/* SIDEBAR */}
         <SidebarNavigation
@@ -1373,6 +1404,7 @@ export default function MainLayout() {
                 onCopy={handleCopyAll}
                 onExport={handleExportCSV}
                 canCopy={canCopy}
+                hasResults={rows.length > 0}
               />
 
               {!dataLoaded ? (

@@ -32,6 +32,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { ChevronDown, Eye, EyeOff, Search, MoreVertical } from "lucide-react";
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
@@ -70,6 +71,7 @@ type Props = {
   canCopy?: boolean;
   forceCollapsed?: boolean;
   onOpenColumns?: (anchor: HTMLElement) => void;
+  hasResults?: boolean;
 };
 
 type ArrayFilterKey =
@@ -141,6 +143,7 @@ export default function TaskSearchCard({
   canCopy = false,
   forceCollapsed = false,
   onOpenColumns,
+  hasResults = false,
 }: Props) {
   const theme = useTheme();
   const [filters, setFilters] = useState<Filters>(() => ({ ...INITIAL_FILTERS }));
@@ -815,30 +818,38 @@ export default function TaskSearchCard({
         }}
       >
         <Box>
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={handleMenuOpen}
-            startIcon={<MoreVertical size={16} />}
-            endIcon={<ChevronDown size={16} />}
-            sx={{
-              borderRadius: 2,
-              textTransform: "none",
-              px: 1,
-              display: 'inline-flex',
-              alignItems: 'center'
-            }}
-          >
-            More
-          </Button>
+          {hasResults ? (
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={handleMenuOpen}
+              startIcon={<MoreVertical size={16} />}
+              endIcon={<ChevronDown size={16} />}
+              sx={{
+                borderRadius: 2,
+                textTransform: "none",
+                px: 1,
+                display: 'inline-flex',
+                alignItems: 'center'
+              }}
+            >
+              More
+            </Button>
+          ) : null}
           {/* Columns button removed — using DataGrid's built-in column menu */}
             <Menu
-            anchorEl={menuAnchorEl}
-            open={Boolean(menuAnchorEl)}
-            onClose={handleMenuClose}
-            anchorOrigin={{ vertical: "top", horizontal: "left" }}
-            transformOrigin={{ vertical: "top", horizontal: "left" }}
-          >
+              anchorEl={menuAnchorEl}
+              open={Boolean(menuAnchorEl)}
+              onClose={handleMenuClose}
+              anchorOrigin={{ vertical: "top", horizontal: "left" }}
+              transformOrigin={{ vertical: "top", horizontal: "left" }}
+            >
+              <MenuItem onClick={handleCopy} sx={{ display: 'flex', alignItems: 'center' }}>
+                <ListItemIcon>
+                  <ContentCopyIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>{canCopy ? "Copy" : "Copy (empty)"}</ListItemText>
+              </MenuItem>
               <MenuItem onClick={handleExport} sx={{ display: 'flex', alignItems: 'center' }}>
                 <ListItemIcon>
                   <FileDownloadIcon fontSize="small" />
@@ -846,8 +857,6 @@ export default function TaskSearchCard({
                 <ListItemText>Export</ListItemText>
               </MenuItem>
             </Menu>
-            <MenuItem onClick={handleCopy}>{canCopy ? "Copy" : "Copy (empty)"}</MenuItem>
-          </Menu>
         </Box>
 
         <Stack direction="row" spacing={1} alignItems="center">
