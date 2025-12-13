@@ -98,7 +98,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
     }
   };
 
-  const FIELD_WIDTH = { xs: '100%', sm: '28ch', md: '36ch' };
+  const FIELD_WIDTH = { xs: '100%', sm: '26ch', md: '32ch' };
 
   return (
     <Autocomplete
@@ -178,9 +178,9 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
         return (
           <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', overflow: 'hidden', height: '100%', pr: '8px' }}>
             <Chip
-              label={`${tagValue.length}`}
+              label={`+${tagValue.length}`}
               size="small"
-              sx={{ flex: '0 0 auto' }}
+              sx={{ flex: '0 0 auto', pl: 1 }}
             />
           </Box>
         );

@@ -39,7 +39,7 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
     );
   }, [options]);
 
-  const FIELD_WIDTH = { xs: '100%', sm: '28ch', md: '36ch' };
+  const FIELD_WIDTH = { xs: '100%', sm: '26ch', md: '32ch' };
 
   return (
     <Autocomplete

@@ -360,7 +360,7 @@ export default function TaskSearchCard({
   // Standard box width used across filter controls to keep consistent sizing.
   // Increased responsive values to give more breathing room so pills/numbers
   // and default placeholder text don't feel cramped.
-  const STANDARD_BOX = { xs: "24ch", sm: "28ch", md: "36ch" };
+  const STANDARD_BOX = { xs: "24ch", sm: "26ch", md: "32ch" };
   // We'll compute per-field widths after we have the options loaded so we can
   // measure the prompt/DB-derived values. `expectedMaxCharsOverrides` is for
   // manual tweaks; measurements from options will be used as the primary
@@ -659,7 +659,7 @@ export default function TaskSearchCard({
                 </Box>
                 <Grid container spacing={1.5} alignItems="center">
                     <Grid item xs={12} sm="auto" md="auto">
-                          <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '28ch', md: '36ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
+                          <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '26ch', md: '32ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="Division"
                         options={divisionOptions}
@@ -672,7 +672,7 @@ export default function TaskSearchCard({
                   </Grid>
 
                   <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '28ch', md: '36ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
+                    <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '26ch', md: '32ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="Domain ID"
                         options={domainOptions}
@@ -685,7 +685,7 @@ export default function TaskSearchCard({
                   </Grid>
 
                   <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '28ch', md: '36ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
+                    <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '26ch', md: '32ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="Task Status"
                         options={statusOptions}
@@ -751,7 +751,7 @@ export default function TaskSearchCard({
             <Box mt={1}>
                 <Grid container spacing={1.5} alignItems="center">
                 <Grid item xs={12} sm="auto" md="auto">
-                  <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '28ch', md: '36ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
+                    <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '26ch', md: '32ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                     <FreeTypeSelectField
                       label="Requester"
                       options={requesterOptions}
@@ -762,7 +762,7 @@ export default function TaskSearchCard({
                 </Grid>
 
                 <Grid item xs={12} sm="auto" md="auto">
-                  <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '28ch', md: '36ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
+                  <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '26ch', md: '32ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                     <FreeTypeSelectField
                       label="Job Type"
                       options={jobTypeOptions}
@@ -773,7 +773,7 @@ export default function TaskSearchCard({
                 </Grid>
 
                 <Grid item xs={12} sm="auto" md="auto">
-                  <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '28ch', md: '36ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
+                  <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '26ch', md: '32ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                     <SingleSelectField
                       label="Location Type"
                       options={[
