@@ -43,7 +43,8 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
     if (!options || !options.length) return label;
     const first = typeof options[0] === 'string' ? options[0] : options[0].label;
     const firstWord = String(first).trim().split(/\s+/)[0] || String(first);
-    return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
+    const example = firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
+    return `${label}${example ? ` (${example})` : ""}`;
   }, [options, label]);
 
   const handleInputChange = (_e: any, newInput: string) => {

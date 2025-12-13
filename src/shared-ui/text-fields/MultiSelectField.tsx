@@ -47,10 +47,12 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
   }, [normalizedQuery, options]);
 
   const prefillPrompt = useMemo(() => {
+    // Use the label and append a short example from the first option's first word.
     if (!options || !options.length) return label;
     const first = String(options[0]).trim();
     const firstWord = first.split(/\s+/)[0] || first;
-    return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
+    const example = firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
+    return `${label}${example ? ` (${example})` : ""}`;
   }, [options, label]);
 
   const filteredSelectionCount = filteredOptions.filter((option) =>
