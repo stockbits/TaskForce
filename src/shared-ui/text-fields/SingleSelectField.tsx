@@ -14,7 +14,7 @@ interface SingleSelectFieldProps {
   renderOption?: (props: any, option: OptionItem) => React.ReactNode;
 }
 
-const FIELD_WIDTH = { xs: '100%', sm: '30ch', md: '40ch' };
+const FIELD_WIDTH = { xs: '100%', sm: '28ch', md: '36ch' };
 
 const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
   label,

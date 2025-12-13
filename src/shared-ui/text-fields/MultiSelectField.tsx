@@ -98,7 +98,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
     }
   };
 
-  const FIELD_WIDTH = { xs: '100%', sm: '30ch', md: '40ch' };
+  const FIELD_WIDTH = { xs: '100%', sm: '28ch', md: '36ch' };
 
   return (
     <Autocomplete
