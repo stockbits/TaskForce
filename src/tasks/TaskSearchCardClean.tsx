@@ -68,6 +68,7 @@ type Props = {
   onExport?: () => void;
   canCopy?: boolean;
   forceCollapsed?: boolean;
+  onOpenColumns?: (anchor: HTMLElement) => void;
 };
 
 type ArrayFilterKey =
@@ -138,6 +139,7 @@ export default function TaskSearchCard({
   onExport,
   canCopy = false,
   forceCollapsed = false,
+  onOpenColumns,
 }: Props) {
   const theme = useTheme();
   const [filters, setFilters] = useState<Filters>(() => ({ ...INITIAL_FILTERS }));
@@ -824,6 +826,15 @@ export default function TaskSearchCard({
           >
             More
           </Button>
+          {/* Columns button removed — using DataGrid's built-in column menu */}
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={handleExport}
+            sx={{ ml: 1, borderRadius: 2, textTransform: 'none' }}
+          >
+            Export
+          </Button>
           <Menu
             anchorEl={menuAnchorEl}
             open={Boolean(menuAnchorEl)}
@@ -832,7 +843,6 @@ export default function TaskSearchCard({
             transformOrigin={{ vertical: "top", horizontal: "left" }}
           >
             <MenuItem onClick={handleCopy}>{canCopy ? "Copy" : "Copy (empty)"}</MenuItem>
-            <MenuItem onClick={handleExport}>{canCopy ? "Export" : "Export (empty)"}</MenuItem>
           </Menu>
         </Box>
 

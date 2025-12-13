@@ -107,7 +107,7 @@ export default function ResourceTablePanel({
           tableHeight="100%"
           rowIdKey="resourceId"
           controlledSelectedRowIds={selectedRowIds}
-          onSelectionChange={(rows) =>
+          onSelectionChange={(rows: ResourceRecord[]) =>
             onSelectionChange(rows as ResourceRecord[])
           }
         />

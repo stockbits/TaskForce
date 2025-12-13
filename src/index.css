@@ -150,19 +150,23 @@ html {
    (The blinking caret you saw on page load)
 =================================================================== */
 
-/* Prevent caret (typing cursor) */
-[data-panel-group] *[tabindex="0"] {
+/* Prevent caret (typing cursor) ONLY for panel resize handles (narrow selector)
+   This avoids interfering with interactive elements like MUI DataGrid headers. */
+[data-panel-group] [data-resize-handle],
+[data-panel-group] [data-panel-resize-handle-enabled] {
   caret-color: transparent !important;
 }
 
-/* Remove focus ring highlight */
-[data-panel-group] *[tabindex="0"]:focus {
+/* Remove focus ring highlight for panel resize handles only */
+[data-panel-group] [data-resize-handle]:focus,
+[data-panel-group] [data-panel-resize-handle-enabled]:focus {
   outline: none !important;
   box-shadow: none !important;
 }
 
-/* Prevent cursor becoming text cursor */
-[data-panel-group] *[tabindex="0"] {
+/* Prevent cursor becoming text cursor on panel resize handles only */
+[data-panel-group] [data-resize-handle],
+[data-panel-group] [data-panel-resize-handle-enabled] {
   cursor: default !important;
 }
 
@@ -176,4 +180,72 @@ html {
   box-shadow: 0 8px 20px rgba(8, 58, 97, 0.12);
   color: #0f172a;
   padding: 8px 12px;
+}
+
+/* ===================================================================
+   DataGrid Header Resize & Reorder Fixes
+   Ensures the MUI DataGrid show the column separator, cursor, and
+   pointer events so users can resize and drag to reorder columns.
+=================================================================== */
+.MuiDataGrid-root .MuiDataGrid-columnHeader {
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.MuiDataGrid-root .MuiDataGrid-columnSeparator {
+  width: 10px; /* make the separator easier to grab */
+  right: 0;
+  top: 0;
+  bottom: 0;
+  cursor: col-resize;
+  touch-action: none;
+  pointer-events: auto;
+  z-index: 5;
+}
+
+/* ensure header title remains draggable for column reordering */
+.MuiDataGrid-root .MuiDataGrid-columnHeaderTitle {
+  cursor: grab;
+}
+
+/* when dragging, show grabbing cursor */
+.MuiDataGrid-root .MuiDataGrid-columnHeaderTitle:active {
+  cursor: grabbing;
+}
+
+/* if any overlay accidentally sits above the header, allow pointer events
+   on the header region to receive the events first */
+.MuiDataGrid-root .MuiDataGrid-columnHeaders {
+  pointer-events: auto;
+  /* keep headers above common overlays (leaflet, panels) */
+  z-index: 2147483000; /* very high to beat other overlays */
+  position: relative;
+  transform: translateZ(0);
+}
+
+.MuiDataGrid-root .MuiDataGrid-columnSeparator {
+  /* ensure separator is on top and receives pointer events */
+  z-index: 2147483001 !important;
+  pointer-events: auto !important;
+}
+
+.MuiDataGrid-root {
+  z-index: 2147482999;
+}
+
+/* ===================================================================
+   DataGrid Header Hover Affordance (subtle UX hint)
+   Shows a tiny non-interactive hint when hovering headers to indicate
+   drag/resize affordances. Pointer-events are disabled so it doesn't
+   interfere with MUI's native handlers.
+=================================================================== */
+.MuiDataGrid-root .MuiDataGrid-columnHeader:hover .MuiDataGrid-columnHeaderTitle::after {
+  content: "drag • resize";
+  font-size: 11px;
+  color: rgba(15,23,42,0.65);
+  margin-left: 8px;
+  display: inline-block;
+  opacity: 0.85;
+  pointer-events: none;
 }

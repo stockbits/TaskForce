@@ -113,7 +113,7 @@ export default function TaskTablePanel({
           tableHeight="100%"
           rowIdKey="taskId"
           controlledSelectedRowIds={selectedRowIds}
-          onSelectionChange={(rows) => onSelectionChange(rows as TaskRecord[])}
+          onSelectionChange={(rows: TaskRecord[]) => onSelectionChange(rows as TaskRecord[])}
         />
       </Box>
     </Paper>

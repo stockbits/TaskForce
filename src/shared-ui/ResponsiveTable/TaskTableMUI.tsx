@@ -1,10 +1,11 @@
 import React, { useMemo, useState, useEffect, MutableRefObject, useRef } from 'react';
-import { Box, useTheme, Paper, Stack, Typography, TextField, InputAdornment, Divider, Button, FormControlLabel, Checkbox } from '@mui/material';
-import { GridColDef } from '@mui/x-data-grid';
-import ResponsiveDataGrid from './ResponsiveDataGrid';
+import { Box, useTheme, Paper, Stack, Typography, TextField, InputAdornment, Divider, Button, FormControlLabel, Checkbox, Popper, ClickAwayListener, TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
+import { GridColDef, useGridApiRef, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarDensitySelector } from '@mui/x-data-grid';
+import { DataGrid } from '@mui/x-data-grid';
+// keep imports minimal: use built-in DataGrid behavior
 import { loadPersistedColumns, applyPersistedColumns, savePersistedColumns } from './usePersistedColumns';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Search, MoreVertical } from 'lucide-react';
+import { Search, MoreVertical, GripVertical } from 'lucide-react';
 import TaskRowContextMenu from '@/shared-ui/TaskRowContextMenu';
 
 type Props = {
@@ -16,11 +17,23 @@ type Props = {
   debug?: boolean;
   onOpenPopout?: (tasks: Record<string, any>[], mouseScreenX: number, mouseScreenY: number) => void;
   onSelectionChange?: (rows: Record<string, any>[]) => void;
+  openColumnsAnchor?: HTMLElement | null;
+  onRequestCloseColumns?: () => void;
 };
 
-export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef, reserveBottom = 160, debug = false, onOpenPopout, onSelectionChange }: Props) {
+export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef, reserveBottom = 160, onOpenPopout, onSelectionChange, openColumnsAnchor, onRequestCloseColumns }: Props) {
   const [selection, setSelection] = useState<any[]>([]);
   const theme = useTheme();
+  // refs for programmatic drag/resize fallback
+  const colStateRef = useRef<GridColDef[]>([]);
+  const draggingRef = useRef<any>(null);
+  const mouseMoveHandlerRef = useRef<any>(null);
+  const mouseUpHandlerRef = useRef<any>(null);
+  const dragStartRef = useRef<any>(null);
+  const resizeStartRef = useRef<any>(null);
+  const holdTimerRef = useRef<number | null>(null);
+  const prevHighlightedHeaderRef = useRef<HTMLElement | null>(null);
+  const resizingHeaderRef = useRef<HTMLElement | null>(null);
 
   const density = (typeof window !== 'undefined' && localStorage.getItem('taskTableDensity')) || 'compact';
 
@@ -28,10 +41,32 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
     return Object.keys(headerNames).map((key) => ({
       field: key,
       headerName: headerNames[key] ?? key,
-      flex: 1,
       minWidth: 120,
       sortable: true,
-      resizable: true as any,
+      renderHeader: (params: any) => (
+        <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, position: 'relative' }}>
+          <Typography
+            variant="body2"
+            sx={{ fontWeight: 600, cursor: 'grab' }}
+            onMouseDown={(e: React.MouseEvent) => {
+              // start hold-to-drag (200ms)
+              if (holdTimerRef.current) { window.clearTimeout(holdTimerRef.current); holdTimerRef.current = null; }
+              const ev = e.nativeEvent as MouseEvent;
+              holdTimerRef.current = window.setTimeout(() => {
+                if (dragStartRef.current) dragStartRef.current(ev, key);
+                holdTimerRef.current = null;
+              }, 200);
+            }}
+            onMouseUp={() => { if (holdTimerRef.current) { window.clearTimeout(holdTimerRef.current); holdTimerRef.current = null; } }}
+            onMouseLeave={() => { if (holdTimerRef.current) { window.clearTimeout(holdTimerRef.current); holdTimerRef.current = null; } }}
+          >{headerNames[key] ?? key}</Typography>
+          <Box
+            onMouseDown={(e) => resizeStartRef.current && resizeStartRef.current(e, key)}
+            sx={{ position: 'absolute', right: -6, top: 0, bottom: 0, width: 12, cursor: 'col-resize' }}
+            aria-hidden
+          />
+        </Box>
+      ),
     }));
   }, [headerNames]);
 
@@ -45,6 +80,69 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
   useEffect(() => {
     setColState(columns);
   }, [columns]);
+
+  // keep ref in sync
+  useEffect(() => {
+    colStateRef.current = colState;
+  }, [colState]);
+
+  // Auto-fit column widths: measure header + cell text and set widths on first load or when rows change
+  const autoFitDoneRef = useRef<string | null>(null);
+  useEffect(() => {
+    try {
+      const persisted = loadPersistedColumns() || {};
+      const persistedWidths = persisted.widths || {};
+      // compute signature to run when rows or headers change
+      const sig = JSON.stringify({ headers: Object.keys(headerNames), rowCount: gridRows.length, sample: gridRows.slice(0, 50).map(r => Object.keys(headerNames).map(k => String((r as any)[k] ?? '')).join('|')).join('||') });
+      if (autoFitDoneRef.current === sig) return;
+      autoFitDoneRef.current = sig;
+
+      // only auto-fit columns that don't have persisted widths
+      const needFields = colStateRef.current.filter((c) => !((persistedWidths || {})[c.field])).map((c) => c.field);
+      if (!needFields.length) return;
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      const bodyStyle = window.getComputedStyle(document.body);
+      ctx.font = bodyStyle.font || '14px sans-serif';
+
+      const padding = 56; // cell padding + grip/resize allowance (increase to include header icons)
+      const maxCap = Math.max(300, Math.round(window.innerWidth * 0.6));
+
+      const widths: Record<string, number> = {};
+      colStateRef.current.forEach((col) => {
+        const field = col.field;
+        let maxW = 0;
+        const headerText = String(col.headerName ?? field);
+        maxW = Math.max(maxW, Math.round(ctx.measureText(headerText).width));
+        // sample rows (limit to 200 for performance)
+        const sample = gridRows.slice(0, 200);
+        for (let i = 0; i < sample.length; i++) {
+          const v = String((sample[i] as any)[field] ?? '');
+          if (!v) continue;
+          const w = Math.round(ctx.measureText(v).width);
+          if (w > maxW) maxW = w;
+        }
+        const target = Math.min(maxCap, Math.max(col.minWidth || 120, maxW + padding));
+        widths[field] = target;
+      });
+
+        // no-op: we rely on DataGrid's built-in column menu/panel
+
+      // apply widths
+      setColState((prev) => prev.map((c) => ({ ...c, width: widths[c.field] || c.width })));
+      try {
+        const cur = loadPersistedColumns() || {};
+        const curWidths = { ...(cur.widths || {}) };
+        Object.assign(curWidths, widths);
+        savePersistedColumns({ ...cur, widths: curWidths });
+      } catch (err) {}
+    } catch (err) {
+      // ignore
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gridRows]);
 
   useEffect(() => {
     try {
@@ -86,21 +184,42 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
 
   // column menu state (simple column selector)
   const [columnMenuVisible, setColumnMenuVisible] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [columnFilter, setColumnFilter] = useState('');
   const [columnVisibilityModel, setColumnVisibilityModel] = useState<Record<string, boolean>>(() => {
     const model: Record<string, boolean> = {};
     columns.forEach((c) => { model[c.field] = !(c as any).hide; });
     return model;
   });
+  
 
   useEffect(() => {
     // keep visibility model in sync when colState changes
     setColumnVisibilityModel(() => {
       const model: Record<string, boolean> = {};
-      (colState || columns).forEach((c) => { model[c.field] = !c.hide; });
+      (colState || columns).forEach((c) => { model[c.field] = !(c as any).hide; });
       return model;
     });
   }, [colState, columns]);
+
+  // controlled via prop from parent - open/close when anchor prop changes
+  useEffect(() => {
+    // If parent requests opening columns UI, open DataGrid's built-in column menu anchored to first visible column
+    if (openColumnsAnchor && apiRef && apiRef.current) {
+      const field = (colState && colState.length && colState[0].field) ? colState[0].field : undefined;
+      if (field) {
+        try { apiRef.current.toggleColumnMenu(field); } catch (err) {}
+      }
+    }
+  }, [openColumnsAnchor]);
+
+  // Use MUI DataGrid's native column resize/reorder behavior (no custom DOM interceptors)
+
+  // fallback: listen for global openColumns events when parent doesn't wire prop
+  useEffect(() => {
+    // no global fallback: parent should provide `openColumnsAnchor` prop
+    return () => {};
+  }, []);
 
   const resetColumns = () => {
     try {
@@ -114,129 +233,233 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
     });
   };
 
+  // Programmatic drag/reorder and resize fallback handlers
+  const startColumnDrag = (e: React.MouseEvent, field: string) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    draggingRef.current = { type: 'reorder', field, startX };
+
+    mouseMoveHandlerRef.current = (ev: MouseEvent) => {
+      ev.preventDefault();
+      try {
+        const el = document.elementFromPoint(ev.clientX, ev.clientY) as HTMLElement | null;
+        const header = el ? el.closest('[data-field]') as HTMLElement | null : null;
+        if (!gridContainerRef.current) return;
+        const containerRect = gridContainerRef.current.getBoundingClientRect();
+        if (header) {
+          const rect = header.getBoundingClientRect();
+          const mid = rect.left + rect.width / 2;
+          const insertAt = ev.clientX < mid ? rect.left : rect.right;
+          setInsertion(({ left: insertAt - containerRect.left, top: rect.top - containerRect.top, height: rect.height, visible: true }));
+          // highlight target header to indicate column clipping/insert
+          if (prevHighlightedHeaderRef.current !== header) {
+            if (prevHighlightedHeaderRef.current) {
+              prevHighlightedHeaderRef.current.style.background = '';
+            }
+            header.style.background = 'rgba(34,197,94,0.08)';
+            prevHighlightedHeaderRef.current = header;
+          }
+        } else {
+          setInsertion((s) => ({ ...s, visible: false }));
+          if (prevHighlightedHeaderRef.current) { prevHighlightedHeaderRef.current.style.background = ''; prevHighlightedHeaderRef.current = null; }
+        }
+      } catch (err) {
+        // ignore
+      }
+    };
+
+    mouseUpHandlerRef.current = (ev: MouseEvent) => {
+      try {
+        const el = document.elementFromPoint(ev.clientX, ev.clientY) as HTMLElement | null;
+        const header = el ? el.closest('[data-field]') as HTMLElement | null : null;
+        const targetField = header ? header.getAttribute('data-field') : null;
+        if (targetField && draggingRef.current && draggingRef.current.field) {
+          const from = draggingRef.current.field;
+          const prev = colStateRef.current.slice();
+          const byField: Record<string, any> = {};
+          prev.forEach((c) => { byField[c.field] = c; });
+          const order = prev.map((c) => c.field).filter(Boolean);
+          // remove from
+          const idx = order.indexOf(from);
+          if (idx !== -1) order.splice(idx, 1);
+          // insert before target
+          const tIdx = order.indexOf(targetField);
+          if (tIdx === -1) order.push(from); else order.splice(tIdx, 0, from);
+          const ordered = order.map((f) => ({ ...byField[f] }));
+          setColState(ordered);
+          try {
+            const cur = loadPersistedColumns() || {};
+            savePersistedColumns({ ...cur, order });
+          } catch (err) {}
+        }
+      } catch (err) {}
+      // clear insertion indicator and header highlight
+      setInsertion((s) => ({ ...s, visible: false }));
+      if (prevHighlightedHeaderRef.current) { prevHighlightedHeaderRef.current.style.background = ''; prevHighlightedHeaderRef.current = null; }
+      // cleanup
+      if (mouseMoveHandlerRef.current) document.removeEventListener('mousemove', mouseMoveHandlerRef.current, true);
+      if (mouseUpHandlerRef.current) document.removeEventListener('mouseup', mouseUpHandlerRef.current, true);
+      // clear any resize header styling
+      if (resizingHeaderRef.current) {
+        try {
+          const sep = resizingHeaderRef.current.querySelector('.MuiDataGrid-columnSeparator') as HTMLElement | null;
+          if (sep) { sep.style.background = ''; sep.style.width = ''; }
+          resizingHeaderRef.current.style.boxShadow = '';
+        } catch (err) {}
+        resizingHeaderRef.current = null;
+      }
+      draggingRef.current = null;
+      mouseMoveHandlerRef.current = null;
+      mouseUpHandlerRef.current = null;
+    };
+
+    document.addEventListener('mousemove', mouseMoveHandlerRef.current, true);
+    document.addEventListener('mouseup', mouseUpHandlerRef.current, true);
+  };
+
+  const startColumnResize = (e: React.MouseEvent, field: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX;
+    const col = colStateRef.current.find((c) => c.field === field);
+    const startWidth = (col && (col.width as number)) || (col && (col.minWidth as number)) || 120;
+    draggingRef.current = { type: 'resize', field, startX, startWidth };
+
+    // mark header separator for visual feedback
+    try {
+      const header = document.querySelector(`[data-field="${field}"]`) as HTMLElement | null;
+      if (header) {
+        resizingHeaderRef.current = header;
+        const sep = header.querySelector('.MuiDataGrid-columnSeparator') as HTMLElement | null;
+        if (sep) {
+          sep.style.background = 'rgba(34,197,94,0.9)';
+          sep.style.width = '2px';
+        } else {
+          header.style.boxShadow = 'inset -4px 0 0 rgba(34,197,94,0.08)';
+        }
+      }
+    } catch (err) {}
+
+    mouseMoveHandlerRef.current = (ev: MouseEvent) => {
+      ev.preventDefault();
+      const dx = ev.clientX - draggingRef.current.startX;
+      const nextWidth = Math.max(40, Math.round(draggingRef.current.startWidth + dx));
+      setColState((prev) => prev.map((c) => c.field === field ? { ...c, width: nextWidth } : c));
+    };
+
+    mouseUpHandlerRef.current = (ev: MouseEvent) => {
+      try {
+        const colDef = colStateRef.current.find((c) => c.field === field);
+        if (colDef) {
+          try {
+            const cur = loadPersistedColumns() || {};
+            const widths = { ...(cur.widths || {}) };
+            widths[field] = (colDef.width as number) || 120;
+            savePersistedColumns({ ...cur, widths });
+          } catch (err) {}
+        }
+      } catch (err) {}
+      if (mouseMoveHandlerRef.current) document.removeEventListener('mousemove', mouseMoveHandlerRef.current, true);
+      if (mouseUpHandlerRef.current) document.removeEventListener('mouseup', mouseUpHandlerRef.current, true);
+      draggingRef.current = null;
+      mouseMoveHandlerRef.current = null;
+      mouseUpHandlerRef.current = null;
+    };
+
+    document.addEventListener('mousemove', mouseMoveHandlerRef.current, true);
+    document.addEventListener('mouseup', mouseUpHandlerRef.current, true);
+  };
+
+    // insertion indicator state for visualizing drop position
+    const [insertion, setInsertion] = useState<{ left: number; top: number; height: number; visible: boolean }>({ left: 0, top: 0, height: 0, visible: false });
+
+    // expose starters via refs so renderHeader (defined earlier) can call them
+    useEffect(() => {
+      dragStartRef.current = startColumnDrag;
+      resizeStartRef.current = startColumnResize;
+    }, []);
+
+    // DataGrid typing is strict for some event props; use an any-cast for JSX usage below
+    const AnyDataGrid: any = DataGrid as any;
+    const apiRef = useGridApiRef();
+
   // context menu for rows
   const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number; clickedRow?: any; clickedColumnKey?: string | null; mouseScreenX?: number; mouseScreenY?: number }>({ visible: false, x: 0, y: 0 });
   const closeContextMenu = () => setContextMenu({ visible: false, x: 0, y: 0 });
 
 
   return (
-    <Box sx={{ width: '100%', display: 'flex', flex: 1, minHeight: 0, position: 'relative' }}>
-      {/* simple header toolbar for table controls */}
-      <Box sx={{ position: 'absolute', top: 8, left: 12, zIndex: 1200 }}>
-        <Button size="small" variant="outlined" onClick={() => setColumnMenuVisible((v) => !v)} startIcon={<MoreVertical size={14} />}>Columns</Button>
+    <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, position: 'relative' }}>
+
+      {/* DataGrid's built-in column menu/panel is used instead of a custom Popper */}
+
+      <Paper sx={{ height: tableHeight, width: '100%', zIndex: 0 }}>
+        <AnyDataGrid
+          rows={gridRows}
+          columns={colState}
+          checkboxSelection
+          density={density as 'compact' | 'standard' | 'comfortable'}
+          pageSizeOptions={[25, 50, 100]}
+          initialState={{ pagination: { paginationModel: { pageSize: 100 } } }}
+          onRowDoubleClick={(params: any, event: any) => {
+            if (onOpenPopout) onOpenPopout([params.row as any], (event as any).screenX ?? 0, (event as any).screenY ?? 0);
+          }}
+          onRowContextMenu={onRowContextMenu as any}
+          sx={{ border: 0, '& .MuiDataGrid-cell': { py: density === 'compact' ? 0.5 : 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }, '& .MuiDataGrid-columnHeaders': { backgroundColor: theme.palette.action.hover }, '& .MuiDataGrid-columnHeaderTitle': { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }}
+          onColumnResize={(params: any) => {
+            const { colDef, width } = params;
+            setColState((prev) => prev.map((c) => (c.field === colDef.field ? { ...c, width } : c)));
+            try {
+              const cur = loadPersistedColumns() || {};
+              const widths = { ...(cur.widths || {}) };
+              widths[colDef.field] = width;
+              savePersistedColumns({ ...cur, widths });
+            } catch (e) {}
+          }}
+          onColumnVisibilityModelChange={(model: any) => {
+            try {
+              setColumnVisibilityModel(() => ({ ...(model || {}) }));
+              setColState((prev) => prev.map((c) => ({ ...c, hide: !((model || {})[c.field]) })));
+              const cur = loadPersistedColumns() || {};
+              const hidden = Object.keys(model).filter((k) => !model[k]);
+              savePersistedColumns({ ...cur, hidden });
+            } catch (e) {}
+          }}
+          onColumnOrderChange={(params: any) => {
+            try {
+              const cur = loadPersistedColumns() || {};
+              const order = params.columnFields || params.items || [];
+              savePersistedColumns({ ...cur, order });
+              if (Array.isArray(order) && order.length) {
+                setColState((prev) => {
+                  const byField: Record<string, any> = {};
+                  prev.forEach((c) => { byField[c.field] = c; });
+                  const ordered: any[] = [];
+                  order.forEach((f: string) => { if (byField[f]) ordered.push({ ...byField[f] }); });
+                  prev.forEach((c) => { if (!order.includes(c.field)) ordered.push({ ...c }); });
+                  return ordered;
+                });
+              }
+            } catch (e) {}
+          }}
+        />
+      </Paper>
+      {/* Toolbar moved below the table to free header space */}
+      <Box sx={{ px: 1, mt: 1 }}>
+        <GridToolbarContainer>
+          <GridToolbarColumnsButton />
+          <GridToolbarFilterButton />
+          <GridToolbarDensitySelector />
+        </GridToolbarContainer>
+      </Box>
+      {/* insertion indicator */}
+      <Box sx={{ position: 'absolute', left: 0, top: 0, pointerEvents: 'none', width: '100%', height: '100%', zIndex: 1200 }} ref={gridContainerRef as any}>
+        {insertion.visible && (
+          <Box sx={{ position: 'absolute', width: 2, bgcolor: 'primary.main', left: insertion.left, top: insertion.top, height: insertion.height, transform: 'translateX(-1px)' }} />
+        )}
       </Box>
 
-      <AnimatePresence>
-        {columnMenuVisible && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.12 }}
-            style={{ position: 'absolute', top: 44, left: 12, zIndex: 1300 }}
-          >
-            <Paper elevation={10} sx={{ width: 320, p: 2 }} onMouseDown={(e) => e.stopPropagation()}>
-              <Stack spacing={1}>
-                <Typography variant="overline" sx={{ color: 'text.secondary' }}>Header Settings</Typography>
-                <TextField
-                  size="small"
-                  placeholder="Filter columns…"
-                  value={columnFilter}
-                  onChange={(e) => setColumnFilter(e.target.value)}
-                  InputProps={{ startAdornment: (<InputAdornment position="start"><Search size={14} /></InputAdornment>) }}
-                />
-                <Divider />
-                <Box sx={{ maxHeight: 300, overflowY: 'auto' }}>
-                  {columns.filter((key) => {
-                    if (!columnFilter.trim()) return true;
-                    const name = (headerNames as any)[key.field] ?? key.field;
-                    return String(name).toLowerCase().includes(columnFilter.toLowerCase());
-                  }).map((c) => (
-                    <FormControlLabel key={c.field} control={(
-                      <Checkbox size="small" checked={!!columnVisibilityModel[c.field]} onChange={(e) => {
-                        const next = { ...columnVisibilityModel, [c.field]: e.target.checked };
-                        setColumnVisibilityModel(next);
-                        // apply hide
-                        setColState((prev) => prev.map((pc) => pc.field === c.field ? { ...pc, hide: !e.target.checked } : pc));
-                        try {
-                          const cur = loadPersistedColumns() || {};
-                          const hidden = Object.keys(next).filter(k => !next[k]);
-                          savePersistedColumns({ ...cur, hidden });
-                        } catch (err) {}
-                      }} />
-                    )} label={<Typography variant="body2">{headerNames[c.field] ?? c.field}</Typography>} sx={{ display: 'flex', px: 0.5 }} />
-                  ))}
-                </Box>
-                <Divider />
-                <Stack direction="row" spacing={1} justifyContent="flex-end">
-                  <Button size="small" variant="outlined" onClick={() => {
-                    const anyEnabled = Object.values(columnVisibilityModel).some(Boolean);
-                    const next = {} as Record<string, boolean>;
-                    columns.forEach((c) => { next[c.field] = !anyEnabled ? true : false; });
-                    setColumnVisibilityModel(next);
-                    setColState((prev) => prev.map((pc) => ({ ...pc, hide: !next[pc.field] })));
-                    try {
-                      const cur = loadPersistedColumns() || {};
-                      const hidden = Object.keys(next).filter(k => !next[k]);
-                      savePersistedColumns({ ...cur, hidden });
-                    } catch (err) {}
-                  }}>Toggle</Button>
-                  <Button size="small" variant="contained" onClick={() => { resetColumns(); setColumnMenuVisible(false); }}>Reset Columns</Button>
-                </Stack>
-              </Stack>
-            </Paper>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <ResponsiveDataGrid
-        rows={gridRows}
-        columns={colState}
-        containerRef={containerRef}
-        debug={debug}
-        checkboxSelection
-        disableColumnMenu
-        density={density as 'compact' | 'standard' | 'comfortable'}
-        onRowSelectionModelChange={(newModel) => setSelection(newModel as any[])}
-        rowSelectionModel={selection}
-        pageSizeOptions={[25, 50, 100]}
-        initialState={{ pagination: { paginationModel: { pageSize: 100 } } }}
-        onRowDoubleClick={(params, event) => {
-          if (onOpenPopout) onOpenPopout([params.row as any], (event as any).screenX ?? 0, (event as any).screenY ?? 0);
-        }}
-        onRowContextMenu={onRowContextMenu}
-        reserveBottom={reserveBottom}
-        sx={{
-          '& .MuiDataGrid-cell': { py: density === 'compact' ? 0.5 : 1 },
-          '& .MuiDataGrid-columnHeader': { py: 1 },
-          '& .MuiDataGrid-columnHeaders': { backgroundColor: theme.palette.action.hover },
-        }}
-        onColumnResize={(params: any) => {
-          const { colDef, width } = params;
-          setColState((prev) => prev.map((c) => (c.field === colDef.field ? { ...c, width } : c)));
-          // persist widths
-          try {
-            const cur = loadPersistedColumns() || {};
-            const widths = { ...(cur.widths || {}) };
-            widths[colDef.field] = width;
-            savePersistedColumns({ ...cur, widths });
-          } catch (e) {}
-        }}
-        onColumnVisibilityModelChange={(model: any) => {
-          try {
-            const cur = loadPersistedColumns() || {};
-            const hidden = Object.keys(model).filter((k) => !model[k]);
-            savePersistedColumns({ ...cur, hidden });
-          } catch (e) {}
-        }}
-        onColumnOrderChange={(params: any) => {
-          try {
-            const cur = loadPersistedColumns() || {};
-            const order = params.columnFields || params.items || [];
-            savePersistedColumns({ ...cur, order });
-          } catch (e) {}
-        }}
-      />
+      {/* open-manage-columns event: anchor our custom Popper to the header element */}
       {/* Row context menu (portal) */}
       <TaskRowContextMenu
         visible={contextMenu.visible}

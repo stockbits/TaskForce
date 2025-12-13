@@ -1,18 +1,21 @@
-import React from "react";
+import React, { useRef } from "react";
+import { Paper, Box } from "@mui/material";
 import TaskTableMUI from "@/shared-ui/ResponsiveTable/TaskTableMUI";
 
-export interface TaskTableAdvancedProps {
-  rows: Record<string, any>[];
-  columns?: any[];
-  loading?: boolean;
-  onOpenPopout?: (tasks: Record<string, any>[], x: number, y: number) => void;
-  onOpenCalloutIncident?: (task: Record<string, any>) => void;
-  sx?: any;
-}
+const TaskTableAdvanced: React.FC<any> = ({ rows, columns, loading, ...rest }) => {
+  const containerRef = useRef<HTMLElement | null>(null);
 
-const TaskTableAdvanced: React.FC<TaskTableAdvancedProps> = ({ rows, columns, loading, ...rest }) => {
-  // Lightweight wrapper that forwards to the consolidated shared TaskTableMUI.
-  return <TaskTableMUI rows={rows} columns={columns} loading={loading} {...rest} />;
+  return (
+    <Box sx={{ width: '100%', display: 'flex', flex: 1, minHeight: 0 }} ref={containerRef as any}>
+      <TaskTableMUI
+        rows={rows}
+        headerNames={(rest && (rest as any).headerNames) || {}}
+        loading={loading}
+        containerRef={containerRef}
+        {...rest}
+      />
+    </Box>
+  );
 };
 
 export default TaskTableAdvanced;

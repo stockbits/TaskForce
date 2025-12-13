@@ -1,20 +1,21 @@
 import React, { useEffect, useRef, useState, MutableRefObject } from 'react';
 import { Box } from '@mui/material';
-import { DataGrid, DataGridProps } from '@mui/x-data-grid';
+import { DataGrid, DataGridProps, useGridApiRef } from '@mui/x-data-grid';
 
 type ResponsiveProps = Omit<DataGridProps, 'autoHeight'> & {
   reserveBottom?: number; // pixels to reserve at bottom (footer)
   minHeight?: number;
   containerRef?: MutableRefObject<HTMLElement | null>;
   autoReserveBottom?: boolean; // if true, detect footer space below container and include it
-  debug?: boolean; // enable console debug logs
 } & Record<string, any>;
 
 export default function ResponsiveDataGrid(props: ResponsiveProps) {
-  const { reserveBottom = 140, minHeight = 220, containerRef, autoReserveBottom = true, debug = false, sx, ...rest } = props;
+  const { reserveBottom = 140, minHeight = 220, containerRef, autoReserveBottom = true, sx, ...rest } = props;
   const innerRef = useRef<HTMLDivElement | null>(null);
   const hostRef = (containerRef as any) ?? innerRef;
   const [height, setHeight] = useState<number>(minHeight);
+  const apiRef = useGridApiRef();
+  const apiRefLocal = apiRef;
 
   useEffect(() => {
     function compute() {
@@ -26,23 +27,11 @@ export default function ResponsiveDataGrid(props: ResponsiveProps) {
         }
         const rect = node.getBoundingClientRect();
         const top = rect.top;
-        // detect footer / leftover space below container (if any)
         const footerSpace = Math.max(0, window.innerHeight - rect.bottom);
         const effectiveReserve = reserveBottom + (autoReserveBottom ? Math.round(footerSpace) : 0);
         const available = Math.max(minHeight, window.innerHeight - top - effectiveReserve);
         const computed = Math.round(available);
-        if (debug) {
-          // eslint-disable-next-line no-console
-          console.debug('ResponsiveDataGrid.compute', {
-            top,
-            bottom: rect.bottom,
-            windowInnerHeight: window.innerHeight,
-            reserveBottom,
-            footerSpace,
-            effectiveReserve,
-            computed,
-          });
-        }
+        // compute available height
         setHeight(computed);
       } catch (e) {
         setHeight(minHeight);
@@ -57,15 +46,17 @@ export default function ResponsiveDataGrid(props: ResponsiveProps) {
       ro.disconnect();
       window.removeEventListener('resize', compute);
     };
-  }, [reserveBottom, minHeight, hostRef]);
+  }, [reserveBottom, minHeight, hostRef, autoReserveBottom]);
 
   return (
     <Box ref={innerRef} sx={{ width: '100%', height, position: 'relative', ...((sx as any) || {}) }}>
       <DataGrid
         {...(rest as any)}
+        apiRef={apiRef}
         autoHeight={false}
         sx={{ height: '100%', '& .MuiDataGrid-viewport': { height: '100%' }, ...(((rest as any).sx) || {}) }}
       />
+      {/* dev pointer inspector removed */}
     </Box>
   );
 }
