@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, MutableRefObject, useRef } from 'react';
 import { Box, useTheme, Paper, Stack, Typography, TextField, InputAdornment, Divider, Button, FormControlLabel, Checkbox, Popper, ClickAwayListener, TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
-import { GridColDef, useGridApiRef, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarDensitySelector } from '@mui/x-data-grid';
+import { GridColDef, useGridApiRef, GridToolbar } from '@mui/x-data-grid';
 import { DataGrid } from '@mui/x-data-grid';
 // keep imports minimal: use built-in DataGrid behavior
 import { loadPersistedColumns, applyPersistedColumns, savePersistedColumns } from './usePersistedColumns';
@@ -397,6 +397,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
         <AnyDataGrid
           rows={gridRows}
           columns={colState}
+          components={{ Toolbar: GridToolbar }}
           checkboxSelection
           density={density as 'compact' | 'standard' | 'comfortable'}
           pageSizeOptions={[25, 50, 100]}
@@ -444,14 +445,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           }}
         />
       </Paper>
-      {/* Toolbar moved below the table to free header space */}
-      <Box sx={{ px: 1, mt: 1 }}>
-        <GridToolbarContainer>
-          <GridToolbarColumnsButton />
-          <GridToolbarFilterButton />
-          <GridToolbarDensitySelector />
-        </GridToolbarContainer>
-      </Box>
+      {/* Toolbar rendered inside DataGrid to maintain proper context */}
       {/* insertion indicator */}
       <Box sx={{ position: 'absolute', left: 0, top: 0, pointerEvents: 'none', width: '100%', height: '100%', zIndex: 1200 }} ref={gridContainerRef as any}>
         {insertion.visible && (
