@@ -33,8 +33,7 @@ import {
 } from "@mui/material";
 import { Bookmark, ChevronDown, Eye, EyeOff, Search } from "lucide-react";
 import FilterListIcon from '@mui/icons-material/FilterList';
-import MultiSelectField from '@/shared-ui';
-import { FreeTypeSelectField } from '@/shared-ui';
+import { MultiSelectField, SingleSelectField, FreeTypeSelectField } from '@/shared-ui';
 
 type Filters = {
   taskSearch: string;
@@ -361,7 +360,7 @@ export default function TaskSearchCard({
   // Standard box width used across filter controls to keep consistent sizing.
   // Increased responsive values to give more breathing room so pills/numbers
   // and default placeholder text don't feel cramped.
-  const STANDARD_BOX = { xs: "24ch", sm: "36ch", md: "48ch" };
+  const STANDARD_BOX = { xs: "24ch", sm: "30ch", md: "40ch" };
   // We'll compute per-field widths after we have the options loaded so we can
   // measure the prompt/DB-derived values. `expectedMaxCharsOverrides` is for
   // manual tweaks; measurements from options will be used as the primary
@@ -659,8 +658,8 @@ export default function TaskSearchCard({
                   </Menu>
                 </Box>
                 <Grid container spacing={1.5} alignItems="center">
-                  <Grid item xs={12} sm="auto" md="auto">
-                          <Box sx={{ width: '100%', maxWidth: maxWidthFor('division'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
+                    <Grid item xs={12} sm="auto" md="auto">
+                      <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '30ch', md: '40ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="Division"
                         options={divisionOptions}
@@ -673,7 +672,7 @@ export default function TaskSearchCard({
                   </Grid>
 
                   <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('domainId'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
+                    <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '30ch', md: '40ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="Domain ID"
                         options={domainOptions}
@@ -686,7 +685,7 @@ export default function TaskSearchCard({
                   </Grid>
 
                   <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('taskStatuses'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
+                    <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '30ch', md: '40ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="Task Status"
                         options={statusOptions}
@@ -698,7 +697,7 @@ export default function TaskSearchCard({
                   </Grid>
 
                   <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('commitType'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
+                    <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '30ch', md: '40ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="Commit Type"
                         options={commitOptions}
@@ -710,7 +709,7 @@ export default function TaskSearchCard({
                   </Grid>
 
                   <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('responseCode'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
+                    <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '30ch', md: '40ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="Response Code"
                         options={responseOptions}
@@ -722,7 +721,7 @@ export default function TaskSearchCard({
                   </Grid>
 
                   <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('pwa'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
+                    <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '36ch', md: '48ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="PWA Selector"
                         options={pwaOptions}
@@ -734,7 +733,7 @@ export default function TaskSearchCard({
                   </Grid>
 
                   <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: maxWidthFor('capabilities'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
+                    <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '30ch', md: '40ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="Capabilities"
                         options={capabilityOptions}
@@ -752,7 +751,7 @@ export default function TaskSearchCard({
             <Box mt={1}>
                 <Grid container spacing={1.5} alignItems="center">
                 <Grid item xs={12} sm="auto" md="auto">
-                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('requester'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
+                  <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '60ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                     <FreeTypeSelectField
                       label="Requester"
                       options={requesterOptions}
@@ -763,7 +762,7 @@ export default function TaskSearchCard({
                 </Grid>
 
                 <Grid item xs={12} sm="auto" md="auto">
-                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('jobType'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
+                  <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '60ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                     <FreeTypeSelectField
                       label="Job Type"
                       options={jobTypeOptions}
@@ -774,80 +773,52 @@ export default function TaskSearchCard({
                 </Grid>
 
                 <Grid item xs={12} sm="auto" md="auto">
-                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('locationType'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
-                    <FormControl size="small" sx={{ minWidth: 120 }}>
-                    <InputLabel id="location-type-label">Location Type</InputLabel>
-                    <Select
-                      labelId="location-type-label"
+                  <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '60ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
+                    <SingleSelectField
                       label="Location Type"
-                      value={filters.locationType}
-                      onChange={(event) =>
-                        setFilters((prev) => ({
-                          ...prev,
-                          locationType: event.target.value,
-                        }))
-                      }
-                    >
-                      <MenuItem value="" disabled>
-                        Select type
-                      </MenuItem>
-                      <MenuItem value="postCode">Postcode</MenuItem>
-                      <MenuItem value="location">Location</MenuItem>
-                      <MenuItem value="groupCode">Group Code</MenuItem>
-                    </Select>
-                  </FormControl>
-                  </Box>
-                </Grid>
-
-                <Grid item xs={12} sm="auto" md="auto">
-                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('locationValue'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
-                    <TextField
-                      name="locationValue"
-                      value={filters.locationValue}
-                      onChange={handleFieldChange}
-                      size="small"
-                      fullWidth
-                      placeholder={filters.locationValue ? "" : "Location Value"}
-                      aria-label="Location Value"
+                      options={[
+                        { label: 'Postcode', value: 'postCode' },
+                        { label: 'Location', value: 'location' },
+                        { label: 'Group Code', value: 'groupCode' },
+                      ]}
+                      value={filters.locationType || null}
+                      onChange={(val) => setFilters((prev) => ({ ...prev, locationType: val ?? '' }))}
                     />
                   </Box>
                 </Grid>
 
                 <Grid item xs={12} sm="auto" md="auto">
-                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('scoreValue'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
-                    <FormControl size="small" sx={{ minWidth: 120 }}>
-                    <InputLabel id="imp-condition-label">IMP Condition</InputLabel>
-                    <Select
-                      labelId="imp-condition-label"
-                      label="IMP Condition"
-                      value={filters.scoreCondition}
-                      onChange={(event) =>
-                        setFilters((prev) => ({
-                          ...prev,
-                          scoreCondition: event.target.value,
-                        }))
-                      }
-                    >
-                      <MenuItem value="" disabled>
-                        Select condition
-                      </MenuItem>
-                      <MenuItem value="greater">Greater Than</MenuItem>
-                      <MenuItem value="less">Less Than</MenuItem>
-                    </Select>
-                  </FormControl>
+                  <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '60ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
+                    <FreeTypeSelectField
+                      label="Location Value"
+                      options={[]}
+                      value={filters.locationValue}
+                      onChange={(next: string) => setFilters((prev) => ({ ...prev, locationValue: next }))}
+                    />
                   </Box>
                 </Grid>
 
                 <Grid item xs={12} sm="auto" md="auto">
-                  <Box sx={{ width: '100%', maxWidth: maxWidthFor('scoreValue'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
-                    <TextField
-                      name="scoreValue"
+                  <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '60ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
+                    <SingleSelectField
+                      label="IMP Condition"
+                      options={[
+                        { label: 'Greater Than', value: 'greater' },
+                        { label: 'Less Than', value: 'less' },
+                      ]}
+                      value={filters.scoreCondition || null}
+                      onChange={(val) => setFilters((prev) => ({ ...prev, scoreCondition: val ?? '' }))}
+                    />
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12} sm="auto" md="auto">
+                  <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '60ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
+                    <FreeTypeSelectField
+                      label="IMP Value"
+                      options={[]}
                       value={filters.scoreValue}
-                      onChange={handleFieldChange}
-                      size="small"
-                      fullWidth
-                      placeholder={filters.scoreValue ? "" : "IMP Value"}
-                      aria-label="IMP Value"
+                      onChange={(next: string) => setFilters((prev) => ({ ...prev, scoreValue: next }))}
                     />
                   </Box>
                 </Grid>

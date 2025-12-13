@@ -39,6 +39,8 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
     );
   }, [options]);
 
+  const FIELD_WIDTH = { xs: '100%', sm: '30ch', md: '40ch' };
+
   return (
     <Autocomplete
       freeSolo
@@ -66,9 +68,13 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
           size="small"
           required={required}
           aria-label={label}
+          InputProps={{
+            ...params.InputProps,
+            sx: { '& .MuiInputBase-input': { paddingRight: '56px' } },
+          }}
         />
       )}
-      sx={{ width: "100%" }}
+      sx={{ width: FIELD_WIDTH }}
     />
   );
 };

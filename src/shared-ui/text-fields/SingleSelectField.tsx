@@ -1,16 +1,20 @@
 import React, { useState, useMemo } from "react";
 import { Autocomplete, ListItem, ListItemText, TextField } from "@mui/material";
 
+type OptionItem = string | { label: string; value: string };
+
 interface SingleSelectFieldProps {
   label: string;
-  options: string[];
+  options: OptionItem[];
   value: string | null;
   onChange: (value: string | null) => void;
   required?: boolean;
   inputValue?: string;
   onInputChange?: (value: string) => void;
-  renderOption?: (props: any, option: string) => React.ReactNode;
+  renderOption?: (props: any, option: OptionItem) => React.ReactNode;
 }
+
+const FIELD_WIDTH = { xs: '100%', sm: '30ch', md: '40ch' };
 
 const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
   label,
@@ -29,12 +33,18 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
 
   const filteredOptions = useMemo(() => {
     if (!normalizedQuery) return options;
-    return options.filter((option) => option.toLowerCase().includes(normalizedQuery));
+    return options.filter((opt) => {
+      const label = typeof opt === 'string' ? opt : opt.label;
+      return label.toLowerCase().includes(normalizedQuery);
+    });
   }, [normalizedQuery, options]);
 
   const longestOption = useMemo(() => {
     if (!options || !options.length) return "";
-    return options.reduce((cur, s) => (String(s).length > cur.length ? String(s) : cur), String(options[0]));
+    return options.reduce<string>((cur, s) => {
+      const label = typeof s === 'string' ? s : s.label;
+      return String(label).length > cur.length ? String(label) : cur;
+    }, typeof options[0] === 'string' ? String(options[0]) : options[0].label);
   }, [options]);
 
   const handleInputChange = (_e: any, newInput: string) => {
@@ -45,14 +55,27 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
   return (
     <Autocomplete
       options={filteredOptions}
-      value={value}
-      onChange={(_e, newValue) => onChange(newValue)}
+      value={
+        (() => {
+          if (value == null) return null;
+          const found = options.find((opt) => (typeof opt === 'string' ? opt === value : opt.value === value));
+          return found ?? null;
+        })()
+      }
+      onChange={(_e, newValue) => {
+        if (newValue == null) {
+          onChange(null);
+          return;
+        }
+        const out = typeof newValue === 'string' ? newValue : newValue.value;
+        onChange(out);
+      }}
       inputValue={inputValue}
       onInputChange={handleInputChange}
-      getOptionLabel={(option) => option}
-      renderOption={renderOption ?? ((props, option) => (
+      getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+      renderOption={renderOption ?? ((props, option: OptionItem) => (
         <ListItem {...props} dense>
-          <ListItemText primary={option} />
+          <ListItemText primary={typeof option === 'string' ? option : option.label} />
         </ListItem>
       ))}
       renderInput={(params) => (
@@ -62,9 +85,13 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
           size="small"
           required={required}
           aria-label={label}
+          InputProps={{
+            ...params.InputProps,
+            sx: { '& .MuiInputBase-input': { paddingRight: '56px' } },
+          }}
         />
       )}
-      sx={{ width: "100%" }}
+      sx={{ width: FIELD_WIDTH }}
     />
   );
 };

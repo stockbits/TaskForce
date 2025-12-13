@@ -98,19 +98,22 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
     }
   };
 
+  const FIELD_WIDTH = { xs: '100%', sm: '30ch', md: '40ch' };
+
   return (
     <Autocomplete
       multiple
       disableCloseOnSelect
       componentsProps={{ popper: { style: { minWidth: '32ch' } } }}
       sx={{
-        width: '100%',
+        width: FIELD_WIDTH,
         '& .MuiAutocomplete-inputRoot': {
           minHeight: 36,
           maxHeight: 36,
           overflow: 'hidden',
           alignItems: 'center',
-          '& .MuiInputBase-input': { paddingRight: '64px' },
+          // reserve space on the right for the select-all icon
+          '& .MuiInputBase-input': { paddingRight: '56px' },
         },
         '& .MuiAutocomplete-tag': {
           maxWidth: '100%',
@@ -222,7 +225,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
             InputProps={{
               ...params.InputProps,
               endAdornment,
-              sx: { height: 36, '& .MuiInputBase-input': { paddingTop: '6px', paddingBottom: '6px' } },
+              sx: { height: 36, '& .MuiInputBase-input': { paddingTop: '6px', paddingBottom: '6px', paddingRight: '56px' } },
             }}
           />
         );

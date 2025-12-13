@@ -183,9 +183,10 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
                 if (next) onStart(next);
               }}
               renderOption={(props, option) => {
-                const resourceCount = resourceCountByGroup.get(option) ?? 0;
+                const label = typeof option === 'string' ? option : option.label;
+                const resourceCount = resourceCountByGroup.get(label) ?? 0;
                 return (
-                  <li {...props} key={option}>
+                  <li {...props} key={label}>
                     <Stack
                       direction="row"
                       spacing={1.5}
@@ -194,7 +195,7 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
                       sx={{ width: '100%' }}
                     >
                       <Typography variant="body2" color="text.primary">
-                        {option}
+                        {label}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
                         {resourceCount} {resourceCount === 1 ? "resource" : "resources"}
