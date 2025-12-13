@@ -46,15 +46,16 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
     );
   }, [normalizedQuery, options]);
 
-  const longestOption = useMemo(() => {
-      componentsProps={{ popper: { style: { minWidth: '32ch', zIndex: 2000 } } }}
-    return options.reduce((cur, s) => (String(s).length > cur.length ? String(s) : cur), String(options[0]));
-  }, [options]);
+  const prefillPrompt = useMemo(() => {
+    if (!options || !options.length) return label;
+    const first = String(options[0]).trim();
+    const firstWord = first.split(/\s+/)[0] || first;
+    return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
+  }, [options, label]);
 
   const filteredSelectionCount = filteredOptions.filter((option) =>
     value.includes(option)
   ).length;
-        sx: { maxHeight: 320, zIndex: 2000 },
   const allFilteredSelected =
     filteredOptions.length > 0 &&
     filteredSelectionCount === filteredOptions.length;
@@ -105,7 +106,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
       disableClearable
       multiple
       disableCloseOnSelect
-      componentsProps={{ popper: { style: { minWidth: '32ch' } } }}
+      componentsProps={{ popper: { style: { minWidth: '32ch', zIndex: 2000 } } }}
       sx={{
         width: FIELD_WIDTH,
         '& .MuiAutocomplete-inputRoot': {
@@ -206,9 +207,9 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
         );
 
         return (
-          <TextField
+            <TextField
             {...params}
-            placeholder={value && value.length ? "" : (longestOption || label)}
+            placeholder={value && value.length ? "" : (prefillPrompt || label)}
             size="small"
             required={required}
             aria-label={label}
@@ -221,7 +222,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
         );
       }}
       ListboxProps={{
-        sx: { maxHeight: 320 },
+        sx: { maxHeight: 320, zIndex: 2000 },
       }}
     />
   );

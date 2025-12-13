@@ -31,13 +31,12 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
     );
   }, [normalizedQuery, options]);
 
-  const longestOption = useMemo(() => {
-    if (!options || !options.length) return "";
-    return options.reduce((cur, s) =>
-      String(s).length > cur.length ? String(s) : cur,
-      String(options[0])
-    );
-  }, [options]);
+  const prefillPrompt = useMemo(() => {
+    if (!options || !options.length) return label;
+    const first = String(options[0]).trim();
+    const firstWord = first.split(/\s+/)[0] || first;
+    return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
+  }, [options, label]);
 
   const FIELD_WIDTH = { xs: '100%', sm: '26ch', md: '32ch' };
 
@@ -65,7 +64,7 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
       renderInput={(params) => (
         <TextField
           {...params}
-          placeholder={value || longestOption || label}
+          placeholder={value || prefillPrompt || label}
           size="small"
           required={required}
           aria-label={label}

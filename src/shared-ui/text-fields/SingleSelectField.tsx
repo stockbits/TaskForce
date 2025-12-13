@@ -39,13 +39,12 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
     });
   }, [normalizedQuery, options]);
 
-  const longestOption = useMemo(() => {
-    if (!options || !options.length) return "";
-    return options.reduce<string>((cur, s) => {
-      const label = typeof s === 'string' ? s : s.label;
-      return String(label).length > cur.length ? String(label) : cur;
-    }, typeof options[0] === 'string' ? String(options[0]) : options[0].label);
-  }, [options]);
+  const prefillPrompt = useMemo(() => {
+    if (!options || !options.length) return label;
+    const first = typeof options[0] === 'string' ? options[0] : options[0].label;
+    const firstWord = String(first).trim().split(/\s+/)[0] || String(first);
+    return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
+  }, [options, label]);
 
   const handleInputChange = (_e: any, newInput: string) => {
     if (controlledInputValue === undefined) setInternalInput(newInput);
@@ -82,7 +81,7 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
       renderInput={(params) => (
         <TextField
           {...params}
-          placeholder={value || longestOption || label}
+          placeholder={value || prefillPrompt || label}
           size="small"
           required={required}
           aria-label={label}
