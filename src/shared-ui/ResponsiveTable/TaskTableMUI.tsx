@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, MutableRefObject, useRef } from 'react';
 import { Box, useTheme, Paper, Stack, Typography, TextField, InputAdornment, Divider, Button, FormControlLabel, Checkbox, Popper, ClickAwayListener, TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
-import { GridColDef, useGridApiRef, GridToolbar } from '@mui/x-data-grid';
+import { GridColDef, useGridApiRef, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarDensitySelector } from '@mui/x-data-grid';
 import { DataGrid } from '@mui/x-data-grid';
 // keep imports minimal: use built-in DataGrid behavior
 import { loadPersistedColumns, applyPersistedColumns, savePersistedColumns } from './usePersistedColumns';
@@ -383,6 +383,15 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
     const AnyDataGrid: any = DataGrid as any;
     const apiRef = useGridApiRef();
 
+    // Custom toolbar without export button (we want Columns/Filter/Density only)
+    const CustomToolbar = () => (
+      <GridToolbarContainer>
+        <GridToolbarColumnsButton />
+        <GridToolbarFilterButton />
+        <GridToolbarDensitySelector />
+      </GridToolbarContainer>
+    );
+
   // context menu for rows
   const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number; clickedRow?: any; clickedColumnKey?: string | null; mouseScreenX?: number; mouseScreenY?: number }>({ visible: false, x: 0, y: 0 });
   const closeContextMenu = () => setContextMenu({ visible: false, x: 0, y: 0 });
@@ -397,7 +406,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
         <AnyDataGrid
           rows={gridRows}
           columns={colState}
-          components={{ Toolbar: GridToolbar }}
+          components={{ Toolbar: CustomToolbar }}
           checkboxSelection
           density={density as 'compact' | 'standard' | 'comfortable'}
           pageSizeOptions={[25, 50, 100]}

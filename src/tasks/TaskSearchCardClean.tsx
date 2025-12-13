@@ -31,7 +31,8 @@ import {
   Tooltip,
   useTheme,
 } from "@mui/material";
-import { ChevronDown, Eye, EyeOff, Search } from "lucide-react";
+import { ChevronDown, Eye, EyeOff, Search, MoreVertical } from "lucide-react";
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -818,30 +819,33 @@ export default function TaskSearchCard({
             variant="outlined"
             size="small"
             onClick={handleMenuOpen}
+            startIcon={<MoreVertical size={16} />}
             endIcon={<ChevronDown size={16} />}
             sx={{
               borderRadius: 2,
               textTransform: "none",
+              px: 1,
+              display: 'inline-flex',
+              alignItems: 'center'
             }}
           >
             More
           </Button>
           {/* Columns button removed — using DataGrid's built-in column menu */}
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={handleExport}
-            sx={{ ml: 1, borderRadius: 2, textTransform: 'none' }}
-          >
-            Export
-          </Button>
-          <Menu
+            <Menu
             anchorEl={menuAnchorEl}
             open={Boolean(menuAnchorEl)}
             onClose={handleMenuClose}
             anchorOrigin={{ vertical: "top", horizontal: "left" }}
             transformOrigin={{ vertical: "top", horizontal: "left" }}
           >
+              <MenuItem onClick={handleExport} sx={{ display: 'flex', alignItems: 'center' }}>
+                <ListItemIcon>
+                  <FileDownloadIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Export</ListItemText>
+              </MenuItem>
+            </Menu>
             <MenuItem onClick={handleCopy}>{canCopy ? "Copy" : "Copy (empty)"}</MenuItem>
           </Menu>
         </Box>
