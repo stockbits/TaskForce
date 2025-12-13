@@ -360,7 +360,21 @@ export default function TaskSearchCard({
   // Standard box width used across filter controls to keep consistent sizing.
   // Increased responsive values to give more breathing room so pills/numbers
   // and default placeholder text don't feel cramped.
-    const STANDARD_BOX = { xs: '100%', sm: '24ch', md: '30ch' };
+  const STANDARD_BOX = { xs: '100%', sm: '22ch', md: '28ch' };
+
+  // Shared Box sx for filter inputs so Basic and Advanced tabs match.
+  const FILTER_BOX_SX = {
+    width: "100%",
+    maxWidth: STANDARD_BOX,
+    px: 1,
+    display: "flex",
+    alignItems: "center",
+    minHeight: 40,
+    flex: "0 0 auto",
+    '& .MuiInputBase-root': { minHeight: 36 },
+    '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 },
+    '& .MuiAutocomplete-inputRoot': { paddingTop: '4px', paddingBottom: '8px' },
+  } as const;
   // We'll compute per-field widths after we have the options loaded so we can
   // measure the prompt/DB-derived values. `expectedMaxCharsOverrides` is for
   // manual tweaks; measurements from options will be used as the primary
@@ -594,7 +608,7 @@ export default function TaskSearchCard({
         <CardContent
           sx={{
             pt: 0.5,
-            pb: 0,
+            pb: 2,
             px: 2,
             maxHeight: 'none',
             overflowY: 'visible',
@@ -659,20 +673,17 @@ export default function TaskSearchCard({
                 </Box>
                 <Grid container spacing={1.5} alignItems="center">
                     <Grid item xs={12} sm="auto" md="auto">
-                          <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '26ch', md: '32ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
-                      <MultiSelectField
-                        label="Division"
-                        options={divisionOptions}
-                        value={filters.division}
+                        <MultiSelectField
+                          label="Division"
+                          options={divisionOptions}
+                          value={filters.division}
                           onChange={(value: string[]) => handleMultiChange("division", value)}
                           showSelectAllIcon
-                        required
-                      />
-                    </Box>
-                  </Grid>
+                          required
+                        />
+                    </Grid>
 
                   <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '26ch', md: '32ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="Domain ID"
                         options={domainOptions}
@@ -681,11 +692,9 @@ export default function TaskSearchCard({
                         showSelectAllIcon
                         required
                       />
-                    </Box>
                   </Grid>
 
                   <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '26ch', md: '32ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="Task Status"
                         options={statusOptions}
@@ -693,11 +702,9 @@ export default function TaskSearchCard({
                         onChange={(value: string[]) => handleMultiChange("taskStatuses", value)}
                         showSelectAllIcon
                       />
-                    </Box>
                   </Grid>
 
                   <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '30ch', md: '40ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="Commit Type"
                         options={commitOptions}
@@ -705,11 +712,9 @@ export default function TaskSearchCard({
                         onChange={(value: string[]) => handleMultiChange("commitType", value)}
                         showSelectAllIcon
                       />
-                    </Box>
                   </Grid>
 
                   <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '30ch', md: '40ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="Response Code"
                         options={responseOptions}
@@ -717,11 +722,9 @@ export default function TaskSearchCard({
                         onChange={(value: string[]) => handleMultiChange("responseCode", value)}
                         showSelectAllIcon
                       />
-                    </Box>
                   </Grid>
 
                   <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '28ch', md: '36ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="PWA Selector"
                         options={pwaOptions}
@@ -729,11 +732,9 @@ export default function TaskSearchCard({
                         onChange={(value: string[]) => handleMultiChange("pwa", value)}
                         showSelectAllIcon
                       />
-                    </Box>
                   </Grid>
 
                   <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '30ch', md: '40ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, flex: '0 0 auto', '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                       <MultiSelectField
                         label="Capabilities"
                         options={capabilityOptions}
@@ -741,7 +742,6 @@ export default function TaskSearchCard({
                         onChange={(value: string[]) => handleMultiChange("capabilities", value)}
                         showSelectAllIcon
                       />
-                    </Box>
                   </Grid>
                 </Grid>
               </Box>
@@ -751,29 +751,24 @@ export default function TaskSearchCard({
             <Box mt={1}>
                 <Grid container spacing={1.5} alignItems="center">
                 <Grid item xs={12} sm="auto" md="auto">
-                    <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '26ch', md: '32ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                     <FreeTypeSelectField
                       label="Requester"
                       options={requesterOptions}
                       value={filters.requester}
                       onChange={(next: string) => setFilters((prev) => ({ ...prev, requester: next }))}
                     />
-                  </Box>
                 </Grid>
 
                 <Grid item xs={12} sm="auto" md="auto">
-                  <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '26ch', md: '32ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                     <FreeTypeSelectField
                       label="Job Type"
                       options={jobTypeOptions}
                       value={filters.jobType}
                       onChange={(next: string) => setFilters((prev) => ({ ...prev, jobType: next }))}
                     />
-                  </Box>
                 </Grid>
 
                 <Grid item xs={12} sm="auto" md="auto">
-                  <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '26ch', md: '32ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                     <SingleSelectField
                       label="Location Type"
                       options={[
@@ -784,22 +779,18 @@ export default function TaskSearchCard({
                       value={filters.locationType || null}
                       onChange={(val) => setFilters((prev) => ({ ...prev, locationType: val ?? '' }))}
                     />
-                  </Box>
                 </Grid>
 
                 <Grid item xs={12} sm="auto" md="auto">
-                  <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '28ch', md: '36ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                     <FreeTypeSelectField
                       label="Location Value"
                       options={[]}
                       value={filters.locationValue}
                       onChange={(next: string) => setFilters((prev) => ({ ...prev, locationValue: next }))}
                     />
-                  </Box>
                 </Grid>
 
                 <Grid item xs={12} sm="auto" md="auto">
-                  <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '60ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                     <SingleSelectField
                       label="IMP Condition"
                       options={[
@@ -809,18 +800,15 @@ export default function TaskSearchCard({
                       value={filters.scoreCondition || null}
                       onChange={(val) => setFilters((prev) => ({ ...prev, scoreCondition: val ?? '' }))}
                     />
-                  </Box>
                 </Grid>
 
                 <Grid item xs={12} sm="auto" md="auto">
-                  <Box sx={{ width: '100%', maxWidth: { xs: '100%', sm: '60ch' }, px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
                     <FreeTypeSelectField
                       label="IMP Value"
                       options={[]}
                       value={filters.scoreValue}
                       onChange={(next: string) => setFilters((prev) => ({ ...prev, scoreValue: next }))}
                     />
-                  </Box>
                 </Grid>
               </Grid>
             </Box>

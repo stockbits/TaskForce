@@ -26,6 +26,7 @@ interface MultiSelectFieldProps {
   onChange: (value: string[]) => void;
   required?: boolean;
   showSelectAllIcon?: boolean;
+  wrapperSx?: any;
 }
 
 const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
@@ -35,6 +36,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
   onChange,
   required = false,
   showSelectAllIcon = true,
+  wrapperSx,
 }) => {
   const [inputValue, setInputValue] = useState("");
   const normalizedQuery = inputValue.trim().toLowerCase();
@@ -96,10 +98,27 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
     }
   };
 
-  const FIELD_WIDTH = { xs: '100%', sm: '24ch', md: '30ch' };
+  const FIELD_WIDTH = { xs: '100%', sm: '22ch', md: '28ch' };
+
+  const CHIP_SIZE = 32;
+  const INPUT_HEIGHT = 48;
+
+  const DEFAULT_WRAPPER_SX = {
+    width: "100%",
+    maxWidth: FIELD_WIDTH,
+    px: 1,
+    display: "flex",
+    alignItems: "center",
+    minHeight: INPUT_HEIGHT,
+    flex: "0 0 auto",
+    '& .MuiInputBase-root': { minHeight: INPUT_HEIGHT, transition: 'all 120ms ease' },
+    '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: INPUT_HEIGHT, transition: 'all 120ms ease' },
+    '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0, transition: 'all 120ms ease' },
+  } as const;
 
   return (
-    <Autocomplete
+    <Box sx={wrapperSx ?? DEFAULT_WRAPPER_SX}>
+      <Autocomplete
       disableClearable
       multiple
       disableCloseOnSelect
@@ -107,20 +126,25 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
       sx={{
         width: FIELD_WIDTH,
         '& .MuiAutocomplete-inputRoot': {
-          minHeight: 36,
-          maxHeight: 36,
+          minHeight: INPUT_HEIGHT,
+          maxHeight: INPUT_HEIGHT,
           overflow: 'hidden',
           alignItems: 'center',
+          transition: 'all 120ms ease',
           // reserve space on the right for the select-all icon
-          '& .MuiInputBase-input': { paddingRight: '56px' },
+          '& .MuiInputBase-input': { paddingRight: '56px', fontSize: 13, lineHeight: `${CHIP_SIZE}px`, paddingTop: 0, paddingBottom: 0 },
         },
         '& .MuiAutocomplete-tag': {
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: CHIP_SIZE,
           maxWidth: '100%',
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
         },
-        '& .MuiInputBase-root': { minHeight: 36 },
+        '& .MuiInputBase-root': { minHeight: INPUT_HEIGHT, transition: 'all 120ms ease' },
       }}
       options={[SELECT_ALL_VALUE, ...options]}
       value={value}
@@ -174,12 +198,34 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
       renderTags={(tagValue) => {
         if (!tagValue || tagValue.length === 0) return null;
 
+        const count = tagValue.length;
+        const isSingle = count < 10;
+
         return (
           <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', overflow: 'hidden', height: '100%', pr: '8px' }}>
             <Chip
-              label={`+${tagValue.length}`}
+              label={`+${count}`}
               size="small"
-              sx={{ flex: '0 0 auto', pl: 1 }}
+              variant="outlined"
+                  sx={{
+                flex: '0 0 auto',
+                height: CHIP_SIZE,
+                width: 'auto',
+                minWidth: CHIP_SIZE,
+                display: 'inline-flex',
+                alignItems: 'center',
+                alignSelf: 'center',
+                justifyContent: 'center',
+                px: 1,
+                fontWeight: 600,
+                fontSize: 13,
+                lineHeight: `${CHIP_SIZE}px`,
+                    borderRadius: '9999px',
+                    bgcolor: 'grey.100',
+                    borderColor: 'rgba(0,0,0,0.08)',
+                    boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.6)',
+                    border: '2px solid rgba(0,0,0,0.12)'
+              }}
             />
           </Box>
         );
@@ -204,7 +250,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
         );
 
         return (
-            <TextField
+          <TextField
             {...params}
             placeholder={value && value.length ? "" : label}
             size="small"
@@ -213,7 +259,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
             InputProps={{
               ...params.InputProps,
               endAdornment,
-              sx: { height: 36, '& .MuiInputBase-input': { paddingTop: '6px', paddingBottom: '6px', paddingRight: '56px' } },
+              sx: { height: INPUT_HEIGHT, transition: 'all 120ms ease', '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, paddingRight: '56px', fontSize: 13, lineHeight: `${CHIP_SIZE}px` } },
             }}
           />
         );
@@ -222,6 +268,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
         sx: { maxHeight: 320, zIndex: 2000 },
       }}
     />
+    </Box>
   );
 };
 

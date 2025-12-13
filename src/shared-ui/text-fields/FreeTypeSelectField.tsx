@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Autocomplete, ListItem, ListItemText, TextField } from "@mui/material";
+import { Autocomplete, Box, ListItem, ListItemText, TextField } from "@mui/material";
 
 interface FreeTypeSelectFieldProps {
   label: string;
@@ -7,9 +7,26 @@ interface FreeTypeSelectFieldProps {
   value: string;
   onChange: (value: string) => void;
   required?: boolean;
+  wrapperSx?: any;
 }
 
-const FIELD_WIDTH = { xs: "100%", sm: "24ch", md: "30ch" };
+const FIELD_WIDTH = { xs: "100%", sm: "22ch", md: "28ch" };
+
+const CHIP_SIZE = 32;
+const INPUT_HEIGHT = 48;
+
+const DEFAULT_WRAPPER_SX = {
+  width: "100%",
+  maxWidth: FIELD_WIDTH,
+  px: 1,
+  display: "flex",
+  alignItems: "center",
+  minHeight: INPUT_HEIGHT,
+  flex: "0 0 auto",
+  '& .MuiInputBase-root': { minHeight: INPUT_HEIGHT },
+  '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: INPUT_HEIGHT },
+  '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0, transition: 'all 120ms ease' },
+} as const;
 
 const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
   label,
@@ -17,6 +34,7 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
   value,
   onChange,
   required = false,
+  wrapperSx,
 }) => {
   const [inputValue, setInputValue] = useState<string>(value ?? "");
 
@@ -28,7 +46,8 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
   }, [normalizedQuery, options]);
 
   return (
-    <Autocomplete
+    <Box sx={wrapperSx ?? DEFAULT_WRAPPER_SX}>
+      <Autocomplete
       freeSolo
       disableClearable
       componentsProps={{ popper: { style: { zIndex: 2000 } } }}
@@ -43,22 +62,28 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
           <ListItemText primary={option} />
         </ListItem>
       )}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          placeholder={label}
-          size="small"
-          required={required}
-          aria-label={label}
-          InputProps={{
-            ...params.InputProps,
-            sx: { "& .MuiInputBase-input": { paddingRight: "56px" } },
-          }}
-        />
-      )}
+      renderInput={(params) => {
+        const endAdornment = <>{params.InputProps.endAdornment}</>;
+
+        return (
+          <TextField
+            {...params}
+            placeholder={value ? "" : label}
+            size="small"
+            required={required}
+            aria-label={label}
+            InputProps={{
+              ...params.InputProps,
+              endAdornment,
+              sx: { height: INPUT_HEIGHT, transition: 'all 120ms ease', "& .MuiInputBase-input": { paddingTop: 0, paddingBottom: 0, paddingRight: "56px", fontSize: 13, lineHeight: `${CHIP_SIZE}px` } },
+            }}
+          />
+        );
+      }}
       ListboxProps={{ sx: { zIndex: 2000, maxHeight: 320 } }}
-      sx={{ width: FIELD_WIDTH }}
+      sx={{ width: FIELD_WIDTH, '& .MuiAutocomplete-inputRoot': { minHeight: INPUT_HEIGHT, maxHeight: INPUT_HEIGHT, alignItems: 'center', transition: 'all 120ms ease', '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, paddingRight: '56px', fontSize: 13, lineHeight: `${CHIP_SIZE}px` } } }}
     />
+    </Box>
   );
 };
 
