@@ -188,6 +188,17 @@ export default function TaskSearchCard({
     []
   );
 
+  // Build a small prefill prompt from the first task row to show examples
+  const prefillPrompt = useMemo(() => {
+    const sample = (mockTasks as any[])[0];
+    if (!sample) return "Task ID, Resource, Postcode";
+    const pieces: string[] = [];
+    if (sample.taskId) pieces.push(String(sample.taskId));
+    if (sample.resourceName) pieces.push(String(sample.resourceName));
+    if (sample.postCode) pieces.push(String(sample.postCode));
+    return pieces.length ? `e.g. ${pieces.slice(0, 3).join(', ')}` : 'e.g. Task ID, Resource, Postcode';
+  }, []);
+
   // helper: get the maximum option string length for a given field key
   const getMaxOptionLength = (key: string) => {
     const arrFor = (k: string): string[] | undefined => {
@@ -580,14 +591,14 @@ export default function TaskSearchCard({
 
           <Box sx={{ width: { xs: 140, sm: 260, md: 360 } }}>
             <TextField
-              name="taskSearch"
-              value={filters.taskSearch}
-              onChange={handleFieldChange}
-              placeholder="Global search"
-              size="small"
-              fullWidth
-              InputProps={{ startAdornment: (<InputAdornment position="start"><Search size={16} /></InputAdornment>) }}
-            />
+                name="taskSearch"
+                value={filters.taskSearch}
+                onChange={handleFieldChange}
+                placeholder={prefillPrompt}
+                size="small"
+                fullWidth
+                InputProps={{ startAdornment: (<InputAdornment position="start"><Search size={16} /></InputAdornment>) }}
+              />
           </Box>
 
           <IconButton
@@ -756,6 +767,7 @@ export default function TaskSearchCard({
                       options={requesterOptions}
                       value={filters.requester}
                       onChange={(next: string) => setFilters((prev) => ({ ...prev, requester: next }))}
+                      placeholder={prefillPrompt}
                     />
                 </Grid>
 
@@ -765,6 +777,7 @@ export default function TaskSearchCard({
                       options={jobTypeOptions}
                       value={filters.jobType}
                       onChange={(next: string) => setFilters((prev) => ({ ...prev, jobType: next }))}
+                      placeholder={prefillPrompt}
                     />
                 </Grid>
 
@@ -787,6 +800,7 @@ export default function TaskSearchCard({
                       options={[]}
                       value={filters.locationValue}
                       onChange={(next: string) => setFilters((prev) => ({ ...prev, locationValue: next }))}
+                      placeholder={prefillPrompt}
                     />
                 </Grid>
 
@@ -808,6 +822,7 @@ export default function TaskSearchCard({
                       options={[]}
                       value={filters.scoreValue}
                       onChange={(next: string) => setFilters((prev) => ({ ...prev, scoreValue: next }))}
+                      placeholder={prefillPrompt}
                     />
                 </Grid>
               </Grid>

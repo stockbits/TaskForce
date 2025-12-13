@@ -8,6 +8,7 @@ interface FreeTypeSelectFieldProps {
   onChange: (value: string) => void;
   required?: boolean;
   wrapperSx?: any;
+  placeholder?: string;
 }
 
 const FIELD_WIDTH = { xs: "100%", sm: "22ch", md: "28ch" };
@@ -35,6 +36,7 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
   onChange,
   required = false,
   wrapperSx,
+  placeholder,
 }) => {
   const [inputValue, setInputValue] = useState<string>(value ?? "");
 
@@ -68,7 +70,7 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
         return (
           <TextField
             {...params}
-            placeholder={value ? "" : label}
+            placeholder={value ? "" : (placeholder ?? label)}
             size="small"
             required={required}
             aria-label={label}
