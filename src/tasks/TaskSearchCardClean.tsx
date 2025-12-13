@@ -360,7 +360,7 @@ export default function TaskSearchCard({
   // Standard box width used across filter controls to keep consistent sizing.
   // Increased responsive values to give more breathing room so pills/numbers
   // and default placeholder text don't feel cramped.
-  const STANDARD_BOX = { xs: "24ch", sm: "26ch", md: "32ch" };
+    const STANDARD_BOX = { xs: '100%', sm: '24ch', md: '30ch' };
   // We'll compute per-field widths after we have the options loaded so we can
   // measure the prompt/DB-derived values. `expectedMaxCharsOverrides` is for
   // manual tweaks; measurements from options will be used as the primary

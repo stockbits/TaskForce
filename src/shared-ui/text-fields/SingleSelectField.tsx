@@ -14,7 +14,7 @@ interface SingleSelectFieldProps {
   renderOption?: (props: any, option: OptionItem) => React.ReactNode;
 }
 
-const FIELD_WIDTH = { xs: '100%', sm: '26ch', md: '32ch' };
+const FIELD_WIDTH = { xs: '100%', sm: '24ch', md: '30ch' };
 
 const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
   label,
@@ -39,13 +39,7 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
     });
   }, [normalizedQuery, options]);
 
-  const prefillPrompt = useMemo(() => {
-    if (!options || !options.length) return label;
-    const first = typeof options[0] === 'string' ? options[0] : options[0].label;
-    const firstWord = String(first).trim().split(/\s+/)[0] || String(first);
-    const example = firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
-    return `${label}${example ? ` (${example})` : ""}`;
-  }, [options, label]);
+  // Placeholder uses only the header `label` now.
 
   const handleInputChange = (_e: any, newInput: string) => {
     if (controlledInputValue === undefined) setInternalInput(newInput);
@@ -82,7 +76,7 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
       renderInput={(params) => (
         <TextField
           {...params}
-          placeholder={value || prefillPrompt || label}
+          placeholder={value || label}
           size="small"
           required={required}
           aria-label={label}

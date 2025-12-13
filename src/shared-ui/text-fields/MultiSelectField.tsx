@@ -46,14 +46,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
     );
   }, [normalizedQuery, options]);
 
-  const prefillPrompt = useMemo(() => {
-    // Use the label and append a short example from the first option's first word.
-    if (!options || !options.length) return label;
-    const first = String(options[0]).trim();
-    const firstWord = first.split(/\s+/)[0] || first;
-    const example = firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
-    return `${label}${example ? ` (${example})` : ""}`;
-  }, [options, label]);
+  // Use only the provided label as the placeholder header.
 
   const filteredSelectionCount = filteredOptions.filter((option) =>
     value.includes(option)
@@ -88,6 +81,8 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
     onChange(cleaned);
   };
 
+  // Placeholder uses only the provided header `label`.
+
   const toggleSelectAll = (event: React.MouseEvent) => {
     event.stopPropagation();
     if (!filteredOptions.length) return;
@@ -101,7 +96,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
     }
   };
 
-  const FIELD_WIDTH = { xs: '100%', sm: '26ch', md: '32ch' };
+  const FIELD_WIDTH = { xs: '100%', sm: '24ch', md: '30ch' };
 
   return (
     <Autocomplete
@@ -211,7 +206,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
         return (
             <TextField
             {...params}
-            placeholder={value && value.length ? "" : (prefillPrompt || label)}
+            placeholder={value && value.length ? "" : label}
             size="small"
             required={required}
             aria-label={label}

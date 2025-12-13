@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { Autocomplete, ListItem, ListItemText, TextField } from "@mui/material";
 
 interface FreeTypeSelectFieldProps {
@@ -9,6 +9,8 @@ interface FreeTypeSelectFieldProps {
   required?: boolean;
 }
 
+const FIELD_WIDTH = { xs: "100%", sm: "24ch", md: "30ch" };
+
 const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
   label,
   options,
@@ -16,47 +18,26 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
   onChange,
   required = false,
 }) => {
-  const [inputValue, setInputValue] = useState(value || "");
-
-  useEffect(() => {
-    setInputValue(value || "");
-  }, [value]);
+  const [inputValue, setInputValue] = useState<string>(value ?? "");
 
   const normalizedQuery = inputValue.trim().toLowerCase();
 
   const filteredOptions = useMemo(() => {
     if (!normalizedQuery) return options;
-    return options.filter((option) =>
-      option.toLowerCase().includes(normalizedQuery)
-    );
+    return options.filter((opt) => opt.toLowerCase().includes(normalizedQuery));
   }, [normalizedQuery, options]);
-
-  const prefillPrompt = useMemo(() => {
-    if (!options || !options.length) return label;
-    const first = String(options[0]).trim();
-    const firstWord = first.split(/\s+/)[0] || first;
-    const example = firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
-    return `${label}${example ? ` (${example})` : ""}`;
-  }, [options, label]);
-
-  const FIELD_WIDTH = { xs: '100%', sm: '26ch', md: '32ch' };
 
   return (
     <Autocomplete
-      componentsProps={{ popper: { style: { zIndex: 2000 } } }}
       freeSolo
+      disableClearable
+      componentsProps={{ popper: { style: { zIndex: 2000 } } }}
       options={filteredOptions}
       value={value || ""}
-      onChange={(_e, newValue) => {
-        const v = typeof newValue === "string" ? newValue : String(newValue ?? "");
-        onChange(v);
-      }}
       inputValue={inputValue}
-      onInputChange={(_e, newInput) => {
-        setInputValue(newInput);
-        onChange(newInput);
-      }}
-      getOptionLabel={(option) => option}
+      onInputChange={(_e, newInput) => setInputValue(newInput)}
+      onChange={(_e, newValue) => onChange(String(newValue ?? ""))}
+      getOptionLabel={(option) => (typeof option === "string" ? option : String(option))}
       renderOption={(props, option) => (
         <ListItem {...props} dense>
           <ListItemText primary={option} />
@@ -65,13 +46,13 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
       renderInput={(params) => (
         <TextField
           {...params}
-          placeholder={value || prefillPrompt || label}
+          placeholder={label}
           size="small"
           required={required}
           aria-label={label}
           InputProps={{
             ...params.InputProps,
-            sx: { '& .MuiInputBase-input': { paddingRight: '56px' } },
+            sx: { "& .MuiInputBase-input": { paddingRight: "56px" } },
           }}
         />
       )}
@@ -82,3 +63,4 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
 };
 
 export default FreeTypeSelectField;
+
