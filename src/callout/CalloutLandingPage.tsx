@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Autocomplete, Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import { Users, ChevronRight } from "lucide-react";
 import { ResourceRecord } from "./CalloutIncidentPanel";
+import SingleSelectField from '@/shared-ui/text-fields/SingleSelectField';
 
 const MotionBox = motion(Box);
 const MotionPaper = motion(Paper);
@@ -165,53 +166,22 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
               Callout Group
             </Typography>
 
-            <Autocomplete
-              fullWidth
-              open={isOpen}
-              onOpen={() => setIsOpen(true)}
-              onClose={() => setIsOpen(false)}
+            <SingleSelectField
+              label="Callout Group"
+              options={calloutGroups}
               value={selectedGroup || null}
               inputValue={query}
-              onChange={(_, newValue) => {
+              onInputChange={(v) => {
+                setQuery(v);
+                if (!v) setSelectedGroup("");
+              }}
+              onChange={(newValue) => {
                 const next = newValue ?? "";
                 setSelectedGroup(next);
                 setQuery(next);
                 setIsOpen(false);
-                if (next) {
-                  onStart(next);
-                }
+                if (next) onStart(next);
               }}
-              onInputChange={(_, newInput) => {
-                setQuery(newInput);
-                if (!newInput) {
-                  setSelectedGroup("");
-                }
-              }}
-              options={calloutGroups}
-              filterOptions={(options, state) => {
-                const q = state.inputValue.trim().toLowerCase();
-                if (!q) return options;
-                return options.filter((option) => option.toLowerCase().includes(q));
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder="Select group…"
-                  size="small"
-                  InputProps={{
-                    ...params.InputProps,
-                    sx: {
-                      borderRadius: 2,
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: alpha(theme.palette.primary.main, 0.25),
-                      },
-                      '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: alpha(theme.palette.primary.main, 0.55),
-                      },
-                    },
-                  }}
-                />
-              )}
               renderOption={(props, option) => {
                 const resourceCount = resourceCountByGroup.get(option) ?? 0;
                 return (
@@ -232,32 +202,6 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
                     </Stack>
                   </li>
                 );
-              }}
-              ListboxProps={{
-                sx: {
-                  borderRadius: 2,
-                  boxShadow: "0 18px 36px rgba(10,74,122,0.16)",
-                  '& .MuiAutocomplete-option': {
-                    px: 2.25,
-                    py: 1.25,
-                    borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.08)}`,
-                    '&:last-of-type': { borderBottom: "none" },
-                  },
-                },
-              }}
-              clearOnBlur={false}
-              selectOnFocus
-              handleHomeEndKeys
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  const first = filteredGroups[0];
-                  if (first) {
-                    setSelectedGroup(first);
-                    setQuery(first);
-                    setIsOpen(false);
-                    onStart(first);
-                  }
-                }
               }}
             />
           </Stack>

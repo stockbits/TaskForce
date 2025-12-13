@@ -20,7 +20,7 @@ import {
   Typography,
 } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
-import MultiSelectField from "../shared-ui/MultiSelectField";
+import MultiSelectField from "@/shared-ui";
 
 export interface SearchToolFilters {
   statuses: string[];
@@ -159,7 +159,7 @@ const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
       label="Task Status"
       options={filtered.statuses}
       value={filters.statuses}
-      onChange={(next) => setFilters((prev) => ({ ...prev, statuses: next }))}
+      onChange={(next: string[]) => setFilters((prev) => ({ ...prev, statuses: next }))}
     />
   );
 
@@ -168,7 +168,7 @@ const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
       label="PWA"
       options={filtered.pwa}
       value={filters.pwa}
-      onChange={(next) => setFilters((prev) => ({ ...prev, pwa: next }))}
+      onChange={(next: string[]) => setFilters((prev) => ({ ...prev, pwa: next }))}
     />
   );
 
@@ -177,7 +177,7 @@ const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
       label="Capabilities"
       options={filtered.capabilities}
       value={filters.capabilities}
-      onChange={(next) => setFilters((prev) => ({ ...prev, capabilities: next }))}
+      onChange={(next: string[]) => setFilters((prev) => ({ ...prev, capabilities: next }))}
     />
   );
 
@@ -186,7 +186,7 @@ const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
       label="Commit Type"
       options={filtered.commitmentTypes}
       value={filters.commitmentTypes}
-      onChange={(next) => setFilters((prev) => ({ ...prev, commitmentTypes: next }))}
+      onChange={(next: string[]) => setFilters((prev) => ({ ...prev, commitmentTypes: next }))}
     />
   );
 
@@ -195,7 +195,7 @@ const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
       label="Response Code"
       options={filtered.responseCodes}
       value={filters.responseCodes ?? []}
-      onChange={(next) => setFilters((prev) => ({ ...prev, responseCodes: next }))}
+      onChange={(next: string[]) => setFilters((prev) => ({ ...prev, responseCodes: next }))}
     />
   );
 
@@ -219,7 +219,7 @@ const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
       label="Status"
       options={filtered.resourceStatuses}
       value={filters.statuses}
-      onChange={(next) => setFilters((prev) => ({ ...prev, statuses: next }))}
+      onChange={(next: string[]) => setFilters((prev) => ({ ...prev, statuses: next }))}
     />
   );
 

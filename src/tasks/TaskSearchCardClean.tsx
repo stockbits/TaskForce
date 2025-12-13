@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import mockTasks from "@/data/mockTasks.json";
 import {
-  Autocomplete,
   Box,
   Button,
   Card,
@@ -34,7 +33,8 @@ import {
 } from "@mui/material";
 import { Bookmark, ChevronDown, Eye, EyeOff, Search } from "lucide-react";
 import FilterListIcon from '@mui/icons-material/FilterList';
-import MultiSelectField from '@/shared-ui/MultiSelectField';
+import MultiSelectField from '@/shared-ui';
+import { FreeTypeSelectField } from '@/shared-ui';
 
 type Filters = {
   taskSearch: string;
@@ -665,7 +665,7 @@ export default function TaskSearchCard({
                         label="Division"
                         options={divisionOptions}
                         value={filters.division}
-                          onChange={(value) => handleMultiChange("division", value)}
+                          onChange={(value: string[]) => handleMultiChange("division", value)}
                           showSelectAllIcon
                         required
                       />
@@ -678,7 +678,7 @@ export default function TaskSearchCard({
                         label="Domain ID"
                         options={domainOptions}
                         value={filters.domainId}
-                        onChange={(value) => handleMultiChange("domainId", value)}
+                        onChange={(value: string[]) => handleMultiChange("domainId", value)}
                         showSelectAllIcon
                         required
                       />
@@ -691,7 +691,7 @@ export default function TaskSearchCard({
                         label="Task Status"
                         options={statusOptions}
                         value={filters.taskStatuses}
-                        onChange={(value) => handleMultiChange("taskStatuses", value)}
+                        onChange={(value: string[]) => handleMultiChange("taskStatuses", value)}
                         showSelectAllIcon
                       />
                     </Box>
@@ -703,7 +703,7 @@ export default function TaskSearchCard({
                         label="Commit Type"
                         options={commitOptions}
                         value={filters.commitType}
-                        onChange={(value) => handleMultiChange("commitType", value)}
+                        onChange={(value: string[]) => handleMultiChange("commitType", value)}
                         showSelectAllIcon
                       />
                     </Box>
@@ -715,7 +715,7 @@ export default function TaskSearchCard({
                         label="Response Code"
                         options={responseOptions}
                         value={filters.responseCode}
-                        onChange={(value) => handleMultiChange("responseCode", value)}
+                        onChange={(value: string[]) => handleMultiChange("responseCode", value)}
                         showSelectAllIcon
                       />
                     </Box>
@@ -727,7 +727,7 @@ export default function TaskSearchCard({
                         label="PWA Selector"
                         options={pwaOptions}
                         value={filters.pwa}
-                        onChange={(value) => handleMultiChange("pwa", value)}
+                        onChange={(value: string[]) => handleMultiChange("pwa", value)}
                         showSelectAllIcon
                       />
                     </Box>
@@ -739,7 +739,7 @@ export default function TaskSearchCard({
                         label="Capabilities"
                         options={capabilityOptions}
                         value={filters.capabilities}
-                        onChange={(value) => handleMultiChange("capabilities", value)}
+                        onChange={(value: string[]) => handleMultiChange("capabilities", value)}
                         showSelectAllIcon
                       />
                     </Box>
@@ -753,52 +753,22 @@ export default function TaskSearchCard({
                 <Grid container spacing={1.5} alignItems="center">
                 <Grid item xs={12} sm="auto" md="auto">
                   <Box sx={{ width: '100%', maxWidth: maxWidthFor('requester'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
-                    <Autocomplete
-                    options={requesterOptions}
-                    value={filters.requester}
-                    inputValue={filters.requester}
-                    onChange={(_event, value) =>
-                      setFilters((prev) => ({ ...prev, requester: value ?? "" }))
-                    }
-                    onInputChange={(_event, input) =>
-                      setFilters((prev) => ({ ...prev, requester: input }))
-                    }
-                    freeSolo
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        placeholder={filters.requester ? "" : "Requester"}
-                        size="small"
-                        fullWidth
-                        aria-label="Requester"
-                      />
-                    )}
+                    <FreeTypeSelectField
+                      label="Requester"
+                      options={requesterOptions}
+                      value={filters.requester}
+                      onChange={(next: string) => setFilters((prev) => ({ ...prev, requester: next }))}
                     />
                   </Box>
                 </Grid>
 
                 <Grid item xs={12} sm="auto" md="auto">
                   <Box sx={{ width: '100%', maxWidth: maxWidthFor('jobType'), px: 1, display: 'flex', alignItems: 'center', minHeight: 40, '& .MuiInputBase-root': { minHeight: 36 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 }, '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 } }}>
-                    <Autocomplete
-                    options={jobTypeOptions}
-                    value={filters.jobType}
-                    inputValue={filters.jobType}
-                    onChange={(_event, value) =>
-                      setFilters((prev) => ({ ...prev, jobType: value ?? "" }))
-                    }
-                    onInputChange={(_event, input) =>
-                      setFilters((prev) => ({ ...prev, jobType: input }))
-                    }
-                    freeSolo
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        placeholder={filters.jobType ? "" : "Job Type"}
-                        size="small"
-                        fullWidth
-                        aria-label="Job Type"
-                      />
-                    )}
+                    <FreeTypeSelectField
+                      label="Job Type"
+                      options={jobTypeOptions}
+                      value={filters.jobType}
+                      onChange={(next: string) => setFilters((prev) => ({ ...prev, jobType: next }))}
                     />
                   </Box>
                 </Grid>
