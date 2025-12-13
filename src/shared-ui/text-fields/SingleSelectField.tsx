@@ -54,6 +54,7 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
 
   return (
     <Autocomplete
+      componentsProps={{ popper: { style: { zIndex: 2000 } } }}
       options={filteredOptions}
       value={
         (() => {
@@ -91,6 +92,7 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
           }}
         />
       )}
+      ListboxProps={{ sx: { zIndex: 2000, maxHeight: 320 } }}
       sx={{ width: FIELD_WIDTH }}
     />
   );

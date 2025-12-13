@@ -43,6 +43,7 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
 
   return (
     <Autocomplete
+      componentsProps={{ popper: { style: { zIndex: 2000 } } }}
       freeSolo
       options={filteredOptions}
       value={value || ""}
@@ -74,6 +75,7 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
           }}
         />
       )}
+      ListboxProps={{ sx: { zIndex: 2000, maxHeight: 320 } }}
       sx={{ width: FIELD_WIDTH }}
     />
   );

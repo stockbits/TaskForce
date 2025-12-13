@@ -47,14 +47,14 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
   }, [normalizedQuery, options]);
 
   const longestOption = useMemo(() => {
-    if (!options || !options.length) return "";
+      componentsProps={{ popper: { style: { minWidth: '32ch', zIndex: 2000 } } }}
     return options.reduce((cur, s) => (String(s).length > cur.length ? String(s) : cur), String(options[0]));
   }, [options]);
 
   const filteredSelectionCount = filteredOptions.filter((option) =>
     value.includes(option)
   ).length;
-
+        sx: { maxHeight: 320, zIndex: 2000 },
   const allFilteredSelected =
     filteredOptions.length > 0 &&
     filteredSelectionCount === filteredOptions.length;
