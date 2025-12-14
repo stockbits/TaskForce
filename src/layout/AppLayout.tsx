@@ -57,6 +57,7 @@ import { SidebarNavigation } from "./SidebarNavigation";
 import TaskSearchCard from "@/tasks/TaskSearchCardClean";
 import TaskTableAdvanced from "@/tasks/TaskTableAdvanced";
 import TaskPopoutPanel from "@/tasks/TaskPopoutPanel";
+import TaskRowContextMenu from '@/shared-ui/TaskRowContextMenu';
 
 import { cardMap } from "@/shared-config/menuRegistry";
 import { TaskDetails, ProgressNoteEntry } from "@/types";
@@ -626,6 +627,57 @@ export default function MainLayout() {
   useEffect(() => {
     return () => closeExternalWindow();
   }, [closeExternalWindow]);
+
+  // Global context menu for any MUI DataGrid in the app.
+  const [globalContext, setGlobalContext] = useState<{
+    visible: boolean;
+    x: number;
+    y: number;
+    clickedRow?: Record<string, any> | null;
+    clickedColumnKey?: string | null;
+    mouseScreenX?: number;
+    mouseScreenY?: number;
+  }>({ visible: false, x: 0, y: 0 });
+
+  useEffect(() => {
+    const handler = (ev: MouseEvent) => {
+      try {
+        const target = ev.target as HTMLElement | null;
+        if (!target) return;
+        // find nearest data grid row element which has data-id
+        const rowEl = target.closest('[data-id]') as HTMLElement | null;
+        if (!rowEl) return;
+        ev.preventDefault();
+        // build a simple row object by scraping cell text values
+        const cells = rowEl.querySelectorAll('[data-field]');
+        const rowObj: Record<string, any> = {};
+        cells.forEach((c) => {
+          const el = c as HTMLElement;
+          const field = el.getAttribute('data-field');
+          if (!field) return;
+          rowObj[field] = el.innerText || '';
+        });
+
+        const colElem = target.closest('[data-field]') as HTMLElement | null;
+        const colKey = colElem ? colElem.getAttribute('data-field') : null;
+
+        setGlobalContext({
+          visible: true,
+          x: ev.clientX,
+          y: ev.clientY,
+          clickedRow: rowObj,
+          clickedColumnKey: colKey,
+          mouseScreenX: (ev as any).screenX ?? 0,
+          mouseScreenY: (ev as any).screenY ?? 0,
+        });
+      } catch (err) {
+        // ignore
+      }
+    };
+
+    document.addEventListener('contextmenu', handler, true);
+    return () => document.removeEventListener('contextmenu', handler, true);
+  }, []);
 
   useEffect(() => {
     const handleViewProgressNotes = (event: Event) => {
@@ -1521,6 +1573,37 @@ export default function MainLayout() {
           />,
           externalContainer
         )}
+
+      {/* Global row context menu (scraped row data) */}
+      <TaskRowContextMenu
+        visible={globalContext.visible}
+        x={globalContext.x}
+        y={globalContext.y}
+        selectedRows={globalContext.clickedRow ? [globalContext.clickedRow] : []}
+        clickedColumnKey={globalContext.clickedColumnKey ?? null}
+        clickedRow={globalContext.clickedRow ?? null}
+        onClose={() => setGlobalContext((s) => ({ ...s, visible: false }))}
+        mouseScreenX={globalContext.mouseScreenX ?? 0}
+        mouseScreenY={globalContext.mouseScreenY ?? 0}
+        onOpenPopout={(tasks: any[], mX: number, mY: number) => {
+          // try to open external window with scraped row(s)
+          try {
+            if (!tasks || tasks.length === 0) return;
+            openExternalWindow(tasks as any, mX, mY);
+          } catch (err) {}
+        }}
+        onOpenCalloutIncident={(task: any) => {
+          setIncidentTask(task);
+          setIncidentOpen(true);
+        }}
+        onProgressTasks={(tasks: any[]) => {
+          // forward as a custom event for other listeners
+          window.dispatchEvent(new CustomEvent('taskforce:progress-tasks', { detail: { tasks } }));
+        }}
+        onProgressNotes={(tasks: any[]) => {
+          window.dispatchEvent(new CustomEvent('taskforce:progress-notes', { detail: { tasks } }));
+        }}
+      />
     </Box>
   );
 }

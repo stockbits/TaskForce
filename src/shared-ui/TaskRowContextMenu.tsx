@@ -46,6 +46,20 @@ export default function TaskRowContextMenu({
 }: TaskRowContextMenuProps) {
   if (!visible) return null;
 
+  const menuRef = React.useRef<HTMLUListElement | null>(null);
+
+  // close on outside click
+  React.useEffect(() => {
+    const handler = (ev: MouseEvent) => {
+      const el = menuRef.current;
+      if (!el) return;
+      if (ev.target && el.contains(ev.target as Node)) return;
+      onClose();
+    };
+    document.addEventListener('mousedown', handler, true);
+    return () => document.removeEventListener('mousedown', handler, true);
+  }, [onClose]);
+
   const actionableRows = selectedRows.length
     ? selectedRows
     : clickedRow
@@ -156,10 +170,11 @@ export default function TaskRowContextMenu({
           transition={{ duration: 0.12 }}
           // Use fixed positioning so the menu appears at the exact viewport
           // coordinates where the user clicked (clientX/clientY).
+          ref={menuRef}
           style={{
             position: "fixed",
-            top: mouseScreenY,
-            left: mouseScreenX,
+            top: y,
+            left: x,
             minWidth: `min(90vw, ${24 * 14.1667}px)`, // 340px, use theme.spacing(42.5) if available
             zIndex: 99999,
           }}

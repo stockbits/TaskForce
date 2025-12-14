@@ -34,6 +34,8 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
   const holdTimerRef = useRef<number | null>(null);
   const prevHighlightedHeaderRef = useRef<HTMLElement | null>(null);
   const resizingHeaderRef = useRef<HTMLElement | null>(null);
+  const lastSelectedRef = useRef<number | null>(null);
+  const suppressSelectionModelChangeRef = useRef<boolean>(false);
 
   const density = (typeof window !== 'undefined' && localStorage.getItem('taskTableDensity')) || 'compact';
 
@@ -163,6 +165,26 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
     event.preventDefault();
     const colElem = (event.target as HTMLElement).closest('[data-field]') as HTMLElement | null;
     const colKey = colElem ? colElem.getAttribute('data-field') : null;
+    // ensure the clicked row becomes selected when right-clicking
+    try {
+      const id = params?.id;
+      if (id != null) {
+        setSelection((prev) => (prev.includes(id) ? prev : [id]));
+        // compute visible index from DOM
+        try {
+          const root = (event.target as HTMLElement).closest('[role="grid"]') as HTMLElement | null;
+          if (root) {
+            const visible = Array.from(root.querySelectorAll('[data-id]')).map((el) => String((el as HTMLElement).getAttribute('data-id')));
+            const idx = visible.indexOf(String(id));
+            lastSelectedRef.current = idx !== -1 ? idx : gridRows.findIndex((r) => r.id === id);
+          } else {
+            lastSelectedRef.current = gridRows.findIndex((r) => r.id === id);
+          }
+        } catch (err) {
+          lastSelectedRef.current = gridRows.findIndex((r) => r.id === id);
+        }
+      }
+    } catch (err) {}
     setContextMenu({
       visible: true,
       x: event.clientX,
@@ -172,6 +194,72 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
       mouseScreenX: (event as any).screenX ?? 0,
       mouseScreenY: (event as any).screenY ?? 0,
     });
+  };
+
+  // row click selection logic: single-click selects, ctrl/meta toggles, shift selects range
+  const onRowClick = (params: any, event: React.MouseEvent) => {
+    try {
+      const id = params.id;
+      // compute visible index using the grid DOM so shift selects visual block
+      let idx = gridRows.findIndex((r) => r.id === id);
+      try {
+        const root = (event.target as HTMLElement).closest('[role="grid"]') as HTMLElement | null;
+        if (root) {
+          const visible = Array.from(root.querySelectorAll('[data-id]')).map((el) => String((el as HTMLElement).getAttribute('data-id')));
+          const found = visible.indexOf(String(id));
+          if (found !== -1) idx = found;
+        }
+      } catch (err) {}
+
+      // If right-click, ensure the clicked row is selected and let context menu handler open
+      if ((event as any).button === 2) {
+        setSelection((prev) => (prev.includes(id) ? prev : [id]));
+        lastSelectedRef.current = idx;
+        return;
+      }
+
+      if (event.shiftKey && lastSelectedRef.current !== null) {
+        // build visible id order and slice by visible indices
+        try {
+          const root = (event.target as HTMLElement).closest('[role="grid"]') as HTMLElement | null;
+          if (root) {
+            const visible = Array.from(root.querySelectorAll('[data-id]')).map((el) => String((el as HTMLElement).getAttribute('data-id')));
+            const start = Math.min(lastSelectedRef.current, idx);
+            const end = Math.max(lastSelectedRef.current, idx);
+            const ids = visible.slice(start, end + 1);
+            suppressSelectionModelChangeRef.current = true;
+            setSelection((prev) => Array.from(new Set([...prev, ...ids])));
+            setTimeout(() => (suppressSelectionModelChangeRef.current = false), 0);
+          } else {
+            const start = Math.min(lastSelectedRef.current, idx);
+            const end = Math.max(lastSelectedRef.current, idx);
+            const ids = gridRows.slice(start, end + 1).map((r) => r.id);
+            suppressSelectionModelChangeRef.current = true;
+            setSelection((prev) => Array.from(new Set([...prev, ...ids])));
+            setTimeout(() => (suppressSelectionModelChangeRef.current = false), 0);
+          }
+        } catch (err) {
+          const start = Math.min(lastSelectedRef.current, idx);
+          const end = Math.max(lastSelectedRef.current, idx);
+          const ids = gridRows.slice(start, end + 1).map((r) => r.id);
+          suppressSelectionModelChangeRef.current = true;
+          setSelection((prev) => Array.from(new Set([...prev, ...ids])));
+          setTimeout(() => (suppressSelectionModelChangeRef.current = false), 0);
+        }
+      } else if (event.ctrlKey || event.metaKey) {
+        suppressSelectionModelChangeRef.current = true;
+        setSelection((prev) => (prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]));
+        lastSelectedRef.current = idx;
+        setTimeout(() => (suppressSelectionModelChangeRef.current = false), 0);
+      } else {
+        suppressSelectionModelChangeRef.current = true;
+        setSelection(() => [id]);
+        lastSelectedRef.current = idx;
+        setTimeout(() => (suppressSelectionModelChangeRef.current = false), 0);
+      }
+    } catch (err) {
+      // ignore
+    }
   };
 
   useEffect(() => {
@@ -267,6 +355,33 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
         // ignore
       }
     };
+
+  // fallback: attach a contextmenu listener to the grid container to catch right-clicks
+  useEffect(() => {
+    const el = gridContainerRef.current;
+    if (!el) return;
+
+    const handler = (ev: MouseEvent) => {
+      try {
+        const target = ev.target as HTMLElement | null;
+        const rowEl = target ? target.closest('[data-id]') as HTMLElement | null : null;
+        if (!rowEl) return;
+        const id = rowEl.getAttribute('data-id');
+        if (!id) return;
+        ev.preventDefault();
+        const row = gridRows.find((r) => String(r.id) === id);
+        // select the row
+        setSelection((prev) => (prev.includes(row?.id) ? prev : [row?.id]));
+        const idx = gridRows.findIndex((r) => String(r.id) === id);
+        lastSelectedRef.current = idx;
+        setContextMenu({ visible: true, x: ev.clientX, y: ev.clientY, clickedRow: row, clickedColumnKey: null, mouseScreenX: (ev as any).screenX ?? 0, mouseScreenY: (ev as any).screenY ?? 0 });
+      } catch (err) {}
+    };
+
+    el.addEventListener('contextmenu', handler, true);
+    return () => el.removeEventListener('contextmenu', handler, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gridContainerRef.current, gridRows]);
 
     mouseUpHandlerRef.current = (ev: MouseEvent) => {
       try {
@@ -406,8 +521,8 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
         <AnyDataGrid
           rows={gridRows}
           columns={colState}
+          selectionModel={selection}
           components={{ Toolbar: CustomToolbar }}
-          checkboxSelection
           density={density as 'compact' | 'standard' | 'comfortable'}
           pageSizeOptions={[25, 50, 100]}
           initialState={{ pagination: { paginationModel: { pageSize: 100 } } }}
@@ -415,6 +530,16 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
             if (onOpenPopout) onOpenPopout([params.row as any], (event as any).screenX ?? 0, (event as any).screenY ?? 0);
           }}
           onRowContextMenu={onRowContextMenu as any}
+          onCellContextMenu={onRowContextMenu as any}
+          onRowClick={onRowClick as any}
+          disableSelectionOnClick
+          onSelectionModelChange={(model: any) => {
+            try {
+              if (suppressSelectionModelChangeRef.current) return;
+              const ids = Array.isArray(model) ? model : [model];
+              setSelection(ids as any[]);
+            } catch (err) {}
+          }}
           sx={{ border: 0, '& .MuiDataGrid-cell': { py: density === 'compact' ? 0.5 : 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }, '& .MuiDataGrid-columnHeaders': { backgroundColor: theme.palette.action.hover }, '& .MuiDataGrid-columnHeaderTitle': { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }}
           onColumnResize={(params: any) => {
             const { colDef, width } = params;
