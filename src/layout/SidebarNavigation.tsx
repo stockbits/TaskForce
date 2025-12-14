@@ -22,6 +22,7 @@ import {
   InputAdornment,
   Fade,
   Paper,
+  Autocomplete,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import {
@@ -64,24 +65,12 @@ interface SidebarProps {
   currentMenu: { label: string; icon: any } | null;
   onMenuClick: (menu: any) => void;
   activeSubPage: string | null;
-  searchQuery: string;
-  setSearchQuery: (v: string) => void;
-  globalResults: any[];
-  showDropdown: boolean;
-  setShowDropdown: (v: boolean) => void;
-  onSelectResult: (item: any) => void;
 }
 
 export const Sidebar = memo(function Sidebar({
   currentMenu,
   onMenuClick,
   activeSubPage,
-  searchQuery,
-  setSearchQuery,
-  globalResults,
-  showDropdown,
-  setShowDropdown,
-  onSelectResult,
 }: SidebarProps) {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
@@ -133,6 +122,16 @@ export const Sidebar = memo(function Sidebar({
     []
   );
 
+  // Flatten all menu items for autocomplete filtering
+  const allMenuItems = useMemo(() => {
+    return sections.flatMap(section => 
+      section.menus.map(menu => ({
+        ...menu,
+        section: section.title
+      }))
+    );
+  }, [sections]);
+
   const handleMenuSelect = useCallback(
     (menu: any) => {
       const label = menu.label.trim();
@@ -183,80 +182,71 @@ export const Sidebar = memo(function Sidebar({
         </Typography>
       </Box>
 
-      {/* Quick Search Box */}
+      {/* Quick Search Filter */}
       <Box sx={{ px: 3, py: 2, borderBottom: `1px solid ${alpha(theme.palette.text.primary, 0.08)}` }}>
-        <TextField
-          value={searchQuery}
-          size="small"
-          onChange={(event) => setSearchQuery(event.target.value)}
-          onFocus={() => setShowDropdown(globalResults.length > 0)}
-          placeholder="Quick search..."
-          variant="outlined"
-          fullWidth
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search size={16} color={alpha(theme.palette.text.primary, 0.6)} />
-              </InputAdornment>
-            ),
-            sx: {
-              fontSize: 14,
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: alpha(theme.palette.text.primary, 0.2),
-              },
-              "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: alpha(theme.palette.text.primary, 0.3),
-              },
-              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                borderColor: theme.palette.primary.main,
-              },
-            },
+        <Autocomplete
+          options={allMenuItems}
+          getOptionLabel={(option) => option.label}
+          renderOption={(props, option) => {
+            const Icon = option.icon;
+            return (
+              <Box component="li" {...props} sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 1 }}>
+                <Icon size={16} />
+                <Box>
+                  <Typography variant="body2" fontWeight={500}>
+                    {option.label}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {option.section}
+                  </Typography>
+                </Box>
+              </Box>
+            );
           }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              placeholder="Filter navigation..."
+              size="small"
+              InputProps={{
+                ...params.InputProps,
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search size={16} color={alpha(theme.palette.text.primary, 0.6)} />
+                  </InputAdornment>
+                ),
+                sx: {
+                  fontSize: 14,
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: alpha(theme.palette.text.primary, 0.2),
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: alpha(theme.palette.text.primary, 0.3),
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: theme.palette.primary.main,
+                  },
+                },
+              }}
+            />
+          )}
+          onChange={(event, newValue) => {
+            if (newValue) {
+              handleMenuSelect(newValue);
+            }
+          }}
+          filterOptions={(options, { inputValue }) => {
+            if (!inputValue) return options;
+            return options.filter(option =>
+              option.label.toLowerCase().includes(inputValue.toLowerCase()) ||
+              option.section.toLowerCase().includes(inputValue.toLowerCase())
+            );
+          }}
+          noOptionsText="No navigation items found"
+          autoHighlight
+          openOnFocus
+          sx={{ width: '100%' }}
         />
-
-        <Fade in={showDropdown && globalResults.length > 0} timeout={120} unmountOnExit>
-          <Paper
-            elevation={4}
-            sx={{
-              position: "absolute",
-              left: 24,
-              right: 24,
-              mt: 1,
-              borderRadius: 2,
-              overflow: "hidden",
-              zIndex: theme.zIndex.tooltip,
-              maxHeight: 300,
-              overflowY: "auto",
-            }}
-          >
-            <List dense disablePadding>
-              {globalResults.map((item: any, idx: number) => (
-                <ListItemButton
-                  key={idx}
-                  onMouseDown={() => onSelectResult(item)}
-                  sx={{ alignItems: "flex-start" }}
-                >
-                  <ListItemText
-                    primary={
-                      <Typography variant="subtitle2" fontWeight={600}>
-                        {item.name}
-                      </Typography>
-                    }
-                    secondary={
-                      <Typography
-                        component="span"
-                        variant="caption"
-                        sx={{ color: "text.secondary" }}
-                      >
-                        {item.category}
-                      </Typography>
-                    }
-                  />
-                </ListItemButton>
-              ))}
-            </List>
-          </Paper>
-        </Fade>
       </Box>
 
       <Box sx={{ flex: 1, overflowY: "auto", py: 1 }}>

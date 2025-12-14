@@ -1249,12 +1249,6 @@ export default function MainLayout() {
         currentMenu={currentMenu}
         onMenuClick={handleMenuClick}
         activeSubPage={activeSubPage}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        globalResults={globalResults}
-        showDropdown={showDropdown}
-        setShowDropdown={setShowDropdown}
-        onSelectResult={handleHeaderSelectResult}
         />
 
       {/* MAIN */}
