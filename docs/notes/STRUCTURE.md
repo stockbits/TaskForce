@@ -42,7 +42,8 @@ src/
 │   ├── usePanelDocking.tsx
 │   ├── useSearchLeftMenu.ts
 │   ├── menuRegistry.ts
-│   └── useCalloutHistory.ts
+│   ├── useCalloutHistory.ts
+│   └── useTaskFilters.ts    # Task filtering utilities
 ├── utils/                 # Utility functions
 ├── data/                  # Mock data and resources
 │   ├── ResourceMock.json

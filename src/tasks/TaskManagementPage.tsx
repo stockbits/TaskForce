@@ -390,7 +390,6 @@ export default function TaskManagementPage() {
             openExternalWindow(tasks as any, mX, mY);
           }}
           onSelectionChange={(rows: Record<string, any>[]) => {
-            try { console.log('TaskManagementPage selection:', (rows||[]).length); } catch (e) {}
             setSelectedRows(rows);
           }}
           onProgressTasks={(tasks: any[]) => openProgressTasks(tasks)}

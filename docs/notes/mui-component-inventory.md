@@ -7,7 +7,7 @@
 	- Styling utilities: `createTheme`
 
 ## Layout Shell
-- `src/layout/MainLayout.tsx`
+- `src/layout/AppLayout.tsx`
 	- Components: `AppBar`, `Avatar`, `Box`, `Card`, `CardActionArea`, `CardContent`, `Fade`, `Grid`, `IconButton`, `InputAdornment`, `List`, `ListItemButton`, `ListItemText`, `Paper`, `TextField`, `Toolbar`, `Typography`
 	- Hooks & styling utilities: `useTheme`, `alpha`
 - `src/layout/Sidebar.tsx`

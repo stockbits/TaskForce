@@ -13,7 +13,7 @@ type Props = {
 
 export default function GlobalSearchField({ value, onChange, placeholder = '', size = 'small', sx = {}, name = 'taskSearch' }: Props) {
   return (
-    <Box sx={{ width: { xs: '100%', sm: 360 }, ...sx }}>
+    <Box sx={{ width: { xs: '100%', sm: 400 }, ...sx }}>
       <TextField
         name={name}
         value={value}

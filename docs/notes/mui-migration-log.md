@@ -6,7 +6,7 @@ This file tracks all major Material UI migrations, including the source file and
 
 - **src/main.tsx** — ThemeProvider, CssBaseline (global setup)
 - **src/theme.ts** — createTheme utilities
-- **src/layout/MainLayout.tsx** — AppBar, Paper, Toolbar, etc. (layout shell)
+- **src/layout/AppLayout.tsx** — AppBar, Paper, Toolbar, etc. (layout shell)
 - **src/layout/Sidebar.tsx** — Drawer, List, Stack, etc. (sidebar shell)
 - **src/features/tasks/TaskManagementPage.tsx** — Box, Paper, Typography, Stack (task main page)
 - **src/features/tasks/components/TaskSearchCardClean.tsx** — Autocomplete, Card, Stack, etc. (task search)
@@ -32,4 +32,4 @@ This file tracks all major Material UI migrations, including the source file and
 
 For each migration, see `docs/mui-component-inventory.md` for details on components and hooks used.
 
-_Last updated: 2025-12-10_
+_Last updated: 2025-12-14_

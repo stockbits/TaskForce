@@ -241,7 +241,6 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
   useEffect(() => {
     if (onSelectionChange) {
       const selected = gridRows.filter((r) => selection.includes(String(r.id)));
-      try { console.log('TaskTableMUI selection effect -> selection array', selection, 'gridIds', gridRows.map((r) => r.id).slice(0,10), 'calling onSelectionChange with', selected.length); } catch(e) {}
       onSelectionChange(selected as Record<string, any>[]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -252,7 +251,6 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
   useEffect(() => {
     if (onSelectionChange && selection && selection.length) {
       const selected = gridRows.filter((r) => selection.includes(String(r.id)));
-      try { console.log('TaskTableMUI rows changed -> re-emitting selection', selection, 'gridIds', gridRows.map((r) => r.id).slice(0,10), 'selectedCount', selected.length); } catch (e) {}
       onSelectionChange(selected as Record<string, any>[]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -522,7 +520,6 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
             try {
               // model may be an array of ids (strings/numbers) or an object for checkboxSelection
               const ids = Array.isArray(model) ? model : Object.keys(model || {});
-              try { console.log('TaskTableMUI onRowSelectionModelChange -> model', model, 'ids', ids); } catch(e) {}
               setSelection((ids || []).map(String) as string[]);
             } catch (err) {}
           }}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, memo, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   AppBar,
@@ -24,7 +24,7 @@ import { alpha } from "@mui/material/styles";
 import { CalloutLandingPage } from "@/callout/CalloutLandingPage";
 import mockTasks from "@/data/mockTasks.json";
 import ResourceMock from "@/data/ResourceMock.json";
-import ScheduleLivePage from "@/schedule/ScheduleLivePage";
+const ScheduleLivePage = lazy(() => import("@/schedule/ScheduleLivePage"));
 import { User } from "lucide-react";
 
 import {
@@ -64,6 +64,7 @@ import { cardMap } from "@/shared-config/menuRegistry";
 import { TaskDetails, ProgressNoteEntry } from "@/types";
 import { useExternalWindow } from "@/hooks/useExternalWindow";
 import { useCalloutHistory } from "@/hooks/useCalloutHistory";
+import { filterTasks } from "@/hooks/useTaskFilters";
 import type { CalloutHistoryEntry } from "@/hooks/useCalloutHistory";
 
 /* =========================================================
@@ -132,79 +133,6 @@ const MotionCard = motion(Card);
 /* =========================================================
    HELPERS
 ========================================================= */
-
-function filterTasks(
-  allRows: Record<string, any>[],
-  filters: Record<string, any>
-): Record<string, any>[] {
-  let filtered = [...allRows];
-
-  // Global quick search
-  if (filters.taskSearch?.trim()) {
-    const q = filters.taskSearch.toLowerCase();
-    filtered = filtered.filter((t) =>
-      [t.taskId, t.resourceName, t.workId, t.assetName, t.description]
-        .join(" ")
-        .toLowerCase()
-        .includes(q)
-    );
-  }
-
-  if (filters.division?.length) {
-    filtered = filtered.filter((t) => filters.division.includes(t.groupCode));
-  }
-
-  // ⭐ MULTI-SELECT DOMAIN LIST
-  if (filters.domainId?.length) {
-    filtered = filtered.filter((t) =>
-      filters.domainId.includes(String(t.domain || "").toUpperCase())
-    );
-  }
-
-  if (filters.taskStatuses?.length) {
-    filtered = filtered.filter((t) =>
-      filters.taskStatuses.includes(t.taskStatus)
-    );
-  }
-
-  if (filters.responseCode?.length) {
-    filtered = filtered.filter((t) =>
-      filters.responseCode.includes(t.responseCode)
-    );
-  }
-
-  if (filters.requester?.trim()) {
-    const q = filters.requester.toLowerCase();
-    filtered = filtered.filter((t) =>
-      String(t.resourceName || "")
-        .toLowerCase()
-        .includes(q)
-    );
-  }
-
-  if (filters.commitType?.length) {
-    filtered = filtered.filter((t) =>
-      filters.commitType.includes(t.commitmentType)
-    );
-  }
-
-  if (filters.capabilities?.length) {
-    filtered = filtered.filter((t) =>
-      filters.capabilities.includes(t.primarySkill)
-    );
-  }
-
-  if (filters.jobType?.trim()) {
-    const q = filters.jobType.toLowerCase();
-    filtered = filtered.filter((t) =>
-      String(t.taskType || "")
-        .toLowerCase()
-        .includes(q)
-    );
-  }
-
-  return filtered;
-}
 
 function buildClipboardHtml(
   headerKeys: string[],
@@ -1499,9 +1427,6 @@ export default function MainLayout() {
                   onProgressTasks={(tasks: any[]) => openProgressTasks(tasks)}
                   onProgressNotes={(tasks: any[]) => window.dispatchEvent(new CustomEvent('taskforce:progress-notes', { detail: { tasks } }))}
                   onSelectionChange={(rows: Record<string, any>[]) => {
-                    try {
-                      console.log('AppLayout selection:', (rows || []).length);
-                    } catch (e) {}
                     setSelectedRows(rows);
                   }}
                   sx={{ borderRadius: '0 0 12px 12px', mt: 0 }}
@@ -1526,7 +1451,11 @@ export default function MainLayout() {
           )}
 
           {/* NEW PAGE: SCHEDULE LIVE */}
-          {activeSubPage === "ScheduleLive" && <ScheduleLivePage />}
+          {activeSubPage === "ScheduleLive" && (
+            <Suspense fallback={<div>Loading...</div>}>
+              <ScheduleLivePage />
+            </Suspense>
+          )}
 
           {/* DEFAULT HOMEPAGE (cards grid) */}
           {!activeSubPage && (

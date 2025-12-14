@@ -377,8 +377,6 @@ export default function ScheduleLivePage() {
       matched = true;
     }
 
-    if (!matched) console.log("No match found.");
-
     handleCloseSearchPanel();
   };
 
