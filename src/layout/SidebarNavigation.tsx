@@ -33,8 +33,10 @@ import {
   ListChecks,
   UserCog,
   LogOut,
+  Folder,
   Search,
 } from "lucide-react";
+import { cardMap, allTiles } from "./menuRegistry";
 
 const userMenus = [
   { label: "Operation Toolkit", icon: ClipboardList },
@@ -124,7 +126,7 @@ export const Sidebar = memo(function Sidebar({
   const filteredSections = useMemo(() => {
     if (!filterText.trim()) return sections;
 
-    return sections
+    const filteredMenuSections = sections
       .map(section => ({
         ...section,
         menus: section.menus.filter(menu =>
@@ -133,10 +135,42 @@ export const Sidebar = memo(function Sidebar({
         )
       }))
       .filter(section => section.menus.length > 0);
+
+    // Add cards section if any cards match
+    const matchingCards = allTiles.filter(card =>
+      card.name.toLowerCase().includes(filterText.toLowerCase()) ||
+      card.description.toLowerCase().includes(filterText.toLowerCase()) ||
+      card.menuLabel.toLowerCase().includes(filterText.toLowerCase())
+    );
+
+    if (matchingCards.length > 0) {
+      const cardMenus = matchingCards.map(card => ({
+        label: card.name,
+        icon: Folder, // Use Folder as default icon for cards
+        cardData: card // Store card data for navigation
+      }));
+
+      filteredMenuSections.push({
+        title: "Cards",
+        menus: cardMenus
+      });
+    }
+
+    return filteredMenuSections;
   }, [sections, filterText]);
 
   const handleMenuSelect = useCallback(
     (menu: any) => {
+      // If this is a card selection, navigate to the menu that contains it
+      if (menu.cardData) {
+        const cardMenu = menu.cardData.menuLabel;
+        const menuWithIcon = { label: cardMenu, icon: Folder };
+        setActiveMenuLabel(cardMenu);
+        onMenuClick(menuWithIcon);
+        setOpen(false);
+        return;
+      }
+
       const label = menu.label.trim();
       const isSameMenu = activeMenuLabel === label;
       const insideTool = activeSubPage !== null;
@@ -236,7 +270,7 @@ export const Sidebar = memo(function Sidebar({
 
 interface SectionBlockProps {
   title: string;
-  menus: Array<{ label: string; icon: any }>;
+  menus: Array<{ label: string; icon?: any; cardData?: any }>;
   activeMenuLabel: string | null;
   onMenuClick: (menu: any) => void;
 }
@@ -266,7 +300,7 @@ const SectionBlock = memo(function SectionBlock({
 
       <List disablePadding>
         {menus.map((menu) => {
-          const Icon = menu.icon;
+          const Icon = menu.icon || Folder;
           const isActive = activeMenuLabel === menu.label;
 
           return (
