@@ -4,6 +4,6 @@
   while `src/shared/config/menuRegistry.ts` remains the source of truth.
 */
 
-export * from "@/shared-config/menuRegistry";
-import { cardMap } from "@/shared-config/menuRegistry";
+export * from "@/layout/menuRegistry";
+import { cardMap } from "@/layout/menuRegistry";
 export default cardMap;

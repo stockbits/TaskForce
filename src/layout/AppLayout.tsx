@@ -60,7 +60,7 @@ import TaskPopoutPanel from "@/tasks/TaskPopoutPanel";
 import TaskRowContextMenu from '@/shared-ui/TaskRowContextMenu';
 import ProgressTasksDialog from '@/tasks/ProgressTasksDialog';
 
-import { cardMap } from "@/shared-config/menuRegistry";
+import { cardMap } from "@/layout/menuRegistry";
 import { TaskDetails, ProgressNoteEntry } from "@/types";
 import { useExternalWindow } from "@/hooks/useExternalWindow";
 import { useCalloutHistory } from "@/hooks/useCalloutHistory";

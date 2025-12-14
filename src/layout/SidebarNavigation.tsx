@@ -20,9 +20,6 @@ import {
   useTheme,
   TextField,
   InputAdornment,
-  Fade,
-  Paper,
-  Autocomplete,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import {
@@ -75,6 +72,7 @@ export const Sidebar = memo(function Sidebar({
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [activeMenuLabel, setActiveMenuLabel] = useState<string | null>(null);
+  const [filterText, setFilterText] = useState("");
   const previousOpen = useRef(open);
 
   useEffect(() => {
@@ -122,15 +120,20 @@ export const Sidebar = memo(function Sidebar({
     []
   );
 
-  // Flatten all menu items for autocomplete filtering
-  const allMenuItems = useMemo(() => {
-    return sections.flatMap(section => 
-      section.menus.map(menu => ({
-        ...menu,
-        section: section.title
+  // Filter sections and menus based on filter text
+  const filteredSections = useMemo(() => {
+    if (!filterText.trim()) return sections;
+
+    return sections
+      .map(section => ({
+        ...section,
+        menus: section.menus.filter(menu =>
+          menu.label.toLowerCase().includes(filterText.toLowerCase()) ||
+          section.title.toLowerCase().includes(filterText.toLowerCase())
+        )
       }))
-    );
-  }, [sections]);
+      .filter(section => section.menus.length > 0);
+  }, [sections, filterText]);
 
   const handleMenuSelect = useCallback(
     (menu: any) => {
@@ -184,73 +187,36 @@ export const Sidebar = memo(function Sidebar({
 
       {/* Quick Search Filter */}
       <Box sx={{ px: 3, py: 2, borderBottom: `1px solid ${alpha(theme.palette.text.primary, 0.08)}` }}>
-        <Autocomplete
-          options={allMenuItems}
-          getOptionLabel={(option) => option.label}
-          renderOption={(props, option) => {
-            const Icon = option.icon;
-            return (
-              <Box component="li" {...props} sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 1 }}>
-                <Icon size={16} />
-                <Box>
-                  <Typography variant="body2" fontWeight={500}>
-                    {option.label}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {option.section}
-                  </Typography>
-                </Box>
-              </Box>
-            );
+        <TextField
+          value={filterText}
+          onChange={(event) => setFilterText(event.target.value)}
+          placeholder="Filter navigation..."
+          size="small"
+          fullWidth
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search size={16} color={alpha(theme.palette.text.primary, 0.6)} />
+              </InputAdornment>
+            ),
+            sx: {
+              fontSize: 14,
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: alpha(theme.palette.text.primary, 0.2),
+              },
+              "&:hover .MuiOutlinedInput-notchedOutline": {
+                borderColor: alpha(theme.palette.text.primary, 0.3),
+              },
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                borderColor: theme.palette.primary.main,
+              },
+            },
           }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              placeholder="Filter navigation..."
-              size="small"
-              InputProps={{
-                ...params.InputProps,
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search size={16} color={alpha(theme.palette.text.primary, 0.6)} />
-                  </InputAdornment>
-                ),
-                sx: {
-                  fontSize: 14,
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: alpha(theme.palette.text.primary, 0.2),
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: alpha(theme.palette.text.primary, 0.3),
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: theme.palette.primary.main,
-                  },
-                },
-              }}
-            />
-          )}
-          onChange={(event, newValue) => {
-            if (newValue) {
-              handleMenuSelect(newValue);
-            }
-          }}
-          filterOptions={(options, { inputValue }) => {
-            if (!inputValue) return options;
-            return options.filter(option =>
-              option.label.toLowerCase().includes(inputValue.toLowerCase()) ||
-              option.section.toLowerCase().includes(inputValue.toLowerCase())
-            );
-          }}
-          noOptionsText="No navigation items found"
-          autoHighlight
-          openOnFocus
-          sx={{ width: '100%' }}
         />
       </Box>
 
       <Box sx={{ flex: 1, overflowY: "auto", py: 1 }}>
-        {sections.map(({ title, menus }) => (
+        {filteredSections.map(({ title, menus }) => (
           <React.Fragment key={title}>
             <SectionBlock
               title={title}
