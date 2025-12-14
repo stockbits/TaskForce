@@ -44,20 +44,20 @@ const userMenus = [
 ];
 
 const taskAdminMenus = [
-  { label: "Task Section", icon: ListChecks },
-  { label: "Jeopardy Section", icon: AlertTriangle },
+  { label: "Task Admin", icon: ListChecks },
+  { label: "Jeopardy Admin", icon: AlertTriangle },
 ];
 
 const peopleMenus = [
-  { label: "Resource Section", icon: Users },
-  { label: "Self Service Section", icon: Settings },
-  { label: "User Section", icon: UserCog },
+  { label: "Resource Admin", icon: Users },
+  { label: "Self Service Admin", icon: Settings },
+  { label: "User Admin", icon: UserCog },
 ];
 
 const systemMenus = [
-  { label: "Domain Section", icon: Globe },
-  { label: "Schedule Section", icon: Calendar },
-  { label: "System Section", icon: Cog },
+  { label: "Domain Admin", icon: Globe },
+  { label: "Schedule Admin", icon: Calendar },
+  { label: "System Admin", icon: Cog },
 ];
 
 interface SidebarProps {
