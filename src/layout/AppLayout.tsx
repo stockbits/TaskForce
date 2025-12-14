@@ -167,12 +167,6 @@ function buildCSV(headerKeys: string[], rows: Record<string, any>[]): string {
 interface HeaderProps {
   currentMenu: { label: string; icon: any };
   windowWidth: number;
-  searchQuery: string;
-  setSearchQuery: (v: string) => void;
-  globalResults: any[];
-  showDropdown: boolean;
-  setShowDropdown: (v: boolean) => void;
-  onSelectResult: (item: any) => void;
   onToggleSidebar: () => void;
   overrideTitle?: string | null;
   whiteBackground?: boolean;
@@ -186,12 +180,6 @@ const Header: React.FC<HeaderProps> = memo(
   ({
     currentMenu,
     windowWidth,
-    searchQuery,
-    setSearchQuery,
-    globalResults,
-    showDropdown,
-    setShowDropdown,
-    onSelectResult,
     onToggleSidebar,
     overrideTitle,
     whiteBackground = false,
@@ -271,88 +259,6 @@ const Header: React.FC<HeaderProps> = memo(
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
-              <Box sx={{ position: "relative", minWidth: { xs: theme.spacing(20), sm: theme.spacing(24) } }}>
-              <TextField
-                value={searchQuery}
-                size="small"
-                onChange={(event) => setSearchQuery(event.target.value)}
-                onFocus={() => setShowDropdown(globalResults.length > 0)}
-                placeholder="Search anywhere..."
-                variant="outlined"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Search
-                        size={18}
-                        color={whiteBackground ? alpha(theme.palette.text.primary, 0.45) : alpha(theme.palette.common.white, 0.75)}
-                      />
-                    </InputAdornment>
-                  ),
-                  sx: {
-                    color: whiteBackground ? theme.palette.text.primary : theme.palette.common.white,
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: whiteBackground ? alpha(theme.palette.text.primary, 0.12) : alpha(theme.palette.common.white, 0.3),
-                    },
-                    "&:hover .MuiOutlinedInput-notchedOutline": {
-                      borderColor: whiteBackground ? alpha(theme.palette.text.primary, 0.2) : alpha(theme.palette.common.white, 0.5),
-                    },
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: whiteBackground ? alpha(theme.palette.primary.main, 0.32) : alpha(theme.palette.common.white, 0.6),
-                    },
-                    "& input::placeholder": {
-                      color: whiteBackground ? alpha(theme.palette.text.primary, 0.45) : alpha(theme.palette.common.white, 0.7),
-                    },
-                    backgroundColor: whiteBackground ? alpha(theme.palette.background.paper, 0.92) : alpha(theme.palette.common.white, 0.1),
-                    borderRadius: 2,
-                  },
-                }}
-                sx={{
-                  width: { xs: 210, sm: 520 },
-                }}
-              />
-
-              <Fade in={showDropdown && globalResults.length > 0} timeout={120} unmountOnExit>
-                <Paper
-                  elevation={8}
-                  sx={{
-                    position: "absolute",
-                    right: 0,
-                    left: 0,
-                    mt: 1,
-                    borderRadius: 2,
-                    overflow: "hidden",
-                    zIndex: theme.zIndex.tooltip,
-                  }}
-                >
-                  <List dense disablePadding>
-                    {globalResults.map((item: any, idx: number) => (
-                      <ListItemButton
-                        key={idx}
-                        onMouseDown={() => onSelectResult(item)}
-                        sx={{ alignItems: "flex-start" }}
-                      >
-                        <ListItemText
-                          primary={
-                            <Typography variant="subtitle2" fontWeight={600}>
-                              {item.name}
-                            </Typography>
-                          }
-                          secondary={
-                            <Typography
-                              component="span"
-                              variant="caption"
-                              sx={{ color: "text.secondary" }}
-                            >
-                              {item.category}
-                            </Typography>
-                          }
-                        />
-                      </ListItemButton>
-                    ))}
-                  </List>
-                </Paper>
-              </Fade>
-            </Box>
 
             <Avatar
               sx={{
@@ -1343,6 +1249,12 @@ export default function MainLayout() {
         currentMenu={currentMenu}
         onMenuClick={handleMenuClick}
         activeSubPage={activeSubPage}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        globalResults={globalResults}
+        showDropdown={showDropdown}
+        setShowDropdown={setShowDropdown}
+        onSelectResult={handleHeaderSelectResult}
         />
 
       {/* MAIN */}
@@ -1359,12 +1271,6 @@ export default function MainLayout() {
         <Header
           currentMenu={currentMenu}
           windowWidth={windowWidth}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          globalResults={globalResults}
-          showDropdown={showDropdown}
-          setShowDropdown={setShowDropdown}
-          onSelectResult={handleHeaderSelectResult}
           onToggleSidebar={() =>
             window.dispatchEvent(new CustomEvent("toggleSidebar"))
           }

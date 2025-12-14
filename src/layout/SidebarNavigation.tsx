@@ -18,6 +18,10 @@ import {
   Stack,
   Typography,
   useTheme,
+  TextField,
+  InputAdornment,
+  Fade,
+  Paper,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import {
@@ -31,6 +35,7 @@ import {
   ListChecks,
   UserCog,
   LogOut,
+  Search,
 } from "lucide-react";
 
 const userMenus = [
@@ -39,32 +44,44 @@ const userMenus = [
 ];
 
 const taskAdminMenus = [
-  { label: "Task Admin", icon: ListChecks },
-  { label: "Jeopardy Admin", icon: AlertTriangle },
+  { label: "Task Section", icon: ListChecks },
+  { label: "Jeopardy Section", icon: AlertTriangle },
 ];
 
 const peopleMenus = [
-  { label: "Resource Admin", icon: Users },
-  { label: "Self Service Admin", icon: Settings },
-  { label: "User Admin", icon: UserCog },
+  { label: "Resource Section", icon: Users },
+  { label: "Self Service Section", icon: Settings },
+  { label: "User Section", icon: UserCog },
 ];
 
 const systemMenus = [
-  { label: "Domain Admin", icon: Globe },
-  { label: "Schedule Admin", icon: Calendar },
-  { label: "System Admin", icon: Cog },
+  { label: "Domain Section", icon: Globe },
+  { label: "Schedule Section", icon: Calendar },
+  { label: "System Section", icon: Cog },
 ];
 
 interface SidebarProps {
   currentMenu: { label: string; icon: any } | null;
   onMenuClick: (menu: any) => void;
   activeSubPage: string | null;
+  searchQuery: string;
+  setSearchQuery: (v: string) => void;
+  globalResults: any[];
+  showDropdown: boolean;
+  setShowDropdown: (v: boolean) => void;
+  onSelectResult: (item: any) => void;
 }
 
 export const Sidebar = memo(function Sidebar({
   currentMenu,
   onMenuClick,
   activeSubPage,
+  searchQuery,
+  setSearchQuery,
+  globalResults,
+  showDropdown,
+  setShowDropdown,
+  onSelectResult,
 }: SidebarProps) {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
@@ -109,9 +126,9 @@ export const Sidebar = memo(function Sidebar({
   const sections = useMemo(
     () => [
       { title: "User Section", menus: userMenus },
-      { title: "Task Admin", menus: taskAdminMenus },
-      { title: "People Admin", menus: peopleMenus },
-      { title: "System Admin", menus: systemMenus },
+      { title: "Task Section", menus: taskAdminMenus },
+      { title: "People Section", menus: peopleMenus },
+      { title: "System Section", menus: systemMenus },
     ],
     []
   );
@@ -166,6 +183,82 @@ export const Sidebar = memo(function Sidebar({
         </Typography>
       </Box>
 
+      {/* Quick Search Box */}
+      <Box sx={{ px: 3, py: 2, borderBottom: `1px solid ${alpha(theme.palette.text.primary, 0.08)}` }}>
+        <TextField
+          value={searchQuery}
+          size="small"
+          onChange={(event) => setSearchQuery(event.target.value)}
+          onFocus={() => setShowDropdown(globalResults.length > 0)}
+          placeholder="Quick search..."
+          variant="outlined"
+          fullWidth
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search size={16} color={alpha(theme.palette.text.primary, 0.6)} />
+              </InputAdornment>
+            ),
+            sx: {
+              fontSize: 14,
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: alpha(theme.palette.text.primary, 0.2),
+              },
+              "&:hover .MuiOutlinedInput-notchedOutline": {
+                borderColor: alpha(theme.palette.text.primary, 0.3),
+              },
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                borderColor: theme.palette.primary.main,
+              },
+            },
+          }}
+        />
+
+        <Fade in={showDropdown && globalResults.length > 0} timeout={120} unmountOnExit>
+          <Paper
+            elevation={4}
+            sx={{
+              position: "absolute",
+              left: 24,
+              right: 24,
+              mt: 1,
+              borderRadius: 2,
+              overflow: "hidden",
+              zIndex: theme.zIndex.tooltip,
+              maxHeight: 300,
+              overflowY: "auto",
+            }}
+          >
+            <List dense disablePadding>
+              {globalResults.map((item: any, idx: number) => (
+                <ListItemButton
+                  key={idx}
+                  onMouseDown={() => onSelectResult(item)}
+                  sx={{ alignItems: "flex-start" }}
+                >
+                  <ListItemText
+                    primary={
+                      <Typography variant="subtitle2" fontWeight={600}>
+                        {item.name}
+                      </Typography>
+                    }
+                    secondary={
+                      <Typography
+                        component="span"
+                        variant="caption"
+                        sx={{ color: "text.secondary" }}
+                      >
+                        {item.category}
+                      </Typography>
+                    }
+                  />
+                </ListItemButton>
+              ))}
+            </List>
+          </Paper>
+        </Fade>
+      </Box>
+
       <Box sx={{ flex: 1, overflowY: "auto", py: 1 }}>
         {sections.map(({ title, menus }) => (
           <React.Fragment key={title}>
@@ -175,7 +268,7 @@ export const Sidebar = memo(function Sidebar({
               activeMenuLabel={activeMenuLabel}
               onMenuClick={handleMenuSelect}
             />
-            <Divider sx={{ mx: 2, my: 2, borderColor: alpha(theme.palette.text.primary, 0.08) }} />
+            <Divider sx={{ mx: 2, my: 1, borderColor: alpha(theme.palette.text.primary, 0.08) }} />
           </React.Fragment>
         ))}
       </Box>
@@ -201,14 +294,15 @@ const SectionBlock = memo(function SectionBlock({
   const theme = useTheme();
 
   return (
-    <Box sx={{ px: 2, py: 1 }}>
+    <Box sx={{ px: 2, py: 0.5 }}>
       <Typography
         variant="overline"
         color="text.secondary"
         sx={{
           px: 1.5,
-          mb: 1,
+          mb: 0.5,
           letterSpacing: 1.4,
+          fontSize: 11,
         }}
       >
         {title}
@@ -225,12 +319,13 @@ const SectionBlock = memo(function SectionBlock({
               onClick={() => onMenuClick(menu)}
               selected={isActive}
               sx={{
-                borderRadius: 2,
-                mb: 1,
+                borderRadius: 1.5,
+                mb: 0.5,
                 alignItems: "center",
-                px: 2.5,
-                py: 1.5,
+                px: 2,
+                py: 1,
                 position: "relative",
+                minHeight: 40,
                 ...(isActive
                   ? {
                       backgroundColor: alpha(theme.palette.primary.main, 0.12),
@@ -238,10 +333,10 @@ const SectionBlock = memo(function SectionBlock({
                       "&::before": {
                         content: '""',
                         position: "absolute",
-                        left: 12,
-                        top: 10,
-                        bottom: 10,
-                        width: 4,
+                        left: 8,
+                        top: 8,
+                        bottom: 8,
+                        width: 3,
                         borderRadius: 999,
                         backgroundColor: theme.palette.primary.main,
                       },
@@ -254,13 +349,13 @@ const SectionBlock = memo(function SectionBlock({
                     }),
               }}
             >
-              <ListItemIcon sx={{ minWidth: theme.spacing(4.5), color: "inherit" }}>
-                {React.createElement(Icon, { size: 18, strokeWidth: 2.2 })}
+              <ListItemIcon sx={{ minWidth: theme.spacing(4), color: "inherit" }}>
+                {React.createElement(Icon, { size: 16, strokeWidth: 2 })}
               </ListItemIcon>
               <ListItemText
                 primary={menu.label}
                 primaryTypographyProps={{
-                  fontSize: 14,
+                  fontSize: 13,
                   fontWeight: isActive ? 600 : 500,
                 }}
               />
