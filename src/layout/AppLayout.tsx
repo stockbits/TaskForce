@@ -24,7 +24,7 @@ import { alpha } from "@mui/material/styles";
 import { CalloutLandingPage } from "@/callout/CalloutLandingPage";
 import mockTasks from "@/data/mockTasks.json";
 import ResourceMock from "@/data/ResourceMock.json";
-const ScheduleLivePage = lazy(() => import("@/schedule/ScheduleLivePage"));
+const ScheduleLivePage = lazy(() => import("@/schedule/scheduleLive - Page"));
 import { User } from "lucide-react";
 
 import {

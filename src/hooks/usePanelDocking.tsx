@@ -85,8 +85,7 @@ export function PanelContainer({
   const iconTone = alpha(theme.palette.text.primary, 0.6);
 
   return (
-    <Paper
-      elevation={isMaximized ? 6 : 1}
+    <Box
       sx={{
         display: "flex",
         flexDirection: "column",
@@ -95,7 +94,9 @@ export function PanelContainer({
         borderRadius: 2,
         border: `1px solid ${borderColor}`,
         overflow: "hidden",
-        backgroundImage: "none",
+        backgroundColor: theme.palette.background.paper,
+        position: "relative",
+        zIndex: isMaximized ? 10 : 1,
       }}
     >
       <Stack
@@ -103,14 +104,15 @@ export function PanelContainer({
         alignItems="center"
         justifyContent="space-between"
         sx={{
-          px: 1.5,
-          py: 0.75,
+          px: 2,
+          py: 1,
           borderBottom: `1px solid ${borderColor}`,
           backgroundColor: headerBg,
+          minHeight: 48,
         }}
       >
-        <Stack direction="row" spacing={1} alignItems="center">
-          <Icon size={16} color={iconTone} />
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <Icon size={18} color={iconTone} />
           <Typography
             variant="subtitle2"
             sx={{ fontWeight: 600, color: theme.palette.text.primary }}
@@ -126,6 +128,8 @@ export function PanelContainer({
               onClick={onMaximize}
               title={isMaximized ? "Restore" : "Maximize"}
               sx={{
+                width: 32,
+                height: 32,
                 borderRadius: 1.5,
                 border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
                 bgcolor: isMaximized
@@ -152,6 +156,8 @@ export function PanelContainer({
             onClick={onClose}
             title="Close"
             sx={{
+              width: 32,
+              height: 32,
               borderRadius: 1.5,
               border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
               bgcolor: theme.palette.common.white,
@@ -165,7 +171,9 @@ export function PanelContainer({
         </Stack>
       </Stack>
 
-      <Box sx={{ flex: 1, minHeight: 0, overflow: "hidden" }}>{children}</Box>
-    </Paper>
+      <Box sx={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
+        {children}
+      </Box>
+    </Box>
   );
 }

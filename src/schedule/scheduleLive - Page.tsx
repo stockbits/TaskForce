@@ -1,5 +1,5 @@
 // ============================================================================
-// ScheduleLivePage.tsx — MATERIAL UI MIGRATION
+// scheduleLive - Page.tsx — MATERIAL UI MIGRATION
 // Fully wired to useLiveSelectEngine.ts (central selection engine)
 // ============================================================================
 
@@ -791,14 +791,14 @@ export default function ScheduleLivePage() {
      RENDER
   ============================================================================ */
   return (
-    <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", position: "relative", backgroundColor: alpha(theme.palette.primary.light, 0.08) }}>
+    <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", position: "relative" }}>
       {toolbar}
 
       <MapLegend visible={legendOpen} onClose={() => setLegendOpen(false)} />
 
       {searchToolPopper}
 
-      <Box sx={{ flex: 1, minHeight: 0, px: 1, pt: 1 }}>
+      <Box sx={{ flex: 1, minHeight: 0 }}>
         <PanelGroup
           key={visiblePanels.join("-")}
           direction="vertical"
