@@ -198,35 +198,67 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
       renderTags={(tagValue) => {
         if (!tagValue || tagValue.length === 0) return null;
 
-        const count = tagValue.length;
-        const isSingle = count < 10;
+        const maxDisplay = 1; // show only the first item then a +N summary
+        const display = tagValue.slice(0, maxDisplay);
+        const extra = tagValue.length - maxDisplay;
 
         return (
-          <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', overflow: 'hidden', height: '100%', pr: '8px' }}>
-            <Chip
-              label={`+${count}`}
-              size="small"
-              variant="outlined"
+          <Box sx={{ display: 'flex', alignItems: 'center', overflow: 'hidden', height: '100%', pr: '8px' }}>
+            {display.map((v, i) => (
+              <Chip
+                key={v}
+                label={String(v).charAt(0)}
+                size="small"
+                sx={{
+                  flex: '0 0 auto',
+                  height: CHIP_SIZE,
+                  width: CHIP_SIZE,
+                  minWidth: CHIP_SIZE,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  px: 0,
+                  fontWeight: 600,
+                  fontSize: 13,
+                  lineHeight: `${CHIP_SIZE}px`,
+                  borderRadius: '50%',
+                  bgcolor: 'background.paper',
+                  border: '1px solid rgba(0,0,0,0.08)',
+                  ml: 0,
+                  zIndex: 20,
+                }}
+                title={v}
+              />
+            ))}
+
+            {extra > 0 ? (() => {
+              const isSingleDigit = extra < 10;
+              return (
+                <Chip
+                  label={`+${extra}`}
+                  size="small"
                   sx={{
-                flex: '0 0 auto',
-                height: CHIP_SIZE,
-                width: 'auto',
-                minWidth: CHIP_SIZE,
-                display: 'inline-flex',
-                alignItems: 'center',
-                alignSelf: 'center',
-                justifyContent: 'center',
-                px: 1,
-                fontWeight: 600,
-                fontSize: 13,
-                lineHeight: `${CHIP_SIZE}px`,
-                    borderRadius: '9999px',
-                    bgcolor: 'grey.100',
-                    borderColor: 'rgba(0,0,0,0.08)',
-                    boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.6)',
-                    border: '2px solid rgba(0,0,0,0.12)'
-              }}
-            />
+                    flex: '0 0 auto',
+                    height: CHIP_SIZE,
+                    minWidth: isSingleDigit ? CHIP_SIZE : undefined,
+                    // single-digit -> perfect circle; multi-digit -> pill (auto width)
+                    width: isSingleDigit ? CHIP_SIZE : 'auto',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    px: isSingleDigit ? 0 : 1,
+                    fontWeight: 600,
+                    fontSize: extra >= 100 ? 10 : extra >= 10 ? 11 : 12,
+                    lineHeight: `${CHIP_SIZE}px`,
+                    borderRadius: isSingleDigit ? '50%' : '999px',
+                    bgcolor: 'primary.main',
+                    color: 'primary.contrastText',
+                    ml: -0.6,
+                    zIndex: 30,
+                  }}
+                />
+              );
+            })() : null}
           </Box>
         );
       }}

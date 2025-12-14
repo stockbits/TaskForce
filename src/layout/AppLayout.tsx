@@ -58,6 +58,7 @@ import TaskSearchCard from "@/tasks/TaskSearchCardClean";
 import TaskTableAdvanced from "@/tasks/TaskTableAdvanced";
 import TaskPopoutPanel from "@/tasks/TaskPopoutPanel";
 import TaskRowContextMenu from '@/shared-ui/TaskRowContextMenu';
+import ProgressTasksDialog from '@/tasks/ProgressTasksDialog';
 
 import { cardMap } from "@/shared-config/menuRegistry";
 import { TaskDetails, ProgressNoteEntry } from "@/types";
@@ -575,6 +576,7 @@ export default function MainLayout() {
 
   const [cards, setCards] = useState<any[]>(cardMap[defaultMenu] || []);
   const [activeSubPage, setActiveSubPage] = useState<string | null>(null);
+  const [selectedRows, setSelectedRows] = useState<Record<string, any>[]>([]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [globalResults, setGlobalResults] = useState<any[]>([]);
@@ -623,61 +625,50 @@ export default function MainLayout() {
   const [incidentTask, setIncidentTask] = useState<Record<string, any> | null>(
     null
   );
+  const [progressDialogOpen, setProgressDialogOpen] = useState(false);
+  const [progressTasks, setProgressTasks] = useState<Record<string, any>[]>([]);
+  const [targetStatus, setTargetStatus] = useState<string>('Completed');
+  const [targetResourceId, setTargetResourceId] = useState<string>('');
+  const [progressNote, setProgressNote] = useState<string>('');
+  const [progressSaving, setProgressSaving] = useState<boolean>(false);
   // Inline popout state
   useEffect(() => {
     return () => closeExternalWindow();
   }, [closeExternalWindow]);
 
-  // Global context menu for any MUI DataGrid in the app.
-  const [globalContext, setGlobalContext] = useState<{
-    visible: boolean;
-    x: number;
-    y: number;
-    clickedRow?: Record<string, any> | null;
-    clickedColumnKey?: string | null;
-    mouseScreenX?: number;
-    mouseScreenY?: number;
-  }>({ visible: false, x: 0, y: 0 });
-
+  // Legacy global context scrapers removed — rely on DataGrid's per-table context handlers.
   useEffect(() => {
-    const handler = (ev: MouseEvent) => {
+    // listen for programmatic action events from anchored menus (e.g., SearchCard Actions)
+    const openPopout = (ev: Event) => {
       try {
-        const target = ev.target as HTMLElement | null;
-        if (!target) return;
-        // find nearest data grid row element which has data-id
-        const rowEl = target.closest('[data-id]') as HTMLElement | null;
-        if (!rowEl) return;
-        ev.preventDefault();
-        // build a simple row object by scraping cell text values
-        const cells = rowEl.querySelectorAll('[data-field]');
-        const rowObj: Record<string, any> = {};
-        cells.forEach((c) => {
-          const el = c as HTMLElement;
-          const field = el.getAttribute('data-field');
-          if (!field) return;
-          rowObj[field] = el.innerText || '';
-        });
-
-        const colElem = target.closest('[data-field]') as HTMLElement | null;
-        const colKey = colElem ? colElem.getAttribute('data-field') : null;
-
-        setGlobalContext({
-          visible: true,
-          x: ev.clientX,
-          y: ev.clientY,
-          clickedRow: rowObj,
-          clickedColumnKey: colKey,
-          mouseScreenX: (ev as any).screenX ?? 0,
-          mouseScreenY: (ev as any).screenY ?? 0,
-        });
-      } catch (err) {
-        // ignore
-      }
+        const custom = ev as CustomEvent<any>;
+        const tasks = custom.detail?.tasks ?? null;
+        if (!tasks || !tasks.length) return;
+        // open in external window centered
+        const coordsX = window.innerWidth / 2;
+        const coordsY = window.innerHeight / 2;
+        openExternalWindow(tasks, coordsX, coordsY);
+      } catch (err) {}
     };
 
-    document.addEventListener('contextmenu', handler, true);
-    return () => document.removeEventListener('contextmenu', handler, true);
+    const openCallout = (ev: Event) => {
+      try {
+        const custom = ev as CustomEvent<any>;
+        const task = custom.detail?.task ?? null;
+        if (!task) return;
+        handleOpenCalloutIncident(task);
+      } catch (err) {}
+    };
+
+    window.addEventListener('taskforce:open-popout', openPopout as EventListener);
+    window.addEventListener('taskforce:open-callout-incident', openCallout as EventListener);
+    // copy/export handled via Actions menu removed — keep only open-popout/open-callout handlers
+    return () => {
+      window.removeEventListener('taskforce:open-popout', openPopout as EventListener);
+      window.removeEventListener('taskforce:open-callout-incident', openCallout as EventListener);
+    };
   }, []);
+  
 
   useEffect(() => {
     const handleViewProgressNotes = (event: Event) => {
@@ -729,6 +720,29 @@ export default function MainLayout() {
       );
     };
   }, [allRows, openExternalWindow, setExternalExpandedSections]);
+
+  // Open Progress Tasks dialog programmatically (used by Actions menu)
+  const openProgressTasks = useCallback((tasks: any[]) => {
+    if (!tasks || !tasks.length) {
+      toast.error('No tasks selected');
+      return;
+    }
+    setProgressTasks(tasks);
+    setProgressDialogOpen(true);
+  }, []);
+
+  // Listen for progress-tasks events fired by Actions menu or row menu (backwards compatibility)
+  useEffect(() => {
+    const handler = (ev: Event) => {
+      try {
+        const custom = ev as CustomEvent<any>;
+        openProgressTasks(custom.detail?.tasks ?? []);
+      } catch (err) {}
+    };
+
+    window.addEventListener('taskforce:progress-tasks', handler as EventListener);
+    return () => window.removeEventListener('taskforce:progress-tasks', handler as EventListener);
+  }, [openProgressTasks]);
 
   useEffect(() => {
     const handleTasksProgressed = (event: Event) => {
@@ -1457,6 +1471,16 @@ export default function MainLayout() {
                 onExport={handleExportCSV}
                 canCopy={canCopy}
                 hasResults={rows.length > 0}
+                selectedRows={selectedRows}
+                onOpenPopout={(tasks: any[]) => {
+                  if (!tasks || !tasks.length) return;
+                  const coordsX = window.innerWidth / 2;
+                  const coordsY = window.innerHeight / 2;
+                  handleOpenPopout(tasks, coordsX, coordsY);
+                }}
+                onProgressTasks={(tasks: any[]) => openProgressTasks(tasks)}
+                onProgressNotes={(tasks: any[]) => window.dispatchEvent(new CustomEvent('taskforce:progress-notes', { detail: { tasks } }))}
+                onOpenCalloutIncident={(task: any) => handleOpenCalloutIncident(task)}
               />
 
               {!dataLoaded ? (
@@ -1472,6 +1496,14 @@ export default function MainLayout() {
                   headerNames={headerNames}
                   onOpenPopout={handleOpenPopout}
                   onOpenCalloutIncident={handleOpenCalloutIncident}
+                  onProgressTasks={(tasks: any[]) => openProgressTasks(tasks)}
+                  onProgressNotes={(tasks: any[]) => window.dispatchEvent(new CustomEvent('taskforce:progress-notes', { detail: { tasks } }))}
+                  onSelectionChange={(rows: Record<string, any>[]) => {
+                    try {
+                      console.log('AppLayout selection:', (rows || []).length);
+                    } catch (e) {}
+                    setSelectedRows(rows);
+                  }}
                   sx={{ borderRadius: '0 0 12px 12px', mt: 0 }}
                 />
               ) : (
@@ -1574,35 +1606,43 @@ export default function MainLayout() {
           externalContainer
         )}
 
-      {/* Global row context menu (scraped row data) */}
-      <TaskRowContextMenu
-        visible={globalContext.visible}
-        x={globalContext.x}
-        y={globalContext.y}
-        selectedRows={globalContext.clickedRow ? [globalContext.clickedRow] : []}
-        clickedColumnKey={globalContext.clickedColumnKey ?? null}
-        clickedRow={globalContext.clickedRow ?? null}
-        onClose={() => setGlobalContext((s) => ({ ...s, visible: false }))}
-        mouseScreenX={globalContext.mouseScreenX ?? 0}
-        mouseScreenY={globalContext.mouseScreenY ?? 0}
-        onOpenPopout={(tasks: any[], mX: number, mY: number) => {
-          // try to open external window with scraped row(s)
+      {/* Global DOM-scraped row menu removed; rely on per-table context menus from DataGrid */}
+      <ProgressTasksDialog
+        open={progressDialogOpen}
+        preview={progressTasks.map((t) => ({ id: String(t.taskId ?? t.id ?? t.TaskID ?? ''), currentStatus: t.taskStatus ?? t.status ?? '', nextStatus: targetStatus }))}
+        tasksCount={progressTasks.length}
+        targetStatus={targetStatus}
+        setTargetStatus={(s) => setTargetStatus(s)}
+        targetResourceId={targetResourceId}
+        setTargetResourceId={(s) => setTargetResourceId(s)}
+        progressNote={progressNote}
+        setProgressNote={(s) => setProgressNote(s)}
+        onClose={() => { setProgressDialogOpen(false); setProgressTasks([]); setProgressNote(''); }}
+        progressSaving={progressSaving}
+        onSave={async () => {
           try {
-            if (!tasks || tasks.length === 0) return;
-            openExternalWindow(tasks as any, mX, mY);
-          } catch (err) {}
+            setProgressSaving(true);
+            const items = progressTasks.map((t) => ({
+              taskId: t.taskId ?? t.id ?? t.TaskID ?? null,
+              previousStatus: t.taskStatus ?? t.status ?? null,
+              nextStatus: targetStatus,
+              note: progressNote || '',
+              timestamp: new Date().toISOString(),
+            }));
+            // simulate save
+            window.dispatchEvent(new CustomEvent('taskforce:tasks-progressed', { detail: { items } }));
+            toast.success(`Progressed ${items.length} task${items.length>1 ? 's' : ''}`);
+            setProgressDialogOpen(false);
+            setProgressTasks([]);
+            setProgressNote('');
+          } catch (err) {
+            toast.error('Progress failed');
+          } finally {
+            setProgressSaving(false);
+          }
         }}
-        onOpenCalloutIncident={(task: any) => {
-          setIncidentTask(task);
-          setIncidentOpen(true);
-        }}
-        onProgressTasks={(tasks: any[]) => {
-          // forward as a custom event for other listeners
-          window.dispatchEvent(new CustomEvent('taskforce:progress-tasks', { detail: { tasks } }));
-        }}
-        onProgressNotes={(tasks: any[]) => {
-          window.dispatchEvent(new CustomEvent('taskforce:progress-notes', { detail: { tasks } }));
-        }}
+        coreStatuses={['Assigned','In Progress','Completed']}
+        additionalStatuses={['Escalated','Cancelled']}
       />
     </Box>
   );

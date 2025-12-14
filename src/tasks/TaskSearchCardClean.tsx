@@ -31,7 +31,7 @@ import {
   Tooltip,
   useTheme,
 } from "@mui/material";
-import { ChevronDown, Eye, EyeOff, Search, MoreVertical } from "lucide-react";
+import { ChevronDown, Eye, EyeOff, Search, MoreVertical, ListChecks, StickyNote, AlertTriangle } from "lucide-react";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
@@ -72,6 +72,11 @@ type Props = {
   forceCollapsed?: boolean;
   onOpenColumns?: (anchor: HTMLElement) => void;
   hasResults?: boolean;
+  selectedRows?: Record<string, any>[];
+  onOpenPopout?: (tasks: any[]) => void;
+  onProgressTasks?: (tasks: any[]) => void;
+  onProgressNotes?: (tasks: any[]) => void;
+  onOpenCalloutIncident?: (task: any) => void;
 };
 
 type ArrayFilterKey =
@@ -144,6 +149,11 @@ export default function TaskSearchCard({
   forceCollapsed = false,
   onOpenColumns,
   hasResults = false,
+  selectedRows = [],
+  onOpenPopout,
+  onProgressTasks,
+  onProgressNotes,
+  onOpenCalloutIncident,
 }: Props) {
   const theme = useTheme();
   const [filters, setFilters] = useState<Filters>(() => ({ ...INITIAL_FILTERS }));
@@ -151,6 +161,7 @@ export default function TaskSearchCard({
   const [isFavourite, setIsFavourite] = useState(false);
   const [activeTab, setActiveTab] = useState<"basic" | "advanced">("basic");
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [actionsAnchorEl, setActionsAnchorEl] = useState<null | HTMLElement>(null);
   const [dateMenuAnchor, setDateMenuAnchor] = useState<null | HTMLElement>(null);
 
   const uniq = (arr: (string | null | undefined)[]) =>
@@ -609,7 +620,7 @@ export default function TaskSearchCard({
                 }}
               />
           </Box>
-
+          {/* debug badge removed */}
           <IconButton
             onClick={(e) => setDateMenuAnchor(e.currentTarget)}
             size="small"
@@ -836,6 +847,90 @@ export default function TaskSearchCard({
               More
             </Button>
           ) : null}
+          {hasResults && (
+            <>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={(e) => setActionsAnchorEl(e.currentTarget)}
+                sx={{ ml: 1, borderRadius: 2, textTransform: 'none' }}
+              >
+                Actions{selectedRows && selectedRows.length ? ` (${selectedRows.length})` : ""}
+              </Button>
+
+              <Menu
+                anchorEl={actionsAnchorEl}
+                open={Boolean(actionsAnchorEl)}
+                onClose={() => setActionsAnchorEl(null)}
+                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                transformOrigin={{ vertical: "top", horizontal: "left" }}
+              >
+                {/* Copy and Export moved out — use Actions menu for viewer/progress/callout only */}
+
+                <MenuItem
+                  onClick={() => {
+                    if (!selectedRows || !selectedRows.length) return;
+                    if (onOpenPopout) onOpenPopout(selectedRows || []);
+                    else window.dispatchEvent(new CustomEvent('taskforce:open-popout', { detail: { tasks: selectedRows } }));
+                    setActionsAnchorEl(null);
+                  }}
+                  disabled={!selectedRows || selectedRows.length === 0}
+                >
+                  <ListItemIcon>
+                    <Eye size={16} />
+                  </ListItemIcon>
+                  Open Viewer{selectedRows && selectedRows.length > 1 ? ` (${selectedRows.length})` : ""}
+                </MenuItem>
+
+                <MenuItem
+                  onClick={() => {
+                    if (!selectedRows || !selectedRows.length) return;
+                    if (onProgressTasks) onProgressTasks(selectedRows || []);
+                    else window.dispatchEvent(new CustomEvent('taskforce:progress-tasks', { detail: { tasks: selectedRows } }));
+                    setActionsAnchorEl(null);
+                  }}
+                  disabled={!selectedRows || selectedRows.length === 0}
+                >
+                  <ListItemIcon>
+                    <ListChecks size={16} />
+                  </ListItemIcon>
+                  Progress Tasks{selectedRows && selectedRows.length > 1 ? ` (${selectedRows.length})` : ""}
+                </MenuItem>
+
+                <MenuItem
+                  onClick={() => {
+                    if (!selectedRows || !selectedRows.length) return;
+                    if (onProgressNotes) onProgressNotes(selectedRows || []);
+                    else window.dispatchEvent(new CustomEvent('taskforce:progress-notes', { detail: { tasks: selectedRows } }));
+                    setActionsAnchorEl(null);
+                  }}
+                  disabled={!selectedRows || selectedRows.length === 0}
+                >
+                  <ListItemIcon>
+                    <StickyNote size={16} />
+                  </ListItemIcon>
+                  Progress Notes{selectedRows && selectedRows.length > 1 ? ` (${selectedRows.length})` : ""}
+                </MenuItem>
+
+                <MenuItem
+                  onClick={() => {
+                    // prefer single task for callout incident; fall back to first selected
+                    const task = selectedRows && selectedRows.length ? selectedRows[0] : null;
+                    if (!task) return;
+                    if (onOpenCalloutIncident) onOpenCalloutIncident(task);
+                    else window.dispatchEvent(new CustomEvent('taskforce:open-callout-incident', { detail: { task } }));
+                    setActionsAnchorEl(null);
+                  }}
+                  disabled={!(selectedRows && selectedRows.length === 1)}
+                >
+                  <ListItemIcon>
+                    <AlertTriangle style={{ fontSize: 18, color: 'rgba(220,53,69,0.95)' }} />
+                  </ListItemIcon>
+                  Callout Incident
+                </MenuItem>
+              </Menu>
+            </>
+          )}
           {/* Columns button removed — using DataGrid's built-in column menu */}
             <Menu
               anchorEl={menuAnchorEl}

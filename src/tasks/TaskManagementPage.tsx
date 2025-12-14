@@ -71,6 +71,7 @@ async function writeToClipboard(text: string) {
 
 export default function TaskManagementPage() {
     const [filteredTasks, setFilteredTasks] = useState<Record<string, any>[]>([]);
+    const [selectedRows, setSelectedRows] = useState<Record<string, any>[]>([]);
     const [tableHeight, setTableHeight] = useState<number>(600);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const searchRef = useRef<HTMLDivElement | null>(null);
@@ -316,6 +317,7 @@ export default function TaskManagementPage() {
           canCopy={canCopy}
           forceCollapsed={filteredTasks.length > 0}
           hasResults={filteredTasks.length > 0}
+          selectedRows={selectedRows}
         />
       </Box>
 
@@ -327,6 +329,10 @@ export default function TaskManagementPage() {
           onOpenPopout={(tasks: any[], mX: number, mY: number) => {
             if (!tasks || tasks.length === 0) return;
             openExternalWindow(tasks as any, mX, mY);
+          }}
+          onSelectionChange={(rows: Record<string, any>[]) => {
+            try { console.log('TaskManagementPage selection:', (rows||[]).length); } catch (e) {}
+            setSelectedRows(rows);
           }}
         />
       ) : (

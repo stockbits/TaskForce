@@ -579,6 +579,7 @@ export default function MainLayout() {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
   const [uiScale, setUiScale] = useState(1);
+  const [selectedRows, setSelectedRows] = useState<Record<string, any>[]>([]);
   
 
   /* ---------------------- Data ---------------------- */
@@ -1376,6 +1377,7 @@ export default function MainLayout() {
                 onExport={handleExportCSV}
                 canCopy={canCopy}
                 hasResults={rows.length > 0}
+                selectedRows={selectedRows}
               />
 
               {!dataLoaded ? (
@@ -1391,6 +1393,10 @@ export default function MainLayout() {
                   headerNames={headerNames}
                   onOpenPopout={handleOpenPopout}
                   onOpenCalloutIncident={handleOpenCalloutIncident}
+                  onSelectionChange={(rows: Record<string, any>[]) => {
+                    try { console.log('MainLayout selection:', (rows||[]).length); } catch (e) {}
+                    setSelectedRows(rows);
+                  }}
                   sx={{ borderRadius: '0 0 12px 12px', mt: 0, borderTop: 'none' }}
                 />
               ) : (

@@ -245,18 +245,22 @@ export default function TaskRowContextMenu({
           </li>
 
           {/* ---------------------------
-              CALLOUT INCIDENT
+              CALLOUT INCIDENT (only when exactly one actionable row)
           --------------------------- */}
-          {clickedRow && (
-            <li
-              onClick={handleCalloutIncident}
-              className="px-4 py-2.5 flex items-center gap-3 cursor-pointer 
-                       hover:bg-red-50 transition-all text-red-700"
-            >
-              <AlertTriangle size={15} className="text-red-600" />
-              <span className="font-semibold">{incidentLabel}</span>
-            </li>
-          )}
+          <li
+            onClick={handleCalloutIncident}
+            className={
+              `px-4 py-2.5 flex items-center gap-3 transition-all ` +
+              (actionableRows.length === 1
+                ? 'cursor-pointer hover:bg-red-50 text-red-700'
+                : 'opacity-40 cursor-not-allowed text-gray-500')
+            }
+            role="menuitem"
+            aria-disabled={actionableRows.length !== 1}
+          >
+            <AlertTriangle size={15} className={actionableRows.length === 1 ? 'text-red-600' : 'text-gray-400'} />
+            <span className="font-semibold">{incidentLabel}</span>
+          </li>
         </motion.ul>
       )}
     </AnimatePresence>

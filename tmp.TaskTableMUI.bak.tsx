@@ -241,22 +241,11 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
   useEffect(() => {
     if (onSelectionChange) {
       const selected = gridRows.filter((r) => selection.includes(String(r.id)));
-      try { console.log('TaskTableMUI selection effect -> selection array', selection, 'gridIds', gridRows.map((r) => r.id).slice(0,10), 'calling onSelectionChange with', selected.length); } catch(e) {}
+      try { console.log('TaskTableMUI selection effect -> calling onSelectionChange with', selected.length); } catch(e) {}
       onSelectionChange(selected as Record<string, any>[]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selection]);
-
-  // If the underlying rows change while we already have a `selection`,
-  // recompute and re-emit the selected row objects so parent state stays in sync
-  useEffect(() => {
-    if (onSelectionChange && selection && selection.length) {
-      const selected = gridRows.filter((r) => selection.includes(String(r.id)));
-      try { console.log('TaskTableMUI rows changed -> re-emitting selection', selection, 'gridIds', gridRows.map((r) => r.id).slice(0,10), 'selectedCount', selected.length); } catch (e) {}
-      onSelectionChange(selected as Record<string, any>[]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gridRows]);
 
   // column menu state (simple column selector)
   const [columnMenuVisible, setColumnMenuVisible] = useState(false);
@@ -521,7 +510,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           onSelectionModelChange={(model: any) => {
             try {
               const ids = Array.isArray(model) ? model : [model];
-              try { console.log('TaskTableMUI onSelectionModelChange -> model', model, 'ids', ids); } catch(e) {}
+              try { console.log('TaskTableMUI onSelectionModelChange -> model length', ids.length); } catch(e) {}
               setSelection(ids.map(String) as string[]);
             } catch (err) {}
           }}
@@ -564,7 +553,10 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           }}
         />
       </Paper>
-      {/* debug badge removed */}
+      {/* DEBUG: show internal selection state */}
+      <Box sx={{ position: 'absolute', right: 12, top: 8, zIndex: 1400, bgcolor: 'rgba(255,255,255,0.9)', px: 1, py: 0.5, borderRadius: 1, boxShadow: 1 }}>
+        <Typography variant="caption">Table sel: {selection.length}</Typography>
+      </Box>
       {/* Toolbar rendered inside DataGrid to maintain proper context */}
       {/* insertion indicator */}
       <Box sx={{ position: 'absolute', left: 0, top: 0, pointerEvents: 'none', width: '100%', height: '100%', zIndex: 1200 }} ref={gridContainerRef as any}>
