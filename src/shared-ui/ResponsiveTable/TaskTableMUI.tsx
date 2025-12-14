@@ -507,7 +507,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
         <AnyDataGrid
           rows={gridRows}
           columns={colState}
-          selectionModel={selection}
+          rowSelectionModel={selection}
           checkboxSelection
           components={{ Toolbar: CustomToolbar }}
           density={density as 'compact' | 'standard' | 'comfortable'}
@@ -518,11 +518,12 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           }}
           onRowContextMenu={onRowContextMenu as any}
           onCellContextMenu={onRowContextMenu as any}
-          onSelectionModelChange={(model: any) => {
+          onRowSelectionModelChange={(model: any) => {
             try {
-              const ids = Array.isArray(model) ? model : [model];
-              try { console.log('TaskTableMUI onSelectionModelChange -> model', model, 'ids', ids); } catch(e) {}
-              setSelection(ids.map(String) as string[]);
+              // model may be an array of ids (strings/numbers) or an object for checkboxSelection
+              const ids = Array.isArray(model) ? model : Object.keys(model || {});
+              try { console.log('TaskTableMUI onRowSelectionModelChange -> model', model, 'ids', ids); } catch(e) {}
+              setSelection((ids || []).map(String) as string[]);
             } catch (err) {}
           }}
           sx={{ border: 0, '& .MuiDataGrid-cell': { py: density === 'compact' ? 0.5 : 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }, '& .MuiDataGrid-columnHeaders': { backgroundColor: theme.palette.action.hover }, '& .MuiDataGrid-columnHeaderTitle': { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }}

@@ -4,6 +4,7 @@ import rawMockTasks from "@/data/mockTasks.json";
 import TaskSearchCard from "@/tasks/TaskSearchCardClean";
 import TaskTableAdvanced from "@/tasks/TaskTableAdvanced";
 import TaskTableMUI from "@/shared-ui/ResponsiveTable/TaskTableMUI";
+import ProgressTasksDialog, { ProgressPreview } from "@/tasks/ProgressTasksDialog";
 import { useExternalWindow } from "@/hooks/useExternalWindow";
 import { Box, Paper, Typography, Stack } from "@mui/material";
 
@@ -77,6 +78,16 @@ export default function TaskManagementPage() {
     const searchRef = useRef<HTMLDivElement | null>(null);
 
   const { openExternalWindow, closeExternalWindow } = useExternalWindow();
+
+  // Progress dialog state (for batch progress / quick notes)
+  const [progressDialogOpen, setProgressDialogOpen] = useState(false);
+  const [progressPreview, setProgressPreview] = useState<ProgressPreview[]>([]);
+  const [progressTargetStatus, setProgressTargetStatus] = useState<string>("Pending");
+  const [progressTargetResourceId, setProgressTargetResourceId] = useState<string>("");
+  const [progressNote, setProgressNote] = useState<string>("");
+  const [progressSaving, setProgressSaving] = useState(false);
+  const [progressError, setProgressError] = useState<string | null>(null);
+  const [progressSuccess, setProgressSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     return () => closeExternalWindow();
@@ -277,6 +288,46 @@ export default function TaskManagementPage() {
     if (ok) toast.success("Copied to clipboard!");
   }, [canCopy, filteredTasks]);
 
+  // Open progress dialog (used by table/search actions)
+  const openProgressTasks = useCallback((tasks: any[]) => {
+    if (!tasks || !tasks.length) return toast.error("No tasks selected");
+    const preview = tasks.map((t) => ({ id: String(t.taskId ?? t.workId ?? t.id ?? ""), currentStatus: t.taskStatus ?? t.status ?? null, nextStatus: null }));
+    setProgressPreview(preview);
+    setProgressDialogOpen(true);
+    setProgressError(null);
+    setProgressSuccess(null);
+    setProgressNote("");
+  }, []);
+
+  const closeProgress = useCallback(() => {
+    setProgressDialogOpen(false);
+  }, []);
+
+  const saveProgress = useCallback(async () => {
+    try {
+      setProgressSaving(true);
+      // simulate save
+      await new Promise((res) => setTimeout(res, 500));
+      setProgressSuccess("Progress saved");
+      setTimeout(() => { setProgressSaving(false); setProgressDialogOpen(false); }, 600);
+    } catch (err) {
+      setProgressError("Failed to save progress");
+      setProgressSaving(false);
+    }
+  }, []);
+
+  // Callout handler: only allow when exactly one task selected
+  const handleOpenCalloutIncident = useCallback((task: Record<string, any> | null) => {
+    if (!task) return;
+    // dispatch to app-level listener (AppLayout) which manages callout modal
+    window.dispatchEvent(new CustomEvent('taskforce:open-callout-incident', { detail: { task } }));
+  }, []);
+
+  const handleCalloutFromSelection = useCallback((tasks: any[]) => {
+    if (!tasks || tasks.length !== 1) return toast.error('Callout Incident requires exactly one selected task');
+    handleOpenCalloutIncident(tasks[0]);
+  }, [handleOpenCalloutIncident]);
+
   const exportCSV = useCallback(() => {
     if (!canCopy) return toast.error("No results to export.");
     const headers = Object.keys(headerNames);
@@ -290,6 +341,7 @@ export default function TaskManagementPage() {
   }, [canCopy, filteredTasks]);
 
   return (
+    <>
     <Box
       ref={containerRef}
       sx={{
@@ -318,6 +370,13 @@ export default function TaskManagementPage() {
           forceCollapsed={filteredTasks.length > 0}
           hasResults={filteredTasks.length > 0}
           selectedRows={selectedRows}
+          onOpenPopout={(tasks) => {
+            if (!tasks || !tasks.length) return;
+            openExternalWindow(tasks as any, window.innerWidth / 2, window.innerHeight / 2);
+          }}
+          onProgressTasks={(tasks) => openProgressTasks(tasks)}
+          onProgressNotes={(tasks) => openProgressTasks(tasks)}
+          onOpenCalloutIncident={(task) => handleOpenCalloutIncident(task)}
         />
       </Box>
 
@@ -333,6 +392,21 @@ export default function TaskManagementPage() {
           onSelectionChange={(rows: Record<string, any>[]) => {
             try { console.log('TaskManagementPage selection:', (rows||[]).length); } catch (e) {}
             setSelectedRows(rows);
+          }}
+          onProgressTasks={(tasks: any[]) => openProgressTasks(tasks)}
+          onProgressNotes={(tasks: any[]) => openProgressTasks(tasks)}
+          onOpenCalloutIncident={(task: any) => {
+            // TaskRowContextMenu already ensures single-click for clickedRow; here we validate selection
+            try {
+              if (!task) return;
+              // if task is array (from some callers), handle accordingly
+              if (Array.isArray(task)) {
+                if (task.length !== 1) return toast.error('Callout Incident requires exactly one selected task');
+                handleOpenCalloutIncident(task[0]);
+              } else {
+                handleOpenCalloutIncident(task);
+              }
+            } catch (err) {}
           }}
         />
       ) : (
@@ -358,5 +432,24 @@ export default function TaskManagementPage() {
         </Paper>
       )}
     </Box>
-  );
+      <ProgressTasksDialog
+        open={progressDialogOpen}
+        preview={progressPreview}
+        tasksCount={progressPreview.length}
+        targetStatus={progressTargetStatus}
+        setTargetStatus={setProgressTargetStatus}
+        targetResourceId={progressTargetResourceId}
+        setTargetResourceId={setProgressTargetResourceId}
+        progressNote={progressNote}
+        setProgressNote={setProgressNote}
+        onSave={saveProgress}
+        onClose={closeProgress}
+        progressError={progressError}
+        progressSuccess={progressSuccess}
+        progressSaving={progressSaving}
+        coreStatuses={["Open", "Assigned", "In Progress", "Completed"]}
+        additionalStatuses={[]}
+      />
+      </>
+    );
 }

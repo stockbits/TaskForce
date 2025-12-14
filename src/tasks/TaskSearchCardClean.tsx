@@ -41,6 +41,7 @@ import TodayIcon from '@mui/icons-material/Today';
 import TodayOutlinedIcon from '@mui/icons-material/TodayOutlined';
 import DateTimePopover from '@/shared-ui/DateTimePopover';
 import { MultiSelectField, SingleSelectField, FreeTypeSelectField } from '@/shared-ui';
+import GlobalSearchField from '@/shared-ui/text-fields/GlobalSearchField';
 
 type Filters = {
   taskSearch: string;
@@ -605,21 +606,14 @@ export default function TaskSearchCard({
 
           <Box sx={{ flex: 1 }} />
 
-          <Box sx={{ width: { xs: '100%', sm: 420, md: 720 } }}>
-            <TextField
-                name="taskSearch"
-                value={filters.taskSearch}
-                onChange={handleFieldChange}
-                placeholder={prefillPrompt}
-                size="small"
-                fullWidth
-                sx={{ '& input::placeholder': { color: theme.palette.text.secondary }, '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, fontSize: 13, lineHeight: '32px' } }}
-                InputProps={{
-                  startAdornment: (<InputAdornment position="start"><Search size={16} /></InputAdornment>),
-                  sx: { height: 48 }
-                }}
-              />
-          </Box>
+          <GlobalSearchField
+            name="taskSearch"
+            value={filters.taskSearch}
+            onChange={handleFieldChange}
+            placeholder={prefillPrompt}
+            size="small"
+            sx={{}}
+          />
           {/* debug badge removed */}
           <IconButton
             onClick={(e) => setDateMenuAnchor(e.currentTarget)}
