@@ -18,9 +18,12 @@ import {
   Stack,
   TextField,
   Typography,
+  Tab,
+  Tabs,
 } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import MultiSelectField from "@/shared-ui";
+import GlobalSearchField from "@/shared-ui/text-fields/GlobalSearchField";
 
 export interface SearchToolFilters {
   statuses: string[];
@@ -73,6 +76,8 @@ const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
   hideActions,
 }) => {
   const theme = useTheme();
+  const [activeTab, setActiveTab] = useState<"basic" | "advanced">("basic");
+  const [globalSearch, setGlobalSearch] = useState("");
   const [filters, setFilters] = useState<SearchToolFilters>({
     statuses: [],
     pwa: [],
@@ -104,6 +109,8 @@ const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
       impCondition: "",
       impValue: "",
     });
+    setGlobalSearch("");
+    setActiveTab("basic");
 
     setQuery({
       statuses: "",
@@ -122,6 +129,16 @@ const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
       onSearch(filters);
     }
   }, [filters, hideActions, onSearch]);
+
+  const handleGlobalSearchKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      onSearch(filters);
+    }
+  };
+
+  const handleGlobalSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setGlobalSearch(e.target.value);
+  };
 
   const safe = (arr: string[] | undefined) => arr ?? [];
 
@@ -228,28 +245,48 @@ const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
 
   const renderMode = () => {
     if (effectiveMode === "task-default") {
-      return (
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            {StatusBlock}
+      if (activeTab === "basic") {
+        return (
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              {StatusBlock}
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              {PwaBlock}
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              {CapBlock}
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              {CommitBlock}
+            </Grid>
           </Grid>
-          <Grid item xs={12} sm={6}>
-            {PwaBlock}
+        );
+      } else {
+        // Advanced tab
+        return (
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              {StatusBlock}
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              {PwaBlock}
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              {CapBlock}
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              {CommitBlock}
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              {ResponseBlock}
+            </Grid>
+            <Grid item xs={12}>
+              {ImpBlock}
+            </Grid>
           </Grid>
-          <Grid item xs={12} sm={6}>
-            {CapBlock}
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            {CommitBlock}
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            {ResponseBlock}
-          </Grid>
-          <Grid item xs={12}>
-            {ImpBlock}
-          </Grid>
-        </Grid>
-      );
+        );
+      }
     }
 
     if (effectiveMode === "resource-active") {
@@ -289,6 +326,31 @@ const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
         overflowX: 'hidden',
       }}
     >
+      {/* Header with tabs and global search */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+        <Tabs
+          value={activeTab}
+          onChange={(_e, v) => setActiveTab(v)}
+          variant="standard"
+          sx={{ minHeight: 36 }}
+        >
+          <Tab value="basic" label="Basic" sx={{ minHeight: 36, px: 1 }} />
+          <Tab value="advanced" label="Advanced" sx={{ minHeight: 36, px: 1 }} />
+        </Tabs>
+
+        <Box sx={{ flex: 1 }} />
+
+        <GlobalSearchField
+          name="globalSearch"
+          value={globalSearch}
+          onChange={handleGlobalSearchChange}
+          onKeyPress={handleGlobalSearchKeyPress}
+          placeholder="Search tasks or resources..."
+          size="small"
+        />
+      </Box>
+
+      {/* Tab content */}
       {renderMode()}
 
       {!hideActions && (
