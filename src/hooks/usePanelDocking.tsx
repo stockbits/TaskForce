@@ -91,7 +91,7 @@ export function PanelContainer({
         flexDirection: "column",
         height: "100%",
         width: "100%",
-        borderRadius: 2,
+        borderRadius: '12px 12px 0 0',
         border: `1px solid ${borderColor}`,
         overflow: "hidden",
         backgroundColor: theme.palette.background.paper,
@@ -162,12 +162,12 @@ export function PanelContainer({
               border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
               bgcolor: theme.palette.common.white,
               '&:hover': {
-                bgcolor: alpha(theme.palette.primary.main, 0.18),
-              },
-            }}
-          >
-            <X size={16} color={theme.palette.text.primary} />
-          </IconButton>
+                  bgcolor: alpha(theme.palette.primary.main, 0.18),
+                },
+              }}
+            >
+              <X size={16} color={theme.palette.text.primary} />
+            </IconButton>
         </Stack>
       </Stack>
 

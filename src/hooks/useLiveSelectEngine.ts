@@ -10,7 +10,7 @@
 
 import { useRef, useState, useEffect } from "react";
 
-const DEBUG_SELECT = true; // ← Set to false to disable ALL debug logging
+const DEBUG_SELECT = false; // ← Set to false to disable ALL debug logging
 
 export interface TaskRecord {
   taskId: string;
@@ -34,6 +34,7 @@ export function useLiveSelectEngine() {
     []
   );
   const [shouldZoom, setShouldZoom] = useState(true);
+  const [selectionFromMap, setSelectionFromMap] = useState(false);
 
   const originRef = useRef<SelectionOrigin>(null);
   const mapSelectingRef = useRef(false);
@@ -89,6 +90,7 @@ export function useLiveSelectEngine() {
     originRef.current = "map";
     mapSelectingRef.current = true;
     lastMapEventTsRef.current = Date.now();
+    setSelectionFromMap(true);
 
     setSelectedTasks((prev) => {
       if (!multi) return [task];
@@ -114,13 +116,8 @@ export function useLiveSelectEngine() {
         rows.map((r) => r.taskId)
       );
 
-    // Ignore empty selection updates to preserve current selection
-    if (!rows || rows.length === 0) {
-      if (DEBUG_SELECT) console.log("TABLE SELECT TASKS ignored (empty selection)");
-      return;
-    }
-
-    // Suppress table-driven changes while map is interacting
+    // Allow empty selections from table (user can deselect all)
+    // But suppress table-driven changes while map is interacting
     const withinSuppress = Date.now() - lastMapEventTsRef.current < SUPPRESS_MS;
     if (
       mapSelectingRef.current ||
@@ -134,6 +131,7 @@ export function useLiveSelectEngine() {
     }
 
     setShouldZoom(true);
+    setSelectionFromMap(false);
     applySelection(rows, setSelectedTasks, "table");
   };
 
@@ -148,6 +146,7 @@ export function useLiveSelectEngine() {
     originRef.current = "map";
     mapSelectingRef.current = true;
     lastMapEventTsRef.current = Date.now();
+    setSelectionFromMap(true);
 
     setSelectedResources((prev) => {
       if (!multi) return [res];
@@ -173,12 +172,7 @@ export function useLiveSelectEngine() {
         rows.map((r) => r.resourceId)
       );
 
-    // Ignore empty selection updates to preserve current selection
-    if (!rows || rows.length === 0) {
-      if (DEBUG_SELECT) console.log("TABLE SELECT RESOURCES ignored (empty selection)");
-      return;
-    }
-
+    // Allow empty selections from table (user can deselect all)
     const withinSuppress = Date.now() - lastMapEventTsRef.current < SUPPRESS_MS;
     if (
       mapSelectingRef.current ||
@@ -192,6 +186,7 @@ export function useLiveSelectEngine() {
     }
 
     setShouldZoom(true);
+    setSelectionFromMap(false);
     applySelection(rows, setSelectedResources, "table");
   };
 
@@ -222,6 +217,7 @@ export function useLiveSelectEngine() {
     originRef.current = "clear";
     setSelectedTasks([]);
     setSelectedResources([]);
+    setSelectionFromMap(false);
     setShouldZoom(true);
 
     setTimeout(() => {
@@ -239,6 +235,8 @@ export function useLiveSelectEngine() {
     selectedResource,
     handleResourceMapClick,
     handleResourceTableSelect,
+
+    selectionFromMap,
 
     shouldZoom,
 

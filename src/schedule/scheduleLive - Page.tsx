@@ -131,11 +131,23 @@ export default function ScheduleLivePage() {
     selectedResource,
     handleResourceMapClick,
     handleResourceTableSelect,
+    selectionFromMap,
     shouldZoom,
     clearAll,
     notifyMapDragStart,
     notifyMapDragEnd,
   } = useLiveSelectEngine();
+
+  /* ==========================================================================
+     SELECTION CLEAR FUNCTIONS
+  ========================================================================== */
+  const clearTaskSelections = () => {
+    handleTaskTableSelect([]);
+  };
+
+  const clearResourceSelections = () => {
+    handleResourceTableSelect([]);
+  };
 
   /* ==========================================================================
      DIVISION OPTIONS
@@ -437,6 +449,8 @@ export default function ScheduleLivePage() {
             data={resourceData}
             selectedResources={selectedResources}
             onSelectionChange={handleResourceTableSelect}
+            selectionFromMap={selectionFromMap}
+            onClearSelection={clearResourceSelections}
           />
         );
 
@@ -446,6 +460,8 @@ export default function ScheduleLivePage() {
             data={taskData}
             selectedTasks={selectedTasks}
             onSelectionChange={handleTaskTableSelect}
+            selectionFromMap={selectionFromMap}
+            onClearSelection={clearTaskSelections}
           />
         );
 
@@ -628,6 +644,7 @@ export default function ScheduleLivePage() {
       placement="bottom-start"
       transition
       modifiers={[{ name: "offset", options: { offset: [0, 10] } }]}
+      sx={{ zIndex: 12000 }}
     >
       {({ TransitionProps }) => (
         <Fade {...TransitionProps} timeout={160}>

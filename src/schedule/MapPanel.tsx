@@ -6,7 +6,7 @@
 // ============================================================================
 
 import React, { useMemo, useEffect } from "react";
-import { Box, Paper } from "@mui/material";
+import { Box } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import {
   MapContainer,
@@ -206,19 +206,12 @@ export default function MapPanel({
   );
 
   return (
-    <Paper
+    <Box
       data-map-root="true"
-      elevation={0}
       sx={{
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        borderRadius: 3,
-        px: 3,
-        py: 2.5,
-        border: `1px solid ${alpha(theme.palette.primary.main, 0.18)}`,
-        boxShadow: "0 18px 46px rgba(8,58,97,0.18)",
-        backgroundImage: "none",
       }}
     >
       <Box
@@ -381,6 +374,6 @@ export default function MapPanel({
           })}
         </MapContainer>
       </Box>
-    </Paper>
+    </Box>
   );
 }

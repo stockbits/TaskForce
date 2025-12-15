@@ -6,8 +6,8 @@ import { Users, ChevronRight } from "lucide-react";
 import { ResourceRecord } from "./CalloutIncidentPanel";
 import SingleSelectField from '@/shared-ui/text-fields/SingleSelectField';
 
-const MotionBox = motion(Box);
-const MotionPaper = motion(Paper);
+const MotionBox = motion.create(Box);
+const MotionPaper = motion.create(Paper);
 
 /* ------------------------------------------------------------------
    TYPES

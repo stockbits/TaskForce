@@ -4,8 +4,8 @@
 // No selection logic inside — only forwards table selections.
 // ============================================================================
 
-import React, { useMemo } from "react";
-import { Box, Paper, Stack, Typography } from "@mui/material";
+import React, { useMemo, useState, useEffect } from "react";
+import { Box, Stack, Typography } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import TaskTableAdvanced from "@/tasks/TaskTableAdvanced";
 import type { TaskRecord } from "@/hooks/useLiveSelectEngine";
@@ -37,26 +37,21 @@ interface TaskTablePanelProps {
   data: TaskRecord[];
   selectedTasks: TaskRecord[];
   onSelectionChange: (rows: TaskRecord[]) => void;
+  selectionFromMap: boolean;
+  onClearSelection?: () => void;
 }
 
 export default function TaskTablePanel({
   data,
   selectedTasks,
   onSelectionChange,
+  selectionFromMap,
+  onClearSelection,
 }: TaskTablePanelProps) {
   const theme = useTheme();
-
-  const panelStyles = {
-    height: '100%',
-    display: "flex",
-    flexDirection: "column" as const,
-    borderRadius: 3,
-    px: 3,
-    py: 2.5,
-    border: `1px solid ${alpha(theme.palette.primary.main, 0.18)}`,
-    boxShadow: "0 18px 46px rgba(8,58,97,0.18)",
-    backgroundImage: "none",
-  };
+  const [currentSortModel, setCurrentSortModel] = useState<any[]>([]);
+  const [pinnedOrder, setPinnedOrder] = useState<string[]>([]);
+  const [prevDataLength, setPrevDataLength] = useState(0);
 
   /* ==========================================================================
      AUTO HEADER BUILDER
@@ -78,25 +73,144 @@ export default function TaskTablePanel({
   }, [data]);
 
   /* ==========================================================================
+     PINNED ORDER: Selected items stay at top until user sorts or data changes
+  ========================================================================== */
+  useEffect(() => {
+    // Reset pinned order when data is cleared (new search started)
+    if (prevDataLength > 0 && data.length === 0) {
+      setPinnedOrder([]);
+    }
+    setPrevDataLength(data.length);
+  }, [data.length, prevDataLength]);
+
+  useEffect(() => {
+    // Add newly selected items from map to the top of pinned order
+    // Always do this when we have map selections
+    if (selectionFromMap && selectedTasks.length > 0) {
+      const currentPinnedIds = new Set(pinnedOrder);
+      const newSelectedIds = selectedTasks
+        .map(t => String(t.taskId))
+        .filter(id => !currentPinnedIds.has(id));
+      
+      if (newSelectedIds.length > 0) {
+        setPinnedOrder(prev => [...newSelectedIds, ...prev]);
+      }
+    }
+  }, [selectedTasks, selectionFromMap]);
+
+  const displayData = useMemo(() => {
+    if (!data || data.length === 0) return [];
+    
+    // If no pinned items, return data sorted by current sort model
+    if (pinnedOrder.length === 0) {
+      let sortedData = [...data];
+      if (currentSortModel && currentSortModel.length > 0) {
+        sortedData.sort((a, b) => {
+          for (const sortItem of currentSortModel) {
+            const { field, sort } = sortItem;
+            const aValue = a[field];
+            const bValue = b[field];
+            
+            // Handle null/undefined values
+            if (aValue == null && bValue == null) continue;
+            if (aValue == null) return sort === 'desc' ? 1 : -1;
+            if (bValue == null) return sort === 'desc' ? -1 : 1;
+            
+            let comparison = 0;
+            if (typeof aValue === 'string' && typeof bValue === 'string') {
+              comparison = aValue.localeCompare(bValue);
+            } else if (typeof aValue === 'number' && typeof bValue === 'number') {
+              comparison = aValue - bValue;
+            } else {
+              // Convert to strings for comparison
+              const aStr = String(aValue);
+              const bStr = String(bValue);
+              comparison = aStr.localeCompare(bStr);
+            }
+            
+            if (comparison !== 0) {
+              return sort === 'desc' ? -comparison : comparison;
+            }
+          }
+          return 0;
+        });
+      }
+      return sortedData;
+    }
+    
+    // Split data: pinned items first (in pinned order), then unpinned sorted by current criteria
+    const pinnedItems: TaskRecord[] = [];
+    const unpinnedItems: TaskRecord[] = [];
+    
+    data.forEach(item => {
+      const itemId = String(item.taskId);
+      if (pinnedOrder.includes(itemId)) {
+        pinnedItems.push(item);
+      } else {
+        unpinnedItems.push(item);
+      }
+    });
+    
+    // Sort pinned items according to pinned order (not by column criteria)
+    pinnedItems.sort((a, b) => {
+      const aIndex = pinnedOrder.indexOf(String(a.taskId));
+      const bIndex = pinnedOrder.indexOf(String(b.taskId));
+      return aIndex - bIndex;
+    });
+    
+    // Sort unpinned items by current sort criteria
+    if (currentSortModel && currentSortModel.length > 0) {
+      unpinnedItems.sort((a, b) => {
+        for (const sortItem of currentSortModel) {
+          const { field, sort } = sortItem;
+          const aValue = a[field];
+          const bValue = b[field];
+          
+          // Handle null/undefined values
+          if (aValue == null && bValue == null) continue;
+          if (aValue == null) return sort === 'desc' ? 1 : -1;
+          if (bValue == null) return sort === 'desc' ? -1 : 1;
+          
+          let comparison = 0;
+          if (typeof aValue === 'string' && typeof bValue === 'string') {
+            comparison = aValue.localeCompare(bValue);
+          } else if (typeof aValue === 'number' && typeof bValue === 'number') {
+            comparison = aValue - bValue;
+          } else {
+            // Convert to strings for comparison
+            const aStr = String(aValue);
+            const bStr = String(bValue);
+            comparison = aStr.localeCompare(bStr);
+          }
+          
+          if (comparison !== 0) {
+            return sort === 'desc' ? -comparison : comparison;
+          }
+        }
+        return 0;
+      });
+    }
+    
+    return [...pinnedItems, ...unpinnedItems];
+  }, [data, pinnedOrder, currentSortModel]);
+
+  /* ==========================================================================
      CONTROLLED SELECTION SET
-     ========================================================================== */
+  ========================================================================== */
   const selectedRowIds = useMemo(() => {
     if (!selectedTasks?.length) return new Set<string>();
     return new Set(selectedTasks.map((t) => String(t.taskId)));
   }, [selectedTasks]);
-
   /* ==========================================================================
      EMPTY STATE
      ========================================================================== */
   if (!data || data.length === 0) {
     return (
-      <Paper elevation={0} sx={panelStyles}>
-        <Stack spacing={1} alignItems="center" justifyContent="center" sx={{ flex: 1 }}>
-          <Typography variant="body2" color="text.secondary" textAlign="center">
-            No tasks loaded yet. Please define filters and press Search.
-          </Typography>
-        </Stack>
-      </Paper>
+      <Stack spacing={1} alignItems="center" justifyContent="center" sx={{ flex: 1, height: '100%' }}>
+        <Typography variant="body2" color="text.secondary" textAlign="center">
+          No tasks loaded yet. Please define filters and press Search.
+        </Typography>
+      </Stack>
     );
   }
 
@@ -104,18 +218,28 @@ export default function TaskTablePanel({
      MAIN RENDER — forward selection only
      ========================================================================== */
   return (
-    <Paper elevation={0} sx={panelStyles}>
-      <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
-        <TaskTableAdvanced
-          rows={data}
-          headerNames={headerNames}
-          sx={{ height: '100%' }}
-          tableHeight="100%"
-          rowIdKey="taskId"
-          controlledSelectedRowIds={selectedRowIds}
-          onSelectionChange={(rows: TaskRecord[]) => onSelectionChange(rows as TaskRecord[])}
-        />
-      </Box>
-    </Paper>
+    <Box sx={{ flex: 1, display: "flex", flexDirection: "column", height: '100%' }}>
+      <TaskTableAdvanced
+        rows={displayData}
+        headerNames={headerNames}
+        sx={{ height: '100%' }}
+        tableHeight="100%"
+        rowIdKey="taskId"
+        controlledSelectedRowIds={selectedRowIds}
+        disablePagination={true}
+        onSelectionChange={(rows: TaskRecord[]) => onSelectionChange(rows as TaskRecord[])}
+        onSortChange={(hasSorting: boolean, sortModel?: any[]) => {
+          setCurrentSortModel(sortModel || []);
+          // Clear pinned order when sorting changes - everything reshuffles
+          if (hasSorting || (sortModel && sortModel.length === 0)) {
+            setPinnedOrder([]);
+          }
+          // Clear all selections when user applies sorting
+          if (hasSorting && onClearSelection) {
+            onClearSelection();
+          }
+        }}
+      />
+    </Box>
   );
 }

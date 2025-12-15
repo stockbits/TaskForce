@@ -16,6 +16,9 @@ type Props = {
   containerRef?: MutableRefObject<HTMLElement | null>;
   reserveBottom?: number;
   debug?: boolean;
+  disablePagination?: boolean;
+  controlledSelectedRowIds?: string[];
+  rowIdKey?: string;
   onOpenPopout?: (tasks: Record<string, any>[], mouseScreenX: number, mouseScreenY: number) => void;
   onSelectionChange?: (rows: Record<string, any>[]) => void;
   onOpenCalloutIncident?: (task: Record<string, any>) => void;
@@ -23,10 +26,19 @@ type Props = {
   onProgressNotes?: (tasks: Record<string, any>[]) => void;
   openColumnsAnchor?: HTMLElement | null;
   onRequestCloseColumns?: () => void;
+  onSortChange?: (hasSorting: boolean, sortModel?: any[]) => void;
 };
 
-export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef, reserveBottom = 160, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns }: Props) {
+export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef, reserveBottom = 160, disablePagination = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns, onSortChange }: Props) {
+  // Internal state for uncontrolled components
   const [selection, setSelection] = useState<string[]>([]);
+  
+  // For controlled components, use controlledSelectedRowIds directly as rowSelectionModel
+  const rowSelectionModel = controlledSelectedRowIds !== undefined
+    ? (Array.isArray(controlledSelectedRowIds)
+        ? controlledSelectedRowIds
+        : Array.from(controlledSelectedRowIds as Set<string>))
+    : selection;
   const theme = useTheme();
   // refs for programmatic drag/resize fallback
   const colStateRef = useRef<GridColDef[]>([]);
@@ -125,8 +137,11 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
   }, [headerNames, theme]);
 
   const gridRows = useMemo(() => {
-    return rows.map((r, idx) => ({ id: String(r.taskId ?? r.workId ?? idx), ...r }));
-  }, [rows]);
+    return (rows || []).map((r, idx) => ({ 
+      id: String(r[rowIdKey || 'taskId'] ?? r.taskId ?? r.workId ?? idx), 
+      ...r 
+    }));
+  }, [rows, rowIdKey]);
 
   // column state with persistence
   const [colState, setColState] = useState<GridColDef[]>(() => columns);
@@ -147,7 +162,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
       const persisted = loadPersistedColumns() || {};
       const persistedWidths = persisted.widths || {};
       // compute signature to run when rows or headers change
-      const sig = JSON.stringify({ headers: Object.keys(headerNames), rowCount: gridRows.length, sample: gridRows.slice(0, 50).map(r => Object.keys(headerNames).map(k => String((r as any)[k] ?? '')).join('|')).join('||') });
+      const sig = JSON.stringify({ headers: Object.keys(headerNames || {}), rowCount: (gridRows || []).length, sample: (gridRows || []).slice(0, 50).map(r => Object.keys(headerNames || {}).map(k => String((r as any)[k] ?? '')).join('|')).join('||') });
       if (autoFitDoneRef.current === sig) return;
       autoFitDoneRef.current = sig;
 
@@ -221,7 +236,16 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
     try {
       const id = params?.id;
       if (id != null) {
-        setSelection((prev) => (prev.includes(String(id)) ? prev : [String(id)]));
+        if (controlledSelectedRowIds !== undefined) {
+          // For controlled components, notify parent of selection change
+          if (onSelectionChange) {
+            const selected = (gridRows || []).filter((r) => String(r.id) === String(id));
+            onSelectionChange(selected as Record<string, any>[]);
+          }
+        } else {
+          // For uncontrolled components, update internal state
+          setSelection((prev) => (Array.isArray(prev) && prev.includes(String(id)) ? prev : [String(id)]));
+        }
         // We select the right-clicked row; let DataGrid manage selection indices for shift/range.
       }
     } catch (err) {}
@@ -235,26 +259,6 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
       mouseScreenY: (event as any).screenY ?? 0,
     });
   };
-
-  // Let MUI DataGrid handle selection (shift/ctrl) natively. We keep selectionModel binding below.
-
-  useEffect(() => {
-    if (onSelectionChange) {
-      const selected = gridRows.filter((r) => selection.includes(String(r.id)));
-      onSelectionChange(selected as Record<string, any>[]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selection]);
-
-  // If the underlying rows change while we already have a `selection`,
-  // recompute and re-emit the selected row objects so parent state stays in sync
-  useEffect(() => {
-    if (onSelectionChange && selection && selection.length) {
-      const selected = gridRows.filter((r) => selection.includes(String(r.id)));
-      onSelectionChange(selected as Record<string, any>[]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gridRows]);
 
   // column menu state (simple column selector)
   const [columnMenuVisible, setColumnMenuVisible] = useState(false);
@@ -357,7 +361,16 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
         ev.preventDefault();
         const row = gridRows.find((r) => String(r.id) === id);
         // select the row (store ids as strings)
-        setSelection((prev) => (prev.includes(String(row?.id)) ? prev : [String(row?.id)]));
+        if (controlledSelectedRowIds !== undefined) {
+          // For controlled components, notify parent of selection change
+          if (onSelectionChange) {
+            const selected = [row].filter(Boolean) as Record<string, any>[];
+            onSelectionChange(selected);
+          }
+        } else {
+          // For uncontrolled components, update internal state
+          setSelection((prev) => (Array.isArray(prev) && prev.includes(String(row?.id)) ? prev : [String(row?.id)]));
+        }
         setContextMenu({ visible: true, x: ev.clientX, y: ev.clientY, clickedRow: row, clickedColumnKey: null, mouseScreenX: (ev as any).screenX ?? 0, mouseScreenY: (ev as any).screenY ?? 0 });
       } catch (err) {}
     };
@@ -505,23 +518,52 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
         <AnyDataGrid
           rows={gridRows}
           columns={colState}
-          rowSelectionModel={selection}
+          rowSelectionModel={rowSelectionModel}
           checkboxSelection
           components={{ Toolbar: CustomToolbar }}
           density={density as 'compact' | 'standard' | 'comfortable'}
-          pageSizeOptions={[25, 50, 100]}
-          initialState={{ pagination: { paginationModel: { pageSize: 100 } } }}
+          sortingMode="server"
+          pagination={!disablePagination}
+          hideFooter={disablePagination}
+          {...(!disablePagination && {
+            pageSizeOptions: [25, 50, 100],
+            initialState: { pagination: { paginationModel: { pageSize: 100 } } }
+          })}
           onRowDoubleClick={(params: any, event: any) => {
             if (onOpenPopout) onOpenPopout([params.row as any], (event as any).screenX ?? 0, (event as any).screenY ?? 0);
           }}
           onRowContextMenu={onRowContextMenu as any}
           onCellContextMenu={onRowContextMenu as any}
+          onSortModelChange={(model: any) => {
+            // Notify parent when sorting changes
+            if (onSortChange) {
+              const hasSorting = model && model.length > 0;
+              onSortChange(hasSorting, model);
+            }
+          }}
           onRowSelectionModelChange={(model: any) => {
             try {
               // model may be an array of ids (strings/numbers) or an object for checkboxSelection
               const ids = Array.isArray(model) ? model : Object.keys(model || {});
-              setSelection((ids || []).map(String) as string[]);
-            } catch (err) {}
+              const newSelection = (ids || []).map(String) as string[];
+
+              // For controlled components, always notify parent of changes
+              // For uncontrolled components, update internal state
+              if (controlledSelectedRowIds !== undefined) {
+                if (onSelectionChange) {
+                  const selected = (gridRows || []).filter((r) => newSelection.includes(String(r.id)));
+                  onSelectionChange(selected as Record<string, any>[]);
+                }
+              } else {
+                setSelection(newSelection);
+                if (onSelectionChange) {
+                  const selected = (gridRows || []).filter((r) => newSelection.includes(String(r.id)));
+                  onSelectionChange(selected as Record<string, any>[]);
+                }
+              }
+            } catch (err) {
+              console.error('Error in onRowSelectionModelChange:', err);
+            }
           }}
           sx={{ border: 0, '& .MuiDataGrid-cell': { py: density === 'compact' ? 0.5 : 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }, '& .MuiDataGrid-columnHeaders': { backgroundColor: theme.palette.action.hover }, '& .MuiDataGrid-columnHeaderTitle': { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }}
           onColumnResize={(params: any) => {
@@ -577,7 +619,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
         visible={contextMenu.visible}
         x={contextMenu.x}
         y={contextMenu.y}
-        selectedRows={gridRows.filter((r) => selection.includes(String(r.id)))}
+        selectedRows={gridRows.filter((r) => (selection || []).includes(String(r.id)))}
         clickedColumnKey={contextMenu.clickedColumnKey ?? null}
         clickedRow={contextMenu.clickedRow ?? null}
         onClose={closeContextMenu}

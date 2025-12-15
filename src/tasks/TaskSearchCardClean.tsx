@@ -96,7 +96,7 @@ type ChipDescriptor = {
   isArray: boolean;
 };
 
-const MotionCard = motion(Card);
+const MotionCard = motion.create(Card);
 const SELECT_ALL_VALUE = "__SELECT_ALL__";
 
 const INITIAL_FILTERS: Filters = {

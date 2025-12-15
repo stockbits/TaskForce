@@ -128,7 +128,7 @@ const ALL_TASK_SECTIONS = [
   "Closure",
 ];
 
-const MotionCard = motion(Card);
+const MotionCard = motion.create(Card);
 
 /* =========================================================
    HELPERS

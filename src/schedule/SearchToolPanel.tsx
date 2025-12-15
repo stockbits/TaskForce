@@ -62,7 +62,7 @@ function sortByBracketCode(list: string[]): string[] {
   });
 }
 
-const MotionPaper = motion(Paper);
+const MotionPaper = motion.create(Paper);
 
 const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
   mode = "task-default",
