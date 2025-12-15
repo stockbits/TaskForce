@@ -538,7 +538,7 @@ export default function ScheduleLivePage() {
         value={searchAnywhere}
         onChange={(e) => setSearchAnywhere(e.target.value)}
         onKeyPress={(e) => e.key === "Enter" && runGlobalSearch()}
-        placeholder="Search anywhere…"
+        placeholder="Search by Task ID, Work ID, Estimate Number, Employee ID"
         size="small"
       />
 

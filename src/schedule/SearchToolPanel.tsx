@@ -117,6 +117,30 @@ const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
     setOpenDropdown(null);
   }, [resetKey]);
 
+  const handleClear = () => {
+    setFilters({
+      statuses: [],
+      pwa: [],
+      capabilities: [],
+      commitmentTypes: [],
+      responseCodes: [],
+      impCondition: "",
+      impValue: "",
+    });
+
+    setQuery({
+      statuses: "",
+      pwa: "",
+      capabilities: "",
+      commitmentTypes: "",
+      responseCodes: "",
+      resourceStatuses: "",
+    });
+
+    setOpenDropdown(null);
+    onClear();
+  };
+
   useEffect(() => {
     if (hideActions) {
       onSearch(filters);
@@ -321,7 +345,7 @@ const SearchToolPanel: React.FC<SearchToolPanelProps> = ({
           <Button
             variant="outlined"
             size="small"
-            onClick={onClear}
+            onClick={handleClear}
             sx={{
               px: 3,
               fontWeight: 600,
