@@ -26,6 +26,8 @@ import { useSearchLeftMenu } from "@/hooks/useSearchLeftMenu";
 
 import { useLiveSelectEngine } from "@/hooks/useLiveSelectEngine";
 
+import GlobalSearchField from "@/shared-ui/text-fields/GlobalSearchField";
+
 import {
   Search,
   SlidersHorizontal,
@@ -532,20 +534,12 @@ export default function ScheduleLivePage() {
         ))}
       </TextField>
 
-      <TextField
-        size="small"
+      <GlobalSearchField
         value={searchAnywhere}
         onChange={(e) => setSearchAnywhere(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && runGlobalSearch()}
+        onKeyPress={(e) => e.key === "Enter" && runGlobalSearch()}
         placeholder="Search anywhere…"
-        sx={{ minWidth: { xs: theme.spacing(20), sm: theme.spacing(30) } }}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start" sx={{ color: alpha(theme.palette.text.primary, 0.6) }}>
-              <Search size={16} />
-            </InputAdornment>
-          ),
-        }}
+        size="small"
       />
 
       <Button
