@@ -54,6 +54,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import CheckIcon from "@mui/icons-material/Check";
 import InputAdornment from "@mui/material/InputAdornment";
 import { alpha, useTheme } from "@mui/material/styles";
 
@@ -84,6 +85,12 @@ export default function ScheduleLivePage() {
   const accentSoft = alpha(accent, 0.1);
   const borderColor = alpha(accent, 0.18);
   const surfaceShadow = "0 24px 54px rgba(8,58,97,0.22)";
+
+  /* ---------------- COMMON STYLES ---------------- */
+  const commonPaperSx = {
+    borderRadius: 3,
+    elevation: 2,
+  };
 
   /* ---------------- DOMAIN + DIVISION ---------------- */
   const [domain, setDomain] = useState<string>("");
@@ -314,7 +321,7 @@ export default function ScheduleLivePage() {
     });
 
     setTaskData(results);
-    handleCloseSearchPanel();
+    // Removed handleCloseSearchPanel() to keep panel open with filters selected
   };
 
   /* ==========================================================================
@@ -362,7 +369,7 @@ export default function ScheduleLivePage() {
     });
 
     setResourceData(results);
-    handleCloseSearchPanel();
+    // Removed handleCloseSearchPanel() to keep panel open with filters selected
   };
 
   /* ==========================================================================
@@ -390,7 +397,7 @@ export default function ScheduleLivePage() {
       matched = true;
     }
 
-    handleCloseSearchPanel();
+    // Removed handleCloseSearchPanel() to keep panel open with filters selected
   };
 
   /* ==========================================================================
@@ -506,7 +513,11 @@ export default function ScheduleLivePage() {
         size="small"
         value={division}
         onChange={(e) => handleDivisionChange(e.target.value)}
-        sx={{ minWidth: { xs: theme.spacing(14), sm: theme.spacing(18) } }}
+        sx={{ 
+          minWidth: { xs: theme.spacing(14), sm: theme.spacing(18) },
+          height: 48,
+          '& .MuiInputBase-input': { fontSize: 13, lineHeight: '32px' }
+        }}
         SelectProps={{ displayEmpty: true, renderValue: (selected) => (selected ? String(selected) : 'Division') }}
       >
         <MenuItem value="">All</MenuItem>
@@ -522,7 +533,11 @@ export default function ScheduleLivePage() {
         size="small"
         value={domain}
         onChange={(e) => handleDomainChange(e.target.value)}
-        sx={{ minWidth: { xs: theme.spacing(14), sm: theme.spacing(18) } }}
+        sx={{ 
+          minWidth: { xs: theme.spacing(14), sm: theme.spacing(18) },
+          height: 48,
+          '& .MuiInputBase-input': { fontSize: 13, lineHeight: '32px' }
+        }}
         SelectProps={{ displayEmpty: true, renderValue: (selected) => (selected ? String(selected) : 'Domain') }}
       >
         <MenuItem value="">All</MenuItem>
@@ -539,6 +554,7 @@ export default function ScheduleLivePage() {
         onKeyPress={(e) => e.key === "Enter" && runGlobalSearch()}
         placeholder="Search by Task ID, Work ID, Estimate Number, Employee ID"
         size="small"
+        sx={{ height: 48, '& .MuiInputBase-input': { fontSize: 13, lineHeight: '32px' } }}
       />
 
       <Button
@@ -550,9 +566,14 @@ export default function ScheduleLivePage() {
         startIcon={<SlidersHorizontal size={16} />}
         disabled={!division}
         sx={{
-          boxShadow: searchButtonActive ? "0 14px 36px rgba(8,58,97,0.25)" : "none",
-          bgcolor: searchButtonActive ? accentSoft : undefined,
-          borderColor: searchButtonActive ? accent : undefined,
+          height: 48,
+          minWidth: 120,
+          fontWeight: 500,
+          fontSize: 13,
+          lineHeight: '32px',
+          ...(searchButtonActive && {
+            boxShadow: theme.shadows[4],
+          }),
         }}
       >
         Search Tool
@@ -561,15 +582,20 @@ export default function ScheduleLivePage() {
       <IconButton
         size="small"
         onClick={() => setFavActive((v) => !v)}
+        color={favActive ? "primary" : "default"}
         sx={{
-          borderRadius: 2,
-          border: `1px solid ${borderColor}`,
-          boxShadow: favActive ? "0 14px 36px rgba(8,58,97,0.2)" : "none",
-          bgcolor: favActive ? accent : "white",
-          color: favActive ? theme.palette.common.white : theme.palette.text.primary,
-          '&:hover': {
-            bgcolor: favActive ? accentHover : alpha(accent, 0.08),
-          },
+          width: 40,
+          height: 40,
+          borderRadius: 1,
+          border: `1px solid ${theme.palette.divider}`,
+          ...(favActive && {
+            bgcolor: theme.palette.primary.main,
+            color: theme.palette.primary.contrastText,
+            borderColor: theme.palette.primary.main,
+            '&:hover': {
+              bgcolor: theme.palette.primary.dark,
+            },
+          }),
         }}
       >
         <Star size={16} />
@@ -578,15 +604,20 @@ export default function ScheduleLivePage() {
       <IconButton
         size="small"
         onClick={() => setLegendOpen((o) => !o)}
+        color={legendOpen ? "primary" : "default"}
         sx={{
-          borderRadius: 2,
-          border: `1px solid ${borderColor}`,
-          boxShadow: legendOpen ? "0 14px 36px rgba(8,58,97,0.2)" : "none",
-          bgcolor: legendOpen ? accent : "white",
-          color: legendOpen ? theme.palette.common.white : theme.palette.text.primary,
-          '&:hover': {
-            bgcolor: legendOpen ? accentHover : alpha(accent, 0.08),
-          },
+          width: 40,
+          height: 40,
+          borderRadius: 1,
+          border: `1px solid ${theme.palette.divider}`,
+          ...(legendOpen && {
+            bgcolor: theme.palette.primary.main,
+            color: theme.palette.primary.contrastText,
+            borderColor: theme.palette.primary.main,
+            '&:hover': {
+              bgcolor: theme.palette.primary.dark,
+            },
+          }),
         }}
         title="Map Legend"
       >
@@ -595,27 +626,38 @@ export default function ScheduleLivePage() {
 
       <Box sx={{ flexGrow: 1 }} />
 
-      <Button variant="outlined" size="small" onClick={handleClearAll}>
+      <Button 
+        variant="outlined" 
+        size="small" 
+        onClick={handleClearAll}
+        sx={{ 
+          minWidth: 100,
+          fontWeight: 500,
+          height: 48,
+          fontSize: 13,
+          lineHeight: '32px',
+        }}
+      >
         Clear All
       </Button>
 
       {collapsedPanels.length > 0 && (
-        <Stack direction="row" spacing={1.5} ml={2} alignItems="center">
+        <Stack direction="row" spacing={1} ml={2} alignItems="center">
           {collapsedPanels.map((key) => (
             <IconButton
               key={key}
               size="small"
               onClick={() => togglePanel(key)}
               sx={{
-                width: 32,
-                height: 32,
-                borderRadius: 1.5,
-                border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
-                bgcolor: "white",
+                width: 36,
+                height: 36,
+                borderRadius: 1,
+                border: `1px solid ${theme.palette.divider}`,
                 '&:hover': {
-                  bgcolor: alpha(theme.palette.primary.main, 0.08),
+                  bgcolor: theme.palette.action.hover,
                 },
               }}
+              title={`Show ${PANEL_DEFS[key].label}`}
             >
               {React.createElement(PANEL_DEFS[key].icon, {
                 size: 15,
@@ -643,29 +685,23 @@ export default function ScheduleLivePage() {
         <Fade {...TransitionProps} timeout={160}>
           <Box>
             <ClickAwayListener onClickAway={handleSearchClickAway}>
-              <Paper
-                elevation={16}
+              <Box
                 sx={{
                   borderRadius: 3,
-                  p: 3,
+                  p: 2,
+                  minWidth: 550,
+                  maxWidth: 900,
+                  mx: 'auto',
                   border: `1px solid ${borderColor}`,
                   boxShadow: surfaceShadow,
-                  backgroundImage: "none",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 3,
+                  backgroundColor: theme.palette.background.paper,
                 }}
-                style={{ width: "min(95vw, 760px)" }}
               >
                 <Stack direction={{ xs: "column", md: "row" }} spacing={3}>
-                  <Paper
-                    elevation={0}
+                  <Box
                     sx={{
-                      width: { xs: "100%", md: "clamp(200px,24vw,240px)" },
+                      width: 220,
                       borderRadius: 2,
-                      border: `1px solid ${alpha(accent, 0.12)}`,
-                      boxShadow: "0 18px 42px rgba(8,58,97,0.18)",
-                      backgroundImage: "none",
                       p: 2.5,
                       display: "flex",
                       flexDirection: "column",
@@ -675,25 +711,29 @@ export default function ScheduleLivePage() {
                     <Box>
                       <Typography
                         variant="overline"
-                        sx={{ fontWeight: 700, color: alpha(theme.palette.text.secondary, 0.9) }}
+                        sx={{ fontWeight: 700, color: alpha(theme.palette.text.secondary, 0.9), mb: 0.5 }}
                       >
-                        Task Searches
+                        Task Search
                       </Typography>
-                      <Stack spacing={1} mt={1.5}>
+                      <Stack spacing={1} mt={1}>
                         {taskItems.map((item) => (
                           <Button
                             key={item.id}
                             onClick={() => select(item.id)}
-                            fullWidth
                             size="small"
                             variant={isActive(item.id) ? "contained" : "outlined"}
                             color="primary"
+                            endIcon={isActive(item.id) ? <CheckIcon /> : undefined}
                             sx={{
                               justifyContent: "flex-start",
                               textTransform: "none",
-                              fontSize: 12,
+                              fontSize: 14,
                               fontWeight: 600,
                               borderRadius: 1.5,
+                              py: 0.5,
+                              whiteSpace: 'nowrap',
+                              minWidth: 140,
+                              width: 200,
                             }}
                           >
                             {item.label}
@@ -702,30 +742,34 @@ export default function ScheduleLivePage() {
                       </Stack>
                     </Box>
 
-                    <Divider flexItem sx={{ my: 1 }} />
+                    <Divider flexItem sx={{ my: 0.5 }} />
 
                     <Box>
                       <Typography
                         variant="overline"
-                        sx={{ fontWeight: 700, color: alpha(theme.palette.text.secondary, 0.9) }}
+                        sx={{ fontWeight: 700, color: alpha(theme.palette.text.secondary, 0.9), mb: 0.5 }}
                       >
-                        Resource Searches
+                        Resource Search
                       </Typography>
-                      <Stack spacing={1} mt={1.5}>
+                      <Stack spacing={1} mt={1}>
                         {resourceItems.map((item) => (
                           <Button
                             key={item.id}
                             onClick={() => select(item.id)}
-                            fullWidth
                             size="small"
                             variant={isActive(item.id) ? "contained" : "outlined"}
                             color="primary"
+                            endIcon={isActive(item.id) ? <CheckIcon /> : undefined}
                             sx={{
                               justifyContent: "flex-start",
                               textTransform: "none",
-                              fontSize: 12,
+                              fontSize: 14,
                               fontWeight: 600,
                               borderRadius: 1.5,
+                              py: 0.5,
+                              whiteSpace: 'nowrap',
+                              minWidth: 140,
+                              width: 200,
                             }}
                           >
                             {item.label}
@@ -733,7 +777,7 @@ export default function ScheduleLivePage() {
                         ))}
                       </Stack>
                     </Box>
-                  </Paper>
+                  </Box>
 
                   <Box
                     sx={{
@@ -789,7 +833,7 @@ export default function ScheduleLivePage() {
                     Search
                   </Button>
                 </Stack>
-              </Paper>
+              </Box>
             </ClickAwayListener>
           </Box>
         </Fade>

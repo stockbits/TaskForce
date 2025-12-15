@@ -13,12 +13,12 @@ export interface SearchMenuItem {
 ------------------------------------------------------------ */
 export const SEARCH_MENU_ITEMS: readonly SearchMenuItem[] = [
   // ----- TASK SEARCHES -----
-  { id: "tasksByCommit", label: "Active Tasks by Commit", group: "task" },
+  { id: "tasksByCommit", label: "Task Filters", group: "task" },
 
   // ----- RESOURCE SEARCHES (ONLY ACTIVE FOR NOW) -----
   {
     id: "resource-active",
-    label: "Active Resources",
+    label: "Resource Filters",
     group: "resource",
   },
 ] as const;

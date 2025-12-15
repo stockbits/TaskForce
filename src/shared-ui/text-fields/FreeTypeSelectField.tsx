@@ -52,7 +52,7 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
       <Autocomplete
       freeSolo
       disableClearable
-      componentsProps={{ popper: { style: { zIndex: 4000 } } }}
+      componentsProps={{ popper: { style: { zIndex: 13000 } } }}
       options={filteredOptions}
       value={value || ""}
       inputValue={inputValue}
@@ -82,7 +82,7 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
           />
         );
       }}
-      ListboxProps={{ sx: { zIndex: 2000, maxHeight: 320 } }}
+      ListboxProps={{ sx: { zIndex: 13000, maxHeight: 320 } }}
       sx={{ width: FIELD_WIDTH, '& .MuiAutocomplete-inputRoot': { minHeight: INPUT_HEIGHT, maxHeight: INPUT_HEIGHT, alignItems: 'center', transition: 'all 120ms ease', '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, paddingRight: '56px', fontSize: 13, lineHeight: `${CHIP_SIZE}px` } } }}
     />
     </Box>

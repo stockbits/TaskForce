@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import toast from "react-hot-toast";
 import rawMockTasks from "@/data/mockTasks.json";
 import TaskSearchCard from "@/tasks/TaskSearchCardClean";
@@ -74,6 +74,7 @@ export default function TaskManagementPage() {
     const [filteredTasks, setFilteredTasks] = useState<Record<string, any>[]>([]);
     const [selectedRows, setSelectedRows] = useState<Record<string, any>[]>([]);
     const [tableHeight, setTableHeight] = useState<number>(600);
+    const [currentSortModel, setCurrentSortModel] = useState<any[]>([]);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const searchRef = useRef<HTMLDivElement | null>(null);
 
@@ -340,6 +341,45 @@ export default function TaskManagementPage() {
     toast.success("Exported CSV file.");
   }, [canCopy, filteredTasks]);
 
+  // Sort filtered tasks based on current sort model
+  const sortedTasks = useMemo(() => {
+    if (!filteredTasks || filteredTasks.length === 0) return [];
+    
+    let sortedData = [...filteredTasks];
+    if (currentSortModel && currentSortModel.length > 0) {
+      sortedData.sort((a, b) => {
+        for (const sortItem of currentSortModel) {
+          const { field, sort } = sortItem;
+          const aValue = a[field];
+          const bValue = b[field];
+          
+          // Handle null/undefined values
+          if (aValue == null && bValue == null) continue;
+          if (aValue == null) return sort === 'desc' ? 1 : -1;
+          if (bValue == null) return sort === 'desc' ? -1 : 1;
+          
+          let comparison = 0;
+          if (typeof aValue === 'string' && typeof bValue === 'string') {
+            comparison = aValue.localeCompare(bValue);
+          } else if (typeof aValue === 'number' && typeof bValue === 'number') {
+            comparison = aValue - bValue;
+          } else {
+            // Convert to strings for comparison
+            const aStr = String(aValue);
+            const bStr = String(bValue);
+            comparison = aStr.localeCompare(bStr);
+          }
+          
+          if (comparison !== 0) {
+            return sort === 'desc' ? -comparison : comparison;
+          }
+        }
+        return 0;
+      });
+    }
+    return sortedData;
+  }, [filteredTasks, currentSortModel]);
+
   return (
     <>
     <Box
@@ -367,8 +407,8 @@ export default function TaskManagementPage() {
           onCopy={copyAll}
           onExport={exportCSV}
           canCopy={canCopy}
-          forceCollapsed={filteredTasks.length > 0}
-          hasResults={filteredTasks.length > 0}
+          forceCollapsed={sortedTasks.length > 0}
+          hasResults={sortedTasks.length > 0}
           selectedRows={selectedRows}
           onOpenPopout={(tasks) => {
             if (!tasks || !tasks.length) return;
@@ -380,9 +420,9 @@ export default function TaskManagementPage() {
         />
       </Box>
 
-      {filteredTasks.length > 0 ? (
+      {sortedTasks.length > 0 ? (
         <TaskTableMUI
-          rows={filteredTasks}
+          rows={sortedTasks}
           headerNames={headerNames}
           tableHeight={tableHeight}
           onOpenPopout={(tasks: any[], mX: number, mY: number) => {
@@ -406,6 +446,13 @@ export default function TaskManagementPage() {
                 handleOpenCalloutIncident(task);
               }
             } catch (err) {}
+          }}
+          onSortChange={(hasSorting: boolean, sortModel?: any[]) => {
+            setCurrentSortModel(sortModel || []);
+            // Clear selections when sorting starts
+            if (hasSorting) {
+              setSelectedRows([]);
+            }
           }}
         />
       ) : (

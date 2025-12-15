@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import {
   Box,
   Button,
-  Paper,
   Stack,
   Tab,
   Tabs,
+  Grid,
 } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import { MultiSelectField, SingleSelectField, FreeTypeSelectField } from "@/shared-ui";
@@ -28,6 +27,7 @@ export interface ScheduleLiveSearchFilters {
   fromTime: string;
   toDate: string;
   toTime: string;
+  calloutGroup: string;
 }
 
 export interface ScheduleLiveSearchProps {
@@ -64,8 +64,6 @@ function sortByBracketCode(list: string[]): string[] {
   });
 }
 
-const MotionPaper = motion.create(Paper);
-
 const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
   mode = "task",
   onSearch,
@@ -93,6 +91,7 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
     fromTime: "",
     toDate: "",
     toTime: "",
+    calloutGroup: "",
   });
 
   const [query, setQuery] = useState<Record<string, string>>({
@@ -123,6 +122,7 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
       fromTime: "",
       toDate: "",
       toTime: "",
+      calloutGroup: "",
     });
     setActiveTab("basic");
     setQuery({
@@ -138,6 +138,26 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
     if (mode === "resource") {
       setActiveTab("basic");
     }
+    // Reset filters when mode changes to keep searches independent
+    setFilters({
+      taskSearch: "",
+      taskStatuses: [],
+      requester: "",
+      responseCode: [],
+      commitType: [],
+      capabilities: [],
+      pwa: [],
+      jobType: "",
+      scoreCondition: "",
+      scoreValue: "",
+      locationType: "",
+      locationValue: "",
+      fromDate: "",
+      fromTime: "",
+      toDate: "",
+      toTime: "",
+      calloutGroup: "",
+    });
   }, [mode]);
 
   const handleClear = () => {
@@ -158,6 +178,7 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
       fromTime: "",
       toDate: "",
       toTime: "",
+      calloutGroup: "",
     });
     setActiveTab("basic");
     setQuery({
@@ -209,22 +230,13 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
   };
 
   const renderFieldGrid = (fields: React.ReactNode[]) => (
-    <Box sx={{
-      display: 'grid',
-      gridTemplateColumns: {
-        xs: '1fr',
-        sm: mode === "resource" ? 'repeat(auto-fit, minmax(280px, 1fr))' : 'repeat(auto-fit, minmax(250px, 1fr))',
-        md: mode === "resource" ? 'repeat(auto-fit, minmax(320px, 1fr))' : 'repeat(auto-fit, minmax(280px, 1fr))',
-        lg: mode === "resource" ? 'repeat(auto-fit, minmax(350px, 1fr))' : 'repeat(auto-fit, minmax(300px, 1fr))',
-        xl: mode === "resource" ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(320px, 1fr))'
-      },
-      gap: 2.5,
-      alignItems: 'flex-start',
-      width: 'fit-content',
-      minWidth: '100%',
-    }}>
-      {fields}
-    </Box>
+    <Grid container spacing={2.5}>
+      {fields.map((field, index) => (
+        <Grid item xs={12} md={6} key={index}>
+          {field}
+        </Grid>
+      ))}
+    </Grid>
   );
 
   const basicFields = [
@@ -281,7 +293,7 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
     ])
   ];
 
-  const advancedFields = [
+  let advancedFields = [
     <FreeTypeSelectField
       key="requester"
       label="Requester"
@@ -296,6 +308,21 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
       value={filters.jobType}
       onChange={(next: string) => setFilters((prev) => ({ ...prev, jobType: next }))}
     />,
+  ];
+
+  if (mode === "resource") {
+    advancedFields.push(
+      <FreeTypeSelectField
+        key="calloutGroup"
+        label="Callout Group"
+        options={[]}
+        value={filters.calloutGroup}
+        onChange={(next: string) => setFilters((prev) => ({ ...prev, calloutGroup: next }))}
+      />
+    );
+  }
+
+  advancedFields = advancedFields.concat([
     <SingleSelectField
       key="locationType"
       label="Location Type"
@@ -331,83 +358,21 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
       value={filters.scoreValue}
       onChange={(next: string) => setFilters((prev) => ({ ...prev, scoreValue: next }))}
     />
-  ];
+  ]);
 
   return (
-    <MotionPaper
-      initial={{ opacity: 0, y: -4 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
-      elevation={2}
-      sx={{
-        width: '100%',
-        maxWidth: 'fit-content',
-        minWidth: { xs: '100%', sm: '600px' },
-        mx: 'auto',
-        borderRadius: 3,
-        display: 'inline-block',
-      }}
-    >
-      <Box sx={{ p: { xs: 2, sm: 2.5, md: 3 }, minWidth: 0 }}>
-        <Box sx={{ borderBottom: mode === "resource" ? 0 : 1, borderColor: 'divider', mb: mode === "resource" ? 1 : 2 }}>
-          {mode !== "resource" && (
-            <Tabs value={activeTab} onChange={(_e, v) => setActiveTab(v)} variant="standard">
-              <Tab value="basic" label="Basic" />
-              <Tab value="advanced" label="Advanced" />
-            </Tabs>
-          )}
-        </Box>
-
-        {activeTab === "basic" && renderFieldGrid(basicFields)}
-
-        {activeTab === "advanced" && mode !== "resource" && renderFieldGrid(advancedFields)}
-
-        {!hideActions && (
-          <Stack
-            direction="row"
-            justifyContent="flex-end"
-            spacing={1.5}
-            pt={1.5}
-            mt={1.5}
-            sx={{
-              borderTop: `1px solid ${alpha(theme.palette.divider, 0.7)}`,
-            }}
-          >
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => onSearch(filters)}
-              sx={{
-                px: 3,
-                fontWeight: 600,
-                "&:hover": {
-                  boxShadow: "0 12px 28px rgba(8,58,97,0.25)",
-                },
-              }}
-            >
-              Search
-            </Button>
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={handleClear}
-              sx={{
-                px: 3,
-                fontWeight: 600,
-                borderColor: alpha(theme.palette.primary.main, 0.28),
-                "&:hover": {
-                  borderColor: theme.palette.primary.main,
-                  backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                },
-              }}
-            >
-              Clear
-            </Button>
-          </Stack>
-        )}
+    <Box sx={{ p: { xs: 2, sm: 2.5, md: 3 }, minWidth: 0 }}>
+<Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+          <Tabs value={activeTab} onChange={(_e, v) => setActiveTab(v)} variant="standard">
+            <Tab value="basic" label="Basic" />
+            <Tab value="advanced" label="Advanced" />
+          </Tabs>
       </Box>
-    </MotionPaper>
+
+      {activeTab === "basic" && renderFieldGrid(basicFields)}
+
+        {activeTab === "advanced" && renderFieldGrid(advancedFields)}
+    </Box>
   );
 };
 
