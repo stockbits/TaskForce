@@ -67,7 +67,7 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
   return (
     <Box sx={wrapperSx ?? DEFAULT_WRAPPER_SX}>
       <Autocomplete
-      componentsProps={{ popper: { style: { zIndex: 2000 } } }}
+      componentsProps={{ popper: { style: { zIndex: 4000 } } }}
       disableClearable
       options={filteredOptions}
       value={

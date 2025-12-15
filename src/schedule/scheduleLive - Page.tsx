@@ -6,8 +6,7 @@
 import React, { useState, useMemo, useRef } from "react";
 
 import MapLegend from "./MapLegend";
-import SearchModeWrapper from "./SearchModeWrapper";
-import type { SearchToolFilters } from "./SearchToolPanel";
+import { ScheduleLiveSearch, ScheduleLiveSearchFilters } from "@/shared-ui";
 
 import TimelinePanel from "./TimelinePanel";
 import MapPanel from "./MapPanel";
@@ -100,7 +99,7 @@ export default function ScheduleLivePage() {
   const searchButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const [searchAnywhere, setSearchAnywhere] = useState("");
-  const currentFiltersRef = useRef<SearchToolFilters>({} as SearchToolFilters);
+  const currentFiltersRef = useRef<ScheduleLiveSearchFilters>({} as ScheduleLiveSearchFilters);
 
   /* ---------------- TABLE DATA ---------------- */
   const [taskData, setTaskData] = useState<TaskRecord[]>([]);
@@ -274,7 +273,7 @@ export default function ScheduleLivePage() {
   /* ==========================================================================
      TASK SEARCH
   ============================================================================ */
-  const runTaskSearch = (filters: SearchToolFilters) => {
+  const runTaskSearch = (filters: ScheduleLiveSearchFilters) => {
     let results = [...(mockTasks as TaskRecord[])];
 
     if (domain) {
@@ -283,8 +282,8 @@ export default function ScheduleLivePage() {
     if (division) {
       results = results.filter((t) => t.division === division);
     }
-    if (filters.statuses?.length) {
-      results = results.filter((t) => filters.statuses.includes(t.taskStatus));
+    if (filters.taskStatuses?.length) {
+      results = results.filter((t) => filters.taskStatuses.includes(t.taskStatus));
     }
     if (filters.pwa?.length) {
       results = results.filter((t) => filters.pwa.includes(t.pwa));
@@ -294,9 +293,9 @@ export default function ScheduleLivePage() {
         t.capabilities?.some((c: string) => filters.capabilities.includes(c))
       );
     }
-    if (filters.commitmentTypes?.length) {
+    if (filters.commitType?.length) {
       results = results.filter((t) =>
-        filters.commitmentTypes.includes(t.commitmentType)
+        filters.commitType.includes(t.commitmentType)
       );
     }
 
@@ -321,7 +320,7 @@ export default function ScheduleLivePage() {
   /* ==========================================================================
      RESOURCE SEARCH
   ============================================================================ */
-  const runResourceSearch = (filters: SearchToolFilters) => {
+  const runResourceSearch = (filters: ScheduleLiveSearchFilters) => {
     if (!division) {
       setResourceData([]);
       handleCloseSearchPanel();
@@ -335,8 +334,8 @@ export default function ScheduleLivePage() {
     if (domain) {
       results = results.filter((r) => String(r.domain).toUpperCase() === domain);
     }
-    if (filters.statuses?.length) {
-      results = results.filter((r) => filters.statuses.includes(r.status));
+    if (filters.taskStatuses?.length) {
+      results = results.filter((r) => filters.taskStatuses.includes(r.status));
     }
     if (filters.pwa?.length) {
       results = results.filter((r) => filters.pwa.includes(r.pwa));
@@ -736,20 +735,19 @@ export default function ScheduleLivePage() {
                     </Box>
                   </Paper>
 
-                  <Paper
-                    elevation={0}
+                  <Box
                     sx={{
-                      flex: 1,
-                      borderRadius: 2,
-                      border: `1px solid ${alpha(accent, 0.12)}`,
-                      boxShadow: "0 18px 42px rgba(8,58,97,0.18)",
-                      backgroundImage: "none",
-                      p: 3,
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'flex-start',
+                      px: { xs: 2, sm: 3, md: 4 },
+                      py: 2,
+                      minHeight: 0,
                     }}
                   >
-                    <SearchModeWrapper
-                      mode={mapSelectedMode(selectedMode)}
-                      onSearch={(filters) => {
+                    <ScheduleLiveSearch
+                      mode={mapSelectedMode(selectedMode) === "resource-active" ? "resource" : "task"}
+                      onSearch={(filters: ScheduleLiveSearchFilters) => {
                         currentFiltersRef.current = filters;
                       }}
                       onClear={() => {
@@ -764,8 +762,9 @@ export default function ScheduleLivePage() {
                         ).sort(),
                       }}
                       resetKey={resetKey}
+                      hideActions={true}
                     />
-                  </Paper>
+                  </Box>
                 </Stack>
 
                 <Stack direction="row" justifyContent="flex-end">

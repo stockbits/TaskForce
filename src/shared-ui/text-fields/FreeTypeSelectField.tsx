@@ -52,7 +52,7 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
       <Autocomplete
       freeSolo
       disableClearable
-      componentsProps={{ popper: { style: { zIndex: 2000 } } }}
+      componentsProps={{ popper: { style: { zIndex: 4000 } } }}
       options={filteredOptions}
       value={value || ""}
       inputValue={inputValue}

@@ -122,7 +122,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
       disableClearable
       multiple
       disableCloseOnSelect
-      componentsProps={{ popper: { style: { minWidth: '32ch', zIndex: 2000 } } }}
+      componentsProps={{ popper: { style: { minWidth: '32ch', zIndex: 4000 } } }}
       sx={{
         width: FIELD_WIDTH,
         '& .MuiAutocomplete-inputRoot': {

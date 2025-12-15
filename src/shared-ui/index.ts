@@ -6,4 +6,7 @@ export { default as FreeTypeSelectField } from './text-fields/FreeTypeSelectFiel
 
 export * as textFields from './text-fields';
 
+export { ScheduleLiveSearch } from './schedule-live-search';
+export type { ScheduleLiveSearchProps, ScheduleLiveSearchFilters } from './schedule-live-search';
+
 export default Multi;
