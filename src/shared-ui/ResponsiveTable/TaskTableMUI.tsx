@@ -4,7 +4,6 @@ import toast from 'react-hot-toast';
 import { GridColDef, useGridApiRef, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarDensitySelector } from '@mui/x-data-grid';
 import { DataGrid } from '@mui/x-data-grid';
 // keep imports minimal: use built-in DataGrid behavior
-import { loadPersistedColumns, applyPersistedColumns, savePersistedColumns } from './usePersistedColumns';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Search, MoreVertical, GripVertical } from 'lucide-react';
 import TaskRowContextMenu from '@/shared-ui/TaskRowContextMenu';
@@ -159,16 +158,10 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
   const autoFitDoneRef = useRef<string | null>(null);
   useEffect(() => {
     try {
-      const persisted = loadPersistedColumns() || {};
-      const persistedWidths = persisted.widths || {};
       // compute signature to run when rows or headers change
       const sig = JSON.stringify({ headers: Object.keys(headerNames || {}), rowCount: (gridRows || []).length, sample: (gridRows || []).slice(0, 50).map(r => Object.keys(headerNames || {}).map(k => String((r as any)[k] ?? '')).join('|')).join('||') });
       if (autoFitDoneRef.current === sig) return;
       autoFitDoneRef.current = sig;
-
-      // only auto-fit columns that don't have persisted widths
-      const needFields = colStateRef.current.filter((c) => !((persistedWidths || {})[c.field])).map((c) => c.field);
-      if (!needFields.length) return;
 
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
@@ -201,30 +194,11 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
 
       // apply widths
       setColState((prev) => prev.map((c) => ({ ...c, width: widths[c.field] || c.width })));
-      try {
-        const cur = loadPersistedColumns() || {};
-        const curWidths = { ...(cur.widths || {}) };
-        Object.assign(curWidths, widths);
-        savePersistedColumns({ ...cur, widths: curWidths });
-      } catch (err) {}
     } catch (err) {
       // ignore
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gridRows]);
-
-  useEffect(() => {
-    try {
-      const persisted = loadPersistedColumns();
-      if (persisted) {
-        const applied = applyPersistedColumns(columns, persisted);
-        setColState(applied);
-      }
-    } catch (e) {
-      // ignore
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // handle right-click on rows to open context menu
   const gridContainerRef = useRef<HTMLDivElement | null>(null);
@@ -300,9 +274,6 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
   }, []);
 
   const resetColumns = () => {
-    try {
-      savePersistedColumns({});
-    } catch (e) {}
     setColState(columns.map((c) => ({ ...c })));
     setColumnVisibilityModel(() => {
       const model: Record<string, boolean> = {};
@@ -399,10 +370,6 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           if (tIdx === -1) order.push(from); else order.splice(tIdx, 0, from);
           const ordered = order.map((f) => ({ ...byField[f] }));
           setColState(ordered);
-          try {
-            const cur = loadPersistedColumns() || {};
-            savePersistedColumns({ ...cur, order });
-          } catch (err) {}
         }
       } catch (err) {}
       // clear insertion indicator and header highlight
@@ -463,12 +430,6 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
       try {
         const colDef = colStateRef.current.find((c) => c.field === field);
         if (colDef) {
-          try {
-            const cur = loadPersistedColumns() || {};
-            const widths = { ...(cur.widths || {}) };
-            widths[field] = (colDef.width as number) || 120;
-            savePersistedColumns({ ...cur, widths });
-          } catch (err) {}
         }
       } catch (err) {}
       if (mouseMoveHandlerRef.current) document.removeEventListener('mousemove', mouseMoveHandlerRef.current, true);
@@ -569,27 +530,16 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           onColumnResize={(params: any) => {
             const { colDef, width } = params;
             setColState((prev) => prev.map((c) => (c.field === colDef.field ? { ...c, width } : c)));
-            try {
-              const cur = loadPersistedColumns() || {};
-              const widths = { ...(cur.widths || {}) };
-              widths[colDef.field] = width;
-              savePersistedColumns({ ...cur, widths });
-            } catch (e) {}
           }}
           onColumnVisibilityModelChange={(model: any) => {
             try {
               setColumnVisibilityModel(() => ({ ...(model || {}) }));
               setColState((prev) => prev.map((c) => ({ ...c, hide: !((model || {})[c.field]) })));
-              const cur = loadPersistedColumns() || {};
-              const hidden = Object.keys(model).filter((k) => !model[k]);
-              savePersistedColumns({ ...cur, hidden });
             } catch (e) {}
           }}
           onColumnOrderChange={(params: any) => {
             try {
-              const cur = loadPersistedColumns() || {};
               const order = params.columnFields || params.items || [];
-              savePersistedColumns({ ...cur, order });
               if (Array.isArray(order) && order.length) {
                 setColState((prev) => {
                   const byField: Record<string, any> = {};

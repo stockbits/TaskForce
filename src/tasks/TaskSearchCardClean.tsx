@@ -849,7 +849,7 @@ export default function TaskSearchCard({
                 onClick={(e) => setActionsAnchorEl(e.currentTarget)}
                 sx={{ ml: 1, borderRadius: 2, textTransform: 'none' }}
               >
-                Actions{selectedRows && selectedRows.length ? ` (${selectedRows.length})` : ""}
+                ToolKit{selectedRows && selectedRows.length ? ` (${selectedRows.length})` : ""}
               </Button>
 
               <Menu
@@ -871,7 +871,7 @@ export default function TaskSearchCard({
                   disabled={!selectedRows || selectedRows.length === 0}
                 >
                   <ListItemIcon>
-                    <Eye size={16} />
+                    <Eye size={16} style={{ color: '#1976d2' }} />
                   </ListItemIcon>
                   Open Viewer{selectedRows && selectedRows.length > 1 ? ` (${selectedRows.length})` : ""}
                 </MenuItem>
@@ -886,7 +886,7 @@ export default function TaskSearchCard({
                   disabled={!selectedRows || selectedRows.length === 0}
                 >
                   <ListItemIcon>
-                    <ListChecks size={16} />
+                    <ListChecks size={16} style={{ color: '#2e7d32' }} />
                   </ListItemIcon>
                   Progress Tasks{selectedRows && selectedRows.length > 1 ? ` (${selectedRows.length})` : ""}
                 </MenuItem>
@@ -901,7 +901,7 @@ export default function TaskSearchCard({
                   disabled={!selectedRows || selectedRows.length === 0}
                 >
                   <ListItemIcon>
-                    <StickyNote size={16} />
+                    <StickyNote size={16} style={{ color: '#ed6c02' }} />
                   </ListItemIcon>
                   Progress Notes{selectedRows && selectedRows.length > 1 ? ` (${selectedRows.length})` : ""}
                 </MenuItem>
@@ -918,7 +918,7 @@ export default function TaskSearchCard({
                   disabled={!(selectedRows && selectedRows.length === 1)}
                 >
                   <ListItemIcon>
-                    <AlertTriangle style={{ fontSize: 18, color: 'rgba(220,53,69,0.95)' }} />
+                    <AlertTriangle size={16} style={{ color: '#d32f2f' }} />
                   </ListItemIcon>
                   Callout Incident
                 </MenuItem>
