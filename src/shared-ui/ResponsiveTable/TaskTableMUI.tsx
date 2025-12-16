@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect, MutableRefObject, useRef } from 'react';
 import { Box, useTheme, Paper, Stack, Typography, TextField, InputAdornment, Divider, FormControlLabel, Checkbox, Popper, ClickAwayListener, TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
 import toast from 'react-hot-toast';
-import { GridColDef, useGridApiRef, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarDensitySelector, GridToolbarQuickFilter } from '@mui/x-data-grid';
+import { GridColDef, useGridApiRef, GridToolbar, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarDensitySelector, GridToolbarQuickFilter } from '@mui/x-data-grid';
 import { DataGrid } from '@mui/x-data-grid';
 // keep imports minimal: use built-in DataGrid behavior
 import { AnimatePresence, motion } from 'framer-motion';
@@ -468,15 +468,9 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
       };
     }, [rows, density, tableHeight, disablePagination]);
 
-    // Custom toolbar without export button (we want Columns/Filter/Density only)
-    const CustomToolbar = () => (
-      <GridToolbarContainer>
-        <GridToolbarQuickFilter sx={{ mr: 1 }} />
-        <GridToolbarColumnsButton />
-        <GridToolbarFilterButton />
-        <GridToolbarDensitySelector />
-      </GridToolbarContainer>
-    );
+    // Use MUI's full GridToolbar (includes export/columns/filter/density)
+    // We previously used a trimmed custom toolbar; replace with the standard one.
+    // If you want to hide export later, we can supply a custom toolbar without it.
 
   // context menu for rows
   const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number; clickedRow?: any; clickedColumnKey?: string | null; mouseScreenX?: number; mouseScreenY?: number }>({ visible: false, x: 0, y: 0 });
@@ -494,7 +488,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           columns={colState}
           rowSelectionModel={rowSelectionModel}
           checkboxSelection
-          components={{ Toolbar: CustomToolbar }}
+          components={{ Toolbar: GridToolbar }}
           density={density as 'compact' | 'standard' | 'comfortable'}
           // Use client-side/native MUI sorting
           apiRef={apiRef}
