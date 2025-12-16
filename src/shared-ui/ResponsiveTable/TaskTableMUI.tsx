@@ -26,9 +26,10 @@ type Props = {
   openColumnsAnchor?: HTMLElement | null;
   onRequestCloseColumns?: () => void;
   onSortChange?: (hasSorting: boolean, sortModel?: any[]) => void;
+  sortModel?: any[];
 };
 
-export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef, reserveBottom = 160, disablePagination = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns, onSortChange }: Props) {
+export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef, reserveBottom = 160, disablePagination = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns, onSortChange, sortModel }: Props) {
   // Internal state for uncontrolled components
   const [selection, setSelection] = useState<string[]>([]);
   
@@ -460,6 +461,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           components={{ Toolbar: CustomToolbar }}
           density={density as 'compact' | 'standard' | 'comfortable'}
           sortingMode="server"
+          sortModel={sortModel}
           pagination={!disablePagination}
           hideFooter={disablePagination}
           {...(!disablePagination && {

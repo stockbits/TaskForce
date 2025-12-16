@@ -425,6 +425,7 @@ export default function TaskManagementPage() {
           rows={sortedTasks}
           headerNames={headerNames}
           tableHeight={tableHeight}
+            sortModel={currentSortModel}
           onOpenPopout={(tasks: any[], mX: number, mY: number) => {
             if (!tasks || tasks.length === 0) return;
             openExternalWindow(tasks as any, mX, mY);
