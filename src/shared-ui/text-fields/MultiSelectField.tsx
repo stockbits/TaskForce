@@ -39,6 +39,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
   wrapperSx,
 }) => {
   const [inputValue, setInputValue] = useState("");
+  const [open, setOpen] = useState(false);
   const normalizedQuery = inputValue.trim().toLowerCase();
 
   const filteredOptions = useMemo(() => {
@@ -121,6 +122,9 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
       disableClearable
       multiple
       disableCloseOnSelect
+      open={open}
+      onOpen={() => setOpen(true)}
+      onClose={() => setOpen(false)}
       componentsProps={{ popper: { style: { minWidth: '32ch', zIndex: 13000 } } }}
       sx={{
         width: FIELD_WIDTH,
@@ -198,33 +202,41 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
         if (!tagValue || tagValue.length === 0) return null;
         const count = tagValue.length;
         return (
-          <Chip
-            label={`+${count} selected`}
-            size="small"
-            variant="outlined"
-            sx={{
-              flex: '0 0 auto',
-              height: CHIP_SIZE,
-              minWidth: 44,
-              maxWidth: 240,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              px: 1,
-              boxSizing: 'border-box',
-              fontWeight: 600,
-              fontSize: count >= 100 ? 10 : count >= 10 ? 11 : 12,
-              lineHeight: `${CHIP_SIZE}px`,
-              borderRadius: '999px',
-              color: 'primary.main',
-              borderColor: 'primary.main',
-              ml: 0,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              zIndex: 30,
-            }}
-          />
+          <Tooltip title="Show selections" arrow>
+            <span>
+              <Chip
+                label={`+${count} selected`}
+                size="small"
+                variant="outlined"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+                sx={{
+                  cursor: 'pointer',
+                  '&:hover': { backgroundColor: (theme) => theme.palette.action.hover },
+                  flex: '0 0 auto',
+                  height: CHIP_SIZE,
+                  minWidth: 44,
+                  maxWidth: 240,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  px: 1,
+                  boxSizing: 'border-box',
+                  fontWeight: 600,
+                  fontSize: count >= 100 ? 10 : count >= 10 ? 11 : 12,
+                  lineHeight: `${CHIP_SIZE}px`,
+                  borderRadius: '999px',
+                  color: 'primary.main',
+                  borderColor: 'primary.main',
+                  ml: 0,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  zIndex: 30,
+                }}
+              />
+            </span>
+          </Tooltip>
         );
       }}
       renderInput={(params) => {
