@@ -432,6 +432,41 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
     // DataGrid typing is strict for some event props; use an any-cast for JSX usage below
     const AnyDataGrid: any = DataGrid as any;
     const apiRef = useGridApiRef();
+    const paperRef = useRef<HTMLDivElement | null>(null);
+    const [pageSize, setPageSize] = useState<number>(100);
+    const [page, setPage] = useState<number>(0);
+
+    // compute pageSize based on available height inside the Paper container
+    useEffect(() => {
+      function computePageSize() {
+        try {
+          const paper = paperRef.current;
+          if (!paper) return;
+          const header = paper.querySelector('.MuiDataGrid-columnHeaders') as HTMLElement | null;
+          const footer = paper.querySelector('.MuiDataGrid-footer') as HTMLElement | null;
+          const rowEl = paper.querySelector('.MuiDataGrid-row') as HTMLElement | null;
+          const paperHeight = paper.clientHeight || 0;
+          const headerH = header?.clientHeight ?? 48;
+          const footerH = disablePagination ? 0 : (footer?.clientHeight ?? 56);
+          const available = Math.max(0, paperHeight - headerH - footerH);
+          const defaultRow = density === 'compact' ? 36 : 52;
+          const rowH = rowEl?.clientHeight ?? defaultRow;
+          const computed = Math.max(5, Math.floor(available / Math.max(1, rowH)));
+          if (computed && computed !== pageSize) setPageSize(computed);
+        } catch (err) {
+          // ignore
+        }
+      }
+
+      computePageSize();
+      const ro = new ResizeObserver(() => computePageSize());
+      if (paperRef.current) ro.observe(paperRef.current);
+      window.addEventListener('resize', computePageSize);
+      return () => {
+        try { ro.disconnect(); } catch (e) {}
+        window.removeEventListener('resize', computePageSize);
+      };
+    }, [rows, density, tableHeight, disablePagination]);
 
     // Custom toolbar without export button (we want Columns/Filter/Density only)
     const CustomToolbar = () => (
@@ -452,7 +487,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
 
       {/* DataGrid's built-in column menu/panel is used instead of a custom Popper */}
 
-      <Paper sx={{ height: tableHeight, width: '100%', zIndex: 0 }}>
+      <Paper ref={paperRef as any} sx={{ height: tableHeight, width: '100%', zIndex: 0 }}>
         <AnyDataGrid
           rows={gridRows}
           columns={colState}
@@ -464,10 +499,15 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           apiRef={apiRef}
           pagination={!disablePagination}
           hideFooter={disablePagination}
-          {...(!disablePagination && {
-            pageSizeOptions: [25, 50, 100],
-            initialState: { pagination: { paginationModel: { pageSize: 100 } } }
-          })}
+          pageSizeOptions={[25, 50, 100, 200]}
+          paginationModel={{ page, pageSize }}
+          onPaginationModelChange={(model: any) => {
+            try {
+              if (!model) return;
+              if (typeof model.pageSize === 'number') setPageSize(model.pageSize);
+              if (typeof model.page === 'number') setPage(model.page);
+            } catch (e) {}
+          }}
           onRowDoubleClick={(params: any, event: any) => {
             if (onOpenPopout) onOpenPopout([params.row as any], (event as any).screenX ?? 0, (event as any).screenY ?? 0);
           }}
