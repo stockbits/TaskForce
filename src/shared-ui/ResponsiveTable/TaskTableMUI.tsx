@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Search, MoreVertical, GripVertical } from 'lucide-react';
 import TaskRowContextMenu from '@/shared-ui/TaskRowContextMenu';
 
-type Props = {
+ type Props = {
   rows: Record<string, any>[];
   headerNames: Record<string, string>;
   tableHeight?: number | string;
@@ -26,10 +26,9 @@ type Props = {
   openColumnsAnchor?: HTMLElement | null;
   onRequestCloseColumns?: () => void;
   onSortChange?: (hasSorting: boolean, sortModel?: any[]) => void;
-  sortModel?: any[];
 };
 
-export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef, reserveBottom = 160, disablePagination = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns, onSortChange, sortModel }: Props) {
+export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef, reserveBottom = 160, disablePagination = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns, onSortChange }: Props) {
   // Internal state for uncontrolled components
   const [selection, setSelection] = useState<string[]>([]);
   
@@ -461,8 +460,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           checkboxSelection
           components={{ Toolbar: CustomToolbar }}
           density={density as 'compact' | 'standard' | 'comfortable'}
-          sortModel={sortModel || []}
-          sortingMode="server"
+          // Use client-side/native MUI sorting
           apiRef={apiRef}
           pagination={!disablePagination}
           hideFooter={disablePagination}
@@ -475,18 +473,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           }}
           onRowContextMenu={onRowContextMenu as any}
           onCellContextMenu={onRowContextMenu as any}
-          onSortModelChange={(model: any) => {
-            // Notify parent when sorting changes
-            try {
-              // debug log to help trace sorting events
-              // eslint-disable-next-line no-console
-              console.debug('TaskTableMUI: onSortModelChange', model);
-            } catch (e) {}
-            if (onSortChange) {
-              const hasSorting = model && model.length > 0;
-              onSortChange(hasSorting, model);
-            }
-          }}
+          // rely on MUI client-side sorting; no server callbacks
           onRowSelectionModelChange={(model: any) => {
             try {
               // model may be an array of ids (strings/numbers) or an object for checkboxSelection

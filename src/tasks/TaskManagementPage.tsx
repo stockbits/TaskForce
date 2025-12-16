@@ -74,7 +74,6 @@ export default function TaskManagementPage() {
     const [filteredTasks, setFilteredTasks] = useState<Record<string, any>[]>([]);
     const [selectedRows, setSelectedRows] = useState<Record<string, any>[]>([]);
     const [tableHeight, setTableHeight] = useState<number>(600);
-    const [currentSortModel, setCurrentSortModel] = useState<any[]>([]);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const searchRef = useRef<HTMLDivElement | null>(null);
 
@@ -341,44 +340,7 @@ export default function TaskManagementPage() {
     toast.success("Exported CSV file.");
   }, [canCopy, filteredTasks]);
 
-  // Sort filtered tasks based on current sort model
-  const sortedTasks = useMemo(() => {
-    if (!filteredTasks || filteredTasks.length === 0) return [];
-    
-    let sortedData = [...filteredTasks];
-    if (currentSortModel && currentSortModel.length > 0) {
-      sortedData.sort((a, b) => {
-        for (const sortItem of currentSortModel) {
-          const { field, sort } = sortItem;
-          const aValue = a[field];
-          const bValue = b[field];
-          
-          // Handle null/undefined values
-          if (aValue == null && bValue == null) continue;
-          if (aValue == null) return sort === 'desc' ? 1 : -1;
-          if (bValue == null) return sort === 'desc' ? -1 : 1;
-          
-          let comparison = 0;
-          if (typeof aValue === 'string' && typeof bValue === 'string') {
-            comparison = aValue.localeCompare(bValue);
-          } else if (typeof aValue === 'number' && typeof bValue === 'number') {
-            comparison = aValue - bValue;
-          } else {
-            // Convert to strings for comparison
-            const aStr = String(aValue);
-            const bStr = String(bValue);
-            comparison = aStr.localeCompare(bStr);
-          }
-          
-          if (comparison !== 0) {
-            return sort === 'desc' ? -comparison : comparison;
-          }
-        }
-        return 0;
-      });
-    }
-    return sortedData;
-  }, [filteredTasks, currentSortModel]);
+  // Use DataGrid's native/client-side sorting — no parent-side sorting required
 
   return (
     <>
@@ -407,8 +369,8 @@ export default function TaskManagementPage() {
           onCopy={copyAll}
           onExport={exportCSV}
           canCopy={canCopy}
-          forceCollapsed={sortedTasks.length > 0}
-          hasResults={sortedTasks.length > 0}
+          forceCollapsed={filteredTasks.length > 0}
+          hasResults={filteredTasks.length > 0}
           selectedRows={selectedRows}
           onOpenPopout={(tasks) => {
             if (!tasks || !tasks.length) return;
@@ -420,12 +382,12 @@ export default function TaskManagementPage() {
         />
       </Box>
 
-      {sortedTasks.length > 0 ? (
+      {filteredTasks.length > 0 ? (
         <TaskTableMUI
-          rows={sortedTasks}
+          rows={filteredTasks}
           headerNames={headerNames}
           tableHeight={tableHeight}
-            sortModel={currentSortModel}
+          
           onOpenPopout={(tasks: any[], mX: number, mY: number) => {
             if (!tasks || tasks.length === 0) return;
             openExternalWindow(tasks as any, mX, mY);
@@ -448,17 +410,7 @@ export default function TaskManagementPage() {
               }
             } catch (err) {}
           }}
-          onSortChange={(hasSorting: boolean, sortModel?: any[]) => {
-            try {
-              // eslint-disable-next-line no-console
-              console.debug('TaskManagementPage: onSortChange', hasSorting, sortModel);
-            } catch (e) {}
-            setCurrentSortModel(sortModel || []);
-            // Clear selections when sorting starts
-            if (hasSorting) {
-              setSelectedRows([]);
-            }
-          }}
+          
         />
       ) : (
         <Paper
