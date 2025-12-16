@@ -234,11 +234,13 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
               />
             ))}
 
-            {extra > 0 ? (() => {
-              const isSingleDigit = extra < 10;
+            {/* always show a count chip for total selections */}
+            {(() => {
+              const count = tagValue.length;
+              const isSingleDigit = count < 10;
               return (
                 <Chip
-                  label={`+${extra}`}
+                  label={`${count}`}
                   size="small"
                   variant="outlined"
                   sx={{
@@ -252,12 +254,12 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
                     px: isSingleDigit ? 0 : 1,
                     boxSizing: 'border-box',
                     fontWeight: 600,
-                    fontSize: extra >= 100 ? 10 : extra >= 10 ? 11 : 12,
+                    fontSize: count >= 100 ? 10 : count >= 10 ? 11 : 12,
                     lineHeight: `${CHIP_SIZE}px`,
                     borderRadius: isSingleDigit ? '50%' : '999px',
                     color: 'primary.main',
                     borderColor: 'primary.main',
-                    ml: isSingleDigit ? 0 : 0.5,
+                    ml: 0.5,
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -265,7 +267,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
                   }}
                 />
               );
-            })() : null}
+            })()}
           </Box>
         );
       }}
