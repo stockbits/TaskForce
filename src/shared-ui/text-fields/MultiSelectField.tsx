@@ -124,14 +124,14 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
       componentsProps={{ popper: { style: { minWidth: '32ch', zIndex: 13000 } } }}
       sx={{
         width: FIELD_WIDTH,
-        '& .MuiAutocomplete-inputRoot': {
+          '& .MuiAutocomplete-inputRoot': {
           minHeight: INPUT_HEIGHT,
           maxHeight: INPUT_HEIGHT,
           overflow: 'hidden',
           alignItems: 'center',
           transition: 'all 120ms ease',
           // reserve space on the right for the select-all icon
-          '& .MuiInputBase-input': { paddingRight: '56px', fontSize: 13, lineHeight: `${CHIP_SIZE}px`, paddingTop: 0, paddingBottom: 0 },
+          '& .MuiInputBase-input': { paddingRight: '40px', fontSize: 13, lineHeight: `${CHIP_SIZE}px`, paddingTop: 0, paddingBottom: 0 },
         },
         '& .MuiAutocomplete-tag': {
           display: 'inline-flex',
@@ -300,7 +300,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
             InputProps={{
               ...params.InputProps,
               endAdornment,
-              sx: { height: INPUT_HEIGHT, transition: 'all 120ms ease', '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, paddingRight: '56px', fontSize: 13, lineHeight: `${CHIP_SIZE}px` } },
+              sx: { height: INPUT_HEIGHT, transition: 'all 120ms ease', '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, paddingRight: '40px', fontSize: 13, lineHeight: `${CHIP_SIZE}px` } },
             }}
           />
         );
