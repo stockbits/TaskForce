@@ -135,8 +135,9 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
   const autoFitDoneRef = useRef<string | null>(null);
   useEffect(() => {
     try {
-      // compute signature to run when rows or headers change
-      const sig = JSON.stringify({ headers: Object.keys(headerNames || {}), rowCount: (gridRows || []).length, sample: (gridRows || []).slice(0, 50).map(r => Object.keys(headerNames || {}).map(k => String((r as any)[k] ?? '')).join('|')).join('||') });
+      // compute signature to run when headers or row COUNT change
+      // NOTE: exclude row content/sample to avoid recomputing widths when rows are merely reordered (e.g. sorting)
+      const sig = JSON.stringify({ headers: Object.keys(headerNames || {}), rowCount: (gridRows || []).length });
       if (autoFitDoneRef.current === sig) return;
       autoFitDoneRef.current = sig;
 
