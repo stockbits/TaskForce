@@ -468,9 +468,17 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
       };
     }, [rows, density, tableHeight, disablePagination]);
 
-    // Use MUI's full GridToolbar (includes export/columns/filter/density)
-    // We previously used a trimmed custom toolbar; replace with the standard one.
-    // If you want to hide export later, we can supply a custom toolbar without it.
+    // Recreate MUI's "basic usage" toolbar layout but without export:
+    // QuickFilter on the left, toolbar actions on the right (columns/filter/density)
+    const CustomToolbar = () => (
+      <GridToolbarContainer>
+        <GridToolbarQuickFilter sx={{ mr: 2 }} />
+        <Box sx={{ flex: 1 }} />
+        <GridToolbarColumnsButton />
+        <GridToolbarFilterButton />
+        <GridToolbarDensitySelector />
+      </GridToolbarContainer>
+    );
 
   // context menu for rows
   const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number; clickedRow?: any; clickedColumnKey?: string | null; mouseScreenX?: number; mouseScreenY?: number }>({ visible: false, x: 0, y: 0 });
@@ -488,7 +496,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           columns={colState}
           rowSelectionModel={rowSelectionModel}
           checkboxSelection
-          components={{ Toolbar: GridToolbar }}
+          components={{ Toolbar: CustomToolbar }}
           density={density as 'compact' | 'standard' | 'comfortable'}
           // Use client-side/native MUI sorting
           apiRef={apiRef}
