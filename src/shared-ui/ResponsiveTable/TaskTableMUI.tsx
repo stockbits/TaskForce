@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect, MutableRefObject, useRef } from 'react';
 import { Box, useTheme, Paper, Stack, Typography, TextField, InputAdornment, Divider, FormControlLabel, Checkbox, Popper, ClickAwayListener, TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
 import toast from 'react-hot-toast';
-import { GridColDef, useGridApiRef, GridToolbar, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarDensitySelector, GridToolbarQuickFilter } from '@mui/x-data-grid';
+import { GridColDef, useGridApiRef, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarDensitySelector } from '@mui/x-data-grid';
 import { DataGrid } from '@mui/x-data-grid';
 // keep imports minimal: use built-in DataGrid behavior
 import { AnimatePresence, motion } from 'framer-motion';
@@ -472,7 +472,6 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
     // QuickFilter on the left, toolbar actions on the right (columns/filter/density)
     const CustomToolbar = () => (
       <GridToolbarContainer>
-        <GridToolbarQuickFilter sx={{ mr: 2 }} />
         <Box sx={{ flex: 1 }} />
         <GridToolbarColumnsButton />
         <GridToolbarFilterButton />
