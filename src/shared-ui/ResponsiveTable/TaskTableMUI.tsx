@@ -499,6 +499,14 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
             }
           }}
           sx={{ border: 0, '& .MuiDataGrid-cell': { py: density === 'compact' ? 0.5 : 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }, '& .MuiDataGrid-columnHeaders': { backgroundColor: theme.palette.action.hover }, '& .MuiDataGrid-columnHeaderTitle': { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }}
+          // ensure DataGrid performs client-side sorting (do not accidentally enter server-mode)
+          sortingMode="client"
+          // notify parent when sort model changes (useful for higher-level features like pinned ordering)
+          onSortModelChange={(model: any) => {
+            try {
+              if (onSortChange) onSortChange(Boolean(model && model.length > 0), model || []);
+            } catch (err) {}
+          }}
           onColumnResize={(params: any) => {
             const { colDef, width } = params;
             setColState((prev) => prev.map((c) => (c.field === colDef.field ? { ...c, width } : c)));
