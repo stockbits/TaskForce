@@ -196,79 +196,36 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
       }}
       renderTags={(tagValue) => {
         if (!tagValue || tagValue.length === 0) return null;
-
-        const maxDisplay = 1; // show only the first item then a +N summary
-        const display = tagValue.slice(0, maxDisplay);
-        const extra = tagValue.length - maxDisplay;
-
+        const count = tagValue.length;
+        const isSingleDigit = count < 10;
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center', overflow: 'hidden', height: '100%', pr: '8px', gap: 0.5 }}>
-            {display.map((v, i) => (
-              <Chip
-                key={v}
-                label={String(v)}
-                size="small"
-                variant="outlined"
-                sx={{
-                  flex: '0 0 auto',
-                  height: CHIP_SIZE,
-                  minWidth: CHIP_SIZE,
-                  maxWidth: 120,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  px: 0.5,
-                  fontWeight: 600,
-                  fontSize: 12,
-                  lineHeight: `${CHIP_SIZE}px`,
-                  borderRadius: 1,
-                  bgcolor: 'background.paper',
-                  border: '1px solid rgba(0,0,0,0.08)',
-                  ml: 0,
-                  zIndex: 20,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-                title={v}
-              />
-            ))}
-
-            {/* always show a count chip for total selections */}
-            {(() => {
-              const count = tagValue.length;
-              const isSingleDigit = count < 10;
-              return (
-                <Chip
-                  label={`+${count}`}
-                  size="small"
-                  variant="outlined"
-                  sx={{
-                    flex: '0 0 auto',
-                    height: CHIP_SIZE,
-                    minWidth: isSingleDigit ? CHIP_SIZE : 44,
-                    width: isSingleDigit ? CHIP_SIZE : 'auto',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    px: isSingleDigit ? 0 : 1,
-                    boxSizing: 'border-box',
-                    fontWeight: 600,
-                    fontSize: count >= 100 ? 10 : count >= 10 ? 11 : 12,
-                    lineHeight: `${CHIP_SIZE}px`,
-                    borderRadius: isSingleDigit ? '50%' : '999px',
-                    color: 'primary.main',
-                    borderColor: 'primary.main',
-                    ml: 0.5,
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    zIndex: 30,
-                  }}
-                />
-              );
-            })()}
-          </Box>
+          <Chip
+            label={`+${count}`}
+            size="small"
+            variant="outlined"
+            sx={{
+              flex: '0 0 auto',
+              height: CHIP_SIZE,
+              minWidth: isSingleDigit ? CHIP_SIZE : 44,
+              width: isSingleDigit ? CHIP_SIZE : 'auto',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              px: isSingleDigit ? 0 : 1,
+              boxSizing: 'border-box',
+              fontWeight: 600,
+              fontSize: count >= 100 ? 10 : count >= 10 ? 11 : 12,
+              lineHeight: `${CHIP_SIZE}px`,
+              borderRadius: isSingleDigit ? '50%' : '999px',
+              color: 'primary.main',
+              borderColor: 'primary.main',
+              ml: 0,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              zIndex: 30,
+            }}
+          />
         );
       }}
       renderInput={(params) => {
