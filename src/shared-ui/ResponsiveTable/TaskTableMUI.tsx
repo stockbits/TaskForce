@@ -460,8 +460,8 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           checkboxSelection
           components={{ Toolbar: CustomToolbar }}
           density={density as 'compact' | 'standard' | 'comfortable'}
-          sortingMode="server"
-          sortModel={sortModel}
+          {...(sortModel && sortModel.length ? { sortModel } : {})}
+          apiRef={apiRef}
           pagination={!disablePagination}
           hideFooter={disablePagination}
           {...(!disablePagination && {
