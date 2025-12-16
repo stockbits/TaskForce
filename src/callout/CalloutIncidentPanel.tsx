@@ -9,7 +9,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   Alert,
   Box,
-  Button,
   CircularProgress,
   FormControl,
   IconButton,
@@ -26,6 +25,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import AppButton from '@/shared-ui/button';
 import {
   X,
   AlertTriangle,
@@ -1130,7 +1130,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                     alignItems={{ xs: "stretch", sm: "center" }}
                                   >
                                       {/* assignedResourceId removed — pins shown at start */}
-                                    <Button
+                                    <AppButton
                                       variant={rowLocked ? "contained" : "outlined"}
                                       color={rowLocked ? "success" : "primary"}
                                       size="small"
@@ -1141,10 +1141,10 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                           <CircularProgress size={16} thickness={5} color="inherit" />
                                         ) : undefined
                                       }
-                                      sx={{ minWidth: 96, textTransform: "none", fontWeight: 600 }}
+                                      sx={{ fontWeight: 600 }}
                                     >
                                       {rowLocked ? "Saved" : "Save"}
-                                    </Button>
+                                    </AppButton>
 
                                     <Stack direction="row" spacing={1} alignItems="center" justifyContent="center">
                                       <Tooltip title="Resource details">
@@ -1206,7 +1206,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                         Recent History
                       </Typography>
                     </Stack>
-                    <Button
+                    <AppButton
                       size="small"
                       variant="text"
                       onClick={() => {
@@ -1224,7 +1224,6 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                         )
                       }
                       sx={{
-                        textTransform: "none",
                         fontWeight: 600,
                         color: theme.palette.primary.main,
                         gap: 0.75,
@@ -1232,7 +1231,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                       }}
                     >
                       {historyLoading ? "Loading" : "Refresh"}
-                    </Button>
+                    </AppButton>
                   </Stack>
 
                   <Box
@@ -1254,12 +1253,11 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                       >
                         Filter
                       </Typography>
-                      <Button
+                      <AppButton
                         size="small"
                         variant="text"
                         onClick={handleResetHistoryFilter}
                         sx={{
-                          textTransform: "none",
                           fontWeight: 600,
                           color:
                             historyFilter === "ALL"
@@ -1272,7 +1270,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                         }}
                       >
                         Show all
-                      </Button>
+                      </AppButton>
                     </Stack>
                     <Typography
                       variant="caption"
@@ -1390,20 +1388,19 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                             >
                               {entry.status ?? ""}
                             </Typography>
-                            <Button
+                            <AppButton
                               size="small"
                               variant="text"
                               onClick={() => handleViewProgress(entry)}
                               startIcon={<ExternalLink size={14} />}
                               sx={{
-                                textTransform: "none",
                                 fontWeight: 600,
                                 color: theme.palette.primary.main,
                                 '&:hover': { color: alpha(theme.palette.primary.main, 0.85) },
                               }}
                             >
                               View progress
-                            </Button>
+                            </AppButton>
                           </Stack>
                         </Paper>
                       );
@@ -1424,17 +1421,15 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                 bgcolor: alpha(theme.palette.primary.main, 0.05),
               }}
             >
-              <Button
+              <AppButton
                 onClick={onClose}
                 variant="outlined"
                 color="primary"
                 size="small"
                 sx={{
-                  textTransform: "none",
                   fontWeight: 600,
                   borderColor: alpha(theme.palette.primary.main, 0.3),
                   color: theme.palette.primary.main,
-                  px: 2.5,
                   '&:hover': {
                     borderColor: theme.palette.primary.main,
                     bgcolor: alpha(theme.palette.primary.main, 0.1),
@@ -1442,7 +1437,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                 }}
               >
                 Close
-              </Button>
+              </AppButton>
             </Box>
           </MotionPaper>
         </MotionBox>

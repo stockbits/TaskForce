@@ -23,10 +23,10 @@ export default function GlobalSearchField({ value, onChange, onKeyPress, placeho
         placeholder={placeholder}
         size={size}
         fullWidth
-        sx={{ '& input::placeholder': { color: 'text.secondary' }, '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, fontSize: 13, lineHeight: '32px' }, height: 48 }}
+        sx={{ '& input::placeholder': { color: 'text.secondary' }, '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, fontSize: 13, lineHeight: '28px' }, height: 40 }}
         InputProps={{
           startAdornment: (<InputAdornment position="start"><Search size={16} /></InputAdornment>),
-          sx: { height: 48 }
+          sx: { height: 40 }
         }}
       />
     </Box>

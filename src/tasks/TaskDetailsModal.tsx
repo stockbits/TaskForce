@@ -6,7 +6,6 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
-  Button,
   Chip,
   Grid,
   Paper,
@@ -15,6 +14,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import AppButton from '@/shared-ui/button';
 import { alpha } from "@mui/material/styles";
 import type { Theme } from "@mui/material/styles";
 import { User, Truck, ThumbsUp, Play, Wrench, Check } from "lucide-react";
@@ -217,15 +217,14 @@ function ProgressNotesEditor({ taskId, taskStatus, onAdd }: ProgressNotesEditorP
         }}
       />
       <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
-        <Button
+        <AppButton
           type="button"
           onClick={handleSave}
           disabled={!text.trim() || saving}
           variant="contained"
-          sx={{ textTransform: "none", borderRadius: 2 }}
         >
           {saving ? "Saving…" : "Save Note"}
-        </Button>
+        </AppButton>
         <Stack spacing={1} direction="row" flexWrap="wrap" useFlexGap>
           {statusMessage && (
             <Alert severity="success" variant="outlined" sx={{ py: 0.5 }}>

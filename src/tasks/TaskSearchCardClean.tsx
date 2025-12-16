@@ -4,7 +4,6 @@ import toast from "react-hot-toast";
 import mockTasks from "@/data/mockTasks.json";
 import {
   Box,
-  Button,
   Card,
   CardActions,
   CardContent,
@@ -31,7 +30,8 @@ import {
   Tooltip,
   useTheme,
 } from "@mui/material";
-import { ChevronDown, Eye, EyeOff, Search, MoreVertical, ListChecks, StickyNote, AlertTriangle } from "lucide-react";
+import AppButton from '@/shared-ui/button';
+import { Eye, EyeOff, Search, ListChecks, StickyNote, AlertTriangle } from "lucide-react";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
@@ -824,33 +824,29 @@ export default function TaskSearchCard({
       >
         <Box>
           {hasResults ? (
-            <Button
+            <AppButton
               variant="outlined"
               size="small"
               onClick={handleMenuOpen}
-              startIcon={<MoreVertical size={16} />}
-              endIcon={<ChevronDown size={16} />}
               sx={{
-                borderRadius: 2,
-                textTransform: "none",
                 px: 1,
                 display: 'inline-flex',
                 alignItems: 'center'
               }}
             >
-              More
-            </Button>
+              Data
+            </AppButton>
           ) : null}
           {hasResults && (
             <>
-              <Button
+              <AppButton
                 variant="outlined"
                 size="small"
                 onClick={(e) => setActionsAnchorEl(e.currentTarget)}
-                sx={{ ml: 1, borderRadius: 2, textTransform: 'none' }}
+                sx={{ ml: 1 }}
               >
-                Data Copy
-              </Button>
+                Menu Items
+              </AppButton>
 
               <Menu
                 anchorEl={actionsAnchorEl}
@@ -930,7 +926,7 @@ export default function TaskSearchCard({
               anchorEl={menuAnchorEl}
               open={Boolean(menuAnchorEl)}
               onClose={handleMenuClose}
-              anchorOrigin={{ vertical: "top", horizontal: "left" }}
+              anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
               transformOrigin={{ vertical: "top", horizontal: "left" }}
             >
               <MenuItem onClick={handleCopy} sx={{ display: 'flex', alignItems: 'center' }}>
@@ -954,27 +950,24 @@ export default function TaskSearchCard({
               Select Division and Domain ID, or type in the global search.
             </Typography>
           )}
-          <Button
+          <AppButton
             variant="outlined"
             size="small"
             onClick={handleClear}
-            sx={{ borderRadius: 2, textTransform: "none" }}
           >
             Clear
-          </Button>
-          <Button
+          </AppButton>
+          <AppButton
             variant="contained"
             size="small"
             onClick={handleSearch}
             disabled={!canSearch}
             sx={{
-              borderRadius: 2,
-              textTransform: "none",
               boxShadow: "none",
             }}
           >
             Search
-          </Button>
+          </AppButton>
         </Stack>
       </CardActions>
     </MotionCard>

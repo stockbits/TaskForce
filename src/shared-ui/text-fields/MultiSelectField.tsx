@@ -83,8 +83,6 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
     onChange(cleaned);
   };
 
-  // Placeholder uses only the provided header `label`.
-
   const toggleSelectAll = (event: React.MouseEvent) => {
     event.stopPropagation();
     if (!filteredOptions.length) return;
@@ -98,10 +96,11 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
     }
   };
 
+
   const FIELD_WIDTH = { xs: '100%', sm: '22ch', md: '28ch' };
 
-  const CHIP_SIZE = 32;
-  const INPUT_HEIGHT = 48;
+  const CHIP_SIZE = 28;
+  const INPUT_HEIGHT = 40;
 
   const DEFAULT_WRAPPER_SX = {
     width: "100%",
@@ -203,7 +202,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
         const extra = tagValue.length - maxDisplay;
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center', overflow: 'hidden', height: '100%', pr: '8px' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', overflow: 'visible', height: '100%', pr: '8px' }}>
             {display.map((v, i) => (
               <Chip
                 key={v}
@@ -240,20 +239,23 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
                   sx={{
                     flex: '0 0 auto',
                     height: CHIP_SIZE,
-                    minWidth: isSingleDigit ? CHIP_SIZE : undefined,
+                    minWidth: isSingleDigit ? CHIP_SIZE : 44,
                     // single-digit -> perfect circle; multi-digit -> pill (auto width)
                     width: isSingleDigit ? CHIP_SIZE : 'auto',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     px: isSingleDigit ? 0 : 1,
+                    boxSizing: 'border-box',
                     fontWeight: 600,
                     fontSize: extra >= 100 ? 10 : extra >= 10 ? 11 : 12,
                     lineHeight: `${CHIP_SIZE}px`,
                     borderRadius: isSingleDigit ? '50%' : '999px',
                     bgcolor: 'primary.main',
                     color: 'primary.contrastText',
-                    ml: -0.6,
+                    ml: isSingleDigit ? 0 : 0.5,
+                    whiteSpace: 'nowrap',
+                    overflow: 'visible',
                     zIndex: 30,
                   }}
                 />

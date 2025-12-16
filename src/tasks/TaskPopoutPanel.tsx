@@ -7,7 +7,8 @@
 // ===============================================================
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Box, Button, Paper, Stack, Typography, useTheme } from "@mui/material";
+import { Box, Paper, Stack, Typography, useTheme } from "@mui/material";
+import AppButton from '@/shared-ui/button';
 import { alpha } from "@mui/material/styles";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import TaskDetailsModal from "./TaskDetailsModal";
@@ -132,47 +133,45 @@ export default function TaskPopoutPanel({
           </Typography>
 
           <Stack direction="row" spacing={2} alignItems="center">
-            <Button
+            <AppButton
               size="small"
               variant="contained"
               onClick={() =>
                 expanded.length > 0 ? onCollapseAll() : onExpandAll()
               }
               startIcon={expanded.length > 0 ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-              sx={{ textTransform: "none", borderRadius: 2, boxShadow: "none" }}
+              sx={{ boxShadow: "none" }}
             >
               {expanded.length > 0 ? "Collapse All" : "Expand All"}
-            </Button>
+            </AppButton>
 
             {showSelectionControls && (
               allSelected ? (
-                <Button
+                <AppButton
                   size="small"
                   variant="outlined"
                   onClick={unselectAll}
-                  sx={{ textTransform: "none", borderRadius: 2 }}
                 >
                   Unselect All
-                </Button>
+                </AppButton>
               ) : (
-                <Button
+                <AppButton
                   size="small"
                   variant="contained"
                   onClick={selectAll}
-                  sx={{ textTransform: "none", borderRadius: 2, boxShadow: "none" }}
+                  sx={{ boxShadow: "none" }}
                 >
                   Select All
-                </Button>
+                </AppButton>
               )
             )}
 
-            <Button
+            <AppButton
               size="small"
               variant="outlined"
-              sx={{ textTransform: "none", borderRadius: 2 }}
             >
               Edit
-            </Button>
+            </AppButton>
           </Stack>
         </Stack>
 

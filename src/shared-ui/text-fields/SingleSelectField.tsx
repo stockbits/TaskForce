@@ -17,8 +17,8 @@ interface SingleSelectFieldProps {
 
 const FIELD_WIDTH = { xs: '100%', sm: '22ch', md: '28ch' };
 
-const CHIP_SIZE = 32;
-const INPUT_HEIGHT = 48;
+const CHIP_SIZE = 28;
+const INPUT_HEIGHT = 40;
 
 const DEFAULT_WRAPPER_SX = {
   width: "100%",

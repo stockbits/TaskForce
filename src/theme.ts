@@ -38,12 +38,12 @@ export const appTheme = createTheme({
     h1: { fontWeight: 600 },
     h2: { fontWeight: 600 },
     h3: { fontWeight: 600 },
-    button: { textTransform: "none", fontWeight: 600 },
+    button: { fontWeight: 600 },
     subtitle1: { color: "#394B59" },
     subtitle2: { color: "#52606D" },
   },
   shape: {
-    borderRadius: 6,
+    borderRadius: 4,
   },
   components: {
     MuiCssBaseline: {
@@ -63,7 +63,7 @@ export const appTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 6,
+          borderRadius: 4,
         },
       },
     },

@@ -1,5 +1,6 @@
 import React from "react";
-import { Dialog, DialogTitle, DialogContent, Box, Stack, Typography, IconButton, Paper, Button, FormControl, InputLabel, Select, MenuItem, Divider, Alert, TextField } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, Box, Stack, Typography, IconButton, Paper, FormControl, InputLabel, Select, MenuItem, Divider, Alert, TextField } from "@mui/material";
+import AppButton from '@/shared-ui/button';
 import { X, ListChecks } from "lucide-react";
 import { alpha, useTheme } from "@mui/material/styles";
 
@@ -107,8 +108,8 @@ export default function ProgressTasksDialog({
         )}
 
         <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ gridColumn: "1 / -1" }}>
-          <Button variant="outlined" size="small" onClick={onClose} sx={{ textTransform: "none", fontWeight: 600 }}>Cancel</Button>
-          <Button variant="contained" size="small" onClick={() => onSave()} disabled={progressSaving} sx={{ textTransform: "none", fontWeight: 700 }}>Save</Button>
+          <AppButton variant="outlined" size="small" onClick={onClose} sx={{ fontWeight: 600 }}>Cancel</AppButton>
+          <AppButton variant="contained" size="small" onClick={() => onSave()} disabled={progressSaving} sx={{ fontWeight: 700 }}>Save</AppButton>
         </Stack>
       </DialogContent>
     </Dialog>

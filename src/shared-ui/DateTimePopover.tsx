@@ -1,5 +1,6 @@
 import React from 'react';
-import { Menu, Box, Stack, TextField, Button } from '@mui/material';
+import { Menu, Box, Stack, TextField } from '@mui/material';
+import AppButton from '@/shared-ui/button';
 
 interface Props {
   anchorEl: HTMLElement | null;
@@ -70,12 +71,12 @@ export default function DateTimePopover({
           />
         </Stack>
         <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-          <Button variant="text" size="small" onClick={() => { onClear && onClear(); }}>
+          <AppButton variant="text" size="small" onClick={() => { onClear && onClear(); }}>
             Clear
-          </Button>
-          <Button variant="contained" size="small" onClick={onClose}>
+          </AppButton>
+          <AppButton variant="contained" size="small" onClick={onClose}>
             Apply
-          </Button>
+          </AppButton>
         </Box>
       </Box>
     </Menu>

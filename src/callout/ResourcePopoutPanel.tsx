@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from "react";
 import {
   Box,
-  Button,
   Chip,
   Grid,
   IconButton,
@@ -16,6 +15,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import AppButton from '@/shared-ui/button';
 import { alpha, useTheme } from "@mui/material/styles";
 import type { Theme } from "@mui/material/styles";
 import { InputAdornment } from "@mui/material";
@@ -214,28 +214,26 @@ export default function ResourcePopoutPanel({
           </Stack>
 
           <Stack direction="row" spacing={1.5} alignItems="center">
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => (expanded.length ? onCollapseAll() : onExpandAll())}
-              startIcon={expanded.length ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-              sx={{
-                textTransform: "none",
-                fontWeight: 600,
-                px: 2.5,
-              }}
-            >
+              <AppButton
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() => (expanded.length ? onCollapseAll() : onExpandAll())}
+                startIcon={expanded.length ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                sx={{
+                  fontWeight: 600,
+                }}
+              >
               {expanded.length ? "Collapse All" : "Expand All"}
-            </Button>
-            <Button
+            </AppButton>
+            <AppButton
               variant="outlined"
               color="primary"
               size="small"
-              sx={{ textTransform: "none", fontWeight: 600 }}
+                sx={{ fontWeight: 600 }}
             >
               Edit
-            </Button>
+            </AppButton>
             <IconButton
               size="small"
               onClick={onClose}
@@ -332,7 +330,7 @@ export default function ResourcePopoutPanel({
                           {resource.resourceId}
                         </Typography>
                       </Stack>
-                      <Button
+                      <AppButton
                         variant="outlined"
                         size="small"
                         startIcon={<Copy size={14} />}
@@ -340,7 +338,7 @@ export default function ResourcePopoutPanel({
                         sx={{ textTransform: "none", fontWeight: 600 }}
                       >
                         Copy ID
-                      </Button>
+                      </AppButton>
                     </Stack>
                     <Grid container spacing={2.5}>
                       {details.map(({ label, value }) => (

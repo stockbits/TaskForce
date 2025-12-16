@@ -42,7 +42,6 @@ import type { TaskRecord, ResourceRecord } from "@/hooks/useLiveSelectEngine";
 
 import {
   Box,
-  Button,
   ClickAwayListener,
   Divider,
   Fade,
@@ -57,6 +56,7 @@ import {
 import CheckIcon from "@mui/icons-material/Check";
 import InputAdornment from "@mui/material/InputAdornment";
 import { alpha, useTheme } from "@mui/material/styles";
+import AppButton from '@/shared-ui/button';
 
 /* ============================================================================
    PANEL DEFINITIONS
@@ -557,7 +557,8 @@ export default function ScheduleLivePage() {
         sx={{ height: 48, '& .MuiInputBase-input': { fontSize: 13, lineHeight: '32px' } }}
       />
 
-      <Button
+      {/* Search Tool + Clear All + quick icons (kept left for workflow) */}
+      <AppButton
         ref={searchButtonRef}
         onClick={handleSearchToggle}
         variant={searchButtonActive ? "contained" : "outlined"}
@@ -565,19 +566,14 @@ export default function ScheduleLivePage() {
         size="small"
         startIcon={<SlidersHorizontal size={16} />}
         disabled={!division}
-        sx={{
-          height: 48,
-          minWidth: 120,
-          fontWeight: 500,
-          fontSize: 13,
-          lineHeight: '32px',
-          ...(searchButtonActive && {
-            boxShadow: theme.shadows[4],
-          }),
-        }}
+        sx={{ minWidth: 96, fontWeight: 500, mr: 1, ...(searchButtonActive && { boxShadow: theme.shadows[4] }) }}
       >
         Search Tool
-      </Button>
+      </AppButton>
+
+      <AppButton variant="outlined" size="small" onClick={handleClearAll} sx={{ minWidth: 96, fontWeight: 500, mr: 1 }}>
+        Clear All
+      </AppButton>
 
       <IconButton
         size="small"
@@ -592,10 +588,9 @@ export default function ScheduleLivePage() {
             bgcolor: theme.palette.primary.main,
             color: theme.palette.primary.contrastText,
             borderColor: theme.palette.primary.main,
-            '&:hover': {
-              bgcolor: theme.palette.primary.dark,
-            },
+            '&:hover': { bgcolor: theme.palette.primary.dark },
           }),
+          mr: 1,
         }}
       >
         <Star size={16} />
@@ -614,10 +609,9 @@ export default function ScheduleLivePage() {
             bgcolor: theme.palette.primary.main,
             color: theme.palette.primary.contrastText,
             borderColor: theme.palette.primary.main,
-            '&:hover': {
-              bgcolor: theme.palette.primary.dark,
-            },
+            '&:hover': { bgcolor: theme.palette.primary.dark },
           }),
+          mr: 1,
         }}
         title="Map Legend"
       >
@@ -625,21 +619,6 @@ export default function ScheduleLivePage() {
       </IconButton>
 
       <Box sx={{ flexGrow: 1 }} />
-
-      <Button 
-        variant="outlined" 
-        size="small" 
-        onClick={handleClearAll}
-        sx={{ 
-          minWidth: 100,
-          fontWeight: 500,
-          height: 48,
-          fontSize: 13,
-          lineHeight: '32px',
-        }}
-      >
-        Clear All
-      </Button>
 
       {collapsedPanels.length > 0 && (
         <Stack direction="row" spacing={1} ml={2} alignItems="center">
@@ -717,7 +696,7 @@ export default function ScheduleLivePage() {
                       </Typography>
                       <Stack spacing={1} mt={1}>
                         {taskItems.map((item) => (
-                          <Button
+                          <AppButton
                             key={item.id}
                             onClick={() => select(item.id)}
                             size="small"
@@ -726,18 +705,16 @@ export default function ScheduleLivePage() {
                             endIcon={isActive(item.id) ? <CheckIcon /> : undefined}
                             sx={{
                               justifyContent: "flex-start",
-                              textTransform: "none",
-                              fontSize: 14,
+                              fontSize: 13,
                               fontWeight: 600,
-                              borderRadius: 1.5,
-                              py: 0.5,
                               whiteSpace: 'nowrap',
-                              minWidth: 140,
-                              width: 200,
+                              minWidth: 120,
+                              px: 1.5,
+                              py: 0.5,
                             }}
                           >
                             {item.label}
-                          </Button>
+                          </AppButton>
                         ))}
                       </Stack>
                     </Box>
@@ -753,7 +730,7 @@ export default function ScheduleLivePage() {
                       </Typography>
                       <Stack spacing={1} mt={1}>
                         {resourceItems.map((item) => (
-                          <Button
+                          <AppButton
                             key={item.id}
                             onClick={() => select(item.id)}
                             size="small"
@@ -762,18 +739,16 @@ export default function ScheduleLivePage() {
                             endIcon={isActive(item.id) ? <CheckIcon /> : undefined}
                             sx={{
                               justifyContent: "flex-start",
-                              textTransform: "none",
-                              fontSize: 14,
+                              fontSize: 13,
                               fontWeight: 600,
-                              borderRadius: 1.5,
-                              py: 0.5,
                               whiteSpace: 'nowrap',
-                              minWidth: 140,
-                              width: 200,
+                              minWidth: 120,
+                              px: 1.5,
+                              py: 0.5,
                             }}
                           >
                             {item.label}
-                          </Button>
+                          </AppButton>
                         ))}
                       </Stack>
                     </Box>
@@ -812,7 +787,7 @@ export default function ScheduleLivePage() {
                 </Stack>
 
                 <Stack direction="row" justifyContent="flex-end">
-                  <Button
+                  <AppButton
                     variant="contained"
                     size="medium"
                     onClick={() => {
@@ -831,7 +806,7 @@ export default function ScheduleLivePage() {
                     }}
                   >
                     Search
-                  </Button>
+                  </AppButton>
                 </Stack>
               </Box>
             </ClickAwayListener>

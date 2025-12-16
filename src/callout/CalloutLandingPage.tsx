@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
+import { Box, Paper, Stack, TextField, Typography } from "@mui/material";
+import AppButton from '@/shared-ui/button';
 import { alpha, useTheme } from "@mui/material/styles";
 import { Users, ChevronRight } from "lucide-react";
 import { ResourceRecord } from "./CalloutIncidentPanel";
@@ -245,24 +246,20 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
 
           {/* Continue Button */}
           <Stack direction="row" justifyContent="flex-end">
-            <Button
-              onClick={() => {
-                setIsOpen(false);
-                onStart(selectedGroup);
-              }}
-              disabled={startDisabled}
-              variant="contained"
-              endIcon={<ChevronRight size={16} />}
-              sx={{
-                textTransform: "none",
-                fontWeight: 600,
-                px: 3,
-                py: 1.25,
-                borderRadius: 2,
-              }}
-            >
-              Continue
-            </Button>
+              <AppButton
+                onClick={() => {
+                  setIsOpen(false);
+                  onStart(selectedGroup);
+                }}
+                disabled={startDisabled}
+                variant="contained"
+                endIcon={<ChevronRight size={16} />}
+                sx={{
+                  fontWeight: 600,
+                }}
+              >
+                Continue
+              </AppButton>
           </Stack>
         </Stack>
       </MotionPaper>
