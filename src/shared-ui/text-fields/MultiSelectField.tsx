@@ -197,26 +197,25 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
       renderTags={(tagValue) => {
         if (!tagValue || tagValue.length === 0) return null;
         const count = tagValue.length;
-        const isSingleDigit = count < 10;
         return (
           <Chip
-            label={`+${count}`}
+            label={`+${count} selected`}
             size="small"
             variant="outlined"
             sx={{
               flex: '0 0 auto',
               height: CHIP_SIZE,
-              minWidth: isSingleDigit ? CHIP_SIZE : 44,
-              width: isSingleDigit ? CHIP_SIZE : 'auto',
+              minWidth: 44,
+              maxWidth: 240,
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              px: isSingleDigit ? 0 : 1,
+              px: 1,
               boxSizing: 'border-box',
               fontWeight: 600,
               fontSize: count >= 100 ? 10 : count >= 10 ? 11 : 12,
               lineHeight: `${CHIP_SIZE}px`,
-              borderRadius: isSingleDigit ? '50%' : '999px',
+              borderRadius: '999px',
               color: 'primary.main',
               borderColor: 'primary.main',
               ml: 0,
