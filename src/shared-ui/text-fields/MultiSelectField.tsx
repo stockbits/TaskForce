@@ -202,29 +202,33 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
         const extra = tagValue.length - maxDisplay;
 
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center', overflow: 'visible', height: '100%', pr: '8px' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', overflow: 'hidden', height: '100%', pr: '8px', gap: 0.5 }}>
             {display.map((v, i) => (
               <Chip
                 key={v}
-                label={String(v).charAt(0)}
+                label={String(v)}
                 size="small"
+                variant="outlined"
                 sx={{
                   flex: '0 0 auto',
                   height: CHIP_SIZE,
-                  width: CHIP_SIZE,
                   minWidth: CHIP_SIZE,
+                  maxWidth: 120,
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  px: 0,
+                  px: 0.5,
                   fontWeight: 600,
-                  fontSize: 13,
+                  fontSize: 12,
                   lineHeight: `${CHIP_SIZE}px`,
-                  borderRadius: '50%',
+                  borderRadius: 1,
                   bgcolor: 'background.paper',
                   border: '1px solid rgba(0,0,0,0.08)',
                   ml: 0,
                   zIndex: 20,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                 }}
                 title={v}
               />
@@ -236,11 +240,11 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
                 <Chip
                   label={`+${extra}`}
                   size="small"
+                  variant="outlined"
                   sx={{
                     flex: '0 0 auto',
                     height: CHIP_SIZE,
                     minWidth: isSingleDigit ? CHIP_SIZE : 44,
-                    // single-digit -> perfect circle; multi-digit -> pill (auto width)
                     width: isSingleDigit ? CHIP_SIZE : 'auto',
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -251,11 +255,12 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
                     fontSize: extra >= 100 ? 10 : extra >= 10 ? 11 : 12,
                     lineHeight: `${CHIP_SIZE}px`,
                     borderRadius: isSingleDigit ? '50%' : '999px',
-                    bgcolor: 'primary.main',
-                    color: 'primary.contrastText',
+                    color: 'primary.main',
+                    borderColor: 'primary.main',
                     ml: isSingleDigit ? 0 : 0.5,
                     whiteSpace: 'nowrap',
-                    overflow: 'visible',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
                     zIndex: 30,
                   }}
                 />
