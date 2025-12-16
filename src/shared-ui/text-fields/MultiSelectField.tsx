@@ -240,7 +240,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
               const isSingleDigit = count < 10;
               return (
                 <Chip
-                  label={`${count}`}
+                  label={`+${count}`}
                   size="small"
                   variant="outlined"
                   sx={{
