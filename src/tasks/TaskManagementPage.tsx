@@ -449,6 +449,10 @@ export default function TaskManagementPage() {
             } catch (err) {}
           }}
           onSortChange={(hasSorting: boolean, sortModel?: any[]) => {
+            try {
+              // eslint-disable-next-line no-console
+              console.debug('TaskManagementPage: onSortChange', hasSorting, sortModel);
+            } catch (e) {}
             setCurrentSortModel(sortModel || []);
             // Clear selections when sorting starts
             if (hasSorting) {

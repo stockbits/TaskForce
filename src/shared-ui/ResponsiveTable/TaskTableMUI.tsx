@@ -476,6 +476,11 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           onCellContextMenu={onRowContextMenu as any}
           onSortModelChange={(model: any) => {
             // Notify parent when sorting changes
+            try {
+              // debug log to help trace sorting events
+              // eslint-disable-next-line no-console
+              console.debug('TaskTableMUI: onSortModelChange', model);
+            } catch (e) {}
             if (onSortChange) {
               const hasSorting = model && model.length > 0;
               onSortChange(hasSorting, model);
