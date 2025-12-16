@@ -39,16 +39,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
         : Array.from(controlledSelectedRowIds as Set<string>))
     : selection;
   const theme = useTheme();
-  // refs for programmatic drag/resize fallback
   const colStateRef = useRef<GridColDef[]>([]);
-  const draggingRef = useRef<any>(null);
-  const mouseMoveHandlerRef = useRef<any>(null);
-  const mouseUpHandlerRef = useRef<any>(null);
-  const dragStartRef = useRef<any>(null);
-  const resizeStartRef = useRef<any>(null);
-  const holdTimerRef = useRef<number | null>(null);
-  const prevHighlightedHeaderRef = useRef<HTMLElement | null>(null);
-  const resizingHeaderRef = useRef<HTMLElement | null>(null);
   
 
   const density = (typeof window !== 'undefined' && localStorage.getItem('taskTableDensity')) || 'compact';
@@ -178,7 +169,6 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
   }, [gridRows]);
 
   // handle right-click on rows to open context menu
-  const gridContainerRef = useRef<HTMLDivElement | null>(null);
   const onRowContextMenu = (params: any, event: React.MouseEvent) => {
     event.preventDefault();
     const colElem = (event.target as HTMLElement).closest('[data-field]') as HTMLElement | null;
@@ -259,175 +249,9 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
     });
   };
 
-  // Programmatic drag/reorder and resize fallback handlers
-  const startColumnDrag = (e: React.MouseEvent, field: string) => {
-    e.preventDefault();
-    const startX = e.clientX;
-    draggingRef.current = { type: 'reorder', field, startX };
+  // Use native MUI DataGrid drag/resize behaviors; removed custom fallbacks
 
-    mouseMoveHandlerRef.current = (ev: MouseEvent) => {
-      ev.preventDefault();
-      try {
-        const el = document.elementFromPoint(ev.clientX, ev.clientY) as HTMLElement | null;
-        const header = el ? el.closest('[data-field]') as HTMLElement | null : null;
-        if (!gridContainerRef.current) return;
-        const containerRect = gridContainerRef.current.getBoundingClientRect();
-        if (header) {
-          const rect = header.getBoundingClientRect();
-          const mid = rect.left + rect.width / 2;
-          const insertAt = ev.clientX < mid ? rect.left : rect.right;
-          setInsertion(({ left: insertAt - containerRect.left, top: rect.top - containerRect.top, height: rect.height, visible: true }));
-          // highlight target header to indicate column clipping/insert
-          if (prevHighlightedHeaderRef.current !== header) {
-            if (prevHighlightedHeaderRef.current) {
-              prevHighlightedHeaderRef.current.style.background = '';
-            }
-            header.style.background = 'rgba(34,197,94,0.08)';
-            prevHighlightedHeaderRef.current = header;
-          }
-        } else {
-          setInsertion((s) => ({ ...s, visible: false }));
-          if (prevHighlightedHeaderRef.current) { prevHighlightedHeaderRef.current.style.background = ''; prevHighlightedHeaderRef.current = null; }
-        }
-      } catch (err) {
-        // ignore
-      }
-    };
-
-  // fallback: attach a contextmenu listener to the grid container to catch right-clicks
-  useEffect(() => {
-    const el = gridContainerRef.current;
-    if (!el) return;
-
-    const handler = (ev: MouseEvent) => {
-      try {
-        const target = ev.target as HTMLElement | null;
-        const rowEl = target ? target.closest('[data-id]') as HTMLElement | null : null;
-        if (!rowEl) return;
-        const id = rowEl.getAttribute('data-id');
-        if (!id) return;
-        ev.preventDefault();
-        const row = gridRows.find((r) => String(r.id) === id);
-        // select the row (store ids as strings)
-        if (controlledSelectedRowIds !== undefined) {
-          // For controlled components, notify parent of selection change
-          if (onSelectionChange) {
-            const selected = [row].filter(Boolean) as Record<string, any>[];
-            onSelectionChange(selected);
-          }
-        } else {
-          // For uncontrolled components, update internal state
-          setSelection((prev) => (Array.isArray(prev) && prev.includes(String(row?.id)) ? prev : [String(row?.id)]));
-        }
-        setContextMenu({ visible: true, x: ev.clientX, y: ev.clientY, clickedRow: row, clickedColumnKey: null, mouseScreenX: (ev as any).screenX ?? 0, mouseScreenY: (ev as any).screenY ?? 0 });
-      } catch (err) {}
-    };
-
-    el.addEventListener('contextmenu', handler, true);
-    return () => el.removeEventListener('contextmenu', handler, true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gridContainerRef.current, gridRows]);
-
-    mouseUpHandlerRef.current = (ev: MouseEvent) => {
-      try {
-        const el = document.elementFromPoint(ev.clientX, ev.clientY) as HTMLElement | null;
-        const header = el ? el.closest('[data-field]') as HTMLElement | null : null;
-        const targetField = header ? header.getAttribute('data-field') : null;
-        if (targetField && draggingRef.current && draggingRef.current.field) {
-          const from = draggingRef.current.field;
-          const prev = colStateRef.current.slice();
-          const byField: Record<string, any> = {};
-          prev.forEach((c) => { byField[c.field] = c; });
-          const order = prev.map((c) => c.field).filter(Boolean);
-          // remove from
-          const idx = order.indexOf(from);
-          if (idx !== -1) order.splice(idx, 1);
-          // insert before target
-          const tIdx = order.indexOf(targetField);
-          if (tIdx === -1) order.push(from); else order.splice(tIdx, 0, from);
-          const ordered = order.map((f) => ({ ...byField[f] }));
-          setColState(ordered);
-        }
-      } catch (err) {}
-      // clear insertion indicator and header highlight
-      setInsertion((s) => ({ ...s, visible: false }));
-      if (prevHighlightedHeaderRef.current) { prevHighlightedHeaderRef.current.style.background = ''; prevHighlightedHeaderRef.current = null; }
-      // cleanup
-      if (mouseMoveHandlerRef.current) document.removeEventListener('mousemove', mouseMoveHandlerRef.current, true);
-      if (mouseUpHandlerRef.current) document.removeEventListener('mouseup', mouseUpHandlerRef.current, true);
-      // clear any resize header styling
-      if (resizingHeaderRef.current) {
-        try {
-          const sep = resizingHeaderRef.current.querySelector('.MuiDataGrid-columnSeparator') as HTMLElement | null;
-          if (sep) { sep.style.background = ''; sep.style.width = ''; }
-          resizingHeaderRef.current.style.boxShadow = '';
-        } catch (err) {}
-        resizingHeaderRef.current = null;
-      }
-      draggingRef.current = null;
-      mouseMoveHandlerRef.current = null;
-      mouseUpHandlerRef.current = null;
-    };
-
-    document.addEventListener('mousemove', mouseMoveHandlerRef.current, true);
-    document.addEventListener('mouseup', mouseUpHandlerRef.current, true);
-  };
-
-  const startColumnResize = (e: React.MouseEvent, field: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const startX = e.clientX;
-    const col = colStateRef.current.find((c) => c.field === field);
-    const startWidth = (col && (col.width as number)) || (col && (col.minWidth as number)) || 120;
-    draggingRef.current = { type: 'resize', field, startX, startWidth };
-
-    // mark header separator for visual feedback
-    try {
-      const header = document.querySelector(`[data-field="${field}"]`) as HTMLElement | null;
-      if (header) {
-        resizingHeaderRef.current = header;
-        const sep = header.querySelector('.MuiDataGrid-columnSeparator') as HTMLElement | null;
-        if (sep) {
-          sep.style.background = 'rgba(34,197,94,0.9)';
-          sep.style.width = '2px';
-        } else {
-          header.style.boxShadow = 'inset -4px 0 0 rgba(34,197,94,0.08)';
-        }
-      }
-    } catch (err) {}
-
-    mouseMoveHandlerRef.current = (ev: MouseEvent) => {
-      ev.preventDefault();
-      const dx = ev.clientX - draggingRef.current.startX;
-      const nextWidth = Math.max(40, Math.round(draggingRef.current.startWidth + dx));
-      setColState((prev) => prev.map((c) => c.field === field ? { ...c, width: nextWidth } : c));
-    };
-
-    mouseUpHandlerRef.current = (ev: MouseEvent) => {
-      try {
-        const colDef = colStateRef.current.find((c) => c.field === field);
-        if (colDef) {
-        }
-      } catch (err) {}
-      if (mouseMoveHandlerRef.current) document.removeEventListener('mousemove', mouseMoveHandlerRef.current, true);
-      if (mouseUpHandlerRef.current) document.removeEventListener('mouseup', mouseUpHandlerRef.current, true);
-      draggingRef.current = null;
-      mouseMoveHandlerRef.current = null;
-      mouseUpHandlerRef.current = null;
-    };
-
-    document.addEventListener('mousemove', mouseMoveHandlerRef.current, true);
-    document.addEventListener('mouseup', mouseUpHandlerRef.current, true);
-  };
-
-    // insertion indicator state for visualizing drop position
-    const [insertion, setInsertion] = useState<{ left: number; top: number; height: number; visible: boolean }>({ left: 0, top: 0, height: 0, visible: false });
-
-    // expose starters via refs so renderHeader (defined earlier) can call them
-    useEffect(() => {
-      dragStartRef.current = startColumnDrag;
-      resizeStartRef.current = startColumnResize;
-    }, []);
+    // no insertion indicator or programmatic header starters — rely on MUI defaults
 
     // DataGrid typing is strict for some event props; use an any-cast for JSX usage below
     const AnyDataGrid: any = DataGrid as any;
@@ -578,12 +402,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
       </Paper>
       {/* debug badge removed */}
       {/* Toolbar rendered inside DataGrid to maintain proper context */}
-      {/* insertion indicator */}
-      <Box sx={{ position: 'absolute', left: 0, top: 0, pointerEvents: 'none', width: '100%', height: '100%', zIndex: 1200 }} ref={gridContainerRef as any}>
-        {insertion.visible && (
-          <Box sx={{ position: 'absolute', width: 2, bgcolor: 'primary.main', left: insertion.left, top: insertion.top, height: insertion.height, transform: 'translateX(-1px)' }} />
-        )}
-      </Box>
+      {/* overlay container removed; relying on native MUI header visuals */}
 
       {/* open-manage-columns event: anchor our custom Popper to the header element */}
       {/* Row context menu (portal) */}
