@@ -108,30 +108,6 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
       minWidth: 120,
       sortable: true,
       renderCell: (params: any) => <CellWithCopy value={params.value} />,
-      renderHeader: (params: any) => (
-        <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, position: 'relative' }}>
-          <Typography
-            variant="body2"
-            sx={{ fontWeight: 600, cursor: 'grab' }}
-            onMouseDown={(e: React.MouseEvent) => {
-              // start hold-to-drag (200ms)
-              if (holdTimerRef.current) { window.clearTimeout(holdTimerRef.current); holdTimerRef.current = null; }
-              const ev = e.nativeEvent as MouseEvent;
-              holdTimerRef.current = window.setTimeout(() => {
-                if (dragStartRef.current) dragStartRef.current(ev, key);
-                holdTimerRef.current = null;
-              }, 200);
-            }}
-            onMouseUp={() => { if (holdTimerRef.current) { window.clearTimeout(holdTimerRef.current); holdTimerRef.current = null; } }}
-            onMouseLeave={() => { if (holdTimerRef.current) { window.clearTimeout(holdTimerRef.current); holdTimerRef.current = null; } }}
-          >{headerNames[key] ?? key}</Typography>
-          <Box
-            onMouseDown={(e) => resizeStartRef.current && resizeStartRef.current(e, key)}
-            sx={{ position: 'absolute', right: -6, top: 0, bottom: 0, width: 12, cursor: 'col-resize' }}
-            aria-hidden
-          />
-        </Box>
-      ),
     }));
   }, [headerNames, theme]);
 
