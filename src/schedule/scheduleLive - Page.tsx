@@ -493,6 +493,11 @@ export default function ScheduleLivePage() {
   const bottomLeftVisible = visiblePanels.includes('resources');
   const bottomRightVisible = visiblePanels.includes('tasks');
 
+  const topHasBoth = topLeftVisible && topRightVisible;
+  const bottomHasBoth = bottomLeftVisible && bottomRightVisible;
+  const leftHasBoth = topLeftVisible && bottomLeftVisible;
+  const rightHasBoth = topRightVisible && bottomRightVisible;
+
   const topRowHas = Number(topLeftVisible || topRightVisible);
   const bottomRowHas = Number(bottomLeftVisible || bottomRightVisible);
   const rowsCount = topRowHas + bottomRowHas;
@@ -1003,9 +1008,9 @@ export default function ScheduleLivePage() {
               </Box>
 
               {/* Vertical splitter */}
-              {colsCount === 2 && (
+              {colsCount === 2 && (topHasBoth || bottomHasBoth) && (
                 <Box
-                  gridRow={rowsCount === 2 ? '1 / span 3' : '1'}
+                  gridRow={topHasBoth && bottomHasBoth ? '1 / span 3' : topHasBoth ? '1' : '3'}
                   gridColumn="2"
                   role="separator"
                   onMouseDown={onVerticalMouseDown}
@@ -1020,10 +1025,10 @@ export default function ScheduleLivePage() {
               )}
 
               {/* Horizontal splitter */}
-              {rowsCount === 2 && (
+              {rowsCount === 2 && (leftHasBoth || rightHasBoth) && (
                 <Box
                   gridRow="2"
-                  gridColumn={colsCount === 2 ? '1 / span 3' : '1'}
+                  gridColumn={leftHasBoth && rightHasBoth ? '1 / span 3' : leftHasBoth ? '1' : '3'}
                   role="separator"
                   onMouseDown={onHorizontalMouseDown}
                   sx={{
