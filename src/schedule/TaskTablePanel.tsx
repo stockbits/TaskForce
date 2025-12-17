@@ -4,7 +4,7 @@
 // No selection logic inside — only forwards table selections.
 // ============================================================================
 
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { Box, Stack, Typography } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import TaskTableAdvanced from "@/tasks/TaskTableAdvanced";
@@ -52,6 +52,8 @@ export default function TaskTablePanel({
   const [currentSortModel, setCurrentSortModel] = useState<any[]>([]);
   const [pinnedOrder, setPinnedOrder] = useState<string[]>([]);
   const [prevDataLength, setPrevDataLength] = useState(0);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [scrollTrigger, setScrollTrigger] = useState(0);
 
   /* ==========================================================================
      AUTO HEADER BUILDER
@@ -97,6 +99,18 @@ export default function TaskTablePanel({
       }
     }
   }, [selectedTasks, selectionFromMap]);
+
+  // Scroll to top when new items are pinned from map selection
+  useEffect(() => {
+    if (containerRef.current && pinnedOrder.length > 0) {
+      // Use requestAnimationFrame for smoother scroll after render
+      requestAnimationFrame(() => {
+        if (containerRef.current) {
+          setScrollTrigger(prev => prev + 1);
+        }
+      });
+    }
+  }, [pinnedOrder]);
 
   const displayData = useMemo(() => {
     if (!data || data.length === 0) return [];
@@ -218,7 +232,7 @@ export default function TaskTablePanel({
      MAIN RENDER — forward selection only
      ========================================================================== */
   return (
-    <Box sx={{ flex: 1, display: "flex", flexDirection: "column", height: '100%', minHeight: 0, overflow: 'auto' }}>
+    <Box ref={containerRef} sx={{ flex: 1, display: "flex", flexDirection: "column", height: '100%', minHeight: 0, overflow: 'auto' }}>
       <TaskTableAdvanced
         rows={displayData}
         headerNames={headerNames}
@@ -228,6 +242,7 @@ export default function TaskTablePanel({
         rowIdKey="taskId"
         controlledSelectedRowIds={selectedRowIds}
         disablePagination={true}
+        scrollToTopTrigger={scrollTrigger}
         onSelectionChange={(rows: TaskRecord[]) => onSelectionChange(rows as TaskRecord[])}
         onSortChange={(hasSorting: boolean, sortModel?: any[]) => {
           setCurrentSortModel(sortModel || []);

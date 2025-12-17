@@ -4,7 +4,7 @@
 // No selection logic — only forwards table selections.
 // ============================================================================
 
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { Box, Stack, Typography } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import TaskTableAdvanced from "@/tasks/TaskTableAdvanced";
@@ -47,6 +47,8 @@ export default function ResourceTablePanel({
   const [currentSortModel, setCurrentSortModel] = useState<any[]>([]);
   const [pinnedOrder, setPinnedOrder] = useState<string[]>([]);
   const [prevDataLength, setPrevDataLength] = useState(0);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [scrollTrigger, setScrollTrigger] = useState(0);
 
   /* ------------------------------------------------------------------------
      AUTO BUILD HEADERS
@@ -92,6 +94,18 @@ export default function ResourceTablePanel({
       }
     }
   }, [selectedResources, selectionFromMap]);
+
+  // Scroll to top when new items are pinned from map selection
+  useEffect(() => {
+    if (containerRef.current && pinnedOrder.length > 0) {
+      // Use requestAnimationFrame for smoother scroll after render
+      requestAnimationFrame(() => {
+        if (containerRef.current) {
+          setScrollTrigger(prev => prev + 1);
+        }
+      });
+    }
+  }, [pinnedOrder]);
 
   const displayData = useMemo(() => {
     if (!data || data.length === 0) return [];
@@ -214,7 +228,7 @@ export default function ResourceTablePanel({
      MAIN RENDER — controlled selection only
   ------------------------------------------------------------------------ */
   return (
-    <Box sx={{ flex: 1, display: "flex", flexDirection: "column", height: '100%', minHeight: 0, overflow: 'auto' }}>
+    <Box ref={containerRef} sx={{ flex: 1, display: "flex", flexDirection: "column", height: '100%', minHeight: 0, overflow: 'auto' }}>
       <TaskTableAdvanced
         rows={displayData}
         headerNames={headerNames}
@@ -224,6 +238,7 @@ export default function ResourceTablePanel({
         rowIdKey="resourceId"
         controlledSelectedRowIds={selectedRowIds}
         disablePagination={true}
+        scrollToTopTrigger={scrollTrigger}
         onSelectionChange={(rows: ResourceRecord[]) =>
           onSelectionChange(rows as ResourceRecord[])
         }

@@ -29,9 +29,10 @@ import TaskRowContextMenu from '@/shared-ui/TaskRowContextMenu';
   openColumnsAnchor?: HTMLElement | null;
   onRequestCloseColumns?: () => void;
   onSortChange?: (hasSorting: boolean, sortModel?: any[]) => void;
+  scrollToTopTrigger?: number;
 };
 
-export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef, reserveBottom = 160, disablePagination = false, hideToolbar = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns, onSortChange }: Props) {
+export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef, reserveBottom = 160, disablePagination = false, hideToolbar = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns, onSortChange, scrollToTopTrigger }: Props) {
   // Internal state for uncontrolled components
   const [selection, setSelection] = useState<string[]>([]);
   
@@ -254,9 +255,16 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
     });
   };
 
-  // Use native MUI DataGrid drag/resize behaviors; removed custom fallbacks
-
-    // no insertion indicator or programmatic header starters — rely on MUI defaults
+  // Scroll to top when triggered
+  useEffect(() => {
+    if (scrollToTopTrigger !== undefined && apiRef.current) {
+      try {
+        apiRef.current.scrollToIndexes({ rowIndex: 0 });
+      } catch (err) {
+        // fallback
+      }
+    }
+  }, [scrollToTopTrigger]);
 
     // DataGrid typing is strict for some event props; use an any-cast for JSX usage below
     const AnyDataGrid: any = DataGrid as any;
