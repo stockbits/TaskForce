@@ -610,8 +610,10 @@ export default function TaskSearchCard({
             name="taskSearch"
             value={filters.taskSearch}
             onChange={handleFieldChange}
+            onSearch={handleSearch}
             placeholder={prefillPrompt}
             size="small"
+            showSearchButton={true}
             sx={{}}
           />
           {/* debug badge removed */}

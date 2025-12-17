@@ -446,6 +446,7 @@ export default function ScheduleLivePage() {
             handleResourceMapClick={handleResourceMapClick}
             notifyMapDragStart={notifyMapDragStart}
             notifyMapDragEnd={notifyMapDragEnd}
+            showMarkers={true}
           />
         );
 
@@ -598,9 +599,10 @@ export default function ScheduleLivePage() {
       <GlobalSearchField
         value={searchAnywhere}
         onChange={(e) => setSearchAnywhere(e.target.value)}
-        onKeyPress={(e) => e.key === "Enter" && runGlobalSearch()}
+        onSearch={runGlobalSearch}
         placeholder="Search by Task ID, Work ID, Estimate Number, Employee ID"
         size="small"
+        showSearchButton={true}
         sx={{ height: theme.custom?.inputHeight ?? 40, '& .MuiInputBase-input': { fontSize: 13, lineHeight: `${theme.custom?.chipSize ?? 28}px` } }}
       />
 
