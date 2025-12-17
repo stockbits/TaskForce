@@ -80,8 +80,8 @@ export default function ResourceTablePanel({
 
   useEffect(() => {
     // Add newly selected items from map to the top of pinned order
-    // Pin any selected items to bring them into focus - only when selected from map
-    if (selectedResources.length > 0 && selectionFromMap) {
+    // Pin any selected items to bring them into focus
+    if (selectedResources.length > 0) {
       const currentPinnedIds = new Set(pinnedOrder);
       const newSelectedIds = selectedResources
         .map(r => String(r.resourceId))
@@ -91,7 +91,7 @@ export default function ResourceTablePanel({
         setPinnedOrder(prev => [...newSelectedIds, ...prev]);
       }
     }
-  }, [selectedResources, selectionFromMap]);
+  }, [selectedResources]);
 
   const displayData = useMemo(() => {
     if (!data || data.length === 0) return [];

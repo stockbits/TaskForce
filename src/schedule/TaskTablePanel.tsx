@@ -85,8 +85,8 @@ export default function TaskTablePanel({
 
   useEffect(() => {
     // Add newly selected items to the top of pinned order
-    // Pin any selected items to bring them into focus - only when selected from map
-    if (selectedTasks.length > 0 && selectionFromMap) {
+    // Pin any selected items to bring them into focus
+    if (selectedTasks.length > 0) {
       const currentPinnedIds = new Set(pinnedOrder);
       const newSelectedIds = selectedTasks
         .map(t => String(t.taskId))
@@ -96,7 +96,7 @@ export default function TaskTablePanel({
         setPinnedOrder(prev => [...newSelectedIds, ...prev]);
       }
     }
-  }, [selectedTasks, selectionFromMap]);
+  }, [selectedTasks]);
 
   const displayData = useMemo(() => {
     if (!data || data.length === 0) return [];
