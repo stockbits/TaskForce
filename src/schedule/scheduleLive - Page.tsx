@@ -929,19 +929,24 @@ export default function ScheduleLivePage() {
         {searchToolPopper}
 
         <Box ref={panelsContainerRef} sx={{ minHeight: 0, position: 'relative', height: '100%', overflow: 'hidden' }} data-visible-panels={visiblePanels.join(',')}>
-          {maximizedPanel ? (
-            <Box sx={{ display: 'flex', height: '100%', minHeight: 0 }}>
-              <PanelContainer
-                title={PANEL_DEFS[maximizedPanel].label}
-                icon={PANEL_DEFS[maximizedPanel].icon}
-                isMaximized={true}
-                onMaximize={() => maximizePanel(maximizedPanel)}
-                onClose={() => closePanel(maximizedPanel)}
-                visibleCount={visiblePanels.length}
-              >
-                {renderPanelBody(maximizedPanel)}
-              </PanelContainer>
-            </Box>
+          { (maximizedPanel || visiblePanels.length === 1) ? (
+            (() => {
+              const single = maximizedPanel ?? visiblePanels[0];
+              return (
+                <Box sx={{ display: 'flex', height: '100%', minHeight: 0 }}>
+                  <PanelContainer
+                    title={PANEL_DEFS[single].label}
+                    icon={PANEL_DEFS[single].icon}
+                    isMaximized={true}
+                    onMaximize={() => maximizePanel(single)}
+                    onClose={() => closePanel(single)}
+                    visibleCount={visiblePanels.length}
+                  >
+                    {renderPanelBody(single)}
+                  </PanelContainer>
+                </Box>
+              );
+            })()
           ) : (
             <Box
               sx={{
