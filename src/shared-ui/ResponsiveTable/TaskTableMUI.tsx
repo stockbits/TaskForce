@@ -262,7 +262,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
     const AnyDataGrid: any = DataGrid as any;
     const apiRef = useGridApiRef();
     const paperRef = useRef<HTMLDivElement | null>(null);
-    const [pageSize, setPageSize] = useState<number>(100);
+    const [pageSize, setPageSize] = useState<number>(50);
     const [page, setPage] = useState<number>(0);
 
     // compute pageSize based on available height inside the Paper container
@@ -280,7 +280,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           const available = Math.max(0, paperHeight - headerH - footerH);
           const defaultRow = density === 'compact' ? 36 : 52;
           const rowH = rowEl?.clientHeight ?? defaultRow;
-          const computed = Math.max(5, Math.floor(available / Math.max(1, rowH)));
+          const computed = Math.max(50, Math.floor(available / Math.max(1, rowH)));
           if (computed && computed !== pageSize) setPageSize(computed);
         } catch (err) {
           // ignore
@@ -314,8 +314,8 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
 
 
   const paperSx: any = (typeof tableHeight === 'string' && tableHeight.trim().endsWith('%'))
-    ? { width: '100%', zIndex: 0, display: 'flex', flex: 1, minHeight: 0, flexDirection: 'column', height: '100%' }
-    : { height: tableHeight, width: '100%', zIndex: 0 };
+    ? { width: '100%', zIndex: 0, display: 'flex', flex: 1, minHeight: 0, flexDirection: 'column', height: '100%', overflow: 'hidden' }
+    : { height: tableHeight, width: '100%', zIndex: 0, overflow: 'hidden' };
 
   return (
     <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, position: 'relative' }}>
@@ -336,7 +336,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           hideFooter={disablePagination}
           // ensure current pageSize is present in options to avoid MUI warning
           pageSizeOptions={(function(){
-            const opts = [25,50,100,200];
+            const opts = [50,100,500];
             if (!opts.includes(pageSize)) opts.push(pageSize);
             return opts.sort((a,b)=>a-b);
           })()}
@@ -378,7 +378,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
               console.error('Error in onRowSelectionModelChange:', err);
             }
           }}
-          sx={{ flex: 1, minHeight: 0, border: 0, overflowY: 'auto', '& .MuiDataGrid-cell': { py: density === 'compact' ? 0.5 : 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }, '& .MuiDataGrid-columnHeaders': { backgroundColor: theme.palette.action.hover }, '& .MuiDataGrid-columnHeaderTitle': { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }}
+          sx={{ flex: 1, minHeight: 0, border: 0, overflow: 'hidden', '& .MuiDataGrid-cell': { py: density === 'compact' ? 0.5 : 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }, '& .MuiDataGrid-columnHeaders': { backgroundColor: theme.palette.action.hover }, '& .MuiDataGrid-columnHeaderTitle': { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }}
           // ensure DataGrid performs client-side sorting (do not accidentally enter server-mode)
           sortingMode="client"
           // notify parent when sort model changes (useful for higher-level features like pinned ordering)

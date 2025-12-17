@@ -97,7 +97,7 @@ export function PanelContainer({
         flexDirection: "column",
         height: "100%",
         width: "100%",
-        borderRadius: '12px 12px 0 0',
+        borderRadius: 1,
         border: `1px solid ${borderColor}`,
         overflow: "hidden",
         backgroundColor: theme.palette.background.paper,

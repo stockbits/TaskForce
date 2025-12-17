@@ -976,7 +976,7 @@ export default function ScheduleLivePage() {
               }}
             >
               {/* Top-left */}
-              <Box sx={{ gridRow: '1', gridColumn: topLeftVisible && !topRightVisible ? '1 / span 3' : '1', display: 'flex', minHeight: 0 }}>
+              <Box sx={{ gridRow: '1', gridColumn: topLeftVisible && !topRightVisible ? '1 / span 3' : '1', display: 'flex', minHeight: 0, zIndex: 10 }}>
                 {visiblePanels.includes('timeline') && (
                   <PanelContainer
                     title={PANEL_DEFS['timeline'].label}
@@ -992,7 +992,7 @@ export default function ScheduleLivePage() {
               </Box>
 
               {/* Top-right */}
-              <Box sx={{ gridRow: '1', gridColumn: !topLeftVisible && topRightVisible ? '1 / span 3' : '3', display: 'flex', minHeight: 0 }}>
+              <Box sx={{ gridRow: '1', gridColumn: !topLeftVisible && topRightVisible ? '1 / span 3' : '3', display: 'flex', minHeight: 0, zIndex: 10 }}>
                 {visiblePanels.includes('map') && (
                   <PanelContainer
                     title={PANEL_DEFS['map'].label}
@@ -1010,7 +1010,7 @@ export default function ScheduleLivePage() {
               {/* Vertical splitter */}
               {colsCount === 2 && (topHasBoth || bottomHasBoth) && (
                 <Box
-                  gridRow={visiblePanels.length === 3 ? '1 / span 3' : topHasBoth ? '1' : '3'}
+                  gridRow={rowsCount === 2 ? '1 / span 3' : topHasBoth ? '1' : '3'}
                   gridColumn="2"
                   role="separator"
                   onMouseDown={onVerticalMouseDown}
@@ -1028,7 +1028,7 @@ export default function ScheduleLivePage() {
               {rowsCount === 2 && (leftHasBoth || rightHasBoth) && (
                 <Box
                   gridRow="2"
-                  gridColumn={visiblePanels.length === 3 ? '1 / span 3' : leftHasBoth ? '1' : '3'}
+                  gridColumn={colsCount === 2 ? '1 / span 3' : leftHasBoth ? '1' : '3'}
                   role="separator"
                   onMouseDown={onHorizontalMouseDown}
                   sx={{
@@ -1042,7 +1042,7 @@ export default function ScheduleLivePage() {
               )}
 
               {/* Bottom-left */}
-              <Box sx={{ gridRow: '3', gridColumn: bottomLeftVisible && !bottomRightVisible ? '1 / span 3' : '1', display: 'flex', minHeight: 0 }}>
+              <Box sx={{ gridRow: '3', gridColumn: bottomLeftVisible && !bottomRightVisible ? '1 / span 3' : '1', display: 'flex', minHeight: 0, zIndex: 10 }}>
                 {visiblePanels.includes('resources') && (
                   <PanelContainer
                     title={PANEL_DEFS['resources'].label}
@@ -1058,7 +1058,7 @@ export default function ScheduleLivePage() {
               </Box>
 
               {/* Bottom-right */}
-              <Box sx={{ gridRow: '3', gridColumn: !bottomLeftVisible && bottomRightVisible ? '1 / span 3' : '3', display: 'flex', minHeight: 0 }}>
+              <Box sx={{ gridRow: '3', gridColumn: !bottomLeftVisible && bottomRightVisible ? '1 / span 3' : '3', display: 'flex', minHeight: 0, zIndex: 10 }}>
                 {visiblePanels.includes('tasks') && (
                   <PanelContainer
                     title={PANEL_DEFS['tasks'].label}
