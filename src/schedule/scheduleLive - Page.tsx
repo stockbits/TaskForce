@@ -488,6 +488,11 @@ export default function ScheduleLivePage() {
   const effectiveTop = maximizedPanel ? [maximizedPanel] : topRow;
   const effectiveBottom = maximizedPanel ? [] : bottomRow;
 
+  const topLeftVisible = visiblePanels.includes('timeline');
+  const topRightVisible = visiblePanels.includes('map');
+  const bottomLeftVisible = visiblePanels.includes('resources');
+  const bottomRightVisible = visiblePanels.includes('tasks');
+
   // splitter state: fraction of height occupied by top area (0..1)
   const [topFraction, setTopFraction] = useState<number>(0.5);
   const panelsContainerRef = useRef<HTMLDivElement | null>(null);
@@ -949,7 +954,7 @@ export default function ScheduleLivePage() {
               }}
             >
               {/* Top-left */}
-              <Box sx={{ gridRow: '1', gridColumn: '1', display: 'flex', minHeight: 0 }}>
+              <Box sx={{ gridRow: '1', gridColumn: topLeftVisible && !topRightVisible ? '1 / span 3' : '1', display: 'flex', minHeight: 0 }}>
                 {visiblePanels.includes('timeline') && (
                   <PanelContainer
                     title={PANEL_DEFS['timeline'].label}
@@ -965,7 +970,7 @@ export default function ScheduleLivePage() {
               </Box>
 
               {/* Top-right */}
-              <Box sx={{ gridRow: '1', gridColumn: '3', display: 'flex', minHeight: 0 }}>
+              <Box sx={{ gridRow: '1', gridColumn: !topLeftVisible && topRightVisible ? '1 / span 3' : '3', display: 'flex', minHeight: 0 }}>
                 {visiblePanels.includes('map') && (
                   <PanelContainer
                     title={PANEL_DEFS['map'].label}
@@ -1011,7 +1016,7 @@ export default function ScheduleLivePage() {
               />
 
               {/* Bottom-left */}
-              <Box sx={{ gridRow: '3', gridColumn: '1', display: 'flex', minHeight: 0 }}>
+              <Box sx={{ gridRow: '3', gridColumn: bottomLeftVisible && !bottomRightVisible ? '1 / span 3' : '1', display: 'flex', minHeight: 0 }}>
                 {visiblePanels.includes('resources') && (
                   <PanelContainer
                     title={PANEL_DEFS['resources'].label}
@@ -1027,7 +1032,7 @@ export default function ScheduleLivePage() {
               </Box>
 
               {/* Bottom-right */}
-              <Box sx={{ gridRow: '3', gridColumn: '3', display: 'flex', minHeight: 0 }}>
+              <Box sx={{ gridRow: '3', gridColumn: !bottomLeftVisible && bottomRightVisible ? '1 / span 3' : '3', display: 'flex', minHeight: 0 }}>
                 {visiblePanels.includes('tasks') && (
                   <PanelContainer
                     title={PANEL_DEFS['tasks'].label}
