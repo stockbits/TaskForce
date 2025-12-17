@@ -167,9 +167,14 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
         option === SELECT_ALL_VALUE ? "Select Filtered" : option
       }
       renderOption={(props, option) => {
+        // props may include a `key` which must not be spread into the JSX element
+        // (React warns when `key` is passed via spread). Remove it before spreading.
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { key: _k, ...safeProps } = props as any;
+
         if (option === SELECT_ALL_VALUE) {
           return (
-            <ListItem {...props} dense>
+            <ListItem {...safeProps} dense>
               <ListItemIcon sx={{ minWidth: 32 }}>
                 <Checkbox
                   edge="start"
@@ -188,7 +193,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
         }
 
         return (
-          <ListItem {...props} dense>
+          <ListItem {...safeProps} dense>
             <ListItemIcon sx={{ minWidth: 32 }}>
               <Checkbox
                 edge="start"
