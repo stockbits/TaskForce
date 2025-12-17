@@ -493,6 +493,14 @@ export default function ScheduleLivePage() {
   const bottomLeftVisible = visiblePanels.includes('resources');
   const bottomRightVisible = visiblePanels.includes('tasks');
 
+  const topRowHas = Number(topLeftVisible || topRightVisible);
+  const bottomRowHas = Number(bottomLeftVisible || bottomRightVisible);
+  const rowsCount = topRowHas + bottomRowHas;
+
+  const leftColHas = Number(topLeftVisible || bottomLeftVisible);
+  const rightColHas = Number(topRightVisible || bottomRightVisible);
+  const colsCount = leftColHas + rightColHas;
+
   // splitter state: fraction of height occupied by top area (0..1)
   const [topFraction, setTopFraction] = useState<number>(0.5);
   const panelsContainerRef = useRef<HTMLDivElement | null>(null);
@@ -951,8 +959,12 @@ export default function ScheduleLivePage() {
             <Box
               sx={{
                 display: 'grid',
-                gridTemplateRows: `${Math.round(rowFraction * 100)}% ${SPLITTER_HEIGHT}px ${Math.round((1 - rowFraction) * 100)}%`,
-                gridTemplateColumns: `${Math.round(colFraction * 100)}% ${SPLITTER_WIDTH}px ${Math.round((1 - colFraction) * 100)}%`,
+                gridTemplateRows: rowsCount === 1
+                  ? '1fr'
+                  : `${Math.round(rowFraction * 100)}% ${SPLITTER_HEIGHT}px ${Math.round((1 - rowFraction) * 100)}%`,
+                gridTemplateColumns: colsCount === 1
+                  ? '1fr'
+                  : `${Math.round(colFraction * 100)}% ${SPLITTER_WIDTH}px ${Math.round((1 - colFraction) * 100)}%`,
                 width: '100%',
                 height: '100%',
                 minHeight: 0,
@@ -991,34 +1003,38 @@ export default function ScheduleLivePage() {
               </Box>
 
               {/* Vertical splitter */}
-              <Box
-                gridRow="1 / span 3"
-                gridColumn="2"
-                role="separator"
-                onMouseDown={onVerticalMouseDown}
-                sx={{
-                  width: SPLITTER_WIDTH,
-                  bgcolor: alpha(theme.palette.primary.main, 0.06),
-                  cursor: isSearchPopperOpen ? 'default' : 'col-resize',
-                  pointerEvents: isSearchPopperOpen ? 'none' : 'auto',
-                  zIndex: 5,
-                }}
-              />
+              {colsCount === 2 && (
+                <Box
+                  gridRow={rowsCount === 2 ? '1 / span 3' : '1'}
+                  gridColumn="2"
+                  role="separator"
+                  onMouseDown={onVerticalMouseDown}
+                  sx={{
+                    width: SPLITTER_WIDTH,
+                    bgcolor: alpha(theme.palette.primary.main, 0.06),
+                    cursor: isSearchPopperOpen ? 'default' : 'col-resize',
+                    pointerEvents: isSearchPopperOpen ? 'none' : 'auto',
+                    zIndex: 5,
+                  }}
+                />
+              )}
 
               {/* Horizontal splitter */}
-              <Box
-                gridRow="2"
-                gridColumn="1 / span 3"
-                role="separator"
-                onMouseDown={onHorizontalMouseDown}
-                sx={{
-                  height: SPLITTER_HEIGHT,
-                  bgcolor: alpha(theme.palette.primary.main, 0.06),
-                  cursor: isSearchPopperOpen ? 'default' : 'row-resize',
-                  pointerEvents: isSearchPopperOpen ? 'none' : 'auto',
-                  zIndex: 5,
-                }}
-              />
+              {rowsCount === 2 && (
+                <Box
+                  gridRow="2"
+                  gridColumn={colsCount === 2 ? '1 / span 3' : '1'}
+                  role="separator"
+                  onMouseDown={onHorizontalMouseDown}
+                  sx={{
+                    height: SPLITTER_HEIGHT,
+                    bgcolor: alpha(theme.palette.primary.main, 0.06),
+                    cursor: isSearchPopperOpen ? 'default' : 'row-resize',
+                    pointerEvents: isSearchPopperOpen ? 'none' : 'auto',
+                    zIndex: 5,
+                  }}
+                />
+              )}
 
               {/* Bottom-left */}
               <Box sx={{ gridRow: '3', gridColumn: bottomLeftVisible && !bottomRightVisible ? '1 / span 3' : '1', display: 'flex', minHeight: 0 }}>
