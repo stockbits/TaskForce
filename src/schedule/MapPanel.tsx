@@ -171,6 +171,7 @@ export default function MapPanel({
   handleResourceMapClick,
   notifyMapDragStart,
   notifyMapDragEnd,
+  showMarkers = true,
 }: {
   tasks: TaskRecord[];
   resources: ResourceRecord[];
@@ -187,6 +188,7 @@ export default function MapPanel({
 
   notifyMapDragStart: () => void;
   notifyMapDragEnd: () => void;
+  showMarkers?: boolean;
 }) {
   const theme = useTheme();
 
@@ -249,7 +251,7 @@ export default function MapPanel({
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
           {/* TASK MARKERS */}
-          {markerTasks.map((t) => {
+          {showMarkers && markerTasks.map((t) => {
             const isSelected = Boolean(
               selectedTaskIds.has(t.taskId) ||
                 (selectedTask && selectedTask.taskId === t.taskId)
@@ -312,7 +314,7 @@ export default function MapPanel({
           })}
 
           {/* RESOURCE MARKERS */}
-          {markerResources.map((r) => {
+          {showMarkers && markerResources.map((r) => {
             const isSelected = Boolean(
               selectedResourceIds.has(r.resourceId) ||
                 (selectedResource &&

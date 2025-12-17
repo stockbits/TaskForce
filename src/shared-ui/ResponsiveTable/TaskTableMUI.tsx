@@ -56,13 +56,15 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
       const [copied, setCopied] = React.useState(false);
       const display = value == null ? '' : String(value);
       const snackbar = useAppSnackbar();
+      const theme = useTheme();
 
       const handleCopy = async (ev: React.MouseEvent) => {
         ev.stopPropagation();
         try {
           await navigator.clipboard.writeText(display);
           setCopied(true);
-          window.setTimeout(() => setCopied(false), 900);
+          snackbar.success('Copied to clipboard');
+          window.setTimeout(() => setCopied(false), 1500);
         } catch (err) {
           try {
             const ta = document.createElement('textarea');
@@ -72,7 +74,8 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
             document.execCommand('copy');
             ta.remove();
             setCopied(true);
-            window.setTimeout(() => setCopied(false), 900);
+            snackbar.success('Copied to clipboard');
+            window.setTimeout(() => setCopied(false), 1500);
           } catch (ee) {
             snackbar.error('Copy failed');
           }
@@ -89,14 +92,18 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
               px: 0.25,
-              transition: 'background-color 120ms ease',
-              backgroundColor: copied ? 'rgba(250, 235, 170, 0.9)' : 'transparent',
+              transition: theme.transitions.create(['color', 'background-color'], {
+                duration: theme.transitions.duration.shortest,
+              }),
+              backgroundColor: copied ? theme.palette.success.main : 'transparent',
+              color: copied ? theme.palette.success.contrastText : 'inherit',
               cursor: 'pointer',
+              borderRadius: 0.5,
             }}
           >
             {display}
           </Typography>
-          <style>{`.tf-cell-copy:hover .MuiTypography-root{ color: #3BE089; background-color: transparent; }`}</style>
+          <style>{`.tf-cell-copy:hover .MuiTypography-root{ color: ${theme.palette.primary.main}; }`}</style>
         </Box>
       );
     };
