@@ -84,19 +84,13 @@ export default function TaskTablePanel({
   }, [data.length, prevDataLength]);
 
   useEffect(() => {
-    // Add newly selected items to the top of pinned order
-    // Pin any selected items to bring them into focus
-    if (selectedTasks.length > 0) {
-      const currentPinnedIds = new Set(pinnedOrder);
-      const newSelectedIds = selectedTasks
-        .map(t => String(t.taskId))
-        .filter(id => !currentPinnedIds.has(id));
-      
-      if (newSelectedIds.length > 0) {
-        setPinnedOrder(prev => [...newSelectedIds, ...prev]);
-      }
+    // Pin currently selected items to the top - replace pinned order with current selection
+    // Only pin when selected from map
+    if (selectionFromMap) {
+      const selectedIds = selectedTasks.map(t => String(t.taskId));
+      setPinnedOrder(selectedIds);
     }
-  }, [selectedTasks]);
+  }, [selectedTasks, selectionFromMap]);
 
   const displayData = useMemo(() => {
     if (!data || data.length === 0) return [];
@@ -228,11 +222,16 @@ export default function TaskTablePanel({
         rowIdKey="taskId"
         controlledSelectedRowIds={selectedRowIds}
         disablePagination={true}
+        sortingMode={pinnedOrder.length > 0 ? 'server' : 'client'}
+        sortModel={pinnedOrder.length > 0 ? [] : currentSortModel}
         onSelectionChange={(rows: TaskRecord[]) => onSelectionChange(rows as TaskRecord[])}
         onSortChange={(hasSorting: boolean, sortModel?: any[]) => {
           setCurrentSortModel(sortModel || []);
-          // Keep pinned order when sorting changes - pinned items stay at top
-          // Only clear selections if user applies sorting (not clearing pinned order)
+          // Clear pinned order when user applies sorting
+          if (hasSorting) {
+            setPinnedOrder([]);
+          }
+          // Clear all selections when user applies sorting
           if (hasSorting && onClearSelection) {
             onClearSelection();
           }

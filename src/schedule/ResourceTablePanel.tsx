@@ -79,19 +79,13 @@ export default function ResourceTablePanel({
   }, [data.length, prevDataLength]);
 
   useEffect(() => {
-    // Add newly selected items from map to the top of pinned order
-    // Pin any selected items to bring them into focus
-    if (selectedResources.length > 0) {
-      const currentPinnedIds = new Set(pinnedOrder);
-      const newSelectedIds = selectedResources
-        .map(r => String(r.resourceId))
-        .filter(id => !currentPinnedIds.has(id));
-      
-      if (newSelectedIds.length > 0) {
-        setPinnedOrder(prev => [...newSelectedIds, ...prev]);
-      }
+    // Pin currently selected items to the top - replace pinned order with current selection
+    // Only pin when selected from map
+    if (selectionFromMap) {
+      const selectedIds = selectedResources.map(r => String(r.resourceId));
+      setPinnedOrder(selectedIds);
     }
-  }, [selectedResources]);
+  }, [selectedResources, selectionFromMap]);
 
   const displayData = useMemo(() => {
     if (!data || data.length === 0) return [];
@@ -224,13 +218,18 @@ export default function ResourceTablePanel({
         rowIdKey="resourceId"
         controlledSelectedRowIds={selectedRowIds}
         disablePagination={true}
+        sortingMode={pinnedOrder.length > 0 ? 'server' : 'client'}
+        sortModel={pinnedOrder.length > 0 ? [] : currentSortModel}
         onSelectionChange={(rows: ResourceRecord[]) =>
           onSelectionChange(rows as ResourceRecord[])
         }
         onSortChange={(hasSorting: boolean, sortModel?: any[]) => {
           setCurrentSortModel(sortModel || []);
-          // Keep pinned order when sorting changes - pinned items stay at top
-          // Only clear selections if user applies sorting (not clearing pinned order)
+          // Clear pinned order when user applies sorting
+          if (hasSorting) {
+            setPinnedOrder([]);
+          }
+          // Clear all selections when user applies sorting
           if (hasSorting && onClearSelection) {
             onClearSelection();
           }

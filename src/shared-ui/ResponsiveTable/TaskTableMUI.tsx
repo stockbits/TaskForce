@@ -30,9 +30,11 @@ import TaskRowContextMenu from '@/shared-ui/TaskRowContextMenu';
   onRequestCloseColumns?: () => void;
   onSortChange?: (hasSorting: boolean, sortModel?: any[]) => void;
   scrollToTopTrigger?: number;
+  sortingMode?: 'client' | 'server';
+  sortModel?: any[];
 };
 
-export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef, reserveBottom = 160, disablePagination = false, hideToolbar = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns, onSortChange, scrollToTopTrigger }: Props) {
+export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef, reserveBottom = 160, disablePagination = false, hideToolbar = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns, onSortChange, scrollToTopTrigger, sortingMode, sortModel }: Props) {
   // Internal state for uncontrolled components
   const [selection, setSelection] = useState<string[]>([]);
   
@@ -388,7 +390,8 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           }}
           sx={{ flex: 1, minHeight: 0, border: 0, overflow: 'hidden', '& .MuiDataGrid-cell': { py: density === 'compact' ? 0.5 : 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }, '& .MuiDataGrid-columnHeaders': { backgroundColor: theme.palette.action.hover }, '& .MuiDataGrid-columnHeaderTitle': { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }}
           // ensure DataGrid performs client-side sorting (do not accidentally enter server-mode)
-          sortingMode="client"
+          sortingMode={sortingMode || 'client'}
+          sortModel={sortModel}
           // notify parent when sort model changes (useful for higher-level features like pinned ordering)
           onSortModelChange={(model: any) => {
             try {
