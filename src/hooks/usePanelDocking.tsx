@@ -22,12 +22,14 @@ export function usePanelDocking(
   /* ---- ACTIONS ---- */
 
   const togglePanel = (key: PanelKey) => {
+    console.debug('[usePanelDocking] togglePanel', key);
     setVisiblePanels((prev) =>
       prev.includes(key) ? prev.filter((p) => p !== key) : [...prev, key]
     );
   };
 
   const closePanel = (key: PanelKey) => {
+    console.debug('[usePanelDocking] closePanel', key);
     setVisiblePanels((prev) => prev.filter((p) => p !== key));
     if (maximizedPanel === key) setMaximizedPanel(null);
   };
@@ -35,6 +37,7 @@ export function usePanelDocking(
   const maximizePanel = (key: PanelKey) => {
     // Only allow maximize if more than 1 panel is visible
     if (visiblePanels.length <= 1) return;
+    console.debug('[usePanelDocking] maximizePanel', key);
     setMaximizedPanel((prev) => (prev === key ? null : key));
   };
 

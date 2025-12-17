@@ -202,7 +202,7 @@ export default function ResourceTablePanel({
   ------------------------------------------------------------------------ */
   if (!data || data.length === 0) {
     return (
-      <Stack spacing={1} alignItems="center" justifyContent="center" sx={{ flex: 1, height: '100%' }}>
+      <Stack spacing={1} alignItems="center" justifyContent="center" sx={{ flex: 1, height: '100%', minHeight: 0 }}>
         <Typography variant="body2" color="text.secondary" textAlign="center">
           No resources loaded. Please define filters and press Search.
         </Typography>
@@ -214,7 +214,7 @@ export default function ResourceTablePanel({
      MAIN RENDER — controlled selection only
   ------------------------------------------------------------------------ */
   return (
-    <Box sx={{ flex: 1, display: "flex", flexDirection: "column", height: '100%' }}>
+    <Box sx={{ flex: 1, display: "flex", flexDirection: "column", height: '100%', minHeight: 0, overflow: 'auto' }}>
       <TaskTableAdvanced
         rows={displayData}
         headerNames={headerNames}

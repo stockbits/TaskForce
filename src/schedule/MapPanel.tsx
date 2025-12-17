@@ -212,6 +212,7 @@ export default function MapPanel({
         height: "100%",
         display: "flex",
         flexDirection: "column",
+        minHeight: 0,
       }}
     >
       <Box
