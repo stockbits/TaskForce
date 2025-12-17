@@ -131,7 +131,10 @@ export function PanelContainer({
           {visibleCount > 1 && (
             <IconButton
               size="small"
-              onClick={onMaximize}
+              onClick={() => {
+                console.log('[PanelContainer] maximize clicked', title);
+                try { onMaximize(); } catch (e) { console.error(e); }
+              }}
               title={isMaximized ? "Restore" : "Maximize"}
               sx={{
                 width: 32,
@@ -159,7 +162,10 @@ export function PanelContainer({
 
           <IconButton
             size="small"
-            onClick={onClose}
+            onClick={() => {
+              console.log('[PanelContainer] close clicked', title);
+              try { onClose(); } catch (e) { console.error(e); }
+            }}
             title="Close"
             sx={{
               width: 32,
