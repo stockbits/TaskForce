@@ -334,7 +334,12 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           apiRef={apiRef}
           pagination={!disablePagination}
           hideFooter={disablePagination}
-          pageSizeOptions={[25, 50, 100, 200]}
+          // ensure current pageSize is present in options to avoid MUI warning
+          pageSizeOptions={(function(){
+            const opts = [25,50,100,200];
+            if (!opts.includes(pageSize)) opts.push(pageSize);
+            return opts.sort((a,b)=>a-b);
+          })()}
           paginationModel={{ page, pageSize }}
           onPaginationModelChange={(model: any) => {
             try {
@@ -373,7 +378,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
               console.error('Error in onRowSelectionModelChange:', err);
             }
           }}
-          sx={{ flex: 1, minHeight: 0, border: 0, '& .MuiDataGrid-cell': { py: density === 'compact' ? 0.5 : 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }, '& .MuiDataGrid-columnHeaders': { backgroundColor: theme.palette.action.hover }, '& .MuiDataGrid-columnHeaderTitle': { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }}
+          sx={{ flex: 1, minHeight: 0, border: 0, overflowY: 'auto', '& .MuiDataGrid-cell': { py: density === 'compact' ? 0.5 : 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }, '& .MuiDataGrid-columnHeaders': { backgroundColor: theme.palette.action.hover }, '& .MuiDataGrid-columnHeaderTitle': { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }}
           // ensure DataGrid performs client-side sorting (do not accidentally enter server-mode)
           sortingMode="client"
           // notify parent when sort model changes (useful for higher-level features like pinned ordering)
