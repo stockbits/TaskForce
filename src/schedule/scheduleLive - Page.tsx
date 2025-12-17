@@ -860,6 +860,8 @@ export default function ScheduleLivePage() {
     const draggingColRef = useRef(false);
 
     const onHorizontalMouseDown = (event: React.MouseEvent) => {
+      // prevent starting a drag while the search popper is open
+      if (isSearchPopperOpen) return;
       event.preventDefault();
       draggingRowRef.current = true;
       const startY = event.clientY;
@@ -886,6 +888,8 @@ export default function ScheduleLivePage() {
     };
 
     const onVerticalMouseDown = (event: React.MouseEvent) => {
+      // prevent starting a drag while the search popper is open
+      if (isSearchPopperOpen) return;
       event.preventDefault();
       draggingColRef.current = true;
       const startX = event.clientX;
@@ -981,7 +985,8 @@ export default function ScheduleLivePage() {
                 sx={{
                   width: SPLITTER_WIDTH,
                   bgcolor: alpha(theme.palette.primary.main, 0.06),
-                  cursor: 'col-resize',
+                  cursor: isSearchPopperOpen ? 'default' : 'col-resize',
+                  pointerEvents: isSearchPopperOpen ? 'none' : 'auto',
                   zIndex: 5,
                 }}
               />
@@ -995,7 +1000,8 @@ export default function ScheduleLivePage() {
                 sx={{
                   height: SPLITTER_HEIGHT,
                   bgcolor: alpha(theme.palette.primary.main, 0.06),
-                  cursor: 'row-resize',
+                  cursor: isSearchPopperOpen ? 'default' : 'row-resize',
+                  pointerEvents: isSearchPopperOpen ? 'none' : 'auto',
                   zIndex: 5,
                 }}
               />
