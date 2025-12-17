@@ -312,12 +312,16 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
   const closeContextMenu = () => setContextMenu({ visible: false, x: 0, y: 0 });
 
 
+  const paperSx: any = (typeof tableHeight === 'string' && tableHeight.trim().endsWith('%'))
+    ? { width: '100%', zIndex: 0, display: 'flex', flex: 1, minHeight: 0, flexDirection: 'column' }
+    : { height: tableHeight, width: '100%', zIndex: 0 };
+
   return (
     <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, position: 'relative' }}>
 
       {/* DataGrid's built-in column menu/panel is used instead of a custom Popper */}
 
-      <Paper ref={paperRef as any} sx={{ height: tableHeight, width: '100%', zIndex: 0 }}>
+      <Paper ref={paperRef as any} sx={paperSx}>
         <AnyDataGrid
           rows={gridRows}
           columns={colState}
@@ -368,7 +372,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
               console.error('Error in onRowSelectionModelChange:', err);
             }
           }}
-          sx={{ border: 0, '& .MuiDataGrid-cell': { py: density === 'compact' ? 0.5 : 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }, '& .MuiDataGrid-columnHeaders': { backgroundColor: theme.palette.action.hover }, '& .MuiDataGrid-columnHeaderTitle': { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }}
+          sx={{ flex: 1, minHeight: 0, border: 0, '& .MuiDataGrid-cell': { py: density === 'compact' ? 0.5 : 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }, '& .MuiDataGrid-columnHeaders': { backgroundColor: theme.palette.action.hover }, '& .MuiDataGrid-columnHeaderTitle': { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }}
           // ensure DataGrid performs client-side sorting (do not accidentally enter server-mode)
           sortingMode="client"
           // notify parent when sort model changes (useful for higher-level features like pinned ordering)
