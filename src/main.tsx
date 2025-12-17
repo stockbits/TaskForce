@@ -4,10 +4,13 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import App from "./App";
 import { appTheme } from "./theme";
 import "./index.css";
+import { AppSnackbarProvider } from '@/shared-ui/SnackbarProvider';
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
 	<ThemeProvider theme={appTheme}>
 		<CssBaseline />
-		<App />
+		<AppSnackbarProvider>
+			<App />
+		</AppSnackbarProvider>
 	</ThemeProvider>
 );

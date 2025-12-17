@@ -1,8 +1,10 @@
 import React from "react";
 import { Dialog, DialogTitle, DialogContent, Box, Stack, Typography, IconButton, Paper, FormControl, InputLabel, Select, MenuItem, Divider, Alert, TextField } from "@mui/material";
 import AppButton from '@/shared-ui/button';
-import { X, ListChecks } from "lucide-react";
+import Close from '@mui/icons-material/Close';
+import ListAlt from '@mui/icons-material/ListAlt';
 import { alpha, useTheme } from "@mui/material/styles";
+import useFieldSizes from "../shared-ui/text-fields/useFieldSizes";
 
 export type ProgressPreview = {
   id: string | null | undefined;
@@ -48,20 +50,21 @@ export default function ProgressTasksDialog({
   additionalStatuses,
 }: Props) {
   const theme = useTheme();
+  const { INPUT_HEIGHT } = useFieldSizes();
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
       <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2 }}>
         <Stack direction="row" spacing={2} alignItems="center">
-          <Box sx={{ height: 48, width: 48, borderRadius: "50%", bgcolor: theme.palette.primary.main, color: theme.palette.primary.contrastText, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 20px rgba(8,58,97,0.35)" }}>
-            <ListChecks size={22} />
+          <Box sx={{ height: INPUT_HEIGHT, width: INPUT_HEIGHT, borderRadius: "50%", bgcolor: theme.palette.primary.main, color: theme.palette.primary.contrastText, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 20px rgba(8,58,97,0.35)" }}>
+            <ListAlt style={{ fontSize: 22 }} />
           </Box>
           <div>
             <Typography variant="h6" fontWeight={600} color="text.primary">Progress Tasks</Typography>
             <Typography variant="body2" color="text.secondary">{tasksCount} task{tasksCount === 1 ? "" : "s"} selected</Typography>
           </div>
         </Stack>
-        <IconButton onClick={onClose}><X size={20} /></IconButton>
+        <IconButton onClick={onClose}><Close style={{ fontSize: 20 }} /></IconButton>
       </DialogTitle>
 
       <DialogContent dividers sx={{ display: "grid", gap: 3, gridTemplateColumns: { lg: "1.6fr 1fr", xs: "1fr" } }}>

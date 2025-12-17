@@ -197,8 +197,8 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
   }, [filters, hideActions, onSearch]);
 
   const safe = (arr: string[] | undefined) => arr ?? [];
-  const makeFilter = (list: string[], q: string) =>
-    list.filter((option) => option.toLowerCase().includes(q.toLowerCase()));
+  const makeFilter = (list: string[], q?: string) =>
+    list.filter((option) => (option ?? "").toLowerCase().includes((q ?? "").toLowerCase()));
 
   const filtered = {
     division: makeFilter(safe(dropdownData.division), query.division),

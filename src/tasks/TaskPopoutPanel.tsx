@@ -10,7 +10,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Box, Paper, Stack, Typography, useTheme } from "@mui/material";
 import AppButton from '@/shared-ui/button';
 import { alpha } from "@mui/material/styles";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 import TaskDetailsModal from "./TaskDetailsModal";
 import PillGroup, { /* for types */ } from "@/shared-ui/PillGroup";
 import type { TaskDetails } from "@/types";
@@ -139,7 +140,7 @@ export default function TaskPopoutPanel({
               onClick={() =>
                 expanded.length > 0 ? onCollapseAll() : onExpandAll()
               }
-              startIcon={expanded.length > 0 ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              startIcon={expanded.length > 0 ? <ExpandLess style={{ fontSize: 16 }} /> : <ExpandMore style={{ fontSize: 16 }} />}
               sx={{ boxShadow: "none" }}
             >
               {expanded.length > 0 ? "Collapse All" : "Expand All"}

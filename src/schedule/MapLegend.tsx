@@ -2,7 +2,7 @@
 import React from "react";
 import { Box, IconButton, Paper, Stack, Typography } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
-import { X } from "lucide-react";
+import Close from '@mui/icons-material/Close';
 import {
   COMMIT_COLORS,
   STATUS_COLORS,
@@ -58,7 +58,7 @@ export default function MapLegend({ visible, onClose }: MapLegendProps) {
               }}
               aria-label="Close legend"
             >
-              <X size={16} />
+              <Close style={{ fontSize: 16 }} />
             </IconButton>
           </Stack>
 

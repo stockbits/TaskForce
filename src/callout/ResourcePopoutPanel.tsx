@@ -19,15 +19,13 @@ import AppButton from '@/shared-ui/button';
 import { alpha, useTheme } from "@mui/material/styles";
 import type { Theme } from "@mui/material/styles";
 import { InputAdornment } from "@mui/material";
-import {
-  ChevronDown,
-  ChevronUp,
-  MapPin,
-  Clock,
-  Search,
-  Copy,
-  X,
-} from "lucide-react";
+import ChevronDown from '@mui/icons-material/ExpandMore';
+import ChevronUp from '@mui/icons-material/ExpandLess';
+import MapPin from '@mui/icons-material/Place';
+import Clock from '@mui/icons-material/AccessTime';
+import Search from '@mui/icons-material/Search';
+import Copy from '@mui/icons-material/ContentCopy';
+import X from '@mui/icons-material/Close';
 import type { ResourceRecord } from "./CalloutIncidentPanel";
 import { CalloutOutcomeConfig } from "./CalloutIncidentPanel";
 import type { CalloutHistoryEntry } from "@/hooks/useCalloutHistory";
@@ -219,7 +217,7 @@ export default function ResourcePopoutPanel({
                 color="primary"
                 size="small"
                 onClick={() => (expanded.length ? onCollapseAll() : onExpandAll())}
-                startIcon={expanded.length ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                startIcon={expanded.length ? <ChevronUp style={{ fontSize: 14 }} /> : <ChevronDown style={{ fontSize: 14 }} />}
                 sx={{
                   fontWeight: 600,
                 }}
@@ -234,7 +232,7 @@ export default function ResourcePopoutPanel({
             >
               Edit
             </AppButton>
-            <IconButton
+              <IconButton
               size="small"
               onClick={onClose}
               sx={{
@@ -243,7 +241,7 @@ export default function ResourcePopoutPanel({
               }}
               aria-label="Close resource panel"
             >
-              <X size={16} />
+              <X style={{ fontSize: 16 }} />
             </IconButton>
           </Stack>
         </Box>
@@ -330,15 +328,15 @@ export default function ResourcePopoutPanel({
                           {resource.resourceId}
                         </Typography>
                       </Stack>
-                      <AppButton
-                        variant="outlined"
-                        size="small"
-                        startIcon={<Copy size={14} />}
-                        onClick={() => navigator.clipboard.writeText(resource.resourceId)}
-                        sx={{ textTransform: "none", fontWeight: 600 }}
-                      >
-                        Copy ID
-                      </AppButton>
+                        <AppButton
+                          variant="outlined"
+                          size="small"
+                          startIcon={<Copy style={{ fontSize: 14 }} />}
+                          onClick={() => navigator.clipboard.writeText(resource.resourceId)}
+                          sx={{ textTransform: "none", fontWeight: 600 }}
+                        >
+                          Copy ID
+                        </AppButton>
                     </Stack>
                     <Grid container spacing={2.5}>
                       {details.map(({ label, value }) => (
@@ -428,7 +426,7 @@ export default function ResourcePopoutPanel({
                             borderColor: alpha(theme.palette.primary.main, 0.12),
                           }}
                         >
-                          <Clock size={18} color={theme.palette.primary.main} />
+                          <Clock style={{ fontSize: 18, color: theme.palette.primary.main }} />
                           <Box>
                             <Typography
                               variant="overline"
@@ -455,7 +453,7 @@ export default function ResourcePopoutPanel({
                             borderColor: alpha(theme.palette.primary.main, 0.12),
                           }}
                         >
-                          <MapPin size={18} color={theme.palette.primary.main} />
+                          <MapPin sx={{ fontSize: 18, color: theme.palette.primary.main }} />
                           <Box>
                             <Typography
                               variant="overline"
@@ -564,7 +562,7 @@ export default function ResourcePopoutPanel({
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <Search size={16} color={alpha(theme.palette.text.secondary, 0.7)} />
+                            <Search sx={{ fontSize: 16, color: alpha(theme.palette.text.secondary, 0.7) }} />
                           </InputAdornment>
                         ),
                         sx: {

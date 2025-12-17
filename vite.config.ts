@@ -45,11 +45,7 @@ export default defineConfig({
         // (OR: "public/popup.html" if you placed it in /public)
       },
       output: {
-        manualChunks: {
-          "vendor-react": ["react", "react-dom"],
-          "vendor-motion": ["framer-motion"],
-          "vendor-icons": ["lucide-react"],
-        },
+        // no manual vendor chunks — let Vite auto-split
       },
     },
   },

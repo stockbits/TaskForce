@@ -1,5 +1,21 @@
 import { createTheme } from "@mui/material/styles";
 
+declare module '@mui/material/styles' {
+  interface Theme {
+    custom: {
+      inputHeight: number;
+      chipSize: number;
+    };
+  }
+  // allow configuration when creating the theme
+  interface ThemeOptions {
+    custom?: {
+      inputHeight?: number;
+      chipSize?: number;
+    };
+  }
+}
+
 // Palette matched to provided logo (navy + mint ring)
 const primaryNavy = "#0F2740"; // logo background
 const primaryNavyLight = "#304862";
@@ -82,5 +98,32 @@ export const appTheme = createTheme({
         },
       },
     },
+    MuiInputBase: {
+      styleOverrides: {
+        root: {
+          minHeight: 40,
+        },
+        input: {
+          paddingTop: 0,
+          paddingBottom: 0,
+          fontSize: 13,
+          lineHeight: '28px',
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        notchedOutline: {
+          // keep default outline styling
+        },
+        root: {
+          minHeight: 40,
+        },
+      },
+    },
+  },
+  custom: {
+    inputHeight: 40,
+    chipSize: 28,
   },
 });

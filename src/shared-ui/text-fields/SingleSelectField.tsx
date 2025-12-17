@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Autocomplete, Box, ListItem, ListItemText, TextField } from "@mui/material";
+import useFieldSizes from './useFieldSizes';
 
 type OptionItem = string | { label: string; value: string };
 
@@ -17,21 +18,8 @@ interface SingleSelectFieldProps {
 
 const FIELD_WIDTH = { xs: '100%', sm: '22ch', md: '28ch' };
 
-const CHIP_SIZE = 28;
-const INPUT_HEIGHT = 40;
 
-const DEFAULT_WRAPPER_SX = {
-  width: "100%",
-  maxWidth: FIELD_WIDTH,
-  px: 1,
-  display: "flex",
-  alignItems: "center",
-  minHeight: INPUT_HEIGHT,
-  flex: "0 0 auto",
-  '& .MuiInputBase-root': { minHeight: INPUT_HEIGHT },
-  '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: INPUT_HEIGHT },
-  '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0, transition: 'all 120ms ease' },
-} as const;
+// DEFAULT_WRAPPER_SX will be created inside the component using theme-backed sizes
 
 const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
   label,
@@ -46,6 +34,21 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
 }) => {
   const [internalInput, setInternalInput] = useState("");
   const inputValue = controlledInputValue !== undefined ? controlledInputValue : internalInput;
+
+  const { INPUT_HEIGHT, CHIP_SIZE } = useFieldSizes();
+
+  const DEFAULT_WRAPPER_SX = {
+    width: "100%",
+    maxWidth: FIELD_WIDTH,
+    px: 1,
+    display: "flex",
+    alignItems: "center",
+    minHeight: INPUT_HEIGHT,
+    flex: "0 0 auto",
+    '& .MuiInputBase-root': { minHeight: INPUT_HEIGHT },
+    '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: INPUT_HEIGHT },
+    '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0, transition: 'all 120ms ease' },
+  } as const;
 
   const normalizedQuery = inputValue.trim().toLowerCase();
 

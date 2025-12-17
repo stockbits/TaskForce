@@ -22,20 +22,18 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import {
-  ClipboardList,
-  Globe,
-  Calendar,
-  Settings,
-  Cog,
-  Users,
-  AlertTriangle,
-  ListChecks,
-  UserCog,
-  LogOut,
-  Folder,
-  Search,
-} from "lucide-react";
+import ClipboardList from '@mui/icons-material/ListAlt';
+import Globe from '@mui/icons-material/Public';
+import Calendar from '@mui/icons-material/CalendarMonth';
+import Settings from '@mui/icons-material/Settings';
+import Cog from '@mui/icons-material/Build';
+import Users from '@mui/icons-material/People';
+import AlertTriangle from '@mui/icons-material/WarningAmber';
+import ListChecks from '@mui/icons-material/ListAlt';
+import UserCog from '@mui/icons-material/AdminPanelSettings';
+import LogOut from '@mui/icons-material/Logout';
+import Folder from '@mui/icons-material/Folder';
+import Search from '@mui/icons-material/Search';
 import { cardMap, allTiles } from "./menuRegistry";
 
 const userMenus = [
@@ -230,7 +228,7 @@ export const Sidebar = memo(function Sidebar({
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Search size={16} color={alpha(theme.palette.text.primary, 0.6)} />
+                <Search sx={{ fontSize: 16, color: alpha(theme.palette.text.primary, 0.6) }} />
               </InputAdornment>
             ),
             sx: {
@@ -373,7 +371,7 @@ const Footer = memo(function Footer() {
           System Info
         </Typography>
         <Box sx={{ color: "text.secondary" }}>
-          <LogOut size={16} />
+          <LogOut sx={{ fontSize: 16 }} />
         </Box>
       </Stack>
 

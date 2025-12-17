@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, TextField, InputAdornment } from '@mui/material';
-import { Search } from 'lucide-react';
+import SearchIcon from '@mui/icons-material/Search';
+import useFieldSizes from './useFieldSizes';
 
 type Props = {
   value: string;
@@ -13,6 +14,8 @@ type Props = {
 };
 
 export default function GlobalSearchField({ value, onChange, onKeyPress, placeholder = '', size = 'small', sx = {}, name = 'taskSearch' }: Props) {
+  const { INPUT_HEIGHT, CHIP_SIZE } = useFieldSizes();
+
   return (
     <Box sx={{ width: { xs: '100%', sm: 400 }, ...sx }}>
       <TextField
@@ -23,10 +26,10 @@ export default function GlobalSearchField({ value, onChange, onKeyPress, placeho
         placeholder={placeholder}
         size={size}
         fullWidth
-        sx={{ '& input::placeholder': { color: 'text.secondary' }, '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, fontSize: 13, lineHeight: '28px' }, height: 40 }}
+        sx={{ '& input::placeholder': { color: 'text.secondary' }, '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, fontSize: 13, lineHeight: `${CHIP_SIZE}px` }, height: INPUT_HEIGHT }}
         InputProps={{
-          startAdornment: (<InputAdornment position="start"><Search size={16} /></InputAdornment>),
-          sx: { height: 40 }
+          startAdornment: (<InputAdornment position="start"><SearchIcon style={{ fontSize: 16 }} /></InputAdornment>),
+          sx: { height: INPUT_HEIGHT }
         }}
       />
     </Box>

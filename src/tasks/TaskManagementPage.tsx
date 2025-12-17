@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
-import toast from "react-hot-toast";
+import { useAppSnackbar } from '@/shared-ui/SnackbarProvider';
 import rawMockTasks from "@/data/mockTasks.json";
 import TaskSearchCard from "@/tasks/TaskSearchCardClean";
 import TaskTableAdvanced from "@/tasks/TaskTableAdvanced";
@@ -71,6 +71,7 @@ async function writeToClipboard(text: string) {
 }
 
 export default function TaskManagementPage() {
+  const snackbar = useAppSnackbar();
     const [filteredTasks, setFilteredTasks] = useState<Record<string, any>[]>([]);
     const [selectedRows, setSelectedRows] = useState<Record<string, any>[]>([]);
     const [tableHeight, setTableHeight] = useState<number>(600);
@@ -151,7 +152,7 @@ export default function TaskManagementPage() {
         const hasDivision = Array.isArray(division) && division.length > 0;
         const hasDomain = Array.isArray(domainId) && domainId.length > 0;
         if (!hasGlobal && !(hasDivision && hasDomain)) {
-          toast.error("Select Division and Domain, or use Global search.");
+          snackbar.error("Select Division and Domain, or use Global search.");
           setFilteredTasks([]);
           return;
         }
@@ -265,32 +266,32 @@ export default function TaskManagementPage() {
       setFilteredTasks(filtered);
 
       filtered.length === 0
-        ? toast.error("No matching tasks found.")
-        : toast.success(`Found ${filtered.length} tasks`);
+        ? snackbar.error("No matching tasks found.")
+        : snackbar.success(`Found ${filtered.length} tasks`);
     } catch (err) {
       console.error("Filter error:", err);
-      toast.error("Error applying filters.");
+      snackbar.error("Error applying filters.");
     }
   }, []);
 
   const handleClear = useCallback(() => {
     setFilteredTasks([]);
-    toast("Filters cleared.", { icon: "🧹" });
+    snackbar.info("Filters cleared.");
   }, []);
 
   const canCopy = filteredTasks.length > 0;
 
   const copyAll = useCallback(async () => {
-    if (!canCopy) return toast.error("No results to copy.");
+    if (!canCopy) return snackbar.error("No results to copy.");
     const headers = Object.keys(headerNames);
     const csv = toCSV(headers, filteredTasks);
     const ok = await writeToClipboard(csv);
-    if (ok) toast.success("Copied to clipboard!");
+    if (ok) snackbar.success("Copied to clipboard!");
   }, [canCopy, filteredTasks]);
 
   // Open progress dialog (used by table/search actions)
   const openProgressTasks = useCallback((tasks: any[]) => {
-    if (!tasks || !tasks.length) return toast.error("No tasks selected");
+    if (!tasks || !tasks.length) return snackbar.error("No tasks selected");
     const preview = tasks.map((t) => ({ id: String(t.taskId ?? t.workId ?? t.id ?? ""), currentStatus: t.taskStatus ?? t.status ?? null, nextStatus: null }));
     setProgressPreview(preview);
     setProgressDialogOpen(true);
@@ -324,12 +325,12 @@ export default function TaskManagementPage() {
   }, []);
 
   const handleCalloutFromSelection = useCallback((tasks: any[]) => {
-    if (!tasks || tasks.length !== 1) return toast.error('Callout Incident requires exactly one selected task');
+    if (!tasks || tasks.length !== 1) return snackbar.error('Callout Incident requires exactly one selected task');
     handleOpenCalloutIncident(tasks[0]);
   }, [handleOpenCalloutIncident]);
 
   const exportCSV = useCallback(() => {
-    if (!canCopy) return toast.error("No results to export.");
+    if (!canCopy) return snackbar.error("No results to export.");
     const headers = Object.keys(headerNames);
     const csv = toCSV(headers, filteredTasks);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -337,7 +338,7 @@ export default function TaskManagementPage() {
     link.href = URL.createObjectURL(blob);
     link.download = "FilteredTasks.csv";
     link.click();
-    toast.success("Exported CSV file.");
+    snackbar.success("Exported CSV file.");
   }, [canCopy, filteredTasks]);
 
   // Use DataGrid's native/client-side sorting — no parent-side sorting required
@@ -403,7 +404,7 @@ export default function TaskManagementPage() {
               if (!task) return;
               // if task is array (from some callers), handle accordingly
               if (Array.isArray(task)) {
-                if (task.length !== 1) return toast.error('Callout Incident requires exactly one selected task');
+                if (task.length !== 1) return snackbar.error('Callout Incident requires exactly one selected task');
                 handleOpenCalloutIncident(task[0]);
               } else {
                 handleOpenCalloutIncident(task);

@@ -17,7 +17,12 @@ import {
 import AppButton from '@/shared-ui/button';
 import { alpha } from "@mui/material/styles";
 import type { Theme } from "@mui/material/styles";
-import { User, Truck, ThumbsUp, Play, Wrench, Check } from "lucide-react";
+import Person from '@mui/icons-material/Person';
+import LocalShipping from '@mui/icons-material/LocalShipping';
+import ThumbUp from '@mui/icons-material/ThumbUp';
+import PlayArrow from '@mui/icons-material/PlayArrow';
+import Build from '@mui/icons-material/Build';
+import Check from '@mui/icons-material/Check';
 import type { TaskDetails, ProgressNoteEntry } from "@/types";
 import ResourceMock from "@/data/ResourceMock.json";
 import ExpandableSectionCard from "@/shared-ui/ExpandableSectionCard";
@@ -274,43 +279,43 @@ const getStatusVisuals = (
   switch (status) {
     case "Assigned":
       return {
-        icon: <User size={14} />,
+        icon: <Person style={{ fontSize: 14 }} />,
         bg: alpha(palette.primary.main, 0.14),
         color: palette.primary.main,
       };
     case "Dispatched":
       return {
-        icon: <Truck size={14} />,
+        icon: <LocalShipping style={{ fontSize: 14 }} />,
         bg: alpha(palette.warning.main, 0.18),
         color: palette.warning.dark,
       };
     case "Accepted":
       return {
-        icon: <ThumbsUp size={14} />,
+        icon: <ThumbUp style={{ fontSize: 14 }} />,
         bg: alpha(palette.secondary.main, 0.16),
         color: palette.secondary.main,
       };
     case "In Progress":
       return {
-        icon: <Play size={14} />,
+        icon: <PlayArrow style={{ fontSize: 14 }} />,
         bg: alpha(palette.info.main, 0.18),
         color: palette.info.dark,
       };
     case "Incomplete":
       return {
-        icon: <Wrench size={14} />,
+        icon: <Build style={{ fontSize: 14 }} />,
         bg: alpha(palette.success.main, 0.14),
         color: palette.success.dark,
       };
     case "Complete":
       return {
-        icon: <Check size={14} />,
+        icon: <Check style={{ fontSize: 14 }} />,
         bg: alpha(palette.success.main, 0.20),
         color: palette.success.main,
       };
     default:
       return {
-        icon: <User size={14} />,
+        icon: <Person style={{ fontSize: 14 }} />,
         bg: alpha(palette.text.primary, 0.08),
         color: palette.text.secondary,
       };

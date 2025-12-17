@@ -5,7 +5,6 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import {
   Alert,
   Box,
@@ -26,16 +25,14 @@ import {
   Typography,
 } from "@mui/material";
 import AppButton from '@/shared-ui/button';
-import {
-  X,
-  AlertTriangle,
-  ClipboardList,
-  Clock,
-  Copy,
-  ExternalLink,
-  RotateCcw,
-  User,
-} from "lucide-react";
+import Close from '@mui/icons-material/Close';
+import WarningAmber from '@mui/icons-material/WarningAmber';
+import ListAlt from '@mui/icons-material/ListAlt';
+import AccessTime from '@mui/icons-material/AccessTime';
+import ContentCopy from '@mui/icons-material/ContentCopy';
+import OpenInNew from '@mui/icons-material/OpenInNew';
+import RotateLeft from '@mui/icons-material/RotateLeft';
+import Person from '@mui/icons-material/Person';
 import { alpha, useTheme } from "@mui/material/styles";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { type CalloutHistoryEntry } from "@/hooks/useCalloutHistory";
@@ -78,9 +75,7 @@ const LIST_SCOPE_LABELS: Record<CalloutListScope, string> = {
   all: "All Lists",
 };
 
-const MotionBox = motion.create(Box);
-const MotionPaper = motion.create(Paper);
-const MotionTableRow = motion.create(TableRow);
+// framer-motion removed — use static MUI components
 
 
 /* -------------------------------------------------------
@@ -704,10 +699,10 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
      JSX
   ----------------------------------------------------- */
 
+  if (!open) return null;
+
   return (
-    <AnimatePresence>
-      {open && (
-        <MotionBox
+    <Box
           ref={overlayRef}
           sx={{
             position: "fixed",
@@ -719,13 +714,10 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
             bgcolor: "rgba(10, 30, 60, 0.55)",
             backdropFilter: "blur(6px)",
           }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
           onMouseDown={handleOverlayMouseDown}
         >
           {/* PANEL */}
-          <MotionPaper
+          <Paper
             variant="outlined"
             elevation={18}
             sx={{
@@ -741,10 +733,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
               boxShadow: '0 24px 64px rgba(8,58,97,0.25)',
               backgroundImage: 'none',
             }}
-            initial={{ opacity: 0, scale: 0.9, y: 24 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 24 }}
-            transition={{ duration: 0.18 }}
+          
           >
             {/* HEADER */}
             <Box
@@ -775,7 +764,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                     boxShadow: "0 10px 24px rgba(8,58,97,0.25)",
                   }}
                 >
-                  <AlertTriangle size={18} />
+                  <WarningAmber sx={{ fontSize: 18 }} />
                 </Box>
 
                 <Stack spacing={0.5}>
@@ -809,7 +798,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                 </FormControl>
 
                 <IconButton onClick={onClose} sx={{ color: "text.secondary" }}>
-                  <X size={18} />
+                  <Close sx={{ fontSize: 18 }} />
                 </IconButton>
               </Stack>
 
@@ -859,8 +848,8 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
               }}
             >
               {/* INFO BOX */}
-              <Alert
-                icon={<ClipboardList size={16} />}
+                  <Alert
+                icon={<ListAlt sx={{ fontSize: 16 }} />}
                 severity="info"
                 variant="outlined"
                 sx={{
@@ -912,23 +901,12 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                     <Typography variant="subtitle2" fontWeight={600} color="text.primary">
                       Callout Resource List — {listScopeLabel}
                     </Typography>
-                    <AnimatePresence mode="wait">
-                      <motion.span
-                        key={`${listScope}-${panelResourceCount}`}
-                        style={{ fontSize: "0.75rem", color: alpha(theme.palette.text.primary, 0.65) }}
-                        initial={{ opacity: 0, y: -6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -6 }}
-                        transition={{ duration: 0.16 }}
-                      >
+                      <Box component="span" sx={{ fontSize: "0.75rem", color: alpha(theme.palette.text.primary, 0.65) }}>
                         {panelResourceCount} {panelResourceLabel}
-                      </motion.span>
-                    </AnimatePresence>
+                      </Box>
                   </Stack>
 
-                  <MotionBox
-                    layout
-                    transition={{ duration: 0.22, ease: "easeInOut" }}
+                  <Box
                     sx={{
                       flex: 1,
                       overflow: "auto",
@@ -1003,8 +981,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                               (requiresUnavailable && (!draft.availableAgainAt || draft.availableAgainAt.trim() === ""));
 
                             return (
-                              <MotionTableRow
-                                layout
+                              <TableRow
                                 key={id}
                                 sx={{
                                   backgroundColor: rowLocked
@@ -1060,7 +1037,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                           handleCopyId(resource.resourceId);
                                         }}
                                       >
-                                        <Copy size={14} />
+                                        <ContentCopy style={{ fontSize: 14 }} />
                                       </IconButton>
                                     </Tooltip>
                                   </Box>
@@ -1090,14 +1067,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                 <TableCell>
                                   <Stack spacing={1} alignItems="flex-start">
                                     <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: "100%" }}>
-                                      <Clock
-                                        size={14}
-                                        color={
-                                          requiresUnavailable && !rowLocked
-                                            ? theme.palette.primary.main
-                                            : alpha(theme.palette.text.secondary, 0.8)
-                                        }
-                                      />
+                                      <AccessTime style={{ fontSize: 14, color: requiresUnavailable && !rowLocked ? theme.palette.primary.main : undefined }} />
                                       <TextField
                                         type="datetime-local"
                                         size="small"
@@ -1152,27 +1122,27 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                           size="small"
                                           onClick={() => handleOpenResourceDetails(resource.resourceId)}
                                         >
-                                          <User size={14} />
+                                          <Person sx={{ fontSize: 14 }} />
                                         </IconButton>
                                       </Tooltip>
 
                                       {task && onOpenTaskPopout && (
                                         <Tooltip title="Open task">
                                           <IconButton size="small" onClick={onOpenTaskPopout}>
-                                            <ExternalLink size={14} />
+                                            <OpenInNew sx={{ fontSize: 14 }} />
                                           </IconButton>
                                         </Tooltip>
                                       )}
                                     </Stack>
                                   </Stack>
                                 </TableCell>
-                              </MotionTableRow>
+                              </TableRow>
                             );
                           })
                         )}
                       </TableBody>
                     </Table>
-                  </MotionBox>
+                  </Box>
                 </Paper>
 
                 {/* HISTORY SIDEBAR */}
@@ -1201,7 +1171,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                     }}
                   >
                     <Stack direction="row" spacing={1.5} alignItems="center">
-                      <Clock size={16} color={theme.palette.primary.main} />
+                      <AccessTime style={{ fontSize: 16, color: theme.palette.primary.main }} />
                       <Typography variant="subtitle2" color="text.primary" fontWeight={600}>
                         Recent History
                       </Typography>
@@ -1220,7 +1190,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                         historyLoading ? (
                           <CircularProgress size={16} thickness={5} color="inherit" />
                         ) : (
-                          <RotateCcw size={14} />
+                          <RotateLeft sx={{ fontSize: 14 }} />
                         )
                       }
                       sx={{
@@ -1392,7 +1362,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                               size="small"
                               variant="text"
                               onClick={() => handleViewProgress(entry)}
-                              startIcon={<ExternalLink size={14} />}
+                              startIcon={<OpenInNew sx={{ fontSize: 14 }} />}
                               sx={{
                                 fontWeight: 600,
                                 color: theme.palette.primary.main,
@@ -1439,9 +1409,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                 Close
               </AppButton>
             </Box>
-          </MotionPaper>
-        </MotionBox>
-      )}
-    </AnimatePresence>
+          </Paper>
+        </Box>
   );
 };

@@ -1,9 +1,10 @@
 import React, { useState, useMemo, useCallback } from "react";
-import { motion } from "framer-motion";
-import toast from "react-hot-toast";
+// framer-motion removed — render static Card components
+import { useAppSnackbar } from '@/shared-ui/SnackbarProvider';
 import mockTasks from "@/data/mockTasks.json";
 import {
   Box,
+  useTheme,
   Card,
   CardActions,
   CardContent,
@@ -21,17 +22,15 @@ import {
   Menu,
   MenuItem,
   Grid,
-  Select,
-  Stack,
-  Tab,
   Tabs,
-  TextField,
+  Tab,
+  Stack,
   Typography,
-  Tooltip,
-  useTheme,
-} from "@mui/material";
-import AppButton from '@/shared-ui/button';
-import { Eye, EyeOff, Search, ListChecks, StickyNote, AlertTriangle } from "lucide-react";
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import ListAlt from '@mui/icons-material/ListAlt';
+import StickyNote2 from '@mui/icons-material/StickyNote2';
+import WarningAmber from '@mui/icons-material/WarningAmber';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
@@ -42,6 +41,8 @@ import TodayOutlinedIcon from '@mui/icons-material/TodayOutlined';
 import DateTimePopover from '@/shared-ui/DateTimePopover';
 import { MultiSelectField, SingleSelectField, FreeTypeSelectField } from '@/shared-ui';
 import GlobalSearchField from '@/shared-ui/text-fields/GlobalSearchField';
+import AppButton from '@/shared-ui/button';
+import Visibility from '@mui/icons-material/Visibility';
 
 type Filters = {
   taskSearch: string;
@@ -96,7 +97,7 @@ type ChipDescriptor = {
   isArray: boolean;
 };
 
-const MotionCard = motion.create(Card);
+// use Card directly instead of motion-wrapped variant
 const SELECT_ALL_VALUE = "__SELECT_ALL__";
 
 const INITIAL_FILTERS: Filters = {
@@ -541,7 +542,7 @@ export default function TaskSearchCard({
     if (canCopy && onCopy) {
       onCopy();
     } else {
-      toast.error("No data to copy");
+      snackbar.error("No data to copy");
     }
     handleMenuClose();
   }, [canCopy, handleMenuClose, onCopy]);
@@ -550,20 +551,22 @@ export default function TaskSearchCard({
     if (canCopy && onExport) {
       onExport();
     } else {
-      toast.error("No data to export");
+      snackbar.error("No data to export");
     }
     handleMenuClose();
   }, [canCopy, handleMenuClose, onExport]);
+
+  const snackbar = useAppSnackbar();
 
   const quickPresets = useMemo(
     () => [
       {
         label: "My Tasks",
-        action: () => toast("Preset: My Tasks"),
+        action: () => snackbar.info("Preset: My Tasks"),
       },
       {
         label: "Due Today",
-        action: () => toast("Preset: Due Today"),
+        action: () => snackbar.info("Preset: Due Today"),
       },
       {
         label: "High IMP",
@@ -575,14 +578,11 @@ export default function TaskSearchCard({
           })),
       },
     ],
-    []
+    [snackbar]
   );
 
   return (
-    <MotionCard
-      initial={{ opacity: 0, y: -6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
+    <Card
       sx={{
         borderRadius: '12px 12px 0 0',
         boxShadow: "0 18px 35px rgba(10, 74, 122, 0.12)",
@@ -867,7 +867,7 @@ export default function TaskSearchCard({
                   disabled={!selectedRows || selectedRows.length === 0}
                 >
                   <ListItemIcon>
-                    <Eye size={16} style={{ color: '#1976d2' }} />
+                    <Visibility style={{ fontSize: 16, color: '#1976d2' }} />
                   </ListItemIcon>
                   Open Viewer{selectedRows && selectedRows.length > 1 ? ` (${selectedRows.length})` : ""}
                 </MenuItem>
@@ -882,7 +882,7 @@ export default function TaskSearchCard({
                   disabled={!selectedRows || selectedRows.length === 0}
                 >
                   <ListItemIcon>
-                    <ListChecks size={16} style={{ color: '#2e7d32' }} />
+                    <ListAlt style={{ fontSize: 16, color: '#2e7d32' }} />
                   </ListItemIcon>
                   Progress Tasks{selectedRows && selectedRows.length > 1 ? ` (${selectedRows.length})` : ""}
                 </MenuItem>
@@ -897,7 +897,7 @@ export default function TaskSearchCard({
                   disabled={!selectedRows || selectedRows.length === 0}
                 >
                   <ListItemIcon>
-                    <StickyNote size={16} style={{ color: '#ed6c02' }} />
+                    <StickyNote2 style={{ fontSize: 16, color: '#ed6c02' }} />
                   </ListItemIcon>
                   Progress Notes{selectedRows && selectedRows.length > 1 ? ` (${selectedRows.length})` : ""}
                 </MenuItem>
@@ -914,7 +914,7 @@ export default function TaskSearchCard({
                   disabled={!(selectedRows && selectedRows.length === 1)}
                 >
                   <ListItemIcon>
-                    <AlertTriangle size={16} style={{ color: '#d32f2f' }} />
+                    <WarningAmber style={{ fontSize: 16, color: '#d32f2f' }} />
                   </ListItemIcon>
                   Callout Incident
                 </MenuItem>
@@ -970,7 +970,7 @@ export default function TaskSearchCard({
           </AppButton>
         </Stack>
       </CardActions>
-    </MotionCard>
+    </Card>
   );
 }
 

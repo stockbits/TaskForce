@@ -16,7 +16,7 @@ import ResourceTablePanel from "./ResourceTablePanel";
 import mockTasks from "@/data/mockTasks.json";
 import ResourceMock from "@/data/ResourceMock.json";
 
-import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+// replaced react-resizable-panels with internal flex splitter
 
 import { usePanelDocking, PanelContainer } from "@/hooks/usePanelDocking";
 import { PanelKey } from "@/types";
@@ -27,16 +27,14 @@ import { useLiveSelectEngine } from "@/hooks/useLiveSelectEngine";
 
 import GlobalSearchField from "@/shared-ui/text-fields/GlobalSearchField";
 
-import {
-  Search,
-  SlidersHorizontal,
-  Star,
-  Info,
-  Clock,
-  Map,
-  Users,
-  ClipboardList,
-} from "lucide-react";
+import Search from '@mui/icons-material/Search';
+import SlidersHorizontal from '@mui/icons-material/Tune';
+import Star from '@mui/icons-material/Star';
+import Info from '@mui/icons-material/Info';
+import Clock from '@mui/icons-material/AccessTime';
+import Map from '@mui/icons-material/Map';
+import Users from '@mui/icons-material/People';
+import ClipboardList from '@mui/icons-material/ListAlt';
 
 import type { TaskRecord, ResourceRecord } from "@/hooks/useLiveSelectEngine";
 
@@ -490,6 +488,37 @@ export default function ScheduleLivePage() {
   const effectiveTop = maximizedPanel ? [maximizedPanel] : topRow;
   const effectiveBottom = maximizedPanel ? [] : bottomRow;
 
+  // splitter state: fraction of height occupied by top area (0..1)
+  const [topFraction, setTopFraction] = useState<number>(0.5);
+  const panelsContainerRef = useRef<HTMLDivElement | null>(null);
+  const draggingRef = useRef(false);
+
+  const onSplitterMouseDown = (event: React.MouseEvent) => {
+    event.preventDefault();
+    draggingRef.current = true;
+    const startY = event.clientY;
+    const container = panelsContainerRef.current;
+    const startRect = container?.getBoundingClientRect();
+    const startHeight = startRect?.height ?? 0;
+
+    const onMove = (moveEvent: MouseEvent) => {
+      if (!draggingRef.current || !container) return;
+      const delta = moveEvent.clientY - startY;
+      const newTopPx = (startRect?.top ?? 0) >= 0 ? (startRect!.height * topFraction + delta) : 0;
+      const frac = Math.max(0.12, Math.min(0.88, newTopPx / startHeight));
+      setTopFraction(frac);
+    };
+
+    const onUp = () => {
+      draggingRef.current = false;
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
+
   /* ==========================================================================
      TOOLBAR
   ============================================================================ */
@@ -515,8 +544,8 @@ export default function ScheduleLivePage() {
         onChange={(e) => handleDivisionChange(e.target.value)}
         sx={{ 
           minWidth: { xs: theme.spacing(14), sm: theme.spacing(18) },
-          height: 48,
-          '& .MuiInputBase-input': { fontSize: 13, lineHeight: '32px' }
+          height: theme.custom?.inputHeight ?? 40,
+          '& .MuiInputBase-input': { fontSize: 13, lineHeight: `${theme.custom?.chipSize ?? 28}px` }
         }}
         SelectProps={{ displayEmpty: true, renderValue: (selected) => (selected ? String(selected) : 'Division') }}
       >
@@ -535,8 +564,8 @@ export default function ScheduleLivePage() {
         onChange={(e) => handleDomainChange(e.target.value)}
         sx={{ 
           minWidth: { xs: theme.spacing(14), sm: theme.spacing(18) },
-          height: 48,
-          '& .MuiInputBase-input': { fontSize: 13, lineHeight: '32px' }
+          height: theme.custom?.inputHeight ?? 40,
+          '& .MuiInputBase-input': { fontSize: 13, lineHeight: `${theme.custom?.chipSize ?? 28}px` }
         }}
         SelectProps={{ displayEmpty: true, renderValue: (selected) => (selected ? String(selected) : 'Domain') }}
       >
@@ -554,7 +583,7 @@ export default function ScheduleLivePage() {
         onKeyPress={(e) => e.key === "Enter" && runGlobalSearch()}
         placeholder="Search by Task ID, Work ID, Estimate Number, Employee ID"
         size="small"
-        sx={{ height: 48, '& .MuiInputBase-input': { fontSize: 13, lineHeight: '32px' } }}
+        sx={{ height: theme.custom?.inputHeight ?? 40, '& .MuiInputBase-input': { fontSize: 13, lineHeight: `${theme.custom?.chipSize ?? 28}px` } }}
       />
 
       {/* Search Tool + Clear All + quick icons (kept left for workflow) */}
@@ -564,7 +593,7 @@ export default function ScheduleLivePage() {
         variant={searchButtonActive ? "contained" : "outlined"}
         color="primary"
         size="small"
-        startIcon={<SlidersHorizontal size={16} />}
+        startIcon={<SlidersHorizontal sx={{ fontSize: 16 }} />}
         disabled={!division}
         sx={{ minWidth: 96, fontWeight: 500, mr: 1, ...(searchButtonActive && { boxShadow: theme.shadows[4] }) }}
       >
@@ -593,7 +622,7 @@ export default function ScheduleLivePage() {
           mr: 1,
         }}
       >
-        <Star size={16} />
+        <Star sx={{ fontSize: 16 }} />
       </IconButton>
 
       <IconButton
@@ -615,7 +644,7 @@ export default function ScheduleLivePage() {
         }}
         title="Map Legend"
       >
-        <Info size={16} />
+        <Info sx={{ fontSize: 16 }} />
       </IconButton>
 
       <Box sx={{ flexGrow: 1 }} />
@@ -776,6 +805,8 @@ export default function ScheduleLivePage() {
                       }}
                       dropdownData={{
                         ...dropdownData,
+                        division: divisionOptions,
+                        domainId: domainOptions,
                         resourceStatuses: Array.from(
                           new Set(allResources.map((r) => r.status))
                         ).sort(),
@@ -819,97 +850,186 @@ export default function ScheduleLivePage() {
   /* ==========================================================================
      RENDER
   ============================================================================ */
-  return (
-    <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", position: "relative" }}>
-      {toolbar}
+    // splitter constants and independent X/Y fractions
+    const SPLITTER_HEIGHT = 6; // px (horizontal splitter)
+    const SPLITTER_WIDTH = 6; // px (vertical splitter)
 
-      <MapLegend visible={legendOpen} onClose={() => setLegendOpen(false)} />
+    const [colFraction, setColFraction] = useState<number>(0.5);
+    const [rowFraction, setRowFraction] = useState<number>(0.5);
+    const draggingRowRef = useRef(false);
+    const draggingColRef = useRef(false);
 
-      {searchToolPopper}
+    const onHorizontalMouseDown = (event: React.MouseEvent) => {
+      event.preventDefault();
+      draggingRowRef.current = true;
+      const startY = event.clientY;
+      const container = panelsContainerRef.current;
+      const rect = container?.getBoundingClientRect();
+      const startHeight = rect?.height ?? 0;
 
-      <Box sx={{ flex: 1, minHeight: 0 }}>
-        <PanelGroup
-          key={visiblePanels.join("-")}
-          direction="vertical"
-          style={{ height: "100%" }}
-        >
-          {effectiveTop.length > 0 && (
-            <>
-              <Panel defaultSize={50}>
-                <PanelGroup direction="horizontal" style={{ height: "100%" }}>
-                  {effectiveTop.map((key, index) => (
-                    <React.Fragment key={key}>
-                      {index > 0 && (
-                        <PanelResizeHandle
-                          style={{
-                            width: 4,
-                            backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                            cursor: "col-resize",
-                          }}
-                        />
-                      )}
-                      <Panel>
-                        <PanelContainer
-                          title={PANEL_DEFS[key].label}
-                          icon={PANEL_DEFS[key].icon}
-                          isMaximized={isPanelMaximized(key)}
-                          onMaximize={() => maximizePanel(key)}
-                          onClose={() => closePanel(key)}
-                          visibleCount={visiblePanels.length}
-                        >
-                          {renderPanelBody(key)}
-                        </PanelContainer>
-                      </Panel>
-                    </React.Fragment>
-                  ))}
-                </PanelGroup>
-              </Panel>
+      const onMove = (ev: MouseEvent) => {
+        if (!draggingRowRef.current || !container) return;
+        const delta = ev.clientY - startY;
+        const newTopPx = rowFraction * startHeight + delta;
+        const frac = Math.max(0.12, Math.min(0.88, newTopPx / startHeight));
+        setRowFraction(frac);
+      };
 
-              {effectiveBottom.length > 0 && (
-                <PanelResizeHandle
-                  style={{
-                    height: 4,
-                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                    cursor: "row-resize",
-                  }}
-                />
-              )}
-            </>
+      const onUp = () => {
+        draggingRowRef.current = false;
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onUp);
+      };
+
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+    };
+
+    const onVerticalMouseDown = (event: React.MouseEvent) => {
+      event.preventDefault();
+      draggingColRef.current = true;
+      const startX = event.clientX;
+      const container = panelsContainerRef.current;
+      const rect = container?.getBoundingClientRect();
+      const startWidth = rect?.width ?? 0;
+
+      const onMove = (ev: MouseEvent) => {
+        if (!draggingColRef.current || !container) return;
+        const delta = ev.clientX - startX;
+        const newLeftPx = colFraction * startWidth + delta;
+        const frac = Math.max(0.12, Math.min(0.88, newLeftPx / startWidth));
+        setColFraction(frac);
+      };
+
+      const onUp = () => {
+        draggingColRef.current = false;
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onUp);
+      };
+
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+    };
+
+    return (
+      <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", position: "relative" }}>
+        {toolbar}
+
+        <MapLegend visible={legendOpen} onClose={() => setLegendOpen(false)} />
+
+        {searchToolPopper}
+
+        <Box ref={panelsContainerRef} sx={{ minHeight: 0, position: 'relative', height: '100%' }}>
+          {maximizedPanel ? (
+            <Box sx={{ display: 'flex', height: '100%', minHeight: 0 }}>
+              <PanelContainer
+                title={PANEL_DEFS[maximizedPanel].label}
+                icon={PANEL_DEFS[maximizedPanel].icon}
+                isMaximized={true}
+                onMaximize={() => maximizePanel(maximizedPanel)}
+                onClose={() => closePanel(maximizedPanel)}
+                visibleCount={visiblePanels.length}
+              >
+                {renderPanelBody(maximizedPanel)}
+              </PanelContainer>
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateRows: `${rowFraction}fr ${SPLITTER_HEIGHT}px ${1 - rowFraction}fr`,
+                gridTemplateColumns: `${colFraction}fr ${SPLITTER_WIDTH}px ${1 - colFraction}fr`,
+                width: '100%',
+                height: '100%',
+                minHeight: 0,
+              }}
+            >
+              {/* Top-left */}
+              <Box sx={{ gridRow: '1', gridColumn: '1', display: 'flex', minHeight: 0 }}>
+                <PanelContainer
+                  title={PANEL_DEFS['timeline'].label}
+                  icon={PANEL_DEFS['timeline'].icon}
+                  isMaximized={false}
+                  onMaximize={() => maximizePanel('timeline')}
+                  onClose={() => closePanel('timeline')}
+                  visibleCount={visiblePanels.length}
+                >
+                  {renderPanelBody('timeline')}
+                </PanelContainer>
+              </Box>
+
+              {/* Top-right */}
+              <Box sx={{ gridRow: '1', gridColumn: '3', display: 'flex', minHeight: 0 }}>
+                <PanelContainer
+                  title={PANEL_DEFS['map'].label}
+                  icon={PANEL_DEFS['map'].icon}
+                  isMaximized={false}
+                  onMaximize={() => maximizePanel('map')}
+                  onClose={() => closePanel('map')}
+                  visibleCount={visiblePanels.length}
+                >
+                  {renderPanelBody('map')}
+                </PanelContainer>
+              </Box>
+
+              {/* Vertical splitter */}
+              <Box
+                gridRow="1 / span 3"
+                gridColumn="2"
+                role="separator"
+                onMouseDown={onVerticalMouseDown}
+                sx={{
+                  width: SPLITTER_WIDTH,
+                  bgcolor: alpha(theme.palette.primary.main, 0.06),
+                  cursor: 'col-resize',
+                  zIndex: 5,
+                }}
+              />
+
+              {/* Horizontal splitter */}
+              <Box
+                gridRow="2"
+                gridColumn="1 / span 3"
+                role="separator"
+                onMouseDown={onHorizontalMouseDown}
+                sx={{
+                  height: SPLITTER_HEIGHT,
+                  bgcolor: alpha(theme.palette.primary.main, 0.06),
+                  cursor: 'row-resize',
+                  zIndex: 5,
+                }}
+              />
+
+              {/* Bottom-left */}
+              <Box sx={{ gridRow: '3', gridColumn: '1', display: 'flex', minHeight: 0 }}>
+                <PanelContainer
+                  title={PANEL_DEFS['resources'].label}
+                  icon={PANEL_DEFS['resources'].icon}
+                  isMaximized={false}
+                  onMaximize={() => maximizePanel('resources')}
+                  onClose={() => closePanel('resources')}
+                  visibleCount={visiblePanels.length}
+                >
+                  {renderPanelBody('resources')}
+                </PanelContainer>
+              </Box>
+
+              {/* Bottom-right */}
+              <Box sx={{ gridRow: '3', gridColumn: '3', display: 'flex', minHeight: 0 }}>
+                <PanelContainer
+                  title={PANEL_DEFS['tasks'].label}
+                  icon={PANEL_DEFS['tasks'].icon}
+                  isMaximized={false}
+                  onMaximize={() => maximizePanel('tasks')}
+                  onClose={() => closePanel('tasks')}
+                  visibleCount={visiblePanels.length}
+                >
+                  {renderPanelBody('tasks')}
+                </PanelContainer>
+              </Box>
+            </Box>
           )}
-
-          {effectiveBottom.length > 0 && (
-            <Panel defaultSize={50}>
-              <PanelGroup direction="horizontal" style={{ height: "100%" }}>
-                {effectiveBottom.map((key, index) => (
-                  <React.Fragment key={key}>
-                    {index > 0 && (
-                      <PanelResizeHandle
-                        style={{
-                          width: 4,
-                          backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                          cursor: "col-resize",
-                        }}
-                      />
-                    )}
-                    <Panel>
-                      <PanelContainer
-                        title={PANEL_DEFS[key].label}
-                        icon={PANEL_DEFS[key].icon}
-                        isMaximized={isPanelMaximized(key)}
-                        onMaximize={() => maximizePanel(key)}
-                        onClose={() => closePanel(key)}
-                        visibleCount={visiblePanels.length}
-                      >
-                        {renderPanelBody(key)}
-                      </PanelContainer>
-                    </Panel>
-                  </React.Fragment>
-                ))}
-              </PanelGroup>
-            </Panel>
-          )}
-        </PanelGroup>
+        </Box>
       </Box>
-    </Box>
-  );
+    );
 }

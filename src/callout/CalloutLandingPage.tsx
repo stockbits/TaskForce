@@ -1,14 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+// framer-motion removed — render static Box/Paper
 import { Box, Paper, Stack, TextField, Typography } from "@mui/material";
 import AppButton from '@/shared-ui/button';
 import { alpha, useTheme } from "@mui/material/styles";
-import { Users, ChevronRight } from "lucide-react";
+import Users from '@mui/icons-material/People';
+import ChevronRight from '@mui/icons-material/ChevronRight';
 import { ResourceRecord } from "./CalloutIncidentPanel";
 import SingleSelectField from '@/shared-ui/text-fields/SingleSelectField';
 
-const MotionBox = motion.create(Box);
-const MotionPaper = motion.create(Paper);
+// use Box and Paper directly
 
 /* ------------------------------------------------------------------
    TYPES
@@ -94,9 +94,7 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
   const startDisabled = !selectedGroup;
 
   return (
-    <MotionBox
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+    <Box
       sx={{
         position: "fixed",
         inset: 0,
@@ -109,7 +107,7 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
       }}
       onClick={onDismiss}
     >
-      <MotionPaper
+      <Paper
         ref={containerRef}
         elevation={18}
         onClick={(event) => event.stopPropagation()}
@@ -141,7 +139,7 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
                 boxShadow: "0 12px 28px rgba(10,74,122,0.35)",
               }}
             >
-              <Users size={20} />
+              <Users style={{ fontSize: 20 }} />
             </Box>
 
             <Stack spacing={0.75}>
@@ -210,38 +208,32 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
 
           {/* Resource count preview */}
           <Box sx={{ minHeight: 64 }}>
-            <AnimatePresence mode="wait">
-              {selectedGroup && (
-                <MotionPaper
-                  key={selectedGroup}
-                  elevation={0}
-                  initial={{ opacity: 0, y: -6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.18 }}
-                  sx={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 1,
-                    px: 3,
-                    py: 2,
-                    borderRadius: 2,
-                    border: `1px solid ${alpha(theme.palette.primary.main, 0.25)}`,
-                    bgcolor: alpha(theme.palette.primary.main, 0.08),
-                    color: theme.palette.primary.main,
-                    fontSize: "0.95rem",
-                    fontWeight: 600,
-                  }}
-                >
-                  <Typography variant="body2" color="inherit">
-                    <Box component="span" sx={{ fontWeight: 700 }}>
-                      {resourcesForGroup.length}
-                    </Box>{" "}
-                    {resourcesForGroup.length === 1 ? "resource" : "resources"} in this callout group.
-                  </Typography>
-                </MotionPaper>
-              )}
-            </AnimatePresence>
+            {selectedGroup ? (
+              <Paper
+                key={selectedGroup}
+                elevation={0}
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 1,
+                  px: 3,
+                  py: 2,
+                  borderRadius: 2,
+                  border: `1px solid ${alpha(theme.palette.primary.main, 0.25)}`,
+                  bgcolor: alpha(theme.palette.primary.main, 0.08),
+                  color: theme.palette.primary.main,
+                  fontSize: "0.95rem",
+                  fontWeight: 600,
+                }}
+              >
+                <Typography variant="body2" color="inherit">
+                  <Box component="span" sx={{ fontWeight: 700 }}>
+                    {resourcesForGroup.length}
+                  </Box>{" "}
+                  {resourcesForGroup.length === 1 ? "resource" : "resources"} in this callout group.
+                </Typography>
+              </Paper>
+            ) : null}
           </Box>
 
           {/* Continue Button */}
@@ -253,7 +245,7 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
                 }}
                 disabled={startDisabled}
                 variant="contained"
-                endIcon={<ChevronRight size={16} />}
+                endIcon={<ChevronRight sx={{ fontSize: 16 }} />}
                 sx={{
                   fontWeight: 600,
                 }}
@@ -262,7 +254,7 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
               </AppButton>
           </Stack>
         </Stack>
-      </MotionPaper>
-    </MotionBox>
+      </Paper>
+    </Box>
   );
 };

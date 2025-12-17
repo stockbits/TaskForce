@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Autocomplete, Box, ListItem, ListItemText, TextField } from "@mui/material";
+import useFieldSizes from './useFieldSizes';
 
 interface FreeTypeSelectFieldProps {
   label: string;
@@ -13,19 +14,13 @@ interface FreeTypeSelectFieldProps {
 
 const FIELD_WIDTH = { xs: "100%", sm: "22ch", md: "28ch" };
 
-const CHIP_SIZE = 28;
-const INPUT_HEIGHT = 40;
-
-const DEFAULT_WRAPPER_SX = {
+const DEFAULT_FIELD_WRAPPER_BASE = {
   width: "100%",
   maxWidth: FIELD_WIDTH,
   px: 1,
   display: "flex",
   alignItems: "center",
-  minHeight: INPUT_HEIGHT,
   flex: "0 0 auto",
-  '& .MuiInputBase-root': { minHeight: INPUT_HEIGHT },
-  '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: INPUT_HEIGHT },
   '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0, transition: 'all 120ms ease' },
 } as const;
 
@@ -38,6 +33,15 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
   wrapperSx,
   placeholder,
 }) => {
+  const { INPUT_HEIGHT, CHIP_SIZE } = useFieldSizes();
+
+  const DEFAULT_WRAPPER_SX = {
+    ...DEFAULT_FIELD_WRAPPER_BASE,
+    minHeight: INPUT_HEIGHT,
+    '& .MuiInputBase-root': { minHeight: INPUT_HEIGHT },
+    '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: INPUT_HEIGHT },
+  } as const;
+
   const [inputValue, setInputValue] = useState<string>(value ?? "");
 
   const normalizedQuery = inputValue.trim().toLowerCase();

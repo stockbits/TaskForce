@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, memo, lazy, Suspense } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { createPortal } from 'react-dom';
 import {
   AppBar,
   Avatar,
@@ -25,7 +25,6 @@ import { CalloutLandingPage } from "@/callout/CalloutLandingPage";
 import mockTasks from "@/data/mockTasks.json";
 import ResourceMock from "@/data/ResourceMock.json";
 const ScheduleLivePage = lazy(() => import("@/schedule/scheduleLive - Page"));
-import { User } from "lucide-react";
 
 import {
   CalloutIncidentPanel,
@@ -33,32 +32,27 @@ import {
   CalloutOutcomeConfig,
   ResourceRecord,
 } from "@/callout/CalloutIncidentPanel";
-import {
-  Menu,
-  Search,
-  Folder,
-  ClipboardList,
-  Settings,
-  ListChecks,
-  AlertTriangle,
-  Users,
-  UserCog,
-  Globe,
-  Calendar,
-  Cog,
-} from "lucide-react";
-import { Toaster, toast } from "react-hot-toast";
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import InfoIcon from '@mui/icons-material/Info';
-import { createPortal } from "react-dom";
 
-import { SidebarNavigation } from "./SidebarNavigation";
-import TaskSearchCard from "@/tasks/TaskSearchCardClean";
-import TaskTableAdvanced from "@/tasks/TaskTableAdvanced";
+import Menu from '@mui/icons-material/Menu';
+import Search from '@mui/icons-material/Search';
+import Folder from '@mui/icons-material/Folder';
+import ClipboardList from '@mui/icons-material/ListAlt';
+import Settings from '@mui/icons-material/Settings';
+import ListChecks from '@mui/icons-material/ListAlt';
+import AlertTriangle from '@mui/icons-material/WarningAmber';
+import Users from '@mui/icons-material/People';
+import User from '@mui/icons-material/Person';
+import UserCog from '@mui/icons-material/AdminPanelSettings';
+import Globe from '@mui/icons-material/Public';
+import Calendar from '@mui/icons-material/CalendarMonth';
+import Cog from '@mui/icons-material/Build';
 import TaskPopoutPanel from "@/tasks/TaskPopoutPanel";
 import TaskRowContextMenu from '@/shared-ui/TaskRowContextMenu';
 import ProgressTasksDialog from '@/tasks/ProgressTasksDialog';
+import { useAppSnackbar } from '@/shared-ui/SnackbarProvider';
+import { Sidebar as SidebarNavigation } from '@/layout/SidebarNavigation';
+import TaskSearchCard from '@/tasks/TaskSearchCardClean';
+import TaskTableAdvanced from '@/tasks/TaskTableAdvanced';
 
 import { cardMap } from "@/layout/menuRegistry";
 import { TaskDetails, ProgressNoteEntry } from "@/types";
@@ -128,7 +122,7 @@ const ALL_TASK_SECTIONS = [
   "Closure",
 ];
 
-const MotionCard = motion.create(Card);
+// motion-backed Card removed; use plain Card with hover styles instead
 
 /* =========================================================
    HELPERS
@@ -243,7 +237,7 @@ const Header: React.FC<HeaderProps> = memo(
                 },
               }}
             >
-              <Menu size={26} strokeWidth={3} />
+              <Menu sx={{ fontSize: 26 }} />
             </IconButton>
 
             <Typography
@@ -269,7 +263,7 @@ const Header: React.FC<HeaderProps> = memo(
                 boxShadow: '0px 0px 0px 2px rgba(255,255,255,0.08)',
               }}
             >
-              <User size={18} color="#FFFFFF" />
+              <User sx={{ fontSize: 18, color: "#FFFFFF" }} />
             </Avatar>
           </Box>
         </Toolbar>
@@ -331,63 +325,54 @@ const MainContent: React.FC<MainContentProps> = memo(
           </Typography>
         </Box>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentMenu?.label || "default"}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.25 }}
-          >
-            <Grid container spacing={{ xs: 3, md: 4 }} justifyContent="center">
-              {filteredItems.length ? (
-                filteredItems.map((item: any, idx: number) => (
-                  <Grid item xs={12} sm={6} md={4} key={idx}>
-                    <MotionCard
-                      whileHover={{ scale: 1.02 }}
-                      transition={{ duration: 0.2 }}
-                      elevation={3}
-                    >
-                      <CardActionArea onClick={() => onCardClick(item)}>
-                        <CardContent
-                          sx={{
-                            minHeight: 150,
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: 1.5,
-                            textAlign: "center",
-                            px: 4,
-                            py: 3,
-                          }}
-                        >
-                          <Typography variant="h6" fontWeight={600}>
-                            {item.name}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {item.description}
-                          </Typography>
-                        </CardContent>
-                      </CardActionArea>
-                    </MotionCard>
-                  </Grid>
-                ))
-              ) : (
-                <Grid item xs={12}>
-                  <Paper
-                    variant="outlined"
-                    sx={{
-                      py: 8,
-                      textAlign: "center",
-                      color: "text.secondary",
-                    }}
+        <Box key={currentMenu?.label || "default"}>
+          <Grid container spacing={{ xs: 3, md: 4 }} justifyContent="center">
+            {filteredItems.length ? (
+              filteredItems.map((item: any, idx: number) => (
+                <Grid item xs={12} sm={6} md={4} key={idx}>
+                  <Card
+                    elevation={3}
+                    sx={{ transition: 'transform .2s', '&:hover': { transform: 'scale(1.02)' } }}
                   >
-                    <Typography variant="body2">No results found.</Typography>
-                  </Paper>
+                    <CardActionArea onClick={() => onCardClick(item)}>
+                      <CardContent
+                        sx={{
+                          minHeight: 150,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 1.5,
+                          textAlign: "center",
+                          px: 4,
+                          py: 3,
+                        }}
+                      >
+                        <Typography variant="h6" fontWeight={600}>
+                          {item.name}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {item.description}
+                        </Typography>
+                      </CardContent>
+                    </CardActionArea>
+                  </Card>
                 </Grid>
-              )}
-            </Grid>
-          </motion.div>
-        </AnimatePresence>
+              ))
+            ) : (
+              <Grid item xs={12}>
+                <Paper
+                  variant="outlined"
+                  sx={{
+                    py: 8,
+                    textAlign: "center",
+                    color: "text.secondary",
+                  }}
+                >
+                  <Typography variant="body2">No results found.</Typography>
+                </Paper>
+              </Grid>
+            )}
+          </Grid>
+        </Box>
       </Box>
     );
   }
@@ -400,6 +385,7 @@ MainContent.displayName = "MainContent";
 ========================================================= */
 
 export default function MainLayout() {
+  const snackbar = useAppSnackbar();
   /* ---------------------- Menu & layout ---------------------- */
   const defaultMenu = "Operation Toolkit";
 
@@ -558,7 +544,7 @@ export default function MainLayout() {
   // Open Progress Tasks dialog programmatically (used by Actions menu)
   const openProgressTasks = useCallback((tasks: any[]) => {
     if (!tasks || !tasks.length) {
-      toast.error('No tasks selected');
+      snackbar.error('No tasks selected');
       return;
     }
     setProgressTasks(tasks);
@@ -717,7 +703,7 @@ export default function MainLayout() {
       setResources(ResourceMock as ResourceRecord[]);
       setResourceLoaded(true);
     } catch (err) {
-      toast.error("Error loading resource data.");
+      snackbar.error("Error loading resource data.");
     }
   }, []);
 
@@ -832,7 +818,7 @@ export default function MainLayout() {
   const handleSearch = useCallback(
     (filters: Record<string, any>) => {
       if (!dataLoaded) {
-        toast.error("Data not loaded yet.");
+        snackbar.error("Data not loaded yet.");
         return;
       }
 
@@ -840,7 +826,7 @@ export default function MainLayout() {
 
       if (filtered.length === 0) {
         setRows([]);
-        toast.error("No matching tasks found.");
+        snackbar.error("No matching tasks found.");
         return;
       }
 
@@ -852,26 +838,26 @@ export default function MainLayout() {
   const handleClear = useCallback(() => {
     setRows([]);
     setExpandedSections([]);
-    toast.success("Filters cleared.", { id: "clear-toast", icon: "🧹" });
+    snackbar.info("Filters cleared.");
   }, []);
 
   const canCopy = rows.length > 0;
 
   const handleCopyAll = useCallback(async () => {
     if (!canCopy) {
-      toast.error("No data to copy.");
+      snackbar.error("No data to copy.");
       return;
     }
 
     const headers = Object.keys(headerNames);
     const html = buildClipboardHtml(headers, rows);
     await navigator.clipboard.writeText(html);
-    toast.success("Copied", { icon: "📋" });
+    snackbar.success("Copied");
   }, [rows, canCopy]);
 
   const handleExportCSV = useCallback(() => {
     if (!canCopy) {
-      toast.error("No data to export.");
+      snackbar.error("No data to export.");
       return;
     }
 
@@ -884,7 +870,7 @@ export default function MainLayout() {
     link.download = "FilteredTasks.csv";
     link.click();
 
-    toast.success("Exported", { icon: "💾" });
+    snackbar.success("Exported");
   }, [rows, canCopy]);
 
   const handleHeaderSelectResult = useCallback((item: any) => {
@@ -1232,17 +1218,7 @@ export default function MainLayout() {
         overflowX: "hidden",
       }}
     >
-      <Toaster
-        position="top-center"
-        containerStyle={{ top: toastTop }}
-        toastOptions={{
-          duration: 4000,
-          style: { fontSize: 13 },
-          success: { icon: <CheckCircleIcon fontSize="small" color="success" /> },
-          error: { icon: <ErrorOutlineIcon fontSize="small" color="error" /> },
-          icon: <InfoIcon fontSize="small" />,
-        }}
-      />
+      {/* Snackbar provided at app root via AppSnackbarProvider */}
 
       {/* SIDEBAR */}
         <SidebarNavigation
@@ -1460,12 +1436,12 @@ export default function MainLayout() {
             }));
             // simulate save
             window.dispatchEvent(new CustomEvent('taskforce:tasks-progressed', { detail: { items } }));
-            toast.success(`Progressed ${items.length} task${items.length>1 ? 's' : ''}`);
+            snackbar.success(`Progressed ${items.length} task${items.length>1 ? 's' : ''}`);
             setProgressDialogOpen(false);
             setProgressTasks([]);
             setProgressNote('');
           } catch (err) {
-            toast.error('Progress failed');
+            snackbar.error('Progress failed');
           } finally {
             setProgressSaving(false);
           }

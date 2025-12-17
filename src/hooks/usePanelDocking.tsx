@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from "react";
-import { X, Maximize2, type LucideIcon } from "lucide-react";
+import Close from '@mui/icons-material/Close';
+import OpenInFull from '@mui/icons-material/OpenInFull';
 import { Box, IconButton, Paper, Stack, Typography } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
+import useFieldSizes from "../shared-ui/text-fields/useFieldSizes";
 
 /* ============================================================
    TYPES
@@ -71,7 +73,7 @@ export function PanelContainer({
   visibleCount,
 }: {
   title: string;
-  icon: LucideIcon;
+  icon: React.ElementType;
   isMaximized: boolean;
   onMaximize: () => void;
   onClose: () => void;
@@ -80,6 +82,7 @@ export function PanelContainer({
   visibleCount: number;
 }) {
   const theme = useTheme();
+  const { INPUT_HEIGHT } = useFieldSizes();
   const borderColor = alpha(theme.palette.primary.main, 0.12);
   const headerBg = alpha(theme.palette.primary.main, 0.05);
   const iconTone = alpha(theme.palette.text.primary, 0.6);
@@ -108,11 +111,11 @@ export function PanelContainer({
           py: 1,
           borderBottom: `1px solid ${borderColor}`,
           backgroundColor: headerBg,
-          minHeight: 48,
+          minHeight: INPUT_HEIGHT,
         }}
       >
         <Stack direction="row" spacing={1.5} alignItems="center">
-          <Icon size={18} color={iconTone} />
+          <Icon sx={{ fontSize: 18, color: iconTone as any }} />
           <Typography
             variant="subtitle2"
             sx={{ fontWeight: 600, color: theme.palette.text.primary }}
@@ -140,10 +143,10 @@ export function PanelContainer({
                 },
               }}
             >
-              <Maximize2
-                size={16}
-                color={theme.palette.text.primary}
+              <OpenInFull
                 style={{
+                  fontSize: 16,
+                  color: theme.palette.text.primary,
                   transform: isMaximized ? "rotate(180deg)" : "none",
                   transition: "transform 150ms ease",
                 }}
@@ -166,7 +169,7 @@ export function PanelContainer({
                 },
               }}
             >
-              <X size={16} color={theme.palette.text.primary} />
+              <Close style={{ fontSize: 16, color: theme.palette.text.primary }} />
             </IconButton>
         </Stack>
       </Stack>

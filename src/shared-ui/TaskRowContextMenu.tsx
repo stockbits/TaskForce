@@ -1,8 +1,11 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { Eye, Copy, AlertTriangle, ListChecks, StickyNote } from "lucide-react";
 import { Paper, List, ListItemButton, ListItemIcon, Typography, Divider } from "@mui/material";
+import Visibility from '@mui/icons-material/Visibility';
+import ContentCopy from '@mui/icons-material/ContentCopy';
+import WarningAmber from '@mui/icons-material/WarningAmber';
+import ListAlt from '@mui/icons-material/ListAlt';
+import StickyNote2 from '@mui/icons-material/StickyNote2';
 
 interface TaskRowContextMenuProps {
   visible: boolean;
@@ -160,27 +163,21 @@ export default function TaskRowContextMenu({
     ? `Callout Incident: ${taskId}`
     : "Callout Incident";
 
-  const menu = (
-    <AnimatePresence>
-      {visible && (
-        <motion.ul
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.96 }}
-          transition={{ duration: 0.12 }}
-          // Use fixed positioning so the menu appears at the exact viewport
-          // coordinates where the user clicked (clientX/clientY).
-          ref={menuRef}
-          style={{
-            position: "fixed",
-            top: y,
-            left: x,
-            minWidth: `min(90vw, ${24 * 14.1667}px)`, // 340px, use theme.spacing(42.5) if available
-            zIndex: 99999,
-          }}
-          className="rounded-xl border border-gray-200 bg-white shadow-xl text-sm text-gray-800 py-1 overflow-hidden"
-          onMouseDown={(e) => e.stopPropagation()}
-        >
+  const menu = visible ? (
+      <ul
+        // Use fixed positioning so the menu appears at the exact viewport
+        // coordinates where the user clicked (clientX/clientY).
+        ref={menuRef}
+        style={{
+          position: "fixed",
+          top: y,
+          left: x,
+          minWidth: `min(90vw, ${24 * 14.1667}px)`, // 340px, use theme.spacing(42.5) if available
+          zIndex: 99999,
+        }}
+        className="rounded-xl border border-gray-200 bg-white shadow-xl text-sm text-gray-800 py-1 overflow-hidden"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
           {/* ---------------------------
               COPY VALUE
           --------------------------- */}
@@ -190,7 +187,7 @@ export default function TaskRowContextMenu({
               className="px-4 py-2.5 flex items-center gap-3 cursor-pointer 
                          hover:bg-gray-50 transition-all"
             >
-              <Copy size={15} className="text-gray-700" />
+              <ContentCopy sx={{ fontSize: 15 }} className="text-gray-700" />
               <span className="text-gray-800">
                 Copy value:{" "}
                 <span className="font-semibold">{previewValue}</span>
@@ -207,7 +204,7 @@ export default function TaskRowContextMenu({
               className="px-4 py-2.5 flex items-center gap-3 cursor-pointer 
                          hover:bg-gray-50 transition-all"
             >
-              <ListChecks size={15} className="text-[#0A4A7A]" />
+              <ListAlt style={{ fontSize: 15 }} className="text-[#0A4A7A]" />
               <span className="font-medium text-gray-800">
                 {multiCount > 1 ? `Progress Tasks (${multiCount})` : "Progress Task"}
               </span>
@@ -223,7 +220,7 @@ export default function TaskRowContextMenu({
               className="px-4 py-2.5 flex items-center gap-3 cursor-pointer 
                          hover:bg-gray-50 transition-all"
             >
-              <StickyNote size={15} className="text-[#0A4A7A]" />
+              <StickyNote2 style={{ fontSize: 15 }} className="text-[#0A4A7A]" />
               <span className="font-medium text-gray-800">
                 {multiCount > 1
                   ? `Progress Notes (${multiCount})`
@@ -240,7 +237,7 @@ export default function TaskRowContextMenu({
             className="px-4 py-2.5 flex items-center gap-3 cursor-pointer 
                        hover:bg-gray-50 transition-all"
           >
-            <Eye size={15} className="text-gray-700" />
+            <Visibility style={{ fontSize: 15 }} className="text-gray-700" />
             <span className="font-medium text-gray-800">{viewLabel}</span>
           </li>
 
@@ -258,13 +255,11 @@ export default function TaskRowContextMenu({
             role="menuitem"
             aria-disabled={actionableRows.length !== 1}
           >
-            <AlertTriangle size={15} className={actionableRows.length === 1 ? 'text-red-600' : 'text-gray-400'} />
+            <WarningAmber style={{ fontSize: 15 }} className={actionableRows.length === 1 ? 'text-red-600' : 'text-gray-400'} />
             <span className="font-semibold">{incidentLabel}</span>
           </li>
-        </motion.ul>
-      )}
-    </AnimatePresence>
-  );
+      </ul>
+    ) : null;
 
   // Render the menu into document.body to avoid being affected by transforms
   // or stacking contexts from parent layout containers.

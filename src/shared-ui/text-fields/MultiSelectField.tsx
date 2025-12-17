@@ -16,6 +16,8 @@ import type {
   AutocompleteChangeReason,
 } from "@mui/material/Autocomplete";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
+import { useTheme } from '@mui/material/styles';
+import useFieldSizes from './useFieldSizes';
 
 const SELECT_ALL_VALUE = "__SELECT_ALL__";
 
@@ -100,8 +102,8 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
 
   const FIELD_WIDTH = { xs: '100%', sm: '22ch', md: '28ch' };
 
-  const CHIP_SIZE = 28;
-  const INPUT_HEIGHT = 40;
+  const theme = useTheme();
+  const { INPUT_HEIGHT, CHIP_SIZE } = useFieldSizes();
 
   const DEFAULT_WRAPPER_SX = {
     width: "100%",
@@ -205,7 +207,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
           <Tooltip title="Show selections" arrow>
             <span>
               <Chip
-                label={`+${count} selected`}
+                label={`+${count} `}
                 size="small"
                 variant="outlined"
                 onMouseDown={(e) => e.preventDefault()}
