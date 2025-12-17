@@ -219,6 +219,7 @@ export default function ResourceTablePanel({
         rows={displayData}
         headerNames={headerNames}
         sx={{ height: '100%' }}
+        hideToolbar={true}
         tableHeight="100%"
         rowIdKey="resourceId"
         controlledSelectedRowIds={selectedRowIds}

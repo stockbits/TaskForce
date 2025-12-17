@@ -18,6 +18,7 @@ import TaskRowContextMenu from '@/shared-ui/TaskRowContextMenu';
   reserveBottom?: number;
   debug?: boolean;
   disablePagination?: boolean;
+  hideToolbar?: boolean;
   controlledSelectedRowIds?: string[];
   rowIdKey?: string;
   onOpenPopout?: (tasks: Record<string, any>[], mouseScreenX: number, mouseScreenY: number) => void;
@@ -30,7 +31,7 @@ import TaskRowContextMenu from '@/shared-ui/TaskRowContextMenu';
   onSortChange?: (hasSorting: boolean, sortModel?: any[]) => void;
 };
 
-export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef, reserveBottom = 160, disablePagination = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns, onSortChange }: Props) {
+export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef, reserveBottom = 160, disablePagination = false, hideToolbar = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns, onSortChange }: Props) {
   // Internal state for uncontrolled components
   const [selection, setSelection] = useState<string[]>([]);
   
@@ -327,7 +328,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           columns={colState}
           rowSelectionModel={rowSelectionModel}
           checkboxSelection
-          components={{ Toolbar: CustomToolbar }}
+          components={hideToolbar ? {} : { Toolbar: CustomToolbar }}
           density={density as 'compact' | 'standard' | 'comfortable'}
           // Use client-side/native MUI sorting
           apiRef={apiRef}

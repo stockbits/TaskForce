@@ -223,6 +223,7 @@ export default function TaskTablePanel({
         rows={displayData}
         headerNames={headerNames}
         sx={{ height: '100%' }}
+        hideToolbar={true}
         tableHeight="100%"
         rowIdKey="taskId"
         controlledSelectedRowIds={selectedRowIds}
