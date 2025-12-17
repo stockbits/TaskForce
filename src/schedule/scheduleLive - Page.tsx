@@ -923,7 +923,7 @@ export default function ScheduleLivePage() {
 
         {searchToolPopper}
 
-        <Box ref={panelsContainerRef} sx={{ minHeight: 0, position: 'relative', height: '100%' }}>
+        <Box ref={panelsContainerRef} sx={{ minHeight: 0, position: 'relative', height: '100%', overflow: 'hidden' }} data-visible-panels={visiblePanels.join(',')}>
           {maximizedPanel ? (
             <Box sx={{ display: 'flex', height: '100%', minHeight: 0 }}>
               <PanelContainer
@@ -941,8 +941,8 @@ export default function ScheduleLivePage() {
             <Box
               sx={{
                 display: 'grid',
-                gridTemplateRows: `${rowFraction}fr ${SPLITTER_HEIGHT}px ${1 - rowFraction}fr`,
-                gridTemplateColumns: `${colFraction}fr ${SPLITTER_WIDTH}px ${1 - colFraction}fr`,
+                gridTemplateRows: `${Math.round(rowFraction * 100)}% ${SPLITTER_HEIGHT}px ${Math.round((1 - rowFraction) * 100)}%`,
+                gridTemplateColumns: `${Math.round(colFraction * 100)}% ${SPLITTER_WIDTH}px ${Math.round((1 - colFraction) * 100)}%`,
                 width: '100%',
                 height: '100%',
                 minHeight: 0,
@@ -950,30 +950,34 @@ export default function ScheduleLivePage() {
             >
               {/* Top-left */}
               <Box sx={{ gridRow: '1', gridColumn: '1', display: 'flex', minHeight: 0 }}>
-                <PanelContainer
-                  title={PANEL_DEFS['timeline'].label}
-                  icon={PANEL_DEFS['timeline'].icon}
-                  isMaximized={false}
-                  onMaximize={() => maximizePanel('timeline')}
-                  onClose={() => closePanel('timeline')}
-                  visibleCount={visiblePanels.length}
-                >
-                  {renderPanelBody('timeline')}
-                </PanelContainer>
+                {visiblePanels.includes('timeline') && (
+                  <PanelContainer
+                    title={PANEL_DEFS['timeline'].label}
+                    icon={PANEL_DEFS['timeline'].icon}
+                    isMaximized={false}
+                    onMaximize={() => maximizePanel('timeline')}
+                    onClose={() => closePanel('timeline')}
+                    visibleCount={visiblePanels.length}
+                  >
+                    {renderPanelBody('timeline')}
+                  </PanelContainer>
+                )}
               </Box>
 
               {/* Top-right */}
               <Box sx={{ gridRow: '1', gridColumn: '3', display: 'flex', minHeight: 0 }}>
-                <PanelContainer
-                  title={PANEL_DEFS['map'].label}
-                  icon={PANEL_DEFS['map'].icon}
-                  isMaximized={false}
-                  onMaximize={() => maximizePanel('map')}
-                  onClose={() => closePanel('map')}
-                  visibleCount={visiblePanels.length}
-                >
-                  {renderPanelBody('map')}
-                </PanelContainer>
+                {visiblePanels.includes('map') && (
+                  <PanelContainer
+                    title={PANEL_DEFS['map'].label}
+                    icon={PANEL_DEFS['map'].icon}
+                    isMaximized={false}
+                    onMaximize={() => maximizePanel('map')}
+                    onClose={() => closePanel('map')}
+                    visibleCount={visiblePanels.length}
+                  >
+                    {renderPanelBody('map')}
+                  </PanelContainer>
+                )}
               </Box>
 
               {/* Vertical splitter */}
@@ -1008,30 +1012,34 @@ export default function ScheduleLivePage() {
 
               {/* Bottom-left */}
               <Box sx={{ gridRow: '3', gridColumn: '1', display: 'flex', minHeight: 0 }}>
-                <PanelContainer
-                  title={PANEL_DEFS['resources'].label}
-                  icon={PANEL_DEFS['resources'].icon}
-                  isMaximized={false}
-                  onMaximize={() => maximizePanel('resources')}
-                  onClose={() => closePanel('resources')}
-                  visibleCount={visiblePanels.length}
-                >
-                  {renderPanelBody('resources')}
-                </PanelContainer>
+                {visiblePanels.includes('resources') && (
+                  <PanelContainer
+                    title={PANEL_DEFS['resources'].label}
+                    icon={PANEL_DEFS['resources'].icon}
+                    isMaximized={false}
+                    onMaximize={() => maximizePanel('resources')}
+                    onClose={() => closePanel('resources')}
+                    visibleCount={visiblePanels.length}
+                  >
+                    {renderPanelBody('resources')}
+                  </PanelContainer>
+                )}
               </Box>
 
               {/* Bottom-right */}
               <Box sx={{ gridRow: '3', gridColumn: '3', display: 'flex', minHeight: 0 }}>
-                <PanelContainer
-                  title={PANEL_DEFS['tasks'].label}
-                  icon={PANEL_DEFS['tasks'].icon}
-                  isMaximized={false}
-                  onMaximize={() => maximizePanel('tasks')}
-                  onClose={() => closePanel('tasks')}
-                  visibleCount={visiblePanels.length}
-                >
-                  {renderPanelBody('tasks')}
-                </PanelContainer>
+                {visiblePanels.includes('tasks') && (
+                  <PanelContainer
+                    title={PANEL_DEFS['tasks'].label}
+                    icon={PANEL_DEFS['tasks'].icon}
+                    isMaximized={false}
+                    onMaximize={() => maximizePanel('tasks')}
+                    onClose={() => closePanel('tasks')}
+                    visibleCount={visiblePanels.length}
+                  >
+                    {renderPanelBody('tasks')}
+                  </PanelContainer>
+                )}
               </Box>
             </Box>
           )}

@@ -314,7 +314,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
 
 
   const paperSx: any = (typeof tableHeight === 'string' && tableHeight.trim().endsWith('%'))
-    ? { width: '100%', zIndex: 0, display: 'flex', flex: 1, minHeight: 0, flexDirection: 'column' }
+    ? { width: '100%', zIndex: 0, display: 'flex', flex: 1, minHeight: 0, flexDirection: 'column', height: '100%' }
     : { height: tableHeight, width: '100%', zIndex: 0 };
 
   return (
