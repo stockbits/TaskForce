@@ -1010,7 +1010,7 @@ export default function ScheduleLivePage() {
               {/* Vertical splitter */}
               {colsCount === 2 && (topHasBoth || bottomHasBoth) && (
                 <Box
-                  gridRow={rowsCount === 2 ? '1 / span 3' : topHasBoth ? '1' : '3'}
+                  gridRow={visiblePanels.length === 3 ? '1 / span 3' : topHasBoth ? '1' : '3'}
                   gridColumn="2"
                   role="separator"
                   onMouseDown={onVerticalMouseDown}
@@ -1028,7 +1028,7 @@ export default function ScheduleLivePage() {
               {rowsCount === 2 && (leftHasBoth || rightHasBoth) && (
                 <Box
                   gridRow="2"
-                  gridColumn={colsCount === 2 ? '1 / span 3' : leftHasBoth ? '1' : '3'}
+                  gridColumn={visiblePanels.length === 3 ? '1 / span 3' : leftHasBoth ? '1' : '3'}
                   role="separator"
                   onMouseDown={onHorizontalMouseDown}
                   sx={{
