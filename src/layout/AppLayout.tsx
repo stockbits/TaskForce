@@ -21,7 +21,6 @@ import {
   useTheme,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import { CalloutLandingPage } from "@/callout/CalloutLandingPage";
 import mockTasks from "@/data/mockTasks.json";
 import ResourceMock from "@/data/ResourceMock.json";
 const ScheduleLivePage = lazy(() => import("@/schedule/scheduleLive - Page"));
@@ -32,6 +31,7 @@ import {
   CalloutOutcomeConfig,
   ResourceRecord,
 } from "@/callout/CalloutIncidentPanel";
+import { CalloutLandingPage } from "@/callout/CalloutLandingPage";
 
 import Menu from '@mui/icons-material/Menu';
 import Search from '@mui/icons-material/Search';

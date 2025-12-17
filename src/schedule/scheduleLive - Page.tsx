@@ -144,6 +144,20 @@ export default function ScheduleLivePage() {
     notifyMapDragEnd,
   } = useLiveSelectEngine();
 
+  // Listen for resource selection from header avatars
+  React.useEffect(() => {
+    const handleResourceSelected = (event: any) => {
+      const { resource } = event.detail;
+      // Select the resource using the selection engine
+      handleResourceTableSelect([resource]);
+      // Also update the search field to show the selected resource ID
+      setSearchAnywhere(resource.resourceId);
+    };
+
+    window.addEventListener('resourceSelected', handleResourceSelected);
+    return () => window.removeEventListener('resourceSelected', handleResourceSelected);
+  }, []);
+
   /* ==========================================================================
      SELECTION CLEAR FUNCTIONS
   ========================================================================== */
@@ -392,6 +406,8 @@ export default function ScheduleLivePage() {
     );
     if (resourceMatches.length) {
       setResourceData(resourceMatches);
+      // Select the matched resource for the timeline
+      handleResourceTableSelect(resourceMatches);
       matched = true;
     }
 
@@ -430,7 +446,7 @@ export default function ScheduleLivePage() {
   const renderPanelBody = (key: PanelKey) => {
     switch (key) {
       case "timeline":
-        return <TimelinePanel />;
+        return <TimelinePanel selectedResource={selectedResource} />;
 
       case "map":
         return (
@@ -600,7 +616,7 @@ export default function ScheduleLivePage() {
         value={searchAnywhere}
         onChange={(e) => setSearchAnywhere(e.target.value)}
         onSearch={runGlobalSearch}
-        placeholder="Search by Task ID, Work ID, Estimate Number, Employee ID"
+        placeholder="Search by Task ID, Work ID, Estimate Number, Employee ID, or Resource ID"
         size="small"
         showSearchButton={true}
         sx={{ height: theme.custom?.inputHeight ?? 40, '& .MuiInputBase-input': { fontSize: 13, lineHeight: `${theme.custom?.chipSize ?? 28}px` } }}
