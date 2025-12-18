@@ -5,31 +5,42 @@ import useFieldSizes from './useFieldSizes';
 
 type Props = {
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onSearch?: () => void;
   placeholder?: string;
   size?: 'small' | 'medium';
   sx?: any;
   name?: string;
   showSearchButton?: boolean;
+  validateExact?: (value: string) => boolean;
+  errorMessage?: string;
 };
 
-export default function GlobalSearchField({
-  value,
-  onChange,
-  onKeyPress,
-  onSearch,
-  placeholder = '',
-  size = 'small',
-  sx = {},
-  name = 'taskSearch',
-  showSearchButton = false
-}: Props) {
+export default function GlobalSearchField(props: Props) {
+  const {
+    value,
+    onChange,
+    onKeyPress,
+    onSearch,
+    placeholder = '',
+    size = 'small',
+    sx = {},
+    name = 'taskSearch',
+    showSearchButton = false,
+    validateExact,
+    errorMessage,
+  } = props;
+
   const { INPUT_HEIGHT, CHIP_SIZE } = useFieldSizes();
+  const [error, setError] = React.useState<boolean>(false);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && onSearch) {
+      if (validateExact && !validateExact(value)) {
+        setError(true);
+        return;
+      }
       onSearch();
     }
     onKeyPress?.(e);
@@ -39,7 +50,13 @@ export default function GlobalSearchField({
     <InputAdornment position="end">
       <IconButton
         size="small"
-        onClick={onSearch}
+        onClick={() => {
+          if (validateExact && !validateExact(value)) {
+            setError(true);
+            return;
+          }
+          onSearch?.();
+        }}
         sx={{ mr: 0.5 }}
         aria-label="search"
       >
@@ -53,7 +70,10 @@ export default function GlobalSearchField({
       <TextField
         name={name}
         value={value}
-        onChange={onChange}
+        onChange={(e) => {
+          onChange(e);
+          if (error) setError(false);
+        }}
         onKeyPress={handleKeyPress}
         placeholder={placeholder}
         size={size}
@@ -69,7 +89,8 @@ export default function GlobalSearchField({
           height: INPUT_HEIGHT
         }}
         InputProps={{
-          startAdornment: (
+          // Avoid duplicate icons when an explicit search button exists
+          startAdornment: showSearchButton ? undefined : (
             <InputAdornment position="start">
               <SearchIcon style={{ fontSize: 16 }} />
             </InputAdornment>
@@ -77,6 +98,8 @@ export default function GlobalSearchField({
           endAdornment,
           sx: { height: INPUT_HEIGHT }
         }}
+        error={error}
+        helperText={undefined}
       />
     </Box>
   );

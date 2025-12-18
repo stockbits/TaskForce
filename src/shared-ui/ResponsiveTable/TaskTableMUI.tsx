@@ -1,13 +1,11 @@
 import React, { useMemo, useState, useEffect, MutableRefObject, useRef } from 'react';
-import { Box, useTheme, Paper, Stack, Typography, TextField, InputAdornment, Divider, FormControlLabel, Checkbox, Popper, ClickAwayListener, TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
+import { Box, useTheme, Paper, Typography } from '@mui/material';
 import { useAppSnackbar } from '@/shared-ui/SnackbarProvider';
 import { GridColDef, useGridApiRef, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarDensitySelector } from '@mui/x-data-grid';
 import { DataGrid } from '@mui/x-data-grid';
 // keep imports minimal: use built-in DataGrid behavior
 // framer-motion removed — using static elements
-import Search from '@mui/icons-material/Search';
-import MoreVertical from '@mui/icons-material/MoreVert';
-import GripVertical from '@mui/icons-material/DragIndicator';
+// icon imports removed (unused)
 import TaskRowContextMenu from '@/shared-ui/TaskRowContextMenu';
 
  type Props = {
@@ -180,7 +178,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
     } catch (err) {
       // ignore
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [gridRows]);
 
   // handle right-click on rows to open context menu

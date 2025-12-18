@@ -40,7 +40,7 @@ import TodayIcon from '@mui/icons-material/Today';
 import TodayOutlinedIcon from '@mui/icons-material/TodayOutlined';
 import DateTimePopover from '@/shared-ui/DateTimePopover';
 import { MultiSelectField, SingleSelectField, FreeTypeSelectField } from '@/shared-ui';
-import GlobalSearchField from '@/shared-ui/text-fields/GlobalSearchField';
+import ExactGlobalSearchField from '@/shared-ui/text-fields/ExactGlobalSearchField';
 import AppButton from '@/shared-ui/button';
 import Visibility from '@mui/icons-material/Visibility';
 
@@ -497,7 +497,7 @@ export default function TaskSearchCard({
   }, [filters]);
 
   const handleFieldChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
+    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { name, value } = event.target;
       setFilters((prev) => ({ ...prev, [name]: value }));
     },
@@ -606,7 +606,7 @@ export default function TaskSearchCard({
 
           <Box sx={{ flex: 1 }} />
 
-          <GlobalSearchField
+          <ExactGlobalSearchField
             name="taskSearch"
             value={filters.taskSearch}
             onChange={handleFieldChange}

@@ -140,7 +140,7 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
         const dr = getDateRange(viewMode);
         chart.xAxis[0].setExtremes(dr.start, dr.end, true, false);
       }
-    } catch (err) {
+    } catch {
       // ignore
     }
   }, [viewMode]);
@@ -554,7 +554,7 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
                     if (p.graphic && typeof p.graphic.getBBox === 'function') {
                       bbox = p.graphic.getBBox();
                     }
-                  } catch (e) {
+                  } catch {
                     bbox = undefined;
                   }
 
@@ -605,8 +605,8 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
           // (when available via shapeArgs) or to the computed row bottoms
           try {
             // clear previous
-            if (gridLinesRef.current && gridLinesRef.current.length && chart && chart.renderer) {
-              gridLinesRef.current.forEach((el: any) => { try { el.destroy(); } catch (e) {} });
+              if (gridLinesRef.current && gridLinesRef.current.length && chart && chart.renderer) {
+              gridLinesRef.current.forEach((el: any) => { try { el.destroy(); } catch {} });
               gridLinesRef.current = [];
             }
 
@@ -623,11 +623,11 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
                 gridLinesRef.current.push(line);
               }
             }
-          } catch (e) {
+          } catch {
             // ignore renderer errors
           }
         }
-      } catch (e) {
+      } catch {
         // ignore
       }
     };
@@ -645,7 +645,7 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
     return () => {
       window.removeEventListener('resize', updateOffset);
       if (chart && (Highcharts as any).removeEvent) {
-        try { (Highcharts as any).removeEvent(chart, 'redraw', updateOffset); } catch (e) {}
+        try { (Highcharts as any).removeEvent(chart, 'redraw', updateOffset); } catch {}
       }
     };
   }, [resources, viewMode]);
@@ -654,8 +654,8 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
   useEffect(() => {
     return () => {
       try {
-        if (gridLinesRef.current && gridLinesRef.current.length) {
-          gridLinesRef.current.forEach((el: any) => { try { el.destroy(); } catch (e) {} });
+          if (gridLinesRef.current && gridLinesRef.current.length) {
+          gridLinesRef.current.forEach((el: any) => { try { el.destroy(); } catch {} });
           gridLinesRef.current = [];
         }
       } catch (e) {}
@@ -670,7 +670,7 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
         const pw = Math.max(8, Math.round(computedRowHeight * 0.6));
         chart.update({ plotOptions: { gantt: { pointWidth: pw } } }, true, false);
       }
-    } catch (e) {
+    } catch {
       // ignore
     }
   }, [computedRowHeight]);
@@ -681,7 +681,7 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
       if (leftColRef.current && rightColRef.current) {
         rightColRef.current.scrollTop = leftColRef.current.scrollTop;
       }
-    } catch (e) {}
+    } catch {}
   };
 
   const onRightScroll = () => {
@@ -689,7 +689,7 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
       if (leftColRef.current && rightColRef.current) {
         leftColRef.current.scrollTop = rightColRef.current.scrollTop;
       }
-    } catch (e) {}
+    } catch {}
   };
 
   return (

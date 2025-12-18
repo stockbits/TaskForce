@@ -49,10 +49,10 @@ import Cog from '@mui/icons-material/Build';
 import TaskPopoutPanel from "@/tasks/TaskPopoutPanel";
 import TaskRowContextMenu from '@/shared-ui/TaskRowContextMenu';
 import ProgressTasksDialog from '@/tasks/ProgressTasksDialog';
-import { useAppSnackbar } from '@/shared-ui/SnackbarProvider';
-import { Sidebar as SidebarNavigation } from '@/layout/SidebarNavigation';
 import TaskSearchCard from '@/tasks/TaskSearchCardClean';
 import TaskTableAdvanced from '@/tasks/TaskTableAdvanced';
+import { useAppSnackbar } from '@/shared-ui/SnackbarProvider';
+import { Sidebar as SidebarNavigation } from '@/layout/SidebarNavigation';
 
 import { cardMap } from "@/layout/menuRegistry";
 import { TaskDetails, ProgressNoteEntry } from "@/types";
@@ -61,9 +61,7 @@ import { useCalloutHistory } from "@/hooks/useCalloutHistory";
 import { filterTasks } from "@/hooks/useTaskFilters";
 import type { CalloutHistoryEntry } from "@/hooks/useCalloutHistory";
 
-/* =========================================================
-   ICON MAP & TABLE HEADERS
-========================================================= */
+/* ========================================================= */
 const iconMap: Record<string, any> = {
   "Operation Toolkit": ClipboardList,
   "General Settings": Settings,
@@ -134,17 +132,8 @@ function buildClipboardHtml(
 ): string {
   return `
     <table border="1" cellpadding="4" cellspacing="0">
-      <thead><tr>${headerKeys
-        .map((h) => `<th>${headerNames[h]}</th>`)
-        .join("")}</tr></thead>
-      <tbody>${rows
-        .map(
-          (r) =>
-            `<tr>${headerKeys
-              .map((h) => `<td>${r[h] ?? ""}</td>`)
-              .join("")}</tr>`
-        )
-        .join("")}</tbody>
+      <thead><tr>${headerKeys.map((h) => `<th>${headerNames[h]}</th>`).join("")}</tr></thead>
+      <tbody>${rows.map((r) => `<tr>${headerKeys.map((h) => `<td>${r[h] ?? ""}</td>`).join("")}</tr>`).join("")}</tbody>
     </table>`;
 }
 
@@ -468,7 +457,7 @@ export default function MainLayout() {
         const coordsX = window.innerWidth / 2;
         const coordsY = window.innerHeight / 2;
         openExternalWindow(tasks, coordsX, coordsY);
-      } catch (err) {}
+      } catch {}
     };
 
     const openCallout = (ev: Event) => {
@@ -477,7 +466,7 @@ export default function MainLayout() {
         const task = custom.detail?.task ?? null;
         if (!task) return;
         handleOpenCalloutIncident(task);
-      } catch (err) {}
+      } catch {}
     };
 
     window.addEventListener('taskforce:open-popout', openPopout as EventListener);
@@ -557,7 +546,7 @@ export default function MainLayout() {
       try {
         const custom = ev as CustomEvent<any>;
         openProgressTasks(custom.detail?.tasks ?? []);
-      } catch (err) {}
+      } catch {}
     };
 
     window.addEventListener('taskforce:progress-tasks', handler as EventListener);
@@ -702,7 +691,7 @@ export default function MainLayout() {
     try {
       setResources(ResourceMock as ResourceRecord[]);
       setResourceLoaded(true);
-    } catch (err) {
+    } catch {
       snackbar.error("Error loading resource data.");
     }
   }, []);
@@ -754,7 +743,7 @@ export default function MainLayout() {
           setToastTop(Math.round(rect.bottom + 8));
           return;
         }
-      } catch (err) {}
+      } catch {}
       setToastTop(72);
     };
     computeTop();
@@ -1440,7 +1429,7 @@ export default function MainLayout() {
             setProgressDialogOpen(false);
             setProgressTasks([]);
             setProgressNote('');
-          } catch (err) {
+          } catch {
             snackbar.error('Progress failed');
           } finally {
             setProgressSaving(false);
