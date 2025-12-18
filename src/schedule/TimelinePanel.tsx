@@ -584,6 +584,19 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
     };
   }, [resources, viewMode]);
 
+  // Update chart pointWidth to visually match computed row height
+  useEffect(() => {
+    try {
+      const chart = (chartRef.current as any)?.chart;
+      if (chart) {
+        const pw = Math.max(8, Math.round(computedRowHeight * 0.6));
+        chart.update({ plotOptions: { gantt: { pointWidth: pw } } }, true, false);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [computedRowHeight]);
+
   // Sync vertical scrolling between left labels column and right chart area
   const onLeftScroll = () => {
     try {
@@ -665,20 +678,18 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
             <Box sx={{ height: `${chartPlotOffset}px`, display: 'flex', alignItems: 'center', px: 0, borderBottom: '1px solid transparent' }}>
               <Typography sx={{ fontWeight: 700, color: 'text.secondary' }}>Resource</Typography>
             </Box>
-            <Box sx={{ height: `${(resources?.length || 1) * computedRowHeight + 40}px`, position: 'relative' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               {resources && resources.map((r: string, idx: number) => {
                 const resourceId = resourceNameToIdMap[r] || '';
-                const top = (rowTops && rowTops[idx] != null) ? rowTops[idx] : idx * computedRowHeight + (chartPlotOffset || 0);
                 return (
-                  <Box key={r} sx={{ position: 'absolute', left: 0, right: 0, top: `${top}px`, height: `${computedRowHeight}px`, display: 'flex', alignItems: 'center', gap: 1, px: 0 }}>
-                    <Avatar sx={{ width: Math.max(24, computedRowHeight - 12), height: Math.max(24, computedRowHeight - 12), bgcolor: 'primary.main', fontSize: 12, fontWeight: 700, ml: 1 }}>{getInitials(r)}</Avatar>
+                  <Box key={r} sx={{ height: `${computedRowHeight}px`, display: 'flex', alignItems: 'center', gap: 1, px: 1, borderBottom: '1px solid #f0f0f0' }}>
+                    <Avatar sx={{ width: Math.max(24, computedRowHeight - 12), height: Math.max(24, computedRowHeight - 12), bgcolor: 'primary.main', fontSize: 12, fontWeight: 700 }}>{getInitials(r)}</Avatar>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', minWidth: 0 }}>
                       <Typography noWrap sx={{ fontWeight: 700, fontSize: 13, color: 'text.primary' }}>{r}</Typography>
                       <Box sx={{ ml: 1, flexShrink: 0 }}>
                         <Typography noWrap variant="caption" sx={{ color: 'primary.main', fontWeight: 700, bgcolor: 'rgba(25,118,210,0.08)', px: 1, py: '2px', borderRadius: 1 }}>{resourceId}</Typography>
                       </Box>
                     </Box>
-                    <Box sx={{ position: 'absolute', right: 0, bottom: 0, left: 0, borderBottom: '1px solid #f0f0f0', pointerEvents: 'none' }} />
                   </Box>
                 );
               })}
