@@ -534,7 +534,8 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
           // derive row height from plotHeight / rows and compute per-row top positions
           const plotH = chart.plotHeight || 0;
           const count = (resources && resources.length) || 1;
-          const derived = Math.max(24, Math.round(plotH / count));
+          // Never shrink rows below the initial ROW_HEIGHT to preserve on-load spacing
+          const derived = Math.max(ROW_HEIGHT, Math.round(plotH / count));
           setComputedRowHeight(derived);
 
           // compute exact top for each resource by looking at points
