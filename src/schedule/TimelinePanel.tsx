@@ -442,7 +442,7 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
       title: {
         text: null // Remove y-axis title
       },
-      gridLineWidth: 1,
+      gridLineWidth: 0, // we'll draw custom grid lines that match left labels
       gridLineColor: '#e0e0e0',
       min: 0,
       max: resources.length - 1, // Show all resources
@@ -522,6 +522,7 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
   const leftColRef = useRef<HTMLDivElement | null>(null);
   const rightColRef = useRef<HTMLDivElement | null>(null);
   const [rowTops, setRowTops] = useState<number[]>([]);
+  const gridLinesRef = useRef<any[]>([]);
 
   useEffect(() => {
     const updateOffset = () => {
@@ -561,6 +562,28 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
             }
           }
           setRowTops(tops);
+          // draw custom horizontal grid lines that exactly match row tops
+          try {
+            // clear previous
+            if (gridLinesRef.current && gridLinesRef.current.length && chart && chart.renderer) {
+              gridLinesRef.current.forEach((el: any) => { try { el.destroy(); } catch (e) {} });
+              gridLinesRef.current = [];
+            }
+
+            if (chart && chart.renderer) {
+              const left = chart.plotLeft || 0;
+              const right = (chart.plotLeft || 0) + (chart.plotWidth || 0);
+              for (let i = 0; i <= count; i++) {
+                const y = (tops[i] != null ? tops[i] : (plotTop + i * derived));
+                const line = chart.renderer.path(["M", left, Math.round(y + derived), "L", right, Math.round(y + derived)])
+                  .attr({ 'stroke-width': 1, stroke: '#f0f0f0' })
+                  .add();
+                gridLinesRef.current.push(line);
+              }
+            }
+          } catch (e) {
+            // ignore renderer errors
+          }
         }
       } catch (e) {
         // ignore
@@ -584,6 +607,18 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
       }
     };
   }, [resources, viewMode]);
+
+  // cleanup grid lines on unmount
+  useEffect(() => {
+    return () => {
+      try {
+        if (gridLinesRef.current && gridLinesRef.current.length) {
+          gridLinesRef.current.forEach((el: any) => { try { el.destroy(); } catch (e) {} });
+          gridLinesRef.current = [];
+        }
+      } catch (e) {}
+    };
+  }, []);
 
   // Update chart pointWidth to visually match computed row height
   useEffect(() => {
