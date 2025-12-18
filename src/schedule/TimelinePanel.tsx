@@ -570,8 +570,17 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
     updateOffset();
     window.addEventListener('resize', updateOffset);
 
+    // Also resync after chart redraws (zoom/pan) for immediate alignment
+    const chart = (chartRef.current as any)?.chart;
+    if (chart && (Highcharts as any).addEvent) {
+      (Highcharts as any).addEvent(chart, 'redraw', updateOffset);
+    }
+
     return () => {
       window.removeEventListener('resize', updateOffset);
+      if (chart && (Highcharts as any).removeEvent) {
+        try { (Highcharts as any).removeEvent(chart, 'redraw', updateOffset); } catch (e) {}
+      }
     };
   }, [resources, viewMode]);
 
