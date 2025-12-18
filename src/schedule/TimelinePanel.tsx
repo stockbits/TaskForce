@@ -1,7 +1,7 @@
 
 import React, { useMemo, useState, useEffect, useRef } from "react";
-import { Box, Typography, Paper, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, Button, IconButton } from "@mui/material";
-import { Refresh as RefreshIcon } from "@mui/icons-material";
+import { Box, Typography, Paper, IconButton, Menu, MenuItem, Avatar } from "@mui/material";
+import { Refresh as RefreshIcon, AccessTime as AccessTimeIcon } from "@mui/icons-material";
 import Highcharts from 'highcharts';
 import 'highcharts/modules/gantt';
 import HighchartsReact from 'highcharts-react-official';
@@ -65,7 +65,7 @@ const getPriorityColor = (priority: string) => {
 };
 
 // Helper to get date range based on view mode
-const getDateRange = (mode: '1day' | '3days' | '7days' | '14days') => {
+const getDateRange = (mode: '1day' | '2days' | '5days' | '7days' | '14days') => {
   const today = new Date();
   const startDate = new Date(today);
   const endDate = new Date(today);
@@ -75,10 +75,17 @@ const getDateRange = (mode: '1day' | '3days' | '7days' | '14days') => {
       startDate.setHours(0, 0, 0, 0);
       endDate.setHours(23, 59, 59, 999);
       break;
-    case '3days':
-      startDate.setDate(today.getDate() - 1);
+    case '2days':
+      // today + tomorrow
       startDate.setHours(0, 0, 0, 0);
       endDate.setDate(today.getDate() + 1);
+      endDate.setHours(23, 59, 59, 999);
+      break;
+    case '5days':
+      // 2 days before through 2 days after
+      startDate.setDate(today.getDate() - 2);
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setDate(today.getDate() + 2);
       endDate.setHours(23, 59, 59, 999);
       break;
     case '7days':
@@ -105,7 +112,8 @@ const getDateRange = (mode: '1day' | '3days' | '7days' | '14days') => {
 
 export default function TimelinePanel({ selectedResource }: { selectedResource?: any }) {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [viewMode, setViewMode] = useState<'1day' | '3days' | '7days' | '14days'>('1day');
+  const [viewMode, setViewMode] = useState<'1day' | '2days' | '5days' | '7days' | '14days'>('1day');
+  const [anchorElRange, setAnchorElRange] = useState<null | HTMLElement>(null);
   const chartRef = useRef<HighchartsReact.RefObject>(null);
 
   // Update current time every minute
@@ -124,13 +132,16 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
     }
   };
 
-  // Reset zoom when view mode changes
+  // When viewMode changes, update the chart window to the date range
   useEffect(() => {
-    if (chartRef.current?.chart) {
-      // Small delay to ensure chart has updated with new data
-      setTimeout(() => {
-        chartRef.current?.chart.zoomOut();
-      }, 100);
+    try {
+      const chart = chartRef.current && (chartRef.current as any).chart;
+      if (chart && chart.xAxis && chart.xAxis[0] && typeof chart.xAxis[0].setExtremes === 'function') {
+        const dr = getDateRange(viewMode);
+        chart.xAxis[0].setExtremes(dr.start, dr.end, true, false);
+      }
+    } catch (err) {
+      // ignore
     }
   }, [viewMode]);
 
@@ -394,12 +405,6 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
           });
         }
       },
-      scrollablePlotArea: {
-        minWidth: 1500, // Minimum width for horizontal scrolling
-        scrollPositionX: 0,
-        minHeight: 600, // Adjusted for increased chart height
-        scrollPositionY: 0
-      },
       backgroundColor: 'transparent',
       style: {
         fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
@@ -414,8 +419,9 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
       title: {
         text: null // Remove x-axis title
       },
+      // Let the outer panel handle scrolling; disable Highcharts x-axis scrollbar
       scrollbar: {
-        enabled: true
+        enabled: false
       },
       // Use date range based on view mode
       min: dateRange.start,
@@ -431,7 +437,7 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
       }
     },
     yAxis: {
-      type: 'category',
+        pointWidth: 10, // thinner task bar for compact rows
       categories: resources,
       title: {
         text: null // Remove y-axis title
@@ -440,31 +446,12 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
       gridLineColor: '#e0e0e0',
       min: 0,
       max: resources.length - 1, // Show all resources
+      // Disable Highcharts-rendered labels; we'll render a MUI left column for consistent styling
       labels: {
-        formatter: function(this: any) {
-          const resourceName = this.value;
-          const resourceId = resourceNameToIdMap[resourceName] || 'UNKNOWN';
-          const initials = getInitials(resourceName);
-
-          // Return HTML with ultra-compact design exactly like Bryntum basic-thin example
-          return `<div style="display: flex; align-items: center; gap: 2px; padding: 0px 2px; min-width: 100px; border-bottom: 1px solid #e0e0e0; height: 18px; align-items: center;">
-            <div style="width: 10px; height: 10px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; display: flex; align-items: center; justify-content: center; font-size: 5px; font-weight: 700; border: 1px solid rgba(255,255,255,0.8); flex-shrink: 0;">${initials}</div>
-            <div style="display: flex; flex-direction: column; flex: 1; min-width: 0; justify-content: center; height: 12px;">
-              <div style="font-weight: 600; font-size: 7px; color: #1a1a1a; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${resourceName}</div>
-              <div style="font-size: 5px; color: #666; font-weight: 500; line-height: 1;">${resourceId}</div>
-            </div>
-          </div>`;
-        },
-        useHTML: true,
-        style: {
-          width: '130px',
-          padding: '0',
-          margin: '0'
-        },
-        y: 0 // Center the labels vertically
+        enabled: false
       },
       scrollbar: {
-        enabled: true,
+        enabled: false,
         showFull: false
       }
     },
@@ -528,6 +515,55 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
     }
   };
 
+  const LABEL_COL_WIDTH = 220;
+  const ROW_HEIGHT = 36;
+  const [chartPlotOffset, setChartPlotOffset] = useState<number>(0);
+  const leftColRef = useRef<HTMLDivElement | null>(null);
+  const rightColRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    let interval: any = null;
+    let timeoutId: any = null;
+    const updateOffset = () => {
+      try {
+        const chart = (chartRef.current as any)?.chart;
+        if (chart && typeof chart.plotTop === 'number') {
+          setChartPlotOffset(chart.plotTop || 0);
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    updateOffset();
+    interval = setInterval(updateOffset, 200);
+    timeoutId = setTimeout(() => { if (interval) clearInterval(interval); }, 1200);
+    window.addEventListener('resize', updateOffset);
+
+    return () => {
+      if (interval) clearInterval(interval);
+      if (timeoutId) clearTimeout(timeoutId);
+      window.removeEventListener('resize', updateOffset);
+    };
+  }, [resources, viewMode]);
+
+  // Sync vertical scrolling between left labels column and right chart area
+  const onLeftScroll = () => {
+    try {
+      if (leftColRef.current && rightColRef.current) {
+        rightColRef.current.scrollTop = leftColRef.current.scrollTop;
+      }
+    } catch (e) {}
+  };
+
+  const onRightScroll = () => {
+    try {
+      if (leftColRef.current && rightColRef.current) {
+        leftColRef.current.scrollTop = rightColRef.current.scrollTop;
+      }
+    } catch (e) {}
+  };
+
   return (
     <Box
       sx={{
@@ -545,46 +581,25 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
         elevation={1}
         sx={{
           p: 1.5,
-          mb: 1,
+              mb: 1,
           backgroundColor: 'white',
           borderRadius: 1,
           border: '1px solid #e0e0e0'
         }}
       >
+            {/* removed top accent as requested */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, color: '#1a1a1a' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
               Timeline View
             </Typography>
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>View Range</InputLabel>
-              <Select
-                value={viewMode}
-                label="View Range"
-                onChange={(e: SelectChangeEvent) => setViewMode(e.target.value as '1day' | '3days' | '7days' | '14days')}
-              >
-                <MenuItem value="1day">1 Day</MenuItem>
-                <MenuItem value="3days">3 Days</MenuItem>
-                <MenuItem value="7days">7 Days</MenuItem>
-                <MenuItem value="14days">14 Days</MenuItem>
-              </Select>
-            </FormControl>
-            <IconButton
-              onClick={handleResetView}
-              size="small"
-              sx={{
-                color: '#1976d2',
-                '&:hover': {
-                  backgroundColor: 'rgba(25, 118, 210, 0.04)'
-                }
-              }}
-              title="Reset zoom and position"
-            >
+            {/* Removed inline select - day range is chosen via time icon menu */}
+            <IconButton onClick={handleResetView} size="small" sx={{ color: 'primary.main' }} title="Reset zoom and position">
               <RefreshIcon fontSize="small" />
             </IconButton>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body1" sx={{ color: '#666' }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               {(() => {
                 const dateRange = getDateRange(viewMode);
                 const start = dateRange.startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -592,40 +607,63 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
                 return `${start} - ${end}`;
               })()}
             </Typography>
-            <Typography variant="h5" sx={{ fontWeight: 700, color: '#1976d2' }}>
-              {currentTime.toLocaleTimeString('en-US', { 
-                hour: '2-digit', 
-                minute: '2-digit',
-                hour12: true 
-              })}
-            </Typography>
+            <IconButton size="small" onClick={(e) => setAnchorElRange(e.currentTarget)} title="Select day range">
+              <AccessTimeIcon sx={{ color: 'primary.main' }} />
+            </IconButton>
+            <Menu anchorEl={anchorElRange} open={Boolean(anchorElRange)} onClose={() => setAnchorElRange(null)}>
+              <MenuItem onClick={() => { setViewMode('1day'); setAnchorElRange(null); }}>1 Day</MenuItem>
+              <MenuItem onClick={() => { setViewMode('2days'); setAnchorElRange(null); }}>2 Days</MenuItem>
+              <MenuItem onClick={() => { setViewMode('5days'); setAnchorElRange(null); }}>5 Days</MenuItem>
+              <MenuItem onClick={() => { setViewMode('7days'); setAnchorElRange(null); }}>7 Days</MenuItem>
+            </Menu>
           </Box>
         </Box>
       </Paper>
 
-      <Box sx={{ 
-        flex: 1, 
-        overflow: 'visible', // Allow chart scrollbars to be visible
-        p: 2,
-        '& .highcharts-background': {
-          fill: 'transparent'
-        },
-        '& .highcharts-plot-background': {
-          fill: 'transparent'
-        }
-      }}>
-        <HighchartsReact
-          ref={chartRef}
-          highcharts={Highcharts}
-          options={options}
-          containerProps={{
-            style: {
-              height: '650px', // Increased height for even more compact resource display
-              width: '100%',
-              minWidth: '1500px'
-            }
-          }}
-        />
+      <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        {/* Left column: MUI-rendered resource labels (keeps consistent styling with app) */}
+        <Box ref={leftColRef} onScroll={onLeftScroll} sx={{ width: LABEL_COL_WIDTH, pr: 1, overflow: 'auto' }}>
+          <Paper elevation={0} sx={{ borderRight: '1px solid #e0e0e0', bgcolor: 'transparent', overflow: 'hidden', position: 'relative', zIndex: 3 }}>
+            <Box sx={{ height: `${(resources?.length || 1) * ROW_HEIGHT + 80}px`, position: 'relative', transform: `translateY(${chartPlotOffset}px)`, transition: 'transform 120ms linear', willChange: 'transform' }}>
+              {resources && resources.map((r: string, idx: number) => {
+                const resourceId = resourceNameToIdMap[r] || '';
+                return (
+                  <Box key={r} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, height: ROW_HEIGHT, borderBottom: '1px solid #f0f0f0' }}>
+                    <Avatar sx={{ width: 28, height: 28, bgcolor: 'primary.main', fontSize: 12, fontWeight: 700 }}>{getInitials(r)}</Avatar>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', minWidth: 0 }}>
+                      <Typography noWrap sx={{ fontWeight: 700, fontSize: 13, color: 'text.primary' }}>{r}</Typography>
+                      <Box sx={{ ml: 1, flexShrink: 0 }}>
+                        <Typography noWrap variant="caption" sx={{ color: 'primary.main', fontWeight: 700, bgcolor: 'rgba(25,118,210,0.08)', px: 1, py: '2px', borderRadius: 1 }}>{resourceId}</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                );
+              })}
+            </Box>
+          </Paper>
+        </Box>
+
+        {/* Right: chart */}
+        <Box ref={rightColRef} onScroll={onRightScroll} sx={{ flex: 1, overflow: 'auto', p: 2,
+          '& .highcharts-background': { fill: 'transparent' },
+          '& .highcharts-plot-background': { fill: 'transparent' },
+          '& .highcharts-scrollbar': { display: 'none !important' },
+          '& .highcharts-scrollbar-thumb': { display: 'none !important' }
+        }}>
+          <HighchartsReact
+            ref={chartRef}
+            highcharts={Highcharts}
+            options={options}
+            containerProps={{
+              style: {
+                // set chart pixel height so Highcharts does not add its own scrollbars
+                height: `${(resources?.length || 1) * ROW_HEIGHT + 80}px`,
+                width: '100%',
+                minWidth: '1500px'
+              }
+            }}
+          />
+        </Box>
       </Box>
     </Box>
   );
