@@ -2,6 +2,7 @@ import React from 'react';
 import GlobalSearchField from './GlobalSearchField';
 import mockTasks from '@/data/mockTasks.json';
 import ResourceMock from '@/data/ResourceMock.json';
+import type { TextFieldProps } from '@mui/material/TextField';
 
 type Props = {
   value: string;
@@ -13,9 +14,9 @@ type Props = {
   sx?: any;
   name?: string;
   showSearchButton?: boolean;
-};
+} & Partial<TextFieldProps>;
 
-export default function ExactGlobalSearchField(props: Props) {
+const ExactGlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function ExactGlobalSearchField(props, ref) {
   const validateExact = (v: string) => {
     const q = String(v || '').trim().toLowerCase();
     if (!q) return false;
@@ -37,5 +38,7 @@ export default function ExactGlobalSearchField(props: Props) {
     return foundInResources;
   };
 
-  return <GlobalSearchField {...props} validateExact={validateExact} />;
-}
+  return <GlobalSearchField {...props} validateExact={validateExact} ref={ref} />;
+});
+
+export default ExactGlobalSearchField;

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Autocomplete, Box, ListItem, ListItemText, TextField } from "@mui/material";
+import { Autocomplete, Box, ListItem, ListItemText, TextField, Typography } from "@mui/material";
 import useFieldSizes from './useFieldSizes';
 
 type OptionItem = string | { label: string; value: string };
@@ -14,6 +14,7 @@ interface SingleSelectFieldProps {
   onInputChange?: (value: string) => void;
   renderOption?: (props: any, option: OptionItem) => React.ReactNode;
   wrapperSx?: any;
+  [key: string]: any;
 }
 
 const FIELD_WIDTH = { xs: '100%', sm: '22ch', md: '28ch' };
@@ -31,6 +32,7 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
   onInputChange,
   renderOption,
   wrapperSx,
+  ...rest
 }) => {
   const [internalInput, setInternalInput] = useState("");
   const inputValue = controlledInputValue !== undefined ? controlledInputValue : internalInput;
@@ -38,7 +40,7 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
   const { INPUT_HEIGHT, CHIP_SIZE } = useFieldSizes();
 
   const DEFAULT_WRAPPER_SX = {
-    width: "100%",
+    width: "fit-content",
     maxWidth: FIELD_WIDTH,
     px: 1,
     display: "flex",
@@ -68,7 +70,8 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
   };
 
   return (
-    <Box sx={wrapperSx ?? DEFAULT_WRAPPER_SX}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'flex-start', ...(wrapperSx ?? DEFAULT_WRAPPER_SX) }}>
+      <Typography variant="body2" sx={{ fontSize: 12, color: 'text.secondary' }}>{label}</Typography>
       <Autocomplete
       componentsProps={{ popper: { style: { zIndex: 13000 } } }}
       disableClearable
@@ -106,7 +109,7 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
         return (
           <TextField
             {...params}
-            placeholder={value ? "" : label}
+            placeholder=""
             size="small"
             required={required}
             aria-label={label}
@@ -120,6 +123,7 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
       }}
       ListboxProps={{ sx: { zIndex: 2000, maxHeight: 320 } }}
       sx={{ width: FIELD_WIDTH, '& .MuiAutocomplete-inputRoot': { minHeight: INPUT_HEIGHT, maxHeight: INPUT_HEIGHT, alignItems: 'center', transition: 'all 120ms ease', '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, paddingRight: '56px', fontSize: 13, lineHeight: `${CHIP_SIZE}px` } } }}
+      {...rest}
     />
     </Box>
   );

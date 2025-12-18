@@ -199,7 +199,7 @@ export default function TaskPopoutPanel({
               items={tasks.map((t) => ({ id: t.taskId, label: String(t.taskId) }))}
               activeIds={activePills}
               maxVisible={6}
-              onToggle={(id) => handlePillClick(id)}
+              onToggle={(id: string) => handlePillClick(id)}
               onSelectAll={selectAll}
               onClearAll={unselectAll}
             />

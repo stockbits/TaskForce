@@ -1,6 +1,8 @@
 import React from 'react';
-import { Box, TextField, InputAdornment, IconButton } from '@mui/material';
+import { Box, TextField, InputAdornment, IconButton, Tooltip } from '@mui/material';
+import type { TextFieldProps } from '@mui/material/TextField';
 import SearchIcon from '@mui/icons-material/Search';
+import InfoIcon from '@mui/icons-material/Info';
 import useFieldSizes from './useFieldSizes';
 
 type Props = {
@@ -15,9 +17,9 @@ type Props = {
   showSearchButton?: boolean;
   validateExact?: (value: string) => boolean;
   errorMessage?: string;
-};
+} & Partial<TextFieldProps>;
 
-export default function GlobalSearchField(props: Props) {
+const GlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function GlobalSearchField(props, ref) {
   const {
     value,
     onChange,
@@ -30,6 +32,7 @@ export default function GlobalSearchField(props: Props) {
     showSearchButton = false,
     validateExact,
     errorMessage,
+    ...rest
   } = props;
 
   const { INPUT_HEIGHT, CHIP_SIZE } = useFieldSizes();
@@ -46,27 +49,34 @@ export default function GlobalSearchField(props: Props) {
     onKeyPress?.(e);
   };
 
-  const endAdornment = showSearchButton && onSearch ? (
+  const endAdornment = (
     <InputAdornment position="end">
-      <IconButton
-        size="small"
-        onClick={() => {
-          if (validateExact && !validateExact(value)) {
-            setError(true);
-            return;
-          }
-          onSearch?.();
-        }}
-        sx={{ mr: 0.5 }}
-        aria-label="search"
-      >
-        <SearchIcon style={{ fontSize: 16 }} />
-      </IconButton>
+      <Tooltip title={placeholder} arrow>
+        <IconButton size="small" sx={{ mr: 0.5 }} aria-label="search info">
+          <InfoIcon style={{ fontSize: 16 }} />
+        </IconButton>
+      </Tooltip>
+      {showSearchButton && onSearch && (
+        <IconButton
+          size="small"
+          onClick={() => {
+            if (validateExact && !validateExact(value)) {
+              setError(true);
+              return;
+            }
+            onSearch?.();
+          }}
+          sx={{ mr: 0.5 }}
+          aria-label="search"
+        >
+          <SearchIcon style={{ fontSize: 16 }} />
+        </IconButton>
+      )}
     </InputAdornment>
-  ) : null;
+  );
 
   return (
-    <Box sx={{ width: { xs: '100%', sm: 400 }, ...sx }}>
+    <Box sx={{ width: 'fit-content', maxWidth: { xs: '100%', sm: 400 }, ...sx }}>
       <TextField
         name={name}
         value={value}
@@ -75,10 +85,10 @@ export default function GlobalSearchField(props: Props) {
           if (error) setError(false);
         }}
         onKeyPress={handleKeyPress}
-        placeholder={placeholder}
+        placeholder="Search tasks..."
         size={size}
-        fullWidth
         sx={{
+          width: 'fit-content',
           '& input::placeholder': { color: 'text.secondary' },
           '& .MuiInputBase-input': {
             paddingTop: 0,
@@ -98,9 +108,13 @@ export default function GlobalSearchField(props: Props) {
           endAdornment,
           sx: { height: INPUT_HEIGHT }
         }}
+        inputRef={ref}
         error={error}
         helperText={undefined}
+        {...rest}
       />
     </Box>
   );
-}
+});
+
+export default GlobalSearchField;

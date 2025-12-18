@@ -1,6 +1,0 @@
-dist/
-.vite/
-node_modules/
-coverage/
-**/*.min.js
-public/

@@ -9,6 +9,7 @@ import {
   ListItemText,
   TextField,
   Tooltip,
+  Typography,
   IconButton as MuiIconButton,
 } from "@mui/material";
 import type {
@@ -29,6 +30,8 @@ interface MultiSelectFieldProps {
   required?: boolean;
   showSelectAllIcon?: boolean;
   wrapperSx?: any;
+  // allow any extra props to pass through to Autocomplete for dynamic/NUI compatibility
+  [key: string]: any;
 }
 
 const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
@@ -39,6 +42,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
   required = false,
   showSelectAllIcon = true,
   wrapperSx,
+  ...rest
 }) => {
   const [inputValue, setInputValue] = useState("");
   const [open, setOpen] = useState(false);
@@ -106,7 +110,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
   const { INPUT_HEIGHT, CHIP_SIZE } = useFieldSizes();
 
   const DEFAULT_WRAPPER_SX = {
-    width: "100%",
+    width: "fit-content",
     maxWidth: FIELD_WIDTH,
     px: 1,
     display: "flex",
@@ -119,7 +123,8 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
   } as const;
 
   return (
-    <Box sx={wrapperSx ?? DEFAULT_WRAPPER_SX}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'flex-start', ...(wrapperSx ?? DEFAULT_WRAPPER_SX) }}>
+      <Typography variant="body2" sx={{ fontSize: 12, color: 'text.secondary' }}>{label}</Typography>
       <Autocomplete
       disableClearable
       multiple
@@ -268,7 +273,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
         return (
           <TextField
             {...params}
-            placeholder={value && value.length ? "" : label}
+            placeholder=""
             size="small"
             required={required}
             aria-label={label}
@@ -283,6 +288,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
       ListboxProps={{
         sx: { maxHeight: 320, zIndex: 2000 },
       }}
+      {...rest}
     />
     </Box>
   );

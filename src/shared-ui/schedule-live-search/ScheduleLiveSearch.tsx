@@ -7,7 +7,8 @@ import {
   Grid,
 } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
-import { MultiSelectField, SingleSelectField, FreeTypeSelectField } from "@/shared-ui";
+import { MultiSelectField, SingleSelectField, FreeTypeSelectField, CombinedLocationField } from "@/shared-ui";
+import ImpScoreField from '@/shared-ui/text-fields/ImpScoreField';
 
 export interface ScheduleLiveSearchFilters {
   taskSearch: string;
@@ -322,40 +323,20 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
   }
 
   advancedFields = advancedFields.concat([
-    <SingleSelectField
-      key="locationType"
-      label="Location Type"
-      options={[
-        { label: 'Postcode', value: 'postCode' },
-        { label: 'Location', value: 'location' },
-        { label: 'Group Code', value: 'groupCode' },
-      ]}
-      value={filters.locationType || null}
-      onChange={(val) => setFilters((prev) => ({ ...prev, locationType: val ?? '' }))}
+    <CombinedLocationField
+      key="location"
+      locationType={filters.locationType}
+      locationValue={filters.locationValue}
+      onTypeChange={(val) => setFilters((prev) => ({ ...prev, locationType: val }))}
+      onValueChange={(val) => setFilters((prev) => ({ ...prev, locationValue: val }))}
     />,
-    <FreeTypeSelectField
-      key="locationValue"
-      label="Location Value"
-      options={[]}
-      value={filters.locationValue}
-      onChange={(next: string) => setFilters((prev) => ({ ...prev, locationValue: next }))}
-    />,
-    <SingleSelectField
-      key="scoreCondition"
-      label="IMP Condition"
-      options={[
-        { label: 'Greater Than', value: 'greater' },
-        { label: 'Less Than', value: 'less' },
-      ]}
-      value={filters.scoreCondition || null}
-      onChange={(val) => setFilters((prev) => ({ ...prev, scoreCondition: val ?? '' }))}
-    />,
-    <FreeTypeSelectField
-      key="scoreValue"
-      label="IMP Value"
-      options={[]}
+    <ImpScoreField
+      key="impScore"
+      label="IMP Score"
+      condition={(filters.scoreCondition as any) || ''}
       value={filters.scoreValue}
-      onChange={(next: string) => setFilters((prev) => ({ ...prev, scoreValue: next }))}
+      onConditionChange={(next) => setFilters((prev) => ({ ...prev, scoreCondition: next }))}
+      onValueChange={(next) => setFilters((prev) => ({ ...prev, scoreValue: next }))}
     />
   ]);
 

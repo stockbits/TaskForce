@@ -3,8 +3,9 @@ import SingleSelectField from './SingleSelectField';
 import FreeTypeSelectField from './FreeTypeSelectField';
 import GlobalSearchField from './GlobalSearchField';
 import ExactGlobalSearchField from './ExactGlobalSearchField';
+import CombinedLocationField from './CombinedLocationField';
 
-export { MultiSelectField, SingleSelectField, FreeTypeSelectField, GlobalSearchField, ExactGlobalSearchField };
+export { MultiSelectField, SingleSelectField, FreeTypeSelectField, GlobalSearchField, ExactGlobalSearchField, CombinedLocationField };
 
 export default {
 	MultiSelectField,
@@ -12,4 +13,5 @@ export default {
 	FreeTypeSelectField,
 	GlobalSearchField,
 	ExactGlobalSearchField,
+	CombinedLocationField,
 };

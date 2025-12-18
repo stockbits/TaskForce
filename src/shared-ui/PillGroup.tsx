@@ -15,9 +15,11 @@ interface PillGroupProps {
   onSelectAll?: () => void;
   onClearAll?: () => void;
   sx?: SxProps;
+  // allow extra props to be forwarded to the root Box for dynamic/NUI usage
+  [key: string]: any;
 }
 
-export default function PillGroup({ items, activeIds = [], maxVisible = 5, onToggle, onSelectAll, onClearAll, sx }: PillGroupProps) {
+const PillGroup = React.forwardRef<HTMLDivElement, PillGroupProps>(function PillGroup({ items, activeIds = [], maxVisible = 5, onToggle, onSelectAll, onClearAll, sx, ...rest }, ref) {
   const theme = useTheme();
   const visible = items.slice(0, maxVisible);
   const overflow = items.length > maxVisible ? items.slice(maxVisible) : [];
@@ -35,8 +37,8 @@ export default function PillGroup({ items, activeIds = [], maxVisible = 5, onTog
   const open = Boolean(anchorEl);
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "nowrap", overflow: "hidden", ...((sx as any) || {}) }}>
-      {visible.map((it) => {
+    <Box ref={ref} sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "nowrap", overflow: "hidden", ...((sx as any) || {}) }} {...rest}>
+      {visible.map((it: PillItem) => {
         const active = activeIds.includes(it.id);
         return (
           <Chip
@@ -87,7 +89,7 @@ export default function PillGroup({ items, activeIds = [], maxVisible = 5, onTog
                 </Box>
               </Stack>
               <List dense>
-              {overflow.map((it) => (
+              {overflow.map((it: PillItem) => (
                 <ListItemButton
                   key={it.id}
                   onClick={() => {
@@ -105,4 +107,6 @@ export default function PillGroup({ items, activeIds = [], maxVisible = 5, onTog
       )}
     </Box>
   );
-}
+});
+
+export default PillGroup;

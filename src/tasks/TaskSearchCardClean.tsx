@@ -25,6 +25,7 @@ import {
   Tabs,
   Tab,
   Stack,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
@@ -39,7 +40,8 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import TodayIcon from '@mui/icons-material/Today';
 import TodayOutlinedIcon from '@mui/icons-material/TodayOutlined';
 import DateTimePopover from '@/shared-ui/DateTimePopover';
-import { MultiSelectField, SingleSelectField, FreeTypeSelectField } from '@/shared-ui';
+import { MultiSelectField, SingleSelectField, FreeTypeSelectField, CombinedLocationField } from '@/shared-ui';
+import ImpScoreField from '@/shared-ui/text-fields/ImpScoreField';
 import ExactGlobalSearchField from '@/shared-ui/text-fields/ExactGlobalSearchField';
 import AppButton from '@/shared-ui/button';
 import Visibility from '@mui/icons-material/Visibility';
@@ -754,45 +756,21 @@ export default function TaskSearchCard({
                 </Grid>
 
                 <Grid item xs={12} sm="auto" md="auto">
-                    <SingleSelectField
-                      label="Location Type"
-                      options={[
-                        { label: 'Postcode', value: 'postCode' },
-                        { label: 'Location', value: 'location' },
-                        { label: 'Group Code', value: 'groupCode' },
-                      ]}
-                      value={filters.locationType || null}
-                      onChange={(val) => setFilters((prev) => ({ ...prev, locationType: val ?? '' }))}
+                    <CombinedLocationField
+                      locationType={filters.locationType}
+                      locationValue={filters.locationValue}
+                      onTypeChange={(val) => setFilters((prev) => ({ ...prev, locationType: val }))}
+                      onValueChange={(val) => setFilters((prev) => ({ ...prev, locationValue: val }))}
                     />
                 </Grid>
 
                 <Grid item xs={12} sm="auto" md="auto">
-                    <FreeTypeSelectField
-                      label="Location Value"
-                      options={[]}
-                      value={filters.locationValue}
-                      onChange={(next: string) => setFilters((prev) => ({ ...prev, locationValue: next }))}
-                    />
-                </Grid>
-
-                <Grid item xs={12} sm="auto" md="auto">
-                    <SingleSelectField
-                      label="IMP Condition"
-                      options={[
-                        { label: 'Greater Than', value: 'greater' },
-                        { label: 'Less Than', value: 'less' },
-                      ]}
-                      value={filters.scoreCondition || null}
-                      onChange={(val) => setFilters((prev) => ({ ...prev, scoreCondition: val ?? '' }))}
-                    />
-                </Grid>
-
-                <Grid item xs={12} sm="auto" md="auto">
-                    <FreeTypeSelectField
-                      label="IMP Value"
-                      options={[]}
+                    <ImpScoreField
+                      label="IMP Score"
+                      condition={(filters.scoreCondition as any) || ''}
                       value={filters.scoreValue}
-                      onChange={(next: string) => setFilters((prev) => ({ ...prev, scoreValue: next }))}
+                      onConditionChange={(next) => setFilters((prev) => ({ ...prev, scoreCondition: next }))}
+                      onValueChange={(next) => setFilters((prev) => ({ ...prev, scoreValue: next }))}
                     />
                 </Grid>
               </Grid>

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Autocomplete, Box, ListItem, ListItemText, TextField } from "@mui/material";
+import { Autocomplete, Box, ListItem, ListItemText, TextField, Typography } from "@mui/material";
 import useFieldSizes from './useFieldSizes';
 
 interface FreeTypeSelectFieldProps {
@@ -15,7 +15,7 @@ interface FreeTypeSelectFieldProps {
 const FIELD_WIDTH = { xs: "100%", sm: "22ch", md: "28ch" };
 
 const DEFAULT_FIELD_WRAPPER_BASE = {
-  width: "100%",
+  width: "fit-content",
   maxWidth: FIELD_WIDTH,
   px: 1,
   display: "flex",
@@ -52,7 +52,8 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
   }, [normalizedQuery, options]);
 
   return (
-    <Box sx={wrapperSx ?? DEFAULT_WRAPPER_SX}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'flex-start', ...(wrapperSx ?? DEFAULT_WRAPPER_SX) }}>
+      <Typography variant="body2" sx={{ fontSize: 12, color: 'text.secondary' }}>{label}</Typography>
       <Autocomplete
       freeSolo
       disableClearable
@@ -74,7 +75,7 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
         return (
           <TextField
             {...params}
-            placeholder={value ? "" : (placeholder ?? label)}
+            placeholder=""
             size="small"
             required={required}
             aria-label={label}
