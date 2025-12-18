@@ -624,7 +624,11 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
         {/* Left column: MUI-rendered resource labels (keeps consistent styling with app) */}
         <Box ref={leftColRef} onScroll={onLeftScroll} sx={{ width: LABEL_COL_WIDTH, pr: 1, overflow: 'auto' }}>
           <Paper elevation={0} sx={{ borderRight: '1px solid #e0e0e0', bgcolor: 'transparent', overflow: 'hidden', position: 'relative', zIndex: 3 }}>
-            <Box sx={{ height: `${(resources?.length || 1) * ROW_HEIGHT + 80}px`, position: 'relative', transform: `translateY(${chartPlotOffset}px)`, transition: 'transform 120ms linear', willChange: 'transform' }}>
+            {/* Resource header spacer to align with chart plot area */}
+            <Box sx={{ height: `${chartPlotOffset}px`, display: 'flex', alignItems: 'center', px: 1, borderBottom: '1px solid transparent' }}>
+              <Typography sx={{ fontWeight: 700, color: 'text.secondary' }}>Resource</Typography>
+            </Box>
+            <Box sx={{ height: `${(resources?.length || 1) * ROW_HEIGHT + 80}px`, position: 'relative' }}>
               {resources && resources.map((r: string, idx: number) => {
                 const resourceId = resourceNameToIdMap[r] || '';
                 return (
