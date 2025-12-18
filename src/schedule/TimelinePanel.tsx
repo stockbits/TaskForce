@@ -518,6 +518,7 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
   const LABEL_COL_WIDTH = 220;
   const ROW_HEIGHT = 36;
   const [chartPlotOffset, setChartPlotOffset] = useState<number>(0);
+  const [computedRowHeight, setComputedRowHeight] = useState<number>(ROW_HEIGHT);
   const leftColRef = useRef<HTMLDivElement | null>(null);
   const rightColRef = useRef<HTMLDivElement | null>(null);
 
@@ -529,6 +530,14 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
         const chart = (chartRef.current as any)?.chart;
         if (chart && typeof chart.plotTop === 'number') {
           setChartPlotOffset(chart.plotTop || 0);
+          try {
+            const plotH = chart.plotHeight || 0;
+            const count = (resources && resources.length) || 1;
+            const derived = Math.max(24, Math.round(plotH / count));
+            setComputedRowHeight(derived);
+          } catch (e) {
+            // ignore
+          }
         }
       } catch (e) {
         // ignore
@@ -628,12 +637,12 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
             <Box sx={{ height: `${chartPlotOffset}px`, display: 'flex', alignItems: 'center', px: 1, borderBottom: '1px solid transparent' }}>
               <Typography sx={{ fontWeight: 700, color: 'text.secondary' }}>Resource</Typography>
             </Box>
-            <Box sx={{ height: `${(resources?.length || 1) * ROW_HEIGHT + 80}px`, position: 'relative' }}>
+            <Box sx={{ height: `${(resources?.length || 1) * computedRowHeight + 40}px`, position: 'relative' }}>
               {resources && resources.map((r: string, idx: number) => {
                 const resourceId = resourceNameToIdMap[r] || '';
                 return (
-                  <Box key={r} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, height: ROW_HEIGHT, borderBottom: '1px solid #f0f0f0' }}>
-                    <Avatar sx={{ width: 28, height: 28, bgcolor: 'primary.main', fontSize: 12, fontWeight: 700 }}>{getInitials(r)}</Avatar>
+                  <Box key={r} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, height: `${computedRowHeight}px`, borderBottom: '1px solid #f0f0f0' }}>
+                    <Avatar sx={{ width: Math.max(24, computedRowHeight - 12), height: Math.max(24, computedRowHeight - 12), bgcolor: 'primary.main', fontSize: 12, fontWeight: 700 }}>{getInitials(r)}</Avatar>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', minWidth: 0 }}>
                       <Typography noWrap sx={{ fontWeight: 700, fontSize: 13, color: 'text.primary' }}>{r}</Typography>
                       <Box sx={{ ml: 1, flexShrink: 0 }}>
@@ -661,7 +670,7 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
             containerProps={{
               style: {
                 // set chart pixel height so Highcharts does not add its own scrollbars
-                height: `${(resources?.length || 1) * ROW_HEIGHT + 80}px`,
+                height: `${(resources?.length || 1) * computedRowHeight + 40}px`,
                 width: '100%',
                 minWidth: '1500px'
               }
