@@ -524,8 +524,6 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
   const [rowTops, setRowTops] = useState<number[]>([]);
 
   useEffect(() => {
-    let interval: any = null;
-    let timeoutId: any = null;
     const updateOffset = () => {
       try {
         const chart = (chartRef.current as any)?.chart;
@@ -568,14 +566,11 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
       }
     };
 
+    // Initial measurement and on resize only (no polling fallback)
     updateOffset();
-    interval = setInterval(updateOffset, 200);
-    timeoutId = setTimeout(() => { if (interval) clearInterval(interval); }, 1200);
     window.addEventListener('resize', updateOffset);
 
     return () => {
-      if (interval) clearInterval(interval);
-      if (timeoutId) clearTimeout(timeoutId);
       window.removeEventListener('resize', updateOffset);
     };
   }, [resources, viewMode]);
