@@ -521,6 +521,7 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
   const [computedRowHeight, setComputedRowHeight] = useState<number>(ROW_HEIGHT);
   const leftColRef = useRef<HTMLDivElement | null>(null);
   const rightColRef = useRef<HTMLDivElement | null>(null);
+  const [rowTops, setRowTops] = useState<number[]>([]);
 
   useEffect(() => {
     let interval: any = null;
@@ -529,15 +530,38 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
       try {
         const chart = (chartRef.current as any)?.chart;
         if (chart && typeof chart.plotTop === 'number') {
-          setChartPlotOffset(chart.plotTop || 0);
-          try {
-            const plotH = chart.plotHeight || 0;
-            const count = (resources && resources.length) || 1;
-            const derived = Math.max(24, Math.round(plotH / count));
-            setComputedRowHeight(derived);
-          } catch (e) {
-            // ignore
+          const plotTop = chart.plotTop || 0;
+          setChartPlotOffset(plotTop);
+
+          // derive row height from plotHeight / rows and compute per-row top positions
+          const plotH = chart.plotHeight || 0;
+          const count = (resources && resources.length) || 1;
+          const derived = Math.max(24, Math.round(plotH / count));
+          setComputedRowHeight(derived);
+
+          // compute exact top for each resource by looking at points
+          const tops: number[] = [];
+          for (let i = 0; i < count; i++) {
+            let found = false;
+            for (let si = 0; si < (chart.series || []).length && !found; si++) {
+              const s = chart.series[si];
+              const pts = s.points || [];
+              for (let pi = 0; pi < pts.length; pi++) {
+                const p = pts[pi];
+                if (p && typeof p.y !== 'undefined' && +p.y === i) {
+                  // p.plotY is relative to plotTop
+                  const y = plotTop + (p.plotY || 0) - Math.round(derived / 2);
+                  tops[i] = Math.max(0, y);
+                  found = true;
+                  break;
+                }
+              }
+            }
+            if (!found) {
+              tops[i] = plotTop + i * derived;
+            }
           }
+          setRowTops(tops);
         }
       } catch (e) {
         // ignore
@@ -640,8 +664,9 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
             <Box sx={{ height: `${(resources?.length || 1) * computedRowHeight + 40}px`, position: 'relative' }}>
               {resources && resources.map((r: string, idx: number) => {
                 const resourceId = resourceNameToIdMap[r] || '';
+                const top = (rowTops && rowTops[idx] != null) ? rowTops[idx] : idx * computedRowHeight + (chartPlotOffset || 0);
                 return (
-                  <Box key={r} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, height: `${computedRowHeight}px`, borderBottom: '1px solid #f0f0f0' }}>
+                  <Box key={r} sx={{ position: 'absolute', left: 0, right: 0, top: `${top}px`, height: `${computedRowHeight}px`, display: 'flex', alignItems: 'center', gap: 1, px: 1 }}>
                     <Avatar sx={{ width: Math.max(24, computedRowHeight - 12), height: Math.max(24, computedRowHeight - 12), bgcolor: 'primary.main', fontSize: 12, fontWeight: 700 }}>{getInitials(r)}</Avatar>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', minWidth: 0 }}>
                       <Typography noWrap sx={{ fontWeight: 700, fontSize: 13, color: 'text.primary' }}>{r}</Typography>
@@ -649,6 +674,7 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
                         <Typography noWrap variant="caption" sx={{ color: 'primary.main', fontWeight: 700, bgcolor: 'rgba(25,118,210,0.08)', px: 1, py: '2px', borderRadius: 1 }}>{resourceId}</Typography>
                       </Box>
                     </Box>
+                    <Box sx={{ position: 'absolute', right: 0, bottom: 0, left: 0, borderBottom: '1px solid #f0f0f0', pointerEvents: 'none' }} />
                   </Box>
                 );
               })}
