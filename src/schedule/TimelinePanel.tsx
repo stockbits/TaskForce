@@ -535,12 +535,11 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
           // derive row height from plotHeight / rows and compute per-row top positions
           const plotH = chart.plotHeight || 0;
           const count = (resources && resources.length) || 1;
-          // Never shrink rows below the initial ROW_HEIGHT to preserve on-load spacing
-          const derived = Math.max(ROW_HEIGHT, Math.round(plotH / count));
-          setComputedRowHeight(derived);
 
-          // compute exact top for each resource by looking at points
+          // Inspect point.shapeArgs (when available) for exact SVG box positions/heights.
           const tops: number[] = [];
+          let maxBarHeight = 0;
+
           for (let i = 0; i < count; i++) {
             let found = false;
             for (let si = 0; si < (chart.series || []).length && !found; si++) {
@@ -549,20 +548,61 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
               for (let pi = 0; pi < pts.length; pi++) {
                 const p = pts[pi];
                 if (p && typeof p.y !== 'undefined' && +p.y === i) {
-                  // p.plotY is relative to plotTop
-                  const y = plotTop + (p.plotY || 0) - Math.round(derived / 2);
-                  tops[i] = Math.max(0, y);
+                  // Prefer actual rendered bbox from the point's graphic for absolute precision
+                  let bbox: any | undefined;
+                  try {
+                    if (p.graphic && typeof p.graphic.getBBox === 'function') {
+                      bbox = p.graphic.getBBox();
+                    }
+                  } catch (e) {
+                    bbox = undefined;
+                  }
+
+                  if (bbox && typeof bbox.y === 'number') {
+                    // bbox.y is relative to the plot area; add plotTop to get container-relative top
+                    tops[i] = plotTop + bbox.y;
+                    maxBarHeight = Math.max(maxBarHeight, Math.round(bbox.height || 0));
+                  } else {
+                    // Prefer shapeArgs when bbox isn't available
+                    const shapeY = p.shapeArgs && typeof p.shapeArgs.y === 'number' ? p.shapeArgs.y : undefined;
+                    const shapeH = p.shapeArgs && typeof p.shapeArgs.height === 'number' ? p.shapeArgs.height : undefined;
+
+                    if (typeof shapeY !== 'undefined') {
+                      tops[i] = plotTop + shapeY;
+                    } else if (typeof p.plotY === 'number') {
+                      tops[i] = plotTop + p.plotY - Math.round(plotH / Math.max(1, count) / 2);
+                    } else {
+                      tops[i] = plotTop + i * Math.max(ROW_HEIGHT, Math.round(plotH / count));
+                    }
+
+                    if (typeof shapeH === 'number') {
+                      maxBarHeight = Math.max(maxBarHeight, shapeH);
+                    } else if (typeof p.plotY === 'number') {
+                      maxBarHeight = Math.max(maxBarHeight, Math.round(plotH / Math.max(1, count) * 0.7));
+                    }
+                  }
+
                   found = true;
                   break;
                 }
               }
             }
             if (!found) {
-              tops[i] = plotTop + i * derived;
+              tops[i] = plotTop + i * Math.max(ROW_HEIGHT, Math.round(plotH / count));
             }
           }
+
+          // Derive a row height that at minimum respects the original ROW_HEIGHT but also
+          // is large enough to contain the tallest rendered bar plus a small padding.
+          const avgDerived = Math.max(ROW_HEIGHT, Math.round(plotH / Math.max(1, count)));
+          const paddedBar = maxBarHeight ? Math.round(maxBarHeight + 8) : avgDerived;
+          const finalDerived = Math.max(ROW_HEIGHT, Math.round(Math.max(avgDerived, paddedBar)));
+
+          setComputedRowHeight(finalDerived);
           setRowTops(tops);
-          // draw custom horizontal grid lines that exactly match row tops
+
+          // draw custom horizontal grid lines that align to either the bottom of the bar
+          // (when available via shapeArgs) or to the computed row bottoms
           try {
             // clear previous
             if (gridLinesRef.current && gridLinesRef.current.length && chart && chart.renderer) {
@@ -574,8 +614,10 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
               const left = chart.plotLeft || 0;
               const right = (chart.plotLeft || 0) + (chart.plotWidth || 0);
               for (let i = 0; i <= count; i++) {
-                const y = (tops[i] != null ? tops[i] : (plotTop + i * derived));
-                const line = chart.renderer.path(["M", left, Math.round(y + derived), "L", right, Math.round(y + derived)])
+                const baseTop = (tops[i] != null ? tops[i] : (plotTop + i * finalDerived));
+                // if we have a maxBarHeight use that to draw the baseline, otherwise use finalDerived
+                const lineY = Math.round(baseTop + (maxBarHeight ? Math.max(maxBarHeight, finalDerived) : finalDerived));
+                const line = chart.renderer.path(["M", left, lineY, "L", right, lineY])
                   .attr({ 'stroke-width': 1, stroke: '#f0f0f0' })
                   .add();
                 gridLinesRef.current.push(line);
