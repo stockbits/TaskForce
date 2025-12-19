@@ -91,6 +91,7 @@ export default function TimelinePanel() {
     return (saved as 'name' | 'id' | 'both') || 'both';
   });
   const chartRef = useRef<HighchartsReact.RefObject>(null);
+  const timelineScrollRef = useRef<HTMLDivElement>(null);
 
   // Menu state
   const [dayMenuAnchor, setDayMenuAnchor] = useState<null | HTMLElement>(null);
@@ -136,6 +137,13 @@ export default function TimelinePanel() {
     setDisplayMode(mode);
     localStorage.setItem('timelineDisplayMode', mode);
     handleDisplayMenuClose();
+  };
+
+  // Scroll synchronization handler
+  const handleTimelineScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    if (timelineScrollRef.current) {
+      timelineScrollRef.current.scrollLeft = event.currentTarget.scrollLeft;
+    }
   };
 
   // Always show all resources from ResourceMock
@@ -570,69 +578,93 @@ export default function TimelinePanel() {
       backgroundColor: '#fafafa',
       borderRadius: 1
     }}>
-      {/* Timeline Header Container for Time Intervals */}
+      {/* Fixed Header Row */}
       <Box sx={{
-        height: '40px',
-        backgroundColor: 'white',
-        borderBottom: '1px solid #e0e0e0',
         display: 'flex',
-        alignItems: 'center',
-        px: 1,
-        gap: 1
+        backgroundColor: 'white',
+        borderBottom: '1px solid #e0e0e0'
       }}>
-        {/* Refresh Button */}
-        <IconButton
-          size="small"
-          onClick={handleResetView}
-          title="Reset View"
-          sx={{ color: '#666' }}
-        >
-          <RefreshIcon fontSize="small" />
-        </IconButton>
+        {/* Left: Controls */}
+        <Box sx={{
+          width: LABEL_COL_WIDTH,
+          height: '40px',
+          display: 'flex',
+          alignItems: 'center',
+          px: 1,
+          gap: 1,
+          borderRight: '1px solid #e0e0e0'
+        }}>
+          <IconButton
+            size="small"
+            onClick={handleResetView}
+            title="Reset View"
+            sx={{ color: '#666' }}
+          >
+            <RefreshIcon fontSize="small" />
+          </IconButton>
 
-        {/* Day Range Selector */}
-        <IconButton
-          size="small"
-          onClick={handleDayMenuOpen}
-          title="Select Day Range"
-          sx={{ color: '#666' }}
-        >
-          <AccessTimeIcon fontSize="small" />
-        </IconButton>
+          <IconButton
+            size="small"
+            onClick={handleDayMenuOpen}
+            title="Select Day Range"
+            sx={{ color: '#666' }}
+          >
+            <AccessTimeIcon fontSize="small" />
+          </IconButton>
 
-        {/* Display Mode Selector */}
-        <IconButton
-          size="small"
-          onClick={handleDisplayMenuOpen}
-          title="Display Mode"
-          sx={{ color: '#666' }}
-        >
-          <PersonIcon fontSize="small" />
-        </IconButton>
+          <IconButton
+            size="small"
+            onClick={handleDisplayMenuOpen}
+            title="Display Mode"
+            sx={{ color: '#666' }}
+          >
+            <PersonIcon fontSize="small" />
+          </IconButton>
+        </Box>
 
-        {/* Hour Intervals Display */}
-        <Box sx={{ flex: 1, display: 'flex', ml: 2 }}>
-          {Array.from({ length: 24 }, (_, i) => (
-            <Box
-              key={i}
-              sx={{
-                flex: 1,
-                textAlign: 'center',
-                fontSize: '0.75rem',
-                color: '#666',
-                borderRight: i < 23 ? '1px solid #e0e0e0' : 'none',
-                py: 1
-              }}
-            >
-              {i.toString().padStart(2, '0')}:00
-            </Box>
-          ))}
+        {/* Right: Timeline Intervals (Scrollable) */}
+        <Box sx={{
+          flex: 1,
+          height: '40px',
+          overflow: 'auto',
+          overflowY: 'hidden',
+          '&::-webkit-scrollbar': { display: 'none' }
+        }}>
+          <Box
+            ref={timelineScrollRef}
+            sx={{
+              display: 'flex',
+              width: '1200px', // Match Gantt chart width
+              height: '100%',
+              '&::-webkit-scrollbar': { display: 'none' }
+            }}
+          >
+            {Array.from({ length: 24 }, (_, i) => (
+              <Box
+                key={i}
+                sx={{
+                  flex: 1,
+                  textAlign: 'center',
+                  fontSize: '0.75rem',
+                  color: '#666',
+                  borderRight: i < 23 ? '1px solid #e0e0e0' : 'none',
+                  py: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                {i.toString().padStart(2, '0')}:00
+              </Box>
+            ))}
+          </Box>
         </Box>
       </Box>
 
+      {/* Scrollable Content */}
       <Box sx={{ display: 'flex', flex: 1, overflow: 'auto', pb: 2 }}>
-        {/* Left column: Resource labels */}
-        <Box sx={{ width: LABEL_COL_WIDTH }}>
+        {/* Left column: Resource labels (Sticky) */}
+        <Box sx={{ width: LABEL_COL_WIDTH, flexShrink: 0 }}>
           <Paper elevation={0} sx={{ borderRight: '1px solid #e0e0e0', bgcolor: 'transparent' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               {resources.map((resourceName: string, _idx: number) => {
@@ -692,26 +724,33 @@ export default function TimelinePanel() {
           </Paper>
         </Box>
 
-        {/* Right: Gantt chart */}
-        <Box sx={{
-          flex: 1,
-          '& .highcharts-background': { fill: 'transparent' },
-          '& .highcharts-plot-background': { fill: 'transparent' },
-          '& .highcharts-scrollbar': { display: 'none !important' },
-          '& .highcharts-scrollbar-thumb': { display: 'none !important' }
-        }}>
-          <HighchartsReact
-            ref={chartRef}
-            highcharts={Highcharts}
-            options={options}
-            containerProps={{
-              style: {
-                height: `${(resources?.length || 1) * ROW_HEIGHT}px`,
-                width: '100%',
-                minWidth: '1200px'
-              }
-            }}
-          />
+        {/* Right: Gantt chart (Horizontally Scrollable) */}
+        <Box
+          sx={{
+            flex: 1,
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            '& .highcharts-background': { fill: 'transparent' },
+            '& .highcharts-plot-background': { fill: 'transparent' },
+            '& .highcharts-scrollbar': { display: 'none !important' },
+            '& .highcharts-scrollbar-thumb': { display: 'none !important' },
+            '&::-webkit-scrollbar': { display: 'none' }
+          }}
+          onScroll={handleTimelineScroll}
+        >
+          <Box sx={{ width: '1200px', minWidth: '1200px' }}> {/* Fixed width container */}
+            <HighchartsReact
+              ref={chartRef}
+              highcharts={Highcharts}
+              options={options}
+              containerProps={{
+                style: {
+                  height: `${(resources?.length || 1) * ROW_HEIGHT}px`,
+                  width: '100%'
+                }
+              }}
+            />
+          </Box>
         </Box>
       </Box>
 
