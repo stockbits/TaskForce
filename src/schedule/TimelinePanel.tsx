@@ -86,12 +86,10 @@ const getDateRange = (mode: '1day' | '2days' | '5days' | '7days' | '12days') => 
 
 export default function TimelinePanel({ selectedResource }: { selectedResource?: any }) {
   const [viewMode, setViewMode] = useState<'1day' | '2days' | '5days' | '7days' | '12days'>('5days');
-  const [anchorElRange, setAnchorElRange] = useState<null | HTMLElement>(null);
   const [displayMode, setDisplayMode] = useState<'name' | 'id' | 'both'>(() => {
     const saved = localStorage.getItem('timelineDisplayMode');
     return (saved as 'name' | 'id' | 'both') || 'both';
   });
-  const [anchorElDisplay, setAnchorElDisplay] = useState<null | HTMLElement>(null);
   const chartRef = useRef<HighchartsReact.RefObject>(null);
 
   // Reset zoom when view mode changes
@@ -540,53 +538,6 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
       backgroundColor: '#fafafa',
       borderRadius: 1
     }}>
-      {/* Time Header with View Mode Controls */}
-      <Paper elevation={1} sx={{
-        p: 1.5,
-        mb: 1,
-        backgroundColor: 'white',
-        borderRadius: 1,
-        border: '1px solid #e0e0e0'
-      }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
-              Timeline View
-            </Typography>
-            <IconButton onClick={handleResetView} size="small" sx={{ color: 'primary.main' }} title="Reset zoom and position">
-              <RefreshIcon fontSize="small" />
-            </IconButton>
-            <IconButton size="small" onClick={(e) => setAnchorElDisplay(e.currentTarget)} title="Display mode">
-              <PersonIcon sx={{ color: 'primary.main' }} />
-            </IconButton>
-            <Menu anchorEl={anchorElDisplay} open={Boolean(anchorElDisplay)} onClose={() => setAnchorElDisplay(null)}>
-              <MenuItem onClick={() => { setDisplayMode('name'); setAnchorElDisplay(null); }}>Show Names</MenuItem>
-              <MenuItem onClick={() => { setDisplayMode('id'); setAnchorElDisplay(null); }}>Show IDs</MenuItem>
-              <MenuItem onClick={() => { setDisplayMode('both'); setAnchorElDisplay(null); }}>Show Both</MenuItem>
-            </Menu>
-          </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              {(() => {
-                const start = dateRange.startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                const end = dateRange.endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                return `${start} - ${end}`;
-              })()}
-            </Typography>
-            <IconButton size="small" onClick={(e) => setAnchorElRange(e.currentTarget)} title="Select day range">
-              <AccessTimeIcon sx={{ color: 'primary.main' }} />
-            </IconButton>
-            <Menu anchorEl={anchorElRange} open={Boolean(anchorElRange)} onClose={() => setAnchorElRange(null)}>
-              <MenuItem onClick={() => { setViewMode('1day'); setAnchorElRange(null); }}>1 Day</MenuItem>
-              <MenuItem onClick={() => { setViewMode('2days'); setAnchorElRange(null); }}>2 Days</MenuItem>
-              <MenuItem onClick={() => { setViewMode('5days'); setAnchorElRange(null); }}>5 Days</MenuItem>
-              <MenuItem onClick={() => { setViewMode('7days'); setAnchorElRange(null); }}>7 Days</MenuItem>
-              <MenuItem onClick={() => { setViewMode('12days'); setAnchorElRange(null); }}>12 Days</MenuItem>
-            </Menu>
-          </Box>
-        </Box>
-      </Paper>
-
       <Box sx={{ display: 'flex', flex: 1, overflow: 'auto', pb: 2 }}>
         {/* Left column: Resource labels */}
         <Box sx={{ width: LABEL_COL_WIDTH }}>
