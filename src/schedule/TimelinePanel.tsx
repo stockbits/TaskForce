@@ -448,7 +448,8 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
       gridLineWidth: 0, // Removed grid lines
       gridLineColor: '#e0e0e0',
       opposite: true,
-      labels: { enabled: false }
+      labels: { enabled: false },
+      visible: false // Hide the entire x-axis to align Y positions
     },
     yAxis: {
       categories: resources,
@@ -586,9 +587,9 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
         </Box>
       </Paper>
 
-      <Box sx={{ display: 'flex', flex: 1, overflow: 'auto' }}>
+      <Box sx={{ display: 'flex', flex: 1, overflow: 'auto', pb: 2 }}>
         {/* Left column: Resource labels */}
-        <Box sx={{ width: LABEL_COL_WIDTH, p: 1 }}>
+        <Box sx={{ width: LABEL_COL_WIDTH }}>
           <Paper elevation={0} sx={{ borderRight: '1px solid #e0e0e0', bgcolor: 'transparent' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               {resources.map((resourceName: string, _idx: number) => {
@@ -651,7 +652,6 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
         {/* Right: Gantt chart */}
         <Box sx={{
           flex: 1,
-          p: 1,
           '& .highcharts-background': { fill: 'transparent' },
           '& .highcharts-plot-background': { fill: 'transparent' },
           '& .highcharts-scrollbar': { display: 'none !important' },
@@ -663,7 +663,7 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
             options={options}
             containerProps={{
               style: {
-                height: `${(resources?.length || 1) * ROW_HEIGHT + 40}px`,
+                height: `${(resources?.length || 1) * ROW_HEIGHT}px`,
                 width: '100%',
                 minWidth: '1200px'
               }
