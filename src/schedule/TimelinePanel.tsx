@@ -442,7 +442,9 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
       dateTimeLabelFormats: { 
         minute: '%H:%M', 
         hour: '%H:%M', 
-        day: '%a %e %b' 
+        day: '%a %e %b',
+        week: '%e %b',
+        month: '%b %Y'
       },
       title: { text: null },
       scrollbar: { enabled: false },
@@ -452,7 +454,17 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
       gridLineWidth: 1,
       gridLineColor: '#e0e0e0',
       opposite: true,
-      labels: { align: 'left', x: 0, y: -5 }
+      labels: { 
+        align: 'center', 
+        x: 0, 
+        y: -2,
+        rotation: 0,
+        style: { fontSize: '11px', fontWeight: '500' }
+      },
+      tickInterval: 60 * 60 * 1000, // 1 hour intervals
+      minorTickInterval: 30 * 60 * 1000, // 30 minute minor ticks
+      minorGridLineWidth: 0.5,
+      minorGridLineColor: '#f0f0f0'
     },
     yAxis: {
       categories: resources,
@@ -674,13 +686,12 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
           '& .highcharts-xaxis': { 
             position: 'sticky !important', 
             top: '0 !important', 
-            zIndex: 1000,
-            backgroundColor: 'white'
+            zIndex: 100,
+            backgroundColor: 'white',
+            width: '100%'
           },
           '& .highcharts-xaxis-labels': {
-            position: 'sticky !important',
-            top: '20px !important',
-            zIndex: 1000,
+            position: 'relative !important',
             backgroundColor: 'white'
           }
         }}>
@@ -692,7 +703,8 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
               style: {
                 height: `${(resources?.length || 1) * ROW_HEIGHT + 40}px`,
                 width: '100%',
-                minWidth: '1200px'
+                minWidth: '1200px',
+                overflow: 'auto'
               }
             }}
           />
