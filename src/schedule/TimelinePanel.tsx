@@ -340,9 +340,9 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
                 priority: 'Shift',
                 estimatedDuration: 0,
                 employeeId: resource.resourceId,
-                color: 'rgba(76, 175, 80, 0.2)', // Light green background for shifts
-                borderColor: 'rgba(76, 175, 80, 0.5)',
-                borderWidth: 1
+                color: 'rgba(76, 175, 80, 0.4)', // Light green background for shifts
+                borderColor: 'rgba(76, 175, 80, 0.7)',
+                borderWidth: 2
               });
             }
           }
@@ -450,7 +450,8 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
       min: 0,
       max: resources.length - 1,
       labels: { enabled: false },
-      scrollbar: { enabled: false, showFull: false }
+      scrollbar: { enabled: false, showFull: false },
+      staticScale: 60
     },
     series: series,
     plotOptions: {
@@ -527,7 +528,7 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
   };
 
   const LABEL_COL_WIDTH = 220;
-  const ROW_HEIGHT = 42;
+  const ROW_HEIGHT = 60;
 
   return (
     <Box sx={{
