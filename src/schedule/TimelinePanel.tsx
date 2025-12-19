@@ -195,7 +195,7 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
             };
             return employeeColors[resource.resourceId] || '#667eea';
           })(),
-          pointPadding: 0.1
+          pointPadding: 0.2
         };
       }).filter(Boolean);
 
@@ -347,7 +347,7 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
                 color: 'rgba(76, 175, 80, 0.4)', // Light green background for shifts
                 borderColor: 'rgba(76, 175, 80, 0.7)',
                 borderWidth: 2,
-                pointPadding: 0.05
+                pointPadding: 0.15
               });
             }
           }
@@ -482,17 +482,9 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
         const point = this.point;
         if (!point || point.name === 'No tasks scheduled') return false;
 
-        // Handle shift bars differently
+        // Disable tooltips for shift bars
         if (point.taskId === 'shift') {
-          const startDate = new Date(point.start);
-          const endDate = new Date(point.end);
-          return `<div style="font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 300px;">
-            <div style="font-weight: 600; font-size: 14px; color: #4caf50; margin-bottom: 8px;">${point.name}</div>
-            <div style="display: flex; flex-direction: column; gap: 4px; font-size: 12px;">
-              <div><strong>Start:</strong> ${startDate.toLocaleString()}</div>
-              <div><strong>End:</strong> ${endDate.toLocaleString()}</div>
-            </div>
-          </div>`;
+          return false;
         }
 
         // Handle travel bars
