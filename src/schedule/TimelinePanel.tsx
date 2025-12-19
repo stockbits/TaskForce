@@ -407,8 +407,8 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
           const currentMax = xAxis.max || dateRange.end;
           const currentRange = currentMax - currentMin;
           const newRange = currentRange * delta;
-          // Limit max zoom to 30 minutes
-          if (newRange < 30 * 60 * 1000) return;
+          // Allow zoom down to 15 minutes for detailed view
+          if (newRange < 15 * 60 * 1000) return;
           const center = (currentMin + currentMax) / 2;
           const newMin = Math.max(dateRange.start, center - newRange / 2);
           const newMax = Math.min(dateRange.end, center + newRange / 2);
@@ -439,11 +439,15 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
     },
     xAxis: {
       type: 'datetime',
-      dateTimeLabelFormats: { hour: '%H:%M', day: '%a %e %b' },
+      dateTimeLabelFormats: { 
+        minute: '%H:%M', 
+        hour: '%H:%M', 
+        day: '%a %e %b' 
+      },
       title: { text: null },
       scrollbar: { enabled: false },
       min: dateRange.start + (5 * 60 * 60 * 1000), // Start at 5 AM
-      max: dateRange.end,
+      max: dateRange.start + (20 * 60 * 60 * 1000), // End at 8 PM
       minRange: dateRange.end - dateRange.start,
       gridLineWidth: 1,
       gridLineColor: '#e0e0e0',
