@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useRef } from "react";
-import { Box, Typography, Paper, Avatar } from "@mui/material";
+import { Box, Typography, Paper, Avatar, IconButton, Menu, MenuItem } from "@mui/material";
+import { Refresh as RefreshIcon, AccessTime as AccessTimeIcon, Person as PersonIcon } from "@mui/icons-material";
 import Highcharts from 'highcharts';
 import 'highcharts/modules/gantt';
 import HighchartsReact from 'highcharts-react-official';
@@ -84,12 +85,16 @@ const getDateRange = (mode: '1day' | '2days' | '5days' | '7days' | '12days') => 
 };
 
 export default function TimelinePanel() {
-  const [viewMode] = useState<'1day' | '2days' | '5days' | '7days' | '12days'>('5days');
-  const [displayMode] = useState<'name' | 'id' | 'both'>(() => {
+  const [viewMode, setViewMode] = useState<'1day' | '2days' | '5days' | '7days' | '12days'>('5days');
+  const [displayMode, setDisplayMode] = useState<'name' | 'id' | 'both'>(() => {
     const saved = localStorage.getItem('timelineDisplayMode');
     return (saved as 'name' | 'id' | 'both') || 'both';
   });
   const chartRef = useRef<HighchartsReact.RefObject>(null);
+
+  // Menu state
+  const [dayMenuAnchor, setDayMenuAnchor] = useState<null | HTMLElement>(null);
+  const [displayMenuAnchor, setDisplayMenuAnchor] = useState<null | HTMLElement>(null);
 
   // Reset zoom when view mode changes
   React.useEffect(() => {
@@ -97,6 +102,41 @@ export default function TimelinePanel() {
       chartRef.current.chart.zoomOut();
     }
   }, [viewMode]);
+
+  // Function to reset chart zoom and position
+  const handleResetView = () => {
+    if (chartRef.current?.chart) {
+      chartRef.current.chart.zoomOut();
+    }
+  };
+
+  // Menu handlers
+  const handleDayMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setDayMenuAnchor(event.currentTarget);
+  };
+
+  const handleDayMenuClose = () => {
+    setDayMenuAnchor(null);
+  };
+
+  const handleDisplayMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setDisplayMenuAnchor(event.currentTarget);
+  };
+
+  const handleDisplayMenuClose = () => {
+    setDisplayMenuAnchor(null);
+  };
+
+  const handleViewModeChange = (mode: '1day' | '2days' | '5days' | '7days' | '12days') => {
+    setViewMode(mode);
+    handleDayMenuClose();
+  };
+
+  const handleDisplayModeChange = (mode: 'name' | 'id' | 'both') => {
+    setDisplayMode(mode);
+    localStorage.setItem('timelineDisplayMode', mode);
+    handleDisplayMenuClose();
+  };
 
   // Always show all resources from ResourceMock
   const allResources = useMemo(() => {
@@ -537,9 +577,43 @@ export default function TimelinePanel() {
         borderBottom: '1px solid #e0e0e0',
         display: 'flex',
         alignItems: 'center',
-        px: 1
+        px: 1,
+        gap: 1
       }}>
-        {/* Time intervals will be added here */}
+        {/* Refresh Button */}
+        <IconButton
+          size="small"
+          onClick={handleResetView}
+          title="Reset View"
+          sx={{ color: '#666' }}
+        >
+          <RefreshIcon fontSize="small" />
+        </IconButton>
+
+        {/* Day Range Selector */}
+        <IconButton
+          size="small"
+          onClick={handleDayMenuOpen}
+          title="Select Day Range"
+          sx={{ color: '#666' }}
+        >
+          <AccessTimeIcon fontSize="small" />
+        </IconButton>
+
+        {/* Display Mode Selector */}
+        <IconButton
+          size="small"
+          onClick={handleDisplayMenuOpen}
+          title="Display Mode"
+          sx={{ color: '#666' }}
+        >
+          <PersonIcon fontSize="small" />
+        </IconButton>
+
+        {/* Current View Mode Display */}
+        <Typography variant="body2" sx={{ color: '#666', ml: 1 }}>
+          {viewMode.replace('days', ' days').replace('day', ' day')}
+        </Typography>
       </Box>
 
       <Box sx={{ display: 'flex', flex: 1, overflow: 'auto', pb: 2 }}>
@@ -626,6 +700,30 @@ export default function TimelinePanel() {
           />
         </Box>
       </Box>
+
+      {/* Day Range Menu */}
+      <Menu
+        anchorEl={dayMenuAnchor}
+        open={Boolean(dayMenuAnchor)}
+        onClose={handleDayMenuClose}
+      >
+        <MenuItem onClick={() => handleViewModeChange('1day')}>1 Day</MenuItem>
+        <MenuItem onClick={() => handleViewModeChange('2days')}>2 Days</MenuItem>
+        <MenuItem onClick={() => handleViewModeChange('5days')}>5 Days</MenuItem>
+        <MenuItem onClick={() => handleViewModeChange('7days')}>7 Days</MenuItem>
+        <MenuItem onClick={() => handleViewModeChange('12days')}>12 Days</MenuItem>
+      </Menu>
+
+      {/* Display Mode Menu */}
+      <Menu
+        anchorEl={displayMenuAnchor}
+        open={Boolean(displayMenuAnchor)}
+        onClose={handleDisplayMenuClose}
+      >
+        <MenuItem onClick={() => handleDisplayModeChange('name')}>Name Only</MenuItem>
+        <MenuItem onClick={() => handleDisplayModeChange('id')}>ID Only</MenuItem>
+        <MenuItem onClick={() => handleDisplayModeChange('both')}>Name & ID</MenuItem>
+      </Menu>
     </Box>
   );
 }
