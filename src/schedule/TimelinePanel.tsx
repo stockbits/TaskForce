@@ -538,6 +538,18 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
       backgroundColor: '#fafafa',
       borderRadius: 1
     }}>
+      {/* Timeline Header Container for Time Intervals */}
+      <Box sx={{
+        height: '40px',
+        backgroundColor: 'white',
+        borderBottom: '1px solid #e0e0e0',
+        display: 'flex',
+        alignItems: 'center',
+        px: 1
+      }}>
+        {/* Time intervals will be added here */}
+      </Box>
+
       <Box sx={{ display: 'flex', flex: 1, overflow: 'auto', pb: 2 }}>
         {/* Left column: Resource labels */}
         <Box sx={{ width: LABEL_COL_WIDTH }}>
