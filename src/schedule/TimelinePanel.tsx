@@ -21,6 +21,25 @@ const getInitials = (name: string) => {
   return name.split(' ').map(n => n[0]).join('').toUpperCase();
 };
 
+// Helper to calculate distance between two lat/lng points in km
+const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng/2) * Math.sin(dLng/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+};
+
+// Helper to calculate travel time in minutes (assuming 30 km/h average speed)
+const calculateTravelTime = (distanceKm: number) => {
+  const speedKmh = 30; // 30 km/h
+  const timeHours = distanceKm / speedKmh;
+  return Math.max(15, Math.round(timeHours * 60)); // minimum 15 minutes travel time
+};
+
 // Helper to get date range based on view mode
 const getDateRange = (mode: '1day' | '2days' | '5days' | '7days' | '12days') => {
   const today = new Date();
@@ -177,6 +196,99 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
         };
       }).filter(Boolean);
 
+      // Sort tasks by start time for travel calculation
+      const sortedTasks = resourceTasks.sort((a, b) => {
+        const aTime = parseDate(a.expectedStartDate) || 0;
+        const bTime = parseDate(b.expectedStartDate) || 0;
+        return aTime - bTime;
+      });
+
+      // Create travel bars
+      const travelBars = [];
+      const homeLat = resource.homeLat;
+      const homeLng = resource.homeLng;
+
+      if (homeLat && homeLng) {
+        // Travel from home to first task
+        const firstTask = sortedTasks[0];
+        if (firstTask && firstTask.lat && firstTask.lng) {
+          const firstStart = parseDate(firstTask.expectedStartDate);
+          if (firstStart) {
+            const distance = calculateDistance(homeLat, homeLng, firstTask.lat, firstTask.lng);
+            const travelTime = calculateTravelTime(distance);
+            const travelStart = firstStart - (travelTime * 60 * 1000);
+            if (travelStart >= dateRange.start) {
+              travelBars.push({
+                name: 'Travel from Home',
+                start: travelStart,
+                end: firstStart,
+                y: resourceIndex,
+                taskId: 'travel-home',
+                taskType: 'Travel',
+                priority: 'Travel',
+                estimatedDuration: travelTime,
+                employeeId: resource.resourceId,
+                color: '#9e9e9e'
+              });
+            }
+          }
+        }
+
+        // Travel between tasks
+        for (let i = 0; i < sortedTasks.length - 1; i++) {
+          const currentTask = sortedTasks[i];
+          const nextTask = sortedTasks[i + 1];
+          const currentEnd = parseDate(currentTask.expectedFinishDate);
+          const nextStart = parseDate(nextTask.expectedStartDate);
+          if (currentEnd && nextStart && currentTask.lat && currentTask.lng && nextTask.lat && nextTask.lng) {
+            const gap = nextStart - currentEnd;
+            if (gap > 0) {
+              const distance = calculateDistance(currentTask.lat, currentTask.lng, nextTask.lat, nextTask.lng);
+              const travelTime = Math.min(calculateTravelTime(distance), gap / (60 * 1000));
+              const travelStart = currentEnd;
+              const travelEnd = Math.min(nextStart, currentEnd + (travelTime * 60 * 1000));
+              travelBars.push({
+                name: 'Travel',
+                start: travelStart,
+                end: travelEnd,
+                y: resourceIndex,
+                taskId: `travel-${i}`,
+                taskType: 'Travel',
+                priority: 'Travel',
+                estimatedDuration: travelTime,
+                employeeId: resource.resourceId,
+                color: '#9e9e9e'
+              });
+            }
+          }
+        }
+
+        // Travel from last task to home
+        const lastTask = sortedTasks[sortedTasks.length - 1];
+        if (lastTask && lastTask.lat && lastTask.lng) {
+          const lastEnd = parseDate(lastTask.expectedFinishDate);
+          if (lastEnd) {
+            const distance = calculateDistance(lastTask.lat, lastTask.lng, homeLat, homeLng);
+            const travelTime = calculateTravelTime(distance);
+            const travelEnd = lastEnd + (travelTime * 60 * 1000);
+            if (travelEnd <= dateRange.end) {
+              travelBars.push({
+                name: 'Travel to Home',
+                start: lastEnd,
+                end: travelEnd,
+                y: resourceIndex,
+                taskId: 'travel-home-end',
+                taskType: 'Travel',
+                priority: 'Travel',
+                estimatedDuration: travelTime,
+                employeeId: resource.resourceId,
+                color: '#9e9e9e'
+              });
+            }
+          }
+        }
+      }
+
       // Add shift time visualization
       const shiftBars = [];
       if (resource.shiftStart && resource.shiftEnd) {
@@ -233,8 +345,8 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
         }
       }
 
-      // Combine shift bars and task bars
-      const allBars = [...shiftBars, ...taskBars];
+      // Combine shift bars, task bars, and travel bars
+      const allBars = [...shiftBars, ...taskBars, ...travelBars];
 
       // If no tasks or shifts, add a placeholder
       if (allBars.length === 0) {
@@ -363,6 +475,20 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
           return `<div style="font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 300px;">
             <div style="font-weight: 600; font-size: 14px; color: #4caf50; margin-bottom: 8px;">${point.name}</div>
             <div style="display: flex; flex-direction: column; gap: 4px; font-size: 12px;">
+              <div><strong>Start:</strong> ${startDate.toLocaleString()}</div>
+              <div><strong>End:</strong> ${endDate.toLocaleString()}</div>
+            </div>
+          </div>`;
+        }
+
+        // Handle travel bars
+        if (point.taskType === 'Travel') {
+          const startDate = new Date(point.start);
+          const endDate = new Date(point.end);
+          return `<div style="font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 300px;">
+            <div style="font-weight: 600; font-size: 14px; color: #616161; margin-bottom: 8px;">${point.name}</div>
+            <div style="display: flex; flex-direction: column; gap: 4px; font-size: 12px;">
+              <div><strong>Duration:</strong> ${point.estimatedDuration} minutes</div>
               <div><strong>Start:</strong> ${startDate.toLocaleString()}</div>
               <div><strong>End:</strong> ${endDate.toLocaleString()}</div>
             </div>
