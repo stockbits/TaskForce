@@ -85,7 +85,7 @@ const getDateRange = (mode: '1day' | '2days' | '5days' | '7days' | '12days') => 
 };
 
 export default function TimelinePanel({ selectedResource }: { selectedResource?: any }) {
-  const [viewMode, setViewMode] = useState<'1day' | '2days' | '5days' | '7days' | '12days'>('1day');
+  const [viewMode, setViewMode] = useState<'1day' | '2days' | '5days' | '7days' | '12days'>('5days');
   const [anchorElRange, setAnchorElRange] = useState<null | HTMLElement>(null);
   const [displayMode, setDisplayMode] = useState<'name' | 'id' | 'both'>(() => {
     const saved = localStorage.getItem('timelineDisplayMode');
