@@ -2,7 +2,6 @@ import React from 'react';
 import { Box, TextField, InputAdornment, IconButton, Tooltip } from '@mui/material';
 import type { TextFieldProps } from '@mui/material/TextField';
 import SearchIcon from '@mui/icons-material/Search';
-import InfoIcon from '@mui/icons-material/Info';
 import useFieldSizes from './useFieldSizes';
 
 type Props = {
@@ -10,13 +9,12 @@ type Props = {
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onSearch?: () => void;
-  placeholder?: string;
   size?: 'small' | 'medium';
   sx?: any;
   name?: string;
   showSearchButton?: boolean;
   validateExact?: (value: string) => boolean;
-  errorMessage?: string;
+  searchTooltip?: string;
 } & Partial<TextFieldProps>;
 
 const GlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function GlobalSearchField(props, ref) {
@@ -25,17 +23,16 @@ const GlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function Glo
     onChange,
     onKeyPress,
     onSearch,
-    placeholder = '',
     size = 'small',
     sx = {},
     name = 'taskSearch',
     showSearchButton = false,
     validateExact,
-    errorMessage,
+    searchTooltip,
     ...rest
   } = props;
 
-  const { INPUT_HEIGHT, CHIP_SIZE } = useFieldSizes();
+  const { INPUT_HEIGHT, CHIP_SIZE, MIN_WIDTH } = useFieldSizes();
   const [error, setError] = React.useState<boolean>(false);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -51,32 +48,29 @@ const GlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function Glo
 
   const endAdornment = (
     <InputAdornment position="end">
-      <Tooltip title={placeholder} arrow>
-        <IconButton size="small" sx={{ mr: 0.5 }} aria-label="search info">
-          <InfoIcon style={{ fontSize: 16 }} />
-        </IconButton>
-      </Tooltip>
       {showSearchButton && onSearch && (
-        <IconButton
-          size="small"
-          onClick={() => {
-            if (validateExact && !validateExact(value)) {
-              setError(true);
-              return;
-            }
-            onSearch?.();
-          }}
-          sx={{ mr: 0.5 }}
-          aria-label="search"
-        >
-          <SearchIcon style={{ fontSize: 16 }} />
-        </IconButton>
+        <Tooltip title={searchTooltip} arrow>
+          <IconButton
+            size="small"
+            onClick={() => {
+              if (validateExact && !validateExact(value)) {
+                setError(true);
+                return;
+              }
+              onSearch?.();
+            }}
+            sx={{ mr: 0.5 }}
+            aria-label="search"
+          >
+            <SearchIcon style={{ fontSize: 16 }} />
+          </IconButton>
+        </Tooltip>
       )}
     </InputAdornment>
   );
 
   return (
-    <Box sx={{ width: 'fit-content', maxWidth: { xs: '100%', sm: 400 }, ...sx }}>
+    <Box sx={{ minWidth: MIN_WIDTH, width: 'fit-content', maxWidth: { xs: '100%', sm: '90ch' }, ...sx }}>
       <TextField
         name={name}
         value={value}
@@ -88,6 +82,7 @@ const GlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function Glo
         placeholder="Search tasks..."
         size={size}
         sx={{
+          minWidth: MIN_WIDTH,
           width: 'fit-content',
           '& input::placeholder': { color: 'text.secondary' },
           '& .MuiInputBase-input': {
@@ -96,8 +91,10 @@ const GlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function Glo
             fontSize: 13,
             lineHeight: `${CHIP_SIZE}px`
           },
-          height: INPUT_HEIGHT
+          height: INPUT_HEIGHT,
+          maxWidth: { xs: '100%', sm: '90ch' }
         }}
+        error={error}
         InputProps={{
           // Avoid duplicate icons when an explicit search button exists
           startAdornment: showSearchButton ? undefined : (
@@ -109,8 +106,6 @@ const GlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function Glo
           sx: { height: INPUT_HEIGHT }
         }}
         inputRef={ref}
-        error={error}
-        helperText={undefined}
         {...rest}
       />
     </Box>

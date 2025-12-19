@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
 import {
   Box,
-  Stack,
   Tab,
   Tabs,
   Grid,
 } from "@mui/material";
-import { alpha, useTheme } from "@mui/material/styles";
-import { MultiSelectField, SingleSelectField, FreeTypeSelectField, CombinedLocationField } from "@/shared-ui";
+import { MultiSelectField, FreeTypeSelectField, CombinedLocationField } from "@/shared-ui";
 import ImpScoreField from '@/shared-ui/text-fields/ImpScoreField';
 
 export interface ScheduleLiveSearchFilters {
@@ -67,12 +65,11 @@ function sortByBracketCode(list: string[]): string[] {
 const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
   mode = "task",
   onSearch,
-  onClear,
+  onClear: _onClear,
   dropdownData,
   resetKey,
   hideActions,
 }) => {
-  const theme = useTheme();
   const [activeTab, setActiveTab] = useState<"basic" | "advanced">("basic");
   const [filters, setFilters] = useState<ScheduleLiveSearchFilters>({
     taskSearch: "",
@@ -160,37 +157,6 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
     });
   }, [mode]);
 
-  const handleClear = () => {
-    setFilters({
-      taskSearch: "",
-      taskStatuses: [],
-      requester: "",
-      responseCode: [],
-      commitType: [],
-      capabilities: [],
-      pwa: [],
-      jobType: "",
-      scoreCondition: "",
-      scoreValue: "",
-      locationType: "",
-      locationValue: "",
-      fromDate: "",
-      fromTime: "",
-      toDate: "",
-      toTime: "",
-      calloutGroup: "",
-    });
-    setActiveTab("basic");
-    setQuery({
-      taskStatuses: "",
-      responseCode: "",
-      commitType: "",
-      capabilities: "",
-      pwa: "",
-    });
-    onClear();
-  };
-
   useEffect(() => {
     if (hideActions) {
       onSearch(filters);
@@ -230,9 +196,9 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
   };
 
   const renderFieldGrid = (fields: React.ReactNode[]) => (
-    <Grid container spacing={2.5}>
+    <Grid container spacing={3}>
       {fields.map((field, index) => (
-        <Grid item xs={12} md={6} key={index}>
+        <Grid item xs={12} md={fields.length === 1 ? 12 : 6} key={index}>
           {field}
         </Grid>
       ))}
@@ -294,6 +260,21 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
   ];
 
   let advancedFields = [
+    <CombinedLocationField
+      key="location"
+      locationType={filters.locationType}
+      locationValue={filters.locationValue}
+      onTypeChange={(val) => setFilters((prev) => ({ ...prev, locationType: val }))}
+      onValueChange={(val) => setFilters((prev) => ({ ...prev, locationValue: val }))}
+    />,
+    <ImpScoreField
+      key="impScore"
+      label="IMP Score"
+      condition={(filters.scoreCondition as any) || ''}
+      value={filters.scoreValue}
+      onConditionChange={(next) => setFilters((prev) => ({ ...prev, scoreCondition: next }))}
+      onValueChange={(next) => setFilters((prev) => ({ ...prev, scoreValue: next }))}
+    />,
     <FreeTypeSelectField
       key="requester"
       label="Requester"
@@ -322,26 +303,8 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
     );
   }
 
-  advancedFields = advancedFields.concat([
-    <CombinedLocationField
-      key="location"
-      locationType={filters.locationType}
-      locationValue={filters.locationValue}
-      onTypeChange={(val) => setFilters((prev) => ({ ...prev, locationType: val }))}
-      onValueChange={(val) => setFilters((prev) => ({ ...prev, locationValue: val }))}
-    />,
-    <ImpScoreField
-      key="impScore"
-      label="IMP Score"
-      condition={(filters.scoreCondition as any) || ''}
-      value={filters.scoreValue}
-      onConditionChange={(next) => setFilters((prev) => ({ ...prev, scoreCondition: next }))}
-      onValueChange={(next) => setFilters((prev) => ({ ...prev, scoreValue: next }))}
-    />
-  ]);
-
   return (
-    <Box sx={{ p: { xs: 2, sm: 2.5, md: 3 }, minWidth: 0 }}>
+    <Box sx={{ p: { xs: 2, sm: 2.5, md: 3 }, minWidth: 0, m: 0 }}>
 <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
           <Tabs value={activeTab} onChange={(_e, v) => setActiveTab(v)} variant="standard">
             <Tab value="basic" label="Basic" />

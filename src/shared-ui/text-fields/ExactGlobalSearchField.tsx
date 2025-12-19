@@ -14,9 +14,12 @@ type Props = {
   sx?: any;
   name?: string;
   showSearchButton?: boolean;
+  enableValidation?: boolean;
+  searchTooltip?: string;
 } & Partial<TextFieldProps>;
 
 const ExactGlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function ExactGlobalSearchField(props, ref) {
+  const { enableValidation = true, ...rest } = props;
   const validateExact = (v: string) => {
     const q = String(v || '').trim().toLowerCase();
     if (!q) return false;
@@ -38,7 +41,7 @@ const ExactGlobalSearchField = React.forwardRef<HTMLInputElement, Props>(functio
     return foundInResources;
   };
 
-  return <GlobalSearchField {...props} validateExact={validateExact} ref={ref} />;
+  return <GlobalSearchField {...rest} validateExact={enableValidation ? validateExact : undefined} ref={ref} />;
 });
 
 export default ExactGlobalSearchField;

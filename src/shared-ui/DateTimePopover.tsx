@@ -43,6 +43,7 @@ export default function DateTimePopover({
             onChange={(e) => onChangeField('fromDate', e.target.value)}
             size="small"
             InputLabelProps={{ shrink: true }}
+            sx={{ maxWidth: { xs: '100%', sm: '15ch' }, minWidth: '15ch' }}
           />
           <TextField
             type="time"
@@ -50,6 +51,7 @@ export default function DateTimePopover({
             value={fromTime}
             onChange={(e) => onChangeField('fromTime', e.target.value)}
             size="small"
+            sx={{ maxWidth: { xs: '100%', sm: '10ch' }, minWidth: '10ch' }}
           />
         </Stack>
         <Stack direction="row" spacing={1} alignItems="center">
@@ -61,6 +63,7 @@ export default function DateTimePopover({
             onChange={(e) => onChangeField('toDate', e.target.value)}
             size="small"
             InputLabelProps={{ shrink: true }}
+            sx={{ maxWidth: { xs: '100%', sm: '15ch' }, minWidth: '15ch' }}
           />
           <TextField
             type="time"
@@ -68,6 +71,7 @@ export default function DateTimePopover({
             value={toTime}
             onChange={(e) => onChangeField('toTime', e.target.value)}
             size="small"
+            sx={{ maxWidth: { xs: '100%', sm: '10ch' }, minWidth: '10ch' }}
           />
         </Stack>
         <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>

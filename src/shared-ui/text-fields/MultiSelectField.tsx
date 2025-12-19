@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import {
   Autocomplete,
   Box,
@@ -17,7 +17,6 @@ import type {
   AutocompleteChangeReason,
 } from "@mui/material/Autocomplete";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
-import { useTheme } from '@mui/material/styles';
 import useFieldSizes from './useFieldSizes';
 
 const SELECT_ALL_VALUE = "__SELECT_ALL__";
@@ -104,26 +103,32 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
   };
 
 
-  const FIELD_WIDTH = { xs: '100%', sm: '22ch', md: '28ch' };
+  const { INPUT_HEIGHT, CHIP_SIZE, MAX_WIDTH, MIN_WIDTH } = useFieldSizes();
+  const END_ADORNMENT_WIDTH = 80; // px reserved for DoneAll + chevron icons
+  const COMPACT_DELTA = 6;
+  const COMPACT_CHIP_HEIGHT = Math.max(16, CHIP_SIZE - COMPACT_DELTA);
+  const endAdornmentRef = useRef<HTMLDivElement | null>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const [endWidth] = useState<number>(END_ADORNMENT_WIDTH);
 
-  const theme = useTheme();
-  const { INPUT_HEIGHT, CHIP_SIZE } = useFieldSizes();
+  const FIELD_WIDTH = MAX_WIDTH;
 
   const DEFAULT_WRAPPER_SX = {
-    width: "fit-content",
     maxWidth: FIELD_WIDTH,
+    minWidth: MIN_WIDTH,
+    // allow wrapper to grow to fill available row width (don't force max)
     px: 1,
     display: "flex",
     alignItems: "center",
     minHeight: INPUT_HEIGHT,
     flex: "0 0 auto",
-    '& .MuiInputBase-root': { minHeight: INPUT_HEIGHT, transition: 'all 120ms ease' },
-    '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: INPUT_HEIGHT, transition: 'all 120ms ease' },
-    '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0, transition: 'all 120ms ease' },
+    '& .MuiInputBase-root': { minHeight: INPUT_HEIGHT, overflow: 'visible' },
+    '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: INPUT_HEIGHT },
+    '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 },
   } as const;
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'flex-start', ...(wrapperSx ?? DEFAULT_WRAPPER_SX) }}>
+    <Box ref={wrapperRef} sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'flex-start', width: '100%', ...(wrapperSx ?? DEFAULT_WRAPPER_SX) }}>
       <Typography variant="body2" sx={{ fontSize: 12, color: 'text.secondary' }}>{label}</Typography>
       <Autocomplete
       disableClearable
@@ -132,29 +137,30 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
       open={open}
       onOpen={() => setOpen(true)}
       onClose={() => setOpen(false)}
-      componentsProps={{ popper: { style: { minWidth: '32ch', zIndex: 13000 } } }}
+      componentsProps={{ popper: { style: { zIndex: 13000 } } }}
       sx={{
-        width: FIELD_WIDTH,
+        width: '100%',
           '& .MuiAutocomplete-inputRoot': {
           minHeight: INPUT_HEIGHT,
           maxHeight: INPUT_HEIGHT,
-          overflow: 'hidden',
+          overflow: 'visible',
           alignItems: 'center',
           transition: 'all 120ms ease',
-          // reserve space on the right for the select-all icon
-          '& .MuiInputBase-input': { paddingRight: '40px', fontSize: 13, lineHeight: `${CHIP_SIZE}px`, paddingTop: 0, paddingBottom: 0 },
+          position: 'relative',
+          // reserve space on the right for the select-all icon + chevron (dynamic)
+          '& .MuiInputBase-input': { paddingRight: `${endWidth}px`, fontSize: 13, lineHeight: `${CHIP_SIZE}px`, paddingTop: 0, paddingBottom: 0 },
         },
         '& .MuiAutocomplete-tag': {
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
           height: CHIP_SIZE,
-          maxWidth: '100%',
+
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
         },
-        '& .MuiInputBase-root': { minHeight: INPUT_HEIGHT, transition: 'all 120ms ease' },
+        '& .MuiInputBase-root': { minHeight: INPUT_HEIGHT, transition: 'all 120ms ease', overflow: 'visible' },
       }}
       options={[SELECT_ALL_VALUE, ...options]}
       value={value}
@@ -210,64 +216,90 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
           </ListItem>
         );
       }}
-      renderTags={(tagValue) => {
+      renderTags={(tagValue, getTagProps) => {
         if (!tagValue || tagValue.length === 0) return null;
-        const count = tagValue.length;
+        const total = tagValue.length;
+        const visible = Math.min(1, total);
+        const overflowCount = total - visible;
+
         return (
-          <Tooltip title="Show selections" arrow>
-            <span>
-              <Chip
-                label={`+${count} `}
-                size="small"
-                variant="outlined"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={(e) => { e.stopPropagation(); setOpen(true); }}
-                sx={{
-                  cursor: 'pointer',
-                  '&:hover': { backgroundColor: (theme) => theme.palette.action.hover },
-                  flex: '0 0 auto',
-                  height: CHIP_SIZE,
-                  minWidth: 44,
-                  maxWidth: 240,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  px: 1,
-                  boxSizing: 'border-box',
-                  fontWeight: 600,
-                  fontSize: count >= 100 ? 10 : count >= 10 ? 11 : 12,
-                  lineHeight: `${CHIP_SIZE}px`,
-                  borderRadius: '999px',
-                  color: 'primary.main',
-                  borderColor: 'primary.main',
-                  ml: 0,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  zIndex: 30,
-                }}
-              />
-            </span>
-          </Tooltip>
+          <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, maxWidth: '100%', overflow: 'visible', whiteSpace: 'nowrap' }}>
+            {tagValue.slice(0, visible).map((tag, index) => {
+              const { key, ...tagProps } = getTagProps({ index });
+              return (
+                <Chip
+                  key={key}
+                  label={tag}
+                  size="small"
+                  {...tagProps}
+                  sx={{
+                    height: COMPACT_CHIP_HEIGHT,
+                    fontSize: 10,
+                    lineHeight: `${COMPACT_CHIP_HEIGHT}px`,
+                    flex: '0 0 auto',
+                    mr: 0.5,
+                    px: 0.5,
+                    whiteSpace: 'nowrap',
+                  }}
+                />
+              );
+            })}
+            {overflowCount > 0 && (
+              <Tooltip title={overflowCount > 1 ? `+${overflowCount} more` : 'Show selection'} arrow>
+                <Chip
+                  label={`+${overflowCount}`}
+                  size="small"
+                  variant="outlined"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+                  sx={{
+                    cursor: 'pointer',
+                    '&:hover': { backgroundColor: 'action.hover' },
+                    flex: '0 0 auto',
+                    height: COMPACT_CHIP_HEIGHT,
+                    minWidth: 44,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    px: 1,
+                    boxSizing: 'border-box',
+                    fontWeight: 600,
+                    fontSize: overflowCount >= 100 ? 10 : overflowCount >= 10 ? 11 : 12,
+                    lineHeight: `${COMPACT_CHIP_HEIGHT}px`,
+                    borderRadius: '999px',
+                    color: 'primary.main',
+                    borderColor: 'primary.main',
+                    ml: 0,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    zIndex: 30,
+                    mr: 0.5,
+                  }}
+                />
+              </Tooltip>
+            )}
+          </Box>
         );
       }}
       renderInput={(params) => {
         const endAdornment = (
-          <>
+          <Box ref={endAdornmentRef} sx={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', zIndex: 40, gap: 2, pointerEvents: 'none' }}>
             {showSelectAllIcon && (
               <Tooltip title={allFilteredSelected ? "Clear filtered" : "Select filtered"} arrow>
                 <MuiIconButton
                   size="small"
                   onClick={toggleSelectAll}
                   aria-label={allFilteredSelected ? "Clear filtered" : "Select filtered"}
-                  sx={{ mr: 0.75, px: 0.75 }}
+                  sx={{ mr: 1.5, px: 0.75, pointerEvents: 'auto' }}
                 >
-                  <DoneAllIcon fontSize="small" color={allFilteredSelected ? 'primary' : 'inherit'} />
+                  <DoneAllIcon fontSize="small" color={allFilteredSelected ? 'primary' : 'action'} />
                 </MuiIconButton>
               </Tooltip>
             )}
-            {params.InputProps.endAdornment}
-          </>
+            {/* ensure the popup/chevron remains clickable */}
+            <Box sx={{ display: 'flex', alignItems: 'center', pointerEvents: 'auto', ml: 1 }}>{params.InputProps.endAdornment}</Box>
+          </Box>
         );
 
         return (
@@ -280,7 +312,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
             InputProps={{
               ...params.InputProps,
               endAdornment,
-              sx: { height: INPUT_HEIGHT, transition: 'all 120ms ease', '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, paddingRight: '40px', fontSize: 13, lineHeight: `${CHIP_SIZE}px` } },
+              sx: { height: INPUT_HEIGHT, '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, paddingRight: `${endWidth}px`, fontSize: 13, lineHeight: `${CHIP_SIZE}px` } },
             }}
           />
         );

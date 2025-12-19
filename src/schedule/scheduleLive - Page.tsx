@@ -616,9 +616,10 @@ export default function ScheduleLivePage() {
         value={searchAnywhere}
         onChange={(e) => setSearchAnywhere(e.target.value)}
         onSearch={runGlobalSearch}
-        placeholder="Search by Task ID, Work ID, Estimate Number, Employee ID, or Resource ID"
+        placeholder="Global Search"
         size="small"
         showSearchButton={true}
+        searchTooltip="Search by Task ID, Work ID, Estimate Number, Employee ID"
         sx={{ height: theme.custom?.inputHeight ?? 40, '& .MuiInputBase-input': { fontSize: 13, lineHeight: `${theme.custom?.chipSize ?? 28}px` } }}
       />
 

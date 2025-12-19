@@ -427,8 +427,8 @@ export default function TaskSearchCard({
 
   const canSearch = useMemo(() => {
     if (filters.taskSearch.trim().length > 0) return true;
-    return filters.division.length > 0 && filters.domainId.length > 0;
-  }, [filters.division.length, filters.domainId.length, filters.taskSearch]);
+    return filters.division.length > 0 && filters.domainId.length > 0 && filters.taskStatuses.length > 0;
+  }, [filters.division.length, filters.domainId.length, filters.taskStatuses.length, filters.taskSearch]);
 
   const activeChips = useMemo<ChipDescriptor[]>(() => {
     const chips: ChipDescriptor[] = [];
@@ -616,6 +616,8 @@ export default function TaskSearchCard({
             placeholder={prefillPrompt}
             size="small"
             showSearchButton={true}
+            enableValidation={filters.taskSearch.trim().length > 0 || (filters.division.length === 0 || filters.domainId.length === 0 || filters.taskStatuses.length === 0)}
+            searchTooltip={prefillPrompt}
             sx={{}}
           />
           {/* debug badge removed */}
@@ -661,7 +663,7 @@ export default function TaskSearchCard({
                 <Grid container spacing={1.5} alignItems="center">
                     <Grid item xs={12} sm="auto" md="auto">
                         <MultiSelectField
-                          label="Division"
+                          label="Division *"
                           options={divisionOptions}
                           value={filters.division}
                           onChange={(value: string[]) => handleMultiChange("division", value)}
@@ -672,7 +674,7 @@ export default function TaskSearchCard({
 
                   <Grid item xs={12} sm="auto" md="auto">
                       <MultiSelectField
-                        label="Domain ID"
+                        label="Domain ID *"
                         options={domainOptions}
                         value={filters.domainId}
                         onChange={(value: string[]) => handleMultiChange("domainId", value)}
@@ -683,31 +685,12 @@ export default function TaskSearchCard({
 
                   <Grid item xs={12} sm="auto" md="auto">
                       <MultiSelectField
-                        label="Task Status"
+                        label="Task Status *"
                         options={statusOptions}
                         value={filters.taskStatuses}
                         onChange={(value: string[]) => handleMultiChange("taskStatuses", value)}
                         showSelectAllIcon
-                      />
-                  </Grid>
-
-                  <Grid item xs={12} sm="auto" md="auto">
-                      <MultiSelectField
-                        label="Commit Type"
-                        options={commitOptions}
-                        value={filters.commitType}
-                        onChange={(value: string[]) => handleMultiChange("commitType", value)}
-                        showSelectAllIcon
-                      />
-                  </Grid>
-
-                  <Grid item xs={12} sm="auto" md="auto">
-                      <MultiSelectField
-                        label="Response Code"
-                        options={responseOptions}
-                        value={filters.responseCode}
-                        onChange={(value: string[]) => handleMultiChange("responseCode", value)}
-                        showSelectAllIcon
+                        required
                       />
                   </Grid>
 
@@ -737,6 +720,25 @@ export default function TaskSearchCard({
           {activeTab === "advanced" && (
             <Box mt={1}>
                 <Grid container spacing={1.5} alignItems="center">
+                <Grid item xs={12} sm="auto" md="auto">
+                    <MultiSelectField
+                      label="Commit Type"
+                      options={commitOptions}
+                      value={filters.commitType}
+                      onChange={(value: string[]) => handleMultiChange("commitType", value)}
+                      showSelectAllIcon
+                    />
+                </Grid>
+
+                <Grid item xs={12} sm="auto" md="auto">
+                    <MultiSelectField
+                      label="Response Code"
+                      options={responseOptions}
+                      value={filters.responseCode}
+                      onChange={(value: string[]) => handleMultiChange("responseCode", value)}
+                      showSelectAllIcon
+                    />
+                </Grid>
                 <Grid item xs={12} sm="auto" md="auto">
                     <FreeTypeSelectField
                       label="Requester"
@@ -925,11 +927,6 @@ export default function TaskSearchCard({
         </Box>
 
         <Stack direction="row" spacing={1} alignItems="center">
-          {!canSearch && (
-            <Typography variant="caption" color="text.secondary">
-              Select Division and Domain ID, or type in the global search.
-            </Typography>
-          )}
           <AppButton
             variant="outlined"
             size="small"
@@ -937,17 +934,21 @@ export default function TaskSearchCard({
           >
             Clear
           </AppButton>
-          <AppButton
-            variant="contained"
-            size="small"
-            onClick={handleSearch}
-            disabled={!canSearch}
-            sx={{
-              boxShadow: "none",
-            }}
-          >
-            Search
-          </AppButton>
+          <Tooltip title={!canSearch ? "Select Division, Domain ID, and Task Status, or type in the global search." : ""} arrow>
+            <span>
+              <AppButton
+                variant="contained"
+                size="small"
+                onClick={handleSearch}
+                disabled={!canSearch}
+                sx={{
+                  boxShadow: "none",
+                }}
+              >
+                Search
+              </AppButton>
+            </span>
+          </Tooltip>
         </Stack>
       </CardActions>
     </Card>

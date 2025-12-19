@@ -31,7 +31,7 @@ const LABEL: Record<Condition, string> = {
 };
 
 const ImpScoreField = React.forwardRef<HTMLInputElement, Props>(function ImpScoreField({ condition, value, onConditionChange, onValueChange, sx, label }, ref) {
-  const { INPUT_HEIGHT, CHIP_SIZE } = useFieldSizes();
+  const { INPUT_HEIGHT, CHIP_SIZE, MAX_WIDTH, MIN_WIDTH, FIELD_GAP } = useFieldSizes();
 
   const current: Condition = (condition as Condition) || 'greater';
 
@@ -42,7 +42,7 @@ const ImpScoreField = React.forwardRef<HTMLInputElement, Props>(function ImpScor
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'flex-start', ...((sx as any) || {}) }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: FIELD_GAP, alignItems: 'flex-start', ...((sx as any) || {}) }}>
       {label && <Typography variant="body2" sx={{ fontSize: 12, color: 'text.secondary' }}>{label}</Typography>}
       <TextField
         size="small"
@@ -66,7 +66,7 @@ const ImpScoreField = React.forwardRef<HTMLInputElement, Props>(function ImpScor
           ),
           sx: { height: INPUT_HEIGHT }
         }}
-        sx={{ '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, fontSize: 13, lineHeight: `${CHIP_SIZE}px` }, height: INPUT_HEIGHT, width: 'fit-content' }}
+        sx={{ '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, fontSize: 13, lineHeight: `${CHIP_SIZE}px` }, height: INPUT_HEIGHT, maxWidth: MAX_WIDTH, minWidth: MIN_WIDTH }}
         inputRef={ref}
       />
     </Box>

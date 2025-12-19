@@ -2,6 +2,9 @@ import React, { useState, useMemo } from "react";
 import { Autocomplete, Box, ListItem, ListItemText, TextField, Typography } from "@mui/material";
 import useFieldSizes from './useFieldSizes';
 
+const MAX_WIDTH = { xs: '100%', sm: '90ch' };
+const MIN_WIDTH = '28ch';
+
 interface FreeTypeSelectFieldProps {
   label: string;
   options: string[];
@@ -12,11 +15,9 @@ interface FreeTypeSelectFieldProps {
   placeholder?: string;
 }
 
-const FIELD_WIDTH = { xs: "100%", sm: "22ch", md: "28ch" };
-
 const DEFAULT_FIELD_WRAPPER_BASE = {
-  width: "fit-content",
-  maxWidth: FIELD_WIDTH,
+  maxWidth: MAX_WIDTH,
+  minWidth: MIN_WIDTH,
   px: 1,
   display: "flex",
   alignItems: "center",
@@ -31,9 +32,9 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
   onChange,
   required = false,
   wrapperSx,
-  placeholder,
+  placeholder: _placeholder,
 }) => {
-  const { INPUT_HEIGHT, CHIP_SIZE } = useFieldSizes();
+  const { INPUT_HEIGHT, CHIP_SIZE, MIN_WIDTH } = useFieldSizes();
 
   const DEFAULT_WRAPPER_SX = {
     ...DEFAULT_FIELD_WRAPPER_BASE,
@@ -82,13 +83,13 @@ const FreeTypeSelectField: React.FC<FreeTypeSelectFieldProps> = ({
             InputProps={{
               ...params.InputProps,
               endAdornment,
-              sx: { height: INPUT_HEIGHT, transition: 'all 120ms ease', "& .MuiInputBase-input": { paddingTop: 0, paddingBottom: 0, paddingRight: "56px", fontSize: 13, lineHeight: `${CHIP_SIZE}px` } },
+              sx: { height: INPUT_HEIGHT, "& .MuiInputBase-input": { paddingTop: 0, paddingBottom: 0, paddingRight: "56px", fontSize: 13, lineHeight: `${CHIP_SIZE}px` } },
             }}
           />
         );
       }}
       ListboxProps={{ sx: { zIndex: 13000, maxHeight: 320 } }}
-      sx={{ width: FIELD_WIDTH, '& .MuiAutocomplete-inputRoot': { minHeight: INPUT_HEIGHT, maxHeight: INPUT_HEIGHT, alignItems: 'center', transition: 'all 120ms ease', '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, paddingRight: '56px', fontSize: 13, lineHeight: `${CHIP_SIZE}px` } } }}
+      sx={{ minWidth: MIN_WIDTH, '& .MuiAutocomplete-inputRoot': { minHeight: INPUT_HEIGHT, maxHeight: INPUT_HEIGHT, alignItems: 'center', '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, paddingRight: '56px', fontSize: 13, lineHeight: `${CHIP_SIZE}px` } } }}
     />
     </Box>
   );

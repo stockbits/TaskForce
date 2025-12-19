@@ -17,8 +17,6 @@ interface SingleSelectFieldProps {
   [key: string]: any;
 }
 
-const FIELD_WIDTH = { xs: '100%', sm: '22ch', md: '28ch' };
-
 
 // DEFAULT_WRAPPER_SX will be created inside the component using theme-backed sizes
 
@@ -37,11 +35,11 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
   const [internalInput, setInternalInput] = useState("");
   const inputValue = controlledInputValue !== undefined ? controlledInputValue : internalInput;
 
-  const { INPUT_HEIGHT, CHIP_SIZE } = useFieldSizes();
+  const { INPUT_HEIGHT, CHIP_SIZE, MAX_WIDTH, MIN_WIDTH } = useFieldSizes();
 
   const DEFAULT_WRAPPER_SX = {
-    width: "fit-content",
-    maxWidth: FIELD_WIDTH,
+    maxWidth: MAX_WIDTH,
+    minWidth: MIN_WIDTH,
     px: 1,
     display: "flex",
     alignItems: "center",
@@ -122,7 +120,7 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
         );
       }}
       ListboxProps={{ sx: { zIndex: 2000, maxHeight: 320 } }}
-      sx={{ width: FIELD_WIDTH, '& .MuiAutocomplete-inputRoot': { minHeight: INPUT_HEIGHT, maxHeight: INPUT_HEIGHT, alignItems: 'center', transition: 'all 120ms ease', '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, paddingRight: '56px', fontSize: 13, lineHeight: `${CHIP_SIZE}px` } } }}
+      sx={{ width: '90ch', '& .MuiAutocomplete-inputRoot': { minHeight: INPUT_HEIGHT, maxHeight: INPUT_HEIGHT, alignItems: 'center', '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, paddingRight: '56px', fontSize: 13, lineHeight: `${CHIP_SIZE}px` } } }}
       {...rest}
     />
     </Box>

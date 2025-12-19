@@ -24,7 +24,7 @@ const CombinedLocationField: React.FC<CombinedLocationFieldProps> = ({
   onValueChange,
   label = "Location",
 }) => {
-  const { INPUT_HEIGHT } = useFieldSizes();
+  const { INPUT_HEIGHT, MAX_WIDTH, MIN_WIDTH, FIELD_GAP } = useFieldSizes();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -42,7 +42,7 @@ const CombinedLocationField: React.FC<CombinedLocationFieldProps> = ({
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'flex-start' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: FIELD_GAP, alignItems: 'flex-start' }}>
       <Typography variant="body2" sx={{ fontSize: 12, color: 'text.secondary' }}>{label}</Typography>
       <TextField
         size="small"
@@ -59,7 +59,7 @@ const CombinedLocationField: React.FC<CombinedLocationFieldProps> = ({
           ),
           sx: { height: INPUT_HEIGHT }
         }}
-        sx={{ width: 'fit-content' }}
+        sx={{ maxWidth: MAX_WIDTH, minWidth: MIN_WIDTH }}
       />
       <Menu
         anchorEl={anchorEl}
