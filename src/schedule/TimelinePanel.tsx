@@ -610,10 +610,24 @@ export default function TimelinePanel() {
           <PersonIcon fontSize="small" />
         </IconButton>
 
-        {/* Current View Mode Display */}
-        <Typography variant="body2" sx={{ color: '#666', ml: 1 }}>
-          {viewMode.replace('days', ' days').replace('day', ' day')}
-        </Typography>
+        {/* Hour Intervals Display */}
+        <Box sx={{ flex: 1, display: 'flex', ml: 2 }}>
+          {Array.from({ length: 24 }, (_, i) => (
+            <Box
+              key={i}
+              sx={{
+                flex: 1,
+                textAlign: 'center',
+                fontSize: '0.75rem',
+                color: '#666',
+                borderRight: i < 23 ? '1px solid #e0e0e0' : 'none',
+                py: 1
+              }}
+            >
+              {i.toString().padStart(2, '0')}:00
+            </Box>
+          ))}
+        </Box>
       </Box>
 
       <Box sx={{ display: 'flex', flex: 1, overflow: 'auto', pb: 2 }}>
