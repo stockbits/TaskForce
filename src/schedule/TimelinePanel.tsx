@@ -92,40 +92,7 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
     return (saved as 'name' | 'id' | 'both') || 'both';
   });
   const [anchorElDisplay, setAnchorElDisplay] = useState<null | HTMLElement>(null);
-  const [timeLabels, setTimeLabels] = useState<{time: number, label: string}[]>([]);
   const chartRef = useRef<HighchartsReact.RefObject>(null);
-
-  // Calculate date range for current view mode
-  const dateRange = getDateRange(viewMode);
-
-  // Function to generate time axis labels based on current chart view
-  const generateTimeLabels = (min: number, max: number) => {
-    const labels: {time: number, label: string}[] = [];
-    const range = max - min;
-    
-    // Determine appropriate interval based on range
-    let interval: number;
-    let formatOptions: Intl.DateTimeFormatOptions;
-    
-    if (range <= 24 * 60 * 60 * 1000) { // Less than 1 day
-      interval = 2 * 60 * 60 * 1000; // 2 hours
-      formatOptions = { hour: '2-digit', minute: '2-digit' };
-    } else if (range <= 7 * 24 * 60 * 60 * 1000) { // Less than 1 week
-      interval = 24 * 60 * 60 * 1000; // 1 day
-      formatOptions = { weekday: 'short', day: 'numeric', month: 'short' };
-    } else { // More than 1 week
-      interval = 24 * 60 * 60 * 1000; // 1 day
-      formatOptions = { day: 'numeric', month: 'short' };
-    }
-    
-    for (let time = min; time <= max; time += interval) {
-      labels.push({
-        time,
-        label: new Date(time).toLocaleDateString('en-US', formatOptions)
-      });
-    }
-    return labels;
-  };
 
   // Reset zoom when view mode changes
   React.useEffect(() => {
@@ -134,26 +101,10 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
     }
   }, [viewMode]);
 
-  // Update time labels when view mode changes
-  React.useEffect(() => {
-    if (chartRef.current?.chart) {
-      const chart = chartRef.current.chart;
-      const xAxis = chart.xAxis[0];
-      const min = xAxis.min || dateRange.start;
-      const max = xAxis.max || dateRange.end;
-      setTimeLabels(generateTimeLabels(min, max));
-    } else {
-      // Fallback for initial render
-      setTimeLabels(generateTimeLabels(dateRange.start, dateRange.end));
-    }
-  }, [dateRange, viewMode]);
-
   // Function to reset chart zoom and position
   const handleResetView = () => {
     if (chartRef.current?.chart) {
       chartRef.current.chart.zoomOut();
-      // Update time labels after reset
-      setTimeLabels(generateTimeLabels(dateRange.start, dateRange.end));
     }
   };
 
@@ -439,6 +390,9 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
     };
   }, [allResources, viewMode]);
 
+  // Calculate date range for current view mode
+  const dateRange = getDateRange(viewMode);
+
   // Handle Ctrl+wheel zoom for the chart
   React.useEffect(() => {
     if (chartRef.current?.chart?.container) {
@@ -453,14 +407,12 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
           const currentMax = xAxis.max || dateRange.end;
           const currentRange = currentMax - currentMin;
           const newRange = currentRange * delta;
-          // Allow zoom down to 15 minutes for detailed view
-          if (newRange < 15 * 60 * 1000) return;
+          // Limit max zoom to 30 minutes
+          if (newRange < 30 * 60 * 1000) return;
           const center = (currentMin + currentMax) / 2;
           const newMin = Math.max(dateRange.start, center - newRange / 2);
           const newMax = Math.min(dateRange.end, center + newRange / 2);
           xAxis.setExtremes(newMin, newMax);
-          // Update time labels after zoom
-          setTimeLabels(generateTimeLabels(newMin, newMax));
         }
       };
       container.addEventListener('wheel', handleWheel, { passive: false });
@@ -487,33 +439,21 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
     },
     xAxis: {
       type: 'datetime',
-      dateTimeLabelFormats: { 
-        minute: '%H:%M', 
-        hour: '%H:%M', 
-        day: '%a %e %b',
-        week: '%e %b',
-        month: '%b %Y'
-      },
+      dateTimeLabelFormats: { hour: '%H:%M', day: '%a %e %b' },
       title: { text: null },
       scrollbar: { enabled: false },
-      min: dateRange.start,
+      min: dateRange.start + (5 * 60 * 60 * 1000), // Start at 5 AM
       max: dateRange.end,
       minRange: dateRange.end - dateRange.start,
-      gridLineWidth: 1,
+      gridLineWidth: 0, // Removed grid lines
       gridLineColor: '#e0e0e0',
       opposite: true,
-      labels: { 
-        enabled: false  // Disabled since we have custom sticky time axis
-      },
-      tickInterval: 60 * 60 * 1000, // 1 hour intervals
-      minorTickInterval: 30 * 60 * 1000, // 30 minute minor ticks
-      minorGridLineWidth: 0.5,
-      minorGridLineColor: '#f0f0f0'
+      labels: { enabled: false }
     },
     yAxis: {
       categories: resources,
       title: { text: null },
-      gridLineWidth: 2,
+      gridLineWidth: 0, // Removed grid lines
       gridLineColor: '#d0d0d0',
       min: 0,
       max: resources.length - 1,
@@ -596,7 +536,6 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
       width: '100%',
       display: 'flex',
       flexDirection: 'column',
-      overflow: 'hidden',
       backgroundColor: '#fafafa',
       borderRadius: 1
     }}>
@@ -647,68 +586,10 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
         </Box>
       </Paper>
 
-      {/* Sticky Time Axis Header */}
-      <Box sx={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 200,
-        backgroundColor: 'white',
-        borderBottom: '1px solid #e0e0e0',
-        display: 'flex',
-        minHeight: '40px'
-      }}>
-        {/* Resource header placeholder */}
-        <Box sx={{ 
-          width: LABEL_COL_WIDTH, 
-          display: 'flex',
-          alignItems: 'center',
-          px: 1,
-          borderRight: '1px solid #e0e0e0'
-        }}>
-          <Typography sx={{ fontWeight: 700, color: 'text.secondary', fontSize: '13px' }}>Time</Typography>
-        </Box>
-        {/* Time axis labels */}
-        <Box sx={{ 
-          flex: 1, 
-          display: 'flex', 
-          overflow: 'hidden',
-          px: 1
-        }}>
-          {timeLabels.map((label, idx) => (
-            <Box key={idx} sx={{ 
-              flex: 1, 
-              textAlign: 'center',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minWidth: '60px'
-            }}>
-              <Typography variant="caption" sx={{ 
-                fontWeight: 500, 
-                fontSize: '11px',
-                color: 'text.secondary'
-              }}>
-                {label.label}
-              </Typography>
-            </Box>
-          ))}
-        </Box>
-      </Box>
-
       <Box sx={{ display: 'flex', flex: 1, overflow: 'auto' }}>
         {/* Left column: Resource labels */}
-        <Box sx={{ 
-          width: LABEL_COL_WIDTH, 
-          p: 1,
-          position: 'sticky',
-          left: 0,
-          zIndex: 10,
-          backgroundColor: '#fafafa'
-        }}>
+        <Box sx={{ width: LABEL_COL_WIDTH, p: 1 }}>
           <Paper elevation={0} sx={{ borderRight: '1px solid #e0e0e0', bgcolor: 'transparent' }}>
-            <Box sx={{ height: '40px', display: 'flex', alignItems: 'center', px: 0, borderBottom: '1px solid transparent' }}>
-              <Typography sx={{ fontWeight: 700, color: 'text.secondary' }}>Resource</Typography>
-            </Box>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               {resources.map((resourceName: string, _idx: number) => {
                 const resourceId = resourceNameToIdMap[resourceName] || '';
@@ -767,6 +648,7 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
           </Paper>
         </Box>
 
+        {/* Right: Gantt chart */}
         <Box sx={{
           flex: 1,
           p: 1,
@@ -783,8 +665,7 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
               style: {
                 height: `${(resources?.length || 1) * ROW_HEIGHT + 40}px`,
                 width: '100%',
-                minWidth: '1200px',
-                overflow: 'auto'
+                minWidth: '1200px'
               }
             }}
           />
