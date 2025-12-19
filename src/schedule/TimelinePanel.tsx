@@ -446,7 +446,8 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
     yAxis: {
       categories: resources,
       title: { text: null },
-      gridLineWidth: 0,
+      gridLineWidth: 2,
+      gridLineColor: '#d0d0d0',
       min: 0,
       max: resources.length - 1,
       labels: { enabled: false },
@@ -461,7 +462,7 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
         borderRadius: 1,
         pointPadding: 0.02,
         groupPadding: 0.02,
-        pointWidth: 12
+        pointWidth: 50
       },
       series: {
         states: { hover: { enabled: false }, inactive: { enabled: false } }
