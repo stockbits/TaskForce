@@ -93,6 +93,24 @@ export default function TimelinePanel() {
   const chartRef = useRef<HighchartsReact.RefObject>(null);
   const timelineScrollRef = useRef<HTMLDivElement>(null);
 
+  // Calculate timeline intervals based on view mode
+  const timelineIntervals = useMemo(() => {
+    const dateRange = getDateRange(viewMode);
+    const intervals = [];
+    const startTime = dateRange.start + (5 * 60 * 60 * 1000); // 5 AM start
+    const endTime = dateRange.end;
+    const totalHours = Math.ceil((endTime - startTime) / (60 * 60 * 1000));
+
+    for (let i = 0; i <= totalHours; i++) {
+      const time = new Date(startTime + (i * 60 * 60 * 1000));
+      intervals.push({
+        time: time.getTime(),
+        label: time.getHours().toString().padStart(2, '0') + ':00'
+      });
+    }
+    return intervals;
+  }, [viewMode]);
+
   // Menu state
   const [dayMenuAnchor, setDayMenuAnchor] = useState<null | HTMLElement>(null);
   const [displayMenuAnchor, setDisplayMenuAnchor] = useState<null | HTMLElement>(null);
@@ -498,7 +516,7 @@ export default function TimelinePanel() {
       max: resources.length - 1,
       labels: { enabled: false },
       scrollbar: { enabled: false, showFull: false },
-      staticScale: 60
+      height: '100%' // Use full height
     },
     series: series,
     plotOptions: {
@@ -634,27 +652,27 @@ export default function TimelinePanel() {
             ref={timelineScrollRef}
             sx={{
               display: 'flex',
-              width: '1200px', // Match Gantt chart width
+              width: `${timelineIntervals.length * 50}px`, // 50px per hour for better alignment
               height: '100%',
               '&::-webkit-scrollbar': { display: 'none' }
             }}
           >
-            {Array.from({ length: 24 }, (_, i) => (
+            {timelineIntervals.map((interval, i) => (
               <Box
                 key={i}
                 sx={{
-                  flex: 1,
+                  width: '50px', // Fixed 50px per hour
                   textAlign: 'center',
                   fontSize: '0.75rem',
                   color: '#666',
-                  borderRight: i < 23 ? '1px solid #e0e0e0' : 'none',
+                  borderRight: i < timelineIntervals.length - 1 ? '1px solid #e0e0e0' : 'none',
                   py: 1,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}
               >
-                {i.toString().padStart(2, '0')}:00
+                {interval.label}
               </Box>
             ))}
           </Box>
@@ -664,14 +682,14 @@ export default function TimelinePanel() {
       {/* Scrollable Content */}
       <Box sx={{ display: 'flex', flex: 1, overflow: 'auto', pb: 2 }}>
         {/* Left column: Resource labels (Sticky) */}
-        <Box sx={{ width: LABEL_COL_WIDTH, flexShrink: 0 }}>
-          <Paper elevation={0} sx={{ borderRight: '1px solid #e0e0e0', bgcolor: 'transparent' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ width: LABEL_COL_WIDTH, flexShrink: 0, height: '100%' }}>
+          <Paper elevation={0} sx={{ borderRight: '1px solid #e0e0e0', bgcolor: 'transparent', height: '100%' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
               {resources.map((resourceName: string, _idx: number) => {
                 const resourceId = resourceNameToIdMap[resourceName] || '';
                 return (
                   <Box key={resourceName} sx={{
-                    height: `${ROW_HEIGHT}px`,
+                    flex: 1, // Take equal height for each resource
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1,
@@ -738,14 +756,14 @@ export default function TimelinePanel() {
           }}
           onScroll={handleTimelineScroll}
         >
-          <Box sx={{ width: '1200px', minWidth: '1200px' }}> {/* Fixed width container */}
+          <Box sx={{ width: `${timelineIntervals.length * 50}px`, minWidth: `${timelineIntervals.length * 50}px`, height: '100%' }}>
             <HighchartsReact
               ref={chartRef}
               highcharts={Highcharts}
               options={options}
               containerProps={{
                 style: {
-                  height: `${(resources?.length || 1) * ROW_HEIGHT}px`,
+                  height: '100%', // Fill available height
                   width: '100%'
                 }
               }}
