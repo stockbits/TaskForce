@@ -446,7 +446,7 @@ export default function ScheduleLivePage() {
   const renderPanelBody = (key: PanelKey) => {
     switch (key) {
       case "timeline":
-        return <TimelinePanel selectedResource={selectedResource} />;
+        return <TimelinePanel />;
 
       case "map":
         return (

@@ -1,6 +1,5 @@
 import React, { useMemo, useState, useRef } from "react";
-import { Box, Typography, Paper, IconButton, Avatar, Menu, MenuItem } from "@mui/material";
-import { Refresh as RefreshIcon, AccessTime as AccessTimeIcon, Person as PersonIcon } from "@mui/icons-material";
+import { Box, Typography, Paper, Avatar } from "@mui/material";
 import Highcharts from 'highcharts';
 import 'highcharts/modules/gantt';
 import HighchartsReact from 'highcharts-react-official';
@@ -84,9 +83,9 @@ const getDateRange = (mode: '1day' | '2days' | '5days' | '7days' | '12days') => 
   };
 };
 
-export default function TimelinePanel({ selectedResource }: { selectedResource?: any }) {
-  const [viewMode, setViewMode] = useState<'1day' | '2days' | '5days' | '7days' | '12days'>('5days');
-  const [displayMode, setDisplayMode] = useState<'name' | 'id' | 'both'>(() => {
+export default function TimelinePanel() {
+  const [viewMode] = useState<'1day' | '2days' | '5days' | '7days' | '12days'>('5days');
+  const [displayMode] = useState<'name' | 'id' | 'both'>(() => {
     const saved = localStorage.getItem('timelineDisplayMode');
     return (saved as 'name' | 'id' | 'both') || 'both';
   });
@@ -98,13 +97,6 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
       chartRef.current.chart.zoomOut();
     }
   }, [viewMode]);
-
-  // Function to reset chart zoom and position
-  const handleResetView = () => {
-    if (chartRef.current?.chart) {
-      chartRef.current.chart.zoomOut();
-    }
-  };
 
   // Always show all resources from ResourceMock
   const allResources = useMemo(() => {
