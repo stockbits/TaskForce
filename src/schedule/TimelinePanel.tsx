@@ -516,7 +516,9 @@ export default function TimelinePanel() {
       max: resources.length - 1,
       labels: { enabled: false },
       scrollbar: { enabled: false, showFull: false },
-      height: '100%' // Use full height
+      height: '100%', // Use full height
+      tickInterval: 1, // Ensure each category gets equal space
+      staticScale: undefined // Remove static scale to allow flex height
     },
     series: series,
     plotOptions: {
@@ -585,7 +587,6 @@ export default function TimelinePanel() {
   };
 
   const LABEL_COL_WIDTH = 220;
-  const ROW_HEIGHT = 60;
 
   return (
     <Box sx={{
