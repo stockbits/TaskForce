@@ -194,7 +194,8 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
               'T8901': '#ffd1dc'
             };
             return employeeColors[resource.resourceId] || '#667eea';
-          })()
+          })(),
+          pointPadding: 0.1
         };
       }).filter(Boolean);
 
@@ -230,7 +231,8 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
                 priority: 'Travel',
                 estimatedDuration: travelTime,
                 employeeId: resource.resourceId,
-                color: '#9e9e9e'
+                color: '#9e9e9e',
+                pointWidth: 6
               });
             }
           }
@@ -261,7 +263,8 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
                 priority: 'Travel',
                 estimatedDuration: travelTime,
                 employeeId: resource.resourceId,
-                color: '#9e9e9e'
+                color: '#9e9e9e',
+                pointWidth: 6
               });
             }
           }
@@ -288,7 +291,8 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
                 priority: 'Travel',
                 estimatedDuration: travelTime,
                 employeeId: resource.resourceId,
-                color: '#9e9e9e'
+                color: '#9e9e9e',
+                pointWidth: 6
               });
             }
           }
@@ -342,7 +346,8 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
                 employeeId: resource.resourceId,
                 color: 'rgba(76, 175, 80, 0.4)', // Light green background for shifts
                 borderColor: 'rgba(76, 175, 80, 0.7)',
-                borderWidth: 2
+                borderWidth: 2,
+                pointPadding: 0.05
               });
             }
           }
@@ -366,7 +371,8 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
           priority: '',
           estimatedDuration: 0,
           employeeId: '',
-          color: '#f0f0f0'
+          color: '#f0f0f0',
+          pointWidth: 50
         });
       }
 
