@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef } from "react";
+import React, { useMemo, useState, useRef, useEffect } from "react";
 import { Box, Typography, Paper, Avatar, IconButton, Menu, MenuItem } from "@mui/material";
 import { Refresh as RefreshIcon, AccessTime as AccessTimeIcon, Person as PersonIcon } from "@mui/icons-material";
 import Highcharts from 'highcharts';
@@ -516,9 +516,7 @@ export default function TimelinePanel() {
       max: resources.length - 1,
       labels: { enabled: false },
       scrollbar: { enabled: false, showFull: false },
-      height: '100%', // Use full height
-      tickInterval: 1, // Ensure each category gets equal space
-      staticScale: undefined // Remove static scale to allow flex height
+      tickInterval: 1
     },
     series: series,
     plotOptions: {
@@ -587,6 +585,7 @@ export default function TimelinePanel() {
   };
 
   const LABEL_COL_WIDTH = 220;
+  const ROW_HEIGHT = 60; // Fixed row height for proper Gantt chart rendering
 
   return (
     <Box sx={{
@@ -690,7 +689,7 @@ export default function TimelinePanel() {
                 const resourceId = resourceNameToIdMap[resourceName] || '';
                 return (
                   <Box key={resourceName} sx={{
-                    flex: 1, // Take equal height for each resource
+                    height: `${ROW_HEIGHT}px`, // Use fixed row height
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1,
@@ -764,7 +763,7 @@ export default function TimelinePanel() {
               options={options}
               containerProps={{
                 style: {
-                  height: '100%', // Fill available height
+                  height: `${(resources?.length || 1) * ROW_HEIGHT}px`, // Use fixed total height
                   width: '100%'
                 }
               }}
