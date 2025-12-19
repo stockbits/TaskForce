@@ -162,12 +162,14 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
       // Get assigned tasks for this resource from our new assignment system
       const resourceTasks = taskAssignments[resource.resourceId] || [];
 
-      // Create task bars from expected start/end times
+      // Create task bars from expected start times and estimated duration
       const taskBars = resourceTasks.map((task: any) => {
         const startTime = parseDate(task.expectedStartDate);
-        const endTime = parseDate(task.expectedFinishDate);
 
-        if (!startTime || !endTime) return null;
+        if (!startTime) return null;
+
+        // Calculate end time using estimated duration (in minutes)
+        const endTime = startTime + (task.estimatedDuration * 60 * 1000);
 
         // Only show tasks within the current date range
         if (startTime < dateRange.start || startTime > dateRange.end) return null;
@@ -238,9 +240,11 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
         for (let i = 0; i < sortedTasks.length - 1; i++) {
           const currentTask = sortedTasks[i];
           const nextTask = sortedTasks[i + 1];
-          const currentEnd = parseDate(currentTask.expectedFinishDate);
+          const currentStart = parseDate(currentTask.expectedStartDate);
           const nextStart = parseDate(nextTask.expectedStartDate);
-          if (currentEnd && nextStart && currentTask.lat && currentTask.lng && nextTask.lat && nextTask.lng) {
+          if (currentStart && nextStart && currentTask.lat && currentTask.lng && nextTask.lat && nextTask.lng) {
+            // Calculate current task end using estimated duration
+            const currentEnd = currentStart + (currentTask.estimatedDuration * 60 * 1000);
             const gap = nextStart - currentEnd;
             if (gap > 0) {
               const distance = calculateDistance(currentTask.lat, currentTask.lng, nextTask.lat, nextTask.lng);
@@ -266,8 +270,10 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
         // Travel from last task to home
         const lastTask = sortedTasks[sortedTasks.length - 1];
         if (lastTask && lastTask.lat && lastTask.lng) {
-          const lastEnd = parseDate(lastTask.expectedFinishDate);
-          if (lastEnd) {
+          const lastStart = parseDate(lastTask.expectedStartDate);
+          if (lastStart) {
+            // Calculate last task end using estimated duration
+            const lastEnd = lastStart + (lastTask.estimatedDuration * 60 * 1000);
             const distance = calculateDistance(lastTask.lat, lastTask.lng, homeLat, homeLng);
             const travelTime = calculateTravelTime(distance);
             const travelEnd = lastEnd + (travelTime * 60 * 1000);
