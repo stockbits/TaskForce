@@ -446,8 +446,8 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
       },
       title: { text: null },
       scrollbar: { enabled: false },
-      min: dateRange.start + (5 * 60 * 60 * 1000), // Start at 5 AM
-      max: dateRange.start + (20 * 60 * 60 * 1000), // End at 8 PM
+      min: dateRange.start,
+      max: dateRange.end,
       minRange: dateRange.end - dateRange.start,
       gridLineWidth: 1,
       gridLineColor: '#e0e0e0',
@@ -593,7 +593,14 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
 
       <Box sx={{ display: 'flex', flex: 1, overflow: 'auto' }}>
         {/* Left column: Resource labels */}
-        <Box sx={{ width: LABEL_COL_WIDTH, p: 1 }}>
+        <Box sx={{ 
+          width: LABEL_COL_WIDTH, 
+          p: 1,
+          position: 'sticky',
+          left: 0,
+          zIndex: 10,
+          backgroundColor: '#fafafa'
+        }}>
           <Paper elevation={0} sx={{ borderRight: '1px solid #e0e0e0', bgcolor: 'transparent' }}>
             <Box sx={{ height: '40px', display: 'flex', alignItems: 'center', px: 0, borderBottom: '1px solid transparent' }}>
               <Typography sx={{ fontWeight: 700, color: 'text.secondary' }}>Resource</Typography>
