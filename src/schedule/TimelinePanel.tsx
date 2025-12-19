@@ -659,7 +659,19 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
           '& .highcharts-background': { fill: 'transparent' },
           '& .highcharts-plot-background': { fill: 'transparent' },
           '& .highcharts-scrollbar': { display: 'none !important' },
-          '& .highcharts-scrollbar-thumb': { display: 'none !important' }
+          '& .highcharts-scrollbar-thumb': { display: 'none !important' },
+          '& .highcharts-xaxis': { 
+            position: 'sticky !important', 
+            top: '0 !important', 
+            zIndex: 1000,
+            backgroundColor: 'white'
+          },
+          '& .highcharts-xaxis-labels': {
+            position: 'sticky !important',
+            top: '20px !important',
+            zIndex: 1000,
+            backgroundColor: 'white'
+          }
         }}>
           <HighchartsReact
             ref={chartRef}
