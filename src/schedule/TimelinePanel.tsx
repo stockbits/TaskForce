@@ -195,7 +195,8 @@ export default function TimelinePanel({ selectedResource }: { selectedResource?:
             };
             return employeeColors[resource.resourceId] || '#667eea';
           })(),
-          pointPadding: 0.2
+          pointPadding: 0.2,
+          pointWidth: 25
         };
       }).filter(Boolean);
 
