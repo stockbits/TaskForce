@@ -67,6 +67,7 @@ export default function TimelinePanel() {
 
   const headerScrollRef = useRef<HTMLDivElement>(null);
   const bodyScrollRef = useRef<HTMLDivElement>(null);
+  const leftScrollRef = useRef<HTMLDivElement>(null);
 
   // Layout constants (keep simple + predictable)
   const LABEL_COL_WIDTH = 160;
@@ -145,9 +146,12 @@ export default function TimelinePanel() {
     return rows;
   }, [resources, dateRange, PX_PER_HOUR]);
 
-  const syncHeaderFromBody = () => {
+  const syncFromBody = () => {
     if (!headerScrollRef.current || !bodyScrollRef.current) return;
     headerScrollRef.current.scrollLeft = bodyScrollRef.current.scrollLeft;
+    if (leftScrollRef.current) {
+      leftScrollRef.current.scrollTop = bodyScrollRef.current.scrollTop;
+    }
   };
 
   const syncBodyFromHeader = () => {
@@ -208,13 +212,15 @@ export default function TimelinePanel() {
       <Box sx={{ display: "flex", flex: 1, overflow: "hidden" }}>
         {/* Left: Resource IDs */}
         <Paper
+          ref={leftScrollRef}
           elevation={0}
           sx={{
             width: LABEL_COL_WIDTH,
             flexShrink: 0,
             borderRight: "1px solid #e0e0e0",
             bgcolor: "transparent",
-            overflow: "hidden",
+            overflow: "auto",
+            "&::-webkit-scrollbar": { display: "none" },
           }}
         >
           {categories.map((rid) => (
@@ -239,7 +245,7 @@ export default function TimelinePanel() {
         {/* Right: Timeline rows */}
         <Box
           ref={bodyScrollRef}
-          onScroll={syncHeaderFromBody}
+          onScroll={syncFromBody}
           sx={{
             flex: 1,
             overflow: "auto",
