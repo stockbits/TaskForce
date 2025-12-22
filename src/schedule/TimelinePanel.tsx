@@ -396,6 +396,7 @@ export default function TimelinePanel({
                 label="Start Date"
                 value={startDate}
                 defaultValue={new Date()}
+                minDate={new Date()}
                 onChange={(newValue) => {
                   if (newValue) {
                     const d = new Date(newValue);
@@ -409,6 +410,7 @@ export default function TimelinePanel({
                 label="End Date"
                 value={endDate}
                 defaultValue={new Date()}
+                minDate={new Date()}
                 onChange={(newValue) => {
                   if (newValue) {
                     const d = new Date(newValue);
