@@ -46,7 +46,10 @@ function parseShiftTime(timeStr: unknown): { h: number; m: number } | null {
   return { h, m: min };
 }
 
-function formatHourLabel(d: Date) {
+function formatHourLabel(d: Date, step: number) {
+  if (step >= 24) {
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
   return `${String(d.getHours()).padStart(2, "0")}:00`;
 }
 
@@ -81,9 +84,7 @@ export default function TimelinePanel() {
 
   const totalHours = Math.ceil((dateRange.end - dateRange.start) / MS_HOUR);
   let step = 1;
-  if (totalHours > 168) step = 12;
-  else if (totalHours > 72) step = 6;
-  else if (totalHours > 24) step = 2;
+  if (totalHours > 24) step = 24;
 
   const categories = useMemo(() => {
     return resources.map((r) => String(r.resourceId ?? r.id ?? "UNKNOWN"));
@@ -93,7 +94,7 @@ export default function TimelinePanel() {
     const out: { time: number; label: string }[] = [];
     for (let i = 0; i <= totalHours; i += step) {
       const d = new Date(dateRange.start + i * MS_HOUR);
-      out.push({ time: d.getTime(), label: formatHourLabel(d) });
+      out.push({ time: d.getTime(), label: formatHourLabel(d, step) });
     }
     return out;
   }, [dateRange, totalHours, step]);
