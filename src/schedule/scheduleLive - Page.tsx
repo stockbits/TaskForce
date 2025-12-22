@@ -99,6 +99,18 @@ export default function ScheduleLivePage() {
   /* ---------------- TABLE DATA ---------------- */
   const [taskData, setTaskData] = useState<TaskRecord[]>([]);
   const [resourceData, setResourceData] = useState<ResourceRecord[]>([]);
+
+  /* ---------------- TIMELINE DATE STATE ---------------- */
+  const [timelineStartDate, setTimelineStartDate] = useState<Date>(() => {
+    const d = new Date();
+    d.setHours(5, 0, 0, 0); // start at 5:00 AM
+    return d;
+  });
+  const [timelineEndDate, setTimelineEndDate] = useState<Date>(() => {
+    const d = new Date();
+    d.setHours(23, 59, 59, 999); // end at end of current day
+    return d;
+  });
   const allResources = ResourceMock as ResourceRecord[];
 
   /* ---------------- DROPDOWN DATA ---------------- */
@@ -433,7 +445,13 @@ export default function ScheduleLivePage() {
       case "timeline":
         return (
           <Suspense fallback={<div>Loading timeline...</div>}>
-            <TimelinePanel isMaximized={!!maximizedPanel} />
+            <TimelinePanel
+              isMaximized={!!maximizedPanel}
+              startDate={timelineStartDate}
+              endDate={timelineEndDate}
+              onStartDateChange={setTimelineStartDate}
+              onEndDateChange={setTimelineEndDate}
+            />
           </Suspense>
         );
 

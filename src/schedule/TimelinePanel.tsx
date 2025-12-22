@@ -65,19 +65,23 @@ function formatHourLabel(d: Date, step: number) {
 
 export default function TimelinePanel({
   isMaximized = false,
+  startDate: propStartDate,
+  endDate: propEndDate,
+  onStartDateChange,
+  onEndDateChange,
 }: {
   isMaximized?: boolean;
+  startDate: Date;
+  endDate: Date;
+  onStartDateChange: (date: Date) => void;
+  onEndDateChange: (date: Date) => void;
 }) {
-  const [startDate, setStartDate] = useState<Date>(() => {
-    const d = new Date();
-    d.setHours(5, 0, 0, 0); // start at 5:00 AM
-    return d;
-  });
-  const [endDate, setEndDate] = useState<Date>(() => {
-    const d = new Date();
-    d.setHours(23, 59, 59, 999); // end at end of current day
-    return d;
-  });
+  // Use props for date state instead of internal state
+  const startDate = propStartDate;
+  const endDate = propEndDate;
+  const setStartDate = onStartDateChange;
+  const setEndDate = onEndDateChange;
+
   const [dateModalOpen, setDateModalOpen] = useState(false);
 
   const headerScrollRef = useRef<HTMLDivElement>(null);
