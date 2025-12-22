@@ -6,7 +6,6 @@
 
 import React, { useMemo, useState, useEffect } from "react";
 import { Box, Stack, Typography } from "@mui/material";
-import { alpha, useTheme } from "@mui/material/styles";
 import TaskTableAdvanced from "@/tasks/TaskTableAdvanced";
 import type { ResourceRecord } from "@/hooks/useLiveSelectEngine";
 
@@ -43,7 +42,6 @@ export default function ResourceTablePanel({
   selectionFromMap,
   onClearSelection,
 }: Props) {
-  const theme = useTheme();
   const [currentSortModel, setCurrentSortModel] = useState<any[]>([]);
   const [pinnedOrder, setPinnedOrder] = useState<string[]>([]);
   const [prevDataLength, setPrevDataLength] = useState(0);
