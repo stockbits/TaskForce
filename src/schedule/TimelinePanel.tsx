@@ -236,7 +236,7 @@ export default function TimelinePanel({
           sx={{
             flex: 1,
             overflowX: isMaximized ? "hidden" : "auto",
-            overflowY: "hidden",
+            overflowY: "auto",
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
@@ -315,7 +315,7 @@ export default function TimelinePanel({
           onScroll={syncFromBody}
           sx={{
             flex: 1,
-            overflow: isMaximized ? "hidden" : "auto",
+            overflow: "auto",
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
