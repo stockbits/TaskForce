@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState } from "react";
-import { Box, Paper, Typography } from "@mui/material";
+import { Box, Paper, Typography, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -61,6 +62,7 @@ export default function TimelinePanel() {
     d.setHours(23, 59, 59, 999);
     return d;
   });
+  const [dateModalOpen, setDateModalOpen] = useState(false);
 
   const headerScrollRef = useRef<HTMLDivElement>(null);
   const bodyScrollRef = useRef<HTMLDivElement>(null);
@@ -170,20 +172,9 @@ export default function TimelinePanel() {
             borderRight: "1px solid #e0e0e0",
           }}
         >
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <DatePicker
-              label="Start"
-              value={startDate}
-              onChange={(newValue) => newValue && setStartDate(newValue)}
-              slotProps={{ textField: { size: 'small', sx: { minWidth: 120 } } }}
-            />
-            <DatePicker
-              label="End"
-              value={endDate}
-              onChange={(newValue) => newValue && setEndDate(newValue)}
-              slotProps={{ textField: { size: 'small', sx: { minWidth: 120 } } }}
-            />
-          </LocalizationProvider>
+          <IconButton onClick={() => setDateModalOpen(true)} size="small">
+            <CalendarTodayIcon />
+          </IconButton>
         </Box>
 
         {/* Timeline labels */}
@@ -308,6 +299,33 @@ export default function TimelinePanel() {
           </Box>
         </Box>
       </Box>
+
+      {/* Date Range Modal */}
+      <Dialog open={dateModalOpen} onClose={() => setDateModalOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Select Date Range</DialogTitle>
+        <DialogContent>
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
+              <DatePicker
+                label="Start Date"
+                value={startDate}
+                onChange={(newValue) => newValue && setStartDate(newValue)}
+                slotProps={{ textField: { fullWidth: true } }}
+              />
+              <DatePicker
+                label="End Date"
+                value={endDate}
+                onChange={(newValue) => newValue && setEndDate(newValue)}
+                slotProps={{ textField: { fullWidth: true } }}
+              />
+            </Box>
+          </LocalizationProvider>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDateModalOpen(false)}>Cancel</Button>
+          <Button onClick={() => setDateModalOpen(false)} variant="contained">Apply</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
