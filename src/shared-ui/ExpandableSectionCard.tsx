@@ -1,4 +1,4 @@
-import React, { useState, memo } from "react";
+import React, { useState, memo, useCallback } from "react";
 import {
   Card,
   CardHeader,
@@ -41,13 +41,13 @@ const ExpandableSectionCard: React.FC<ExpandableSectionCardProps> = memo(({
   const [internalExpanded, setInternalExpanded] = useState(defaultExpanded);
   const isControlled = typeof expanded === "boolean";
   const isExpanded = isControlled ? expanded : internalExpanded;
-  const handleToggle = () => {
+  const handleToggle = useCallback(() => {
     if (isControlled && onToggle) {
       onToggle();
     } else {
       setInternalExpanded((prev) => !prev);
     }
-  };
+  }, [isControlled, onToggle]);
 
   return (
     <Card elevation={3} sx={{ mb: 2 }} {...paperProps}>

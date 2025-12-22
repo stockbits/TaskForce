@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useCallback } from "react";
 import {
   Autocomplete,
   Box,
@@ -66,7 +66,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
   const partiallyFilteredSelected =
     filteredSelectionCount > 0 && !allFilteredSelected;
 
-  const handleChange = (
+  const handleChange = useCallback((
     _event: React.SyntheticEvent,
     newValue: string[],
     _reason: AutocompleteChangeReason,
@@ -87,9 +87,9 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
 
     const cleaned = newValue.filter((option) => option !== SELECT_ALL_VALUE);
     onChange(cleaned);
-  };
+  }, [filteredOptions, allFilteredSelected, value, onChange]);
 
-  const toggleSelectAll = (event: React.MouseEvent) => {
+  const toggleSelectAll = useCallback((event: React.MouseEvent) => {
     event.stopPropagation();
     if (!filteredOptions.length) return;
 
@@ -100,7 +100,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
       const next = Array.from(new Set([...value, ...filteredOptions]));
       onChange(next);
     }
-  };
+  }, [filteredOptions, allFilteredSelected, value, onChange]);
 
 
   const { INPUT_HEIGHT, CHIP_SIZE, MAX_WIDTH, MIN_WIDTH } = useFieldSizes();

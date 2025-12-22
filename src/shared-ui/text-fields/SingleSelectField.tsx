@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { Autocomplete, Box, ListItem, ListItemText, TextField, Typography } from "@mui/material";
 import useFieldSizes from './useFieldSizes';
 
@@ -62,10 +62,10 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
 
   // Placeholder uses only the header `label` now.
 
-  const handleInputChange = (_e: any, newInput: string) => {
+  const handleInputChange = useCallback((_e: any, newInput: string) => {
     if (controlledInputValue === undefined) setInternalInput(newInput);
     onInputChange?.(newInput);
-  };
+  }, [controlledInputValue, onInputChange]);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'flex-start', ...(wrapperSx ?? DEFAULT_WRAPPER_SX) }}>

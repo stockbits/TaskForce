@@ -3,7 +3,7 @@
 // Fully wired to useLiveSelectEngine.ts (central selection engine)
 // ============================================================================
 
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useCallback } from "react";
 
 import MapLegend from "./MapLegend";
 import { ScheduleLiveSearch, ScheduleLiveSearchFilters } from "@/shared-ui";
@@ -204,7 +204,7 @@ export default function ScheduleLivePage() {
   /* ==========================================================================
      DIVISION CHANGE
   ============================================================================ */
-  const handleDivisionChange = (value: string) => {
+  const handleDivisionChange = useCallback((value: string) => {
     setDivision(value);
     setTaskData([]);
     setResourceData([]);
@@ -223,9 +223,9 @@ export default function ScheduleLivePage() {
     }
 
     setSearchAnywhere("");
-  };
+  }, []);
 
-  const handleDomainChange = (value: string) => {
+  const handleDomainChange = useCallback((value: string) => {
     setDomain(value);
     setTaskData([]);
     setResourceData([]);
@@ -237,7 +237,7 @@ export default function ScheduleLivePage() {
     setDropdownData(buildFilteredDropdowns(rows));
 
     setSearchAnywhere("");
-  };
+  }, [division]);
 
   /* ==========================================================================
      DOCKING LOGIC
@@ -254,29 +254,29 @@ export default function ScheduleLivePage() {
   /* ==========================================================================
      SEARCH HELPERS
   ============================================================================ */
-  const handleCloseSearchPanel = () => {
+  const handleCloseSearchPanel = useCallback(() => {
     setSearchOpen(false);
     setSearchButtonActive(false);
-  };
+  }, []);
 
-  const handleSearchToggle = () => {
+  const handleSearchToggle = useCallback(() => {
     if (!division) return;
     setSearchOpen((prev) => {
       const next = !prev;
       setSearchButtonActive(next);
       return next;
     });
-  };
+  }, [division]);
 
   const anchorEl = searchButtonRef.current;
   const isSearchPopperOpen = Boolean(searchOpen && division && anchorEl);
 
-  const handleSearchClickAway = (event: MouseEvent | TouchEvent) => {
+  const handleSearchClickAway = useCallback((event: MouseEvent | TouchEvent) => {
     if (anchorEl && anchorEl.contains(event.target as Node)) {
       return;
     }
     handleCloseSearchPanel();
-  };
+  }, [anchorEl, handleCloseSearchPanel]);
 
   /* ==========================================================================
      TASK SEARCH
@@ -402,7 +402,7 @@ export default function ScheduleLivePage() {
   /* ==========================================================================
      CLEAR ALL (data + selection)
   ============================================================================ */
-  const handleClearAll = () => {
+  const handleClearAll = useCallback(() => {
     clearAll();
 
     setSearchAnywhere("");
@@ -423,7 +423,7 @@ export default function ScheduleLivePage() {
     }
 
     handleCloseSearchPanel();
-  };
+  }, [clearAll, division, handleCloseSearchPanel]);
 
   /* ==========================================================================
      PANEL RENDERER

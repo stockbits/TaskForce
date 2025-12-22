@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import Close from '@mui/icons-material/Close';
 import OpenInFull from '@mui/icons-material/OpenInFull';
 import { Box, IconButton, Stack, Typography } from "@mui/material";
@@ -21,22 +21,22 @@ export function usePanelDocking(
 
   /* ---- ACTIONS ---- */
 
-  const togglePanel = (key: PanelKey) => {
+  const togglePanel = useCallback((key: PanelKey) => {
     setVisiblePanels((prev) =>
       prev.includes(key) ? prev.filter((p) => p !== key) : [...prev, key]
     );
-  };
+  }, []);
 
-  const closePanel = (key: PanelKey) => {
+  const closePanel = useCallback((key: PanelKey) => {
     setVisiblePanels((prev) => prev.filter((p) => p !== key));
     if (maximizedPanel === key) setMaximizedPanel(null);
-  };
+  }, [maximizedPanel]);
 
-  const maximizePanel = (key: PanelKey) => {
+  const maximizePanel = useCallback((key: PanelKey) => {
     // Only allow maximize if more than 1 panel is visible
     if (visiblePanels.length <= 1) return;
     setMaximizedPanel((prev) => (prev === key ? null : key));
-  };
+  }, [visiblePanels.length]);
 
   /* ---- DERIVED ---- */
 
