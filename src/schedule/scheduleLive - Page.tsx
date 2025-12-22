@@ -431,7 +431,7 @@ export default function ScheduleLivePage() {
   const renderPanelBody = (key: PanelKey) => {
     switch (key) {
       case "timeline":
-        return <TimelinePanel />;
+        return <TimelinePanel isMaximized={!!maximizedPanel} />;
 
       case "map":
         return (

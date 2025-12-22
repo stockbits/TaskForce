@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import { Box, Paper, Typography, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
@@ -53,7 +53,7 @@ function formatHourLabel(d: Date, step: number) {
   return `${String(d.getHours()).padStart(2, "0")}:00`;
 }
 
-export default function TimelinePanel() {
+export default function TimelinePanel({ isMaximized = false }: { isMaximized?: boolean }) {
   const [startDate, setStartDate] = useState<Date>(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0); // start at midnight
@@ -70,6 +70,9 @@ export default function TimelinePanel() {
   const headerScrollRef = useRef<HTMLDivElement>(null);
   const bodyScrollRef = useRef<HTMLDivElement>(null);
   const leftScrollRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const [containerWidth, setContainerWidth] = useState(0);
 
   // Layout constants (keep simple + predictable)
   const LABEL_COL_WIDTH = 160;
@@ -82,9 +85,17 @@ export default function TimelinePanel() {
   const dateRange = useMemo(() => getDateRange(startDate, endDate), [startDate, endDate]);
 
   const totalHours = Math.ceil((dateRange.end - dateRange.start) / MS_HOUR);
-  const PX_PER_HOUR = totalHours <= 24 ? 50 : Math.max(10, 50 * (24 / totalHours));
+  const PX_PER_HOUR = isMaximized && containerWidth > 0
+    ? Math.max(10, containerWidth / totalHours)
+    : totalHours <= 24 ? 50 : Math.max(10, 50 * (24 / totalHours));
   let step = 1;
   if (totalHours > 24) step = 24;
+
+  useEffect(() => {
+    if (containerRef.current) {
+      setContainerWidth(containerRef.current.clientWidth);
+    }
+  }, [isMaximized, totalHours]); // update when maximized or hours change
 
   const categories = useMemo(() => {
     return resources.map((r) => String(r.resourceId ?? r.id ?? "UNKNOWN"));
@@ -189,12 +200,12 @@ export default function TimelinePanel() {
           onScroll={syncBodyFromHeader}
           sx={{
             flex: 1,
-            overflowX: "auto",
+            overflowX: isMaximized ? "hidden" : "auto",
             overflowY: "hidden",
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
-          <Box sx={{ width: contentWidth, height: "100%", display: "flex" }}>
+          <Box sx={{ width: isMaximized ? "100%" : contentWidth, height: "100%", display: "flex" }}>
             {timelineIntervals.map((it, i) => (
               <Box
                 key={it.time}
@@ -251,15 +262,15 @@ export default function TimelinePanel() {
 
         {/* Right: Timeline rows */}
         <Box
-          ref={bodyScrollRef}
+          ref={containerRef}
           onScroll={syncFromBody}
           sx={{
             flex: 1,
-            overflow: "auto",
+            overflow: isMaximized ? "hidden" : "auto",
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
-          <Box sx={{ width: contentWidth, minWidth: contentWidth }}>
+          <Box sx={{ width: isMaximized ? "100%" : contentWidth, minWidth: contentWidth }}>
             {categories.map((rid, rowIndex) => (
               <Box
                 key={rid}
