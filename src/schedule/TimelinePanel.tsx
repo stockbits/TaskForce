@@ -1,10 +1,12 @@
-import React, { useMemo, useRef } from "react";
-import { Box, Paper, Typography } from "@mui/material";
+import React, { useMemo, useRef, useState, useEffect } from "react";
+import { Box, Paper, Typography, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 import ResourceMock from "../data/ResourceMock.json";
-
-type ViewMode = "5days";
 
 type ResourceRow = {
   resourceId?: string;
@@ -20,26 +22,12 @@ function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
-function getDateRange(mode: ViewMode) {
-  const today = new Date();
-  const startDate = new Date(today);
-  const endDate = new Date(today);
-
-  const startOfDay = (d: Date) => d.setHours(4, 0, 0, 0);
-  const endOfDay = (d: Date) => d.setHours(23, 59, 59, 999);
-
-  if (mode === "5days") {
-    startDate.setDate(today.getDate() - 2);
-    endDate.setDate(today.getDate() + 2);
-    startOfDay(startDate);
-    endOfDay(endDate);
-  }
-
+function getDateRange(start: Date, end: Date) {
   return {
-    start: startDate.getTime(),
-    end: endDate.getTime(),
-    startDate,
-    endDate,
+    start: start.getTime(),
+    end: end.getTime(),
+    startDate: start,
+    endDate: end,
   };
 }
 
@@ -58,43 +46,71 @@ function parseShiftTime(timeStr: unknown): { h: number; m: number } | null {
   return { h, m: min };
 }
 
-function formatHourLabel(d: Date) {
+function formatHourLabel(d: Date, step: number) {
+  if (step >= 24) {
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
   return `${String(d.getHours()).padStart(2, "0")}:00`;
 }
 
-export default function TimelinePanel() {
-  const viewMode: ViewMode = "5days";
+export default function TimelinePanel({ isMaximized = false }: { isMaximized?: boolean }) {
+  const [startDate, setStartDate] = useState<Date>(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0); // start at midnight
+    return d;
+  });
+  const [endDate, setEndDate] = useState<Date>(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7); // end of next week
+    d.setHours(23, 59, 59, 999);
+    return d;
+  });
+  const [dateModalOpen, setDateModalOpen] = useState(false);
 
   const headerScrollRef = useRef<HTMLDivElement>(null);
   const bodyScrollRef = useRef<HTMLDivElement>(null);
   const leftScrollRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const [containerWidth, setContainerWidth] = useState(0);
 
   // Layout constants (keep simple + predictable)
   const LABEL_COL_WIDTH = 160;
   const ROW_HEIGHT = 40;
-  const PX_PER_HOUR = 50;
 
   const resources: ResourceRow[] = useMemo(() => {
     return Array.isArray(ResourceMock) ? (ResourceMock as ResourceRow[]) : [];
   }, []);
 
-  const dateRange = useMemo(() => getDateRange(viewMode), [viewMode]);
+  const dateRange = useMemo(() => getDateRange(startDate, endDate), [startDate, endDate]);
+
+  const totalHours = Math.ceil((dateRange.end - dateRange.start) / MS_HOUR);
+  const PX_PER_HOUR = isMaximized && containerWidth > 0
+    ? Math.max(10, containerWidth / totalHours)
+    : totalHours <= 24 ? 50 : Math.max(10, 50 * (24 / totalHours));
+  let step = 1;
+  if (totalHours > 24) step = 24;
+
+  useEffect(() => {
+    if (containerRef.current) {
+      setContainerWidth(containerRef.current.clientWidth);
+    }
+  }, [isMaximized, totalHours]); // update when maximized or hours change
 
   const categories = useMemo(() => {
     return resources.map((r) => String(r.resourceId ?? r.id ?? "UNKNOWN"));
   }, [resources]);
 
   const timelineIntervals = useMemo(() => {
-    const totalHours = Math.ceil((dateRange.end - dateRange.start) / MS_HOUR);
     const out: { time: number; label: string }[] = [];
-    for (let i = 0; i <= totalHours; i++) {
+    for (let i = 0; i <= totalHours; i += step) {
       const d = new Date(dateRange.start + i * MS_HOUR);
-      out.push({ time: d.getTime(), label: formatHourLabel(d) });
+      out.push({ time: d.getTime(), label: formatHourLabel(d, step) });
     }
     return out;
-  }, [dateRange]);
+  }, [dateRange, totalHours, step]);
 
-  const contentWidth = Math.max(1, timelineIntervals.length) * PX_PER_HOUR;
+  const contentWidth = totalHours * PX_PER_HOUR;
 
   // Build shift bars only
   const shiftBarsByRow = useMemo(() => {
@@ -173,7 +189,9 @@ export default function TimelinePanel() {
             borderRight: "1px solid #e0e0e0",
           }}
         >
-          {/* Removed buttons */}
+          <IconButton onClick={() => setDateModalOpen(true)} size="small">
+            <CalendarTodayIcon />
+          </IconButton>
         </Box>
 
         {/* Timeline labels */}
@@ -182,17 +200,17 @@ export default function TimelinePanel() {
           onScroll={syncBodyFromHeader}
           sx={{
             flex: 1,
-            overflowX: "auto",
+            overflowX: isMaximized ? "hidden" : "auto",
             overflowY: "hidden",
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
-          <Box sx={{ width: contentWidth, height: "100%", display: "flex" }}>
+          <Box sx={{ width: isMaximized ? "100%" : contentWidth, height: "100%", display: "flex" }}>
             {timelineIntervals.map((it, i) => (
               <Box
                 key={it.time}
                 sx={{
-                  width: PX_PER_HOUR,
+                  width: step * PX_PER_HOUR,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -244,15 +262,18 @@ export default function TimelinePanel() {
 
         {/* Right: Timeline rows */}
         <Box
-          ref={bodyScrollRef}
+          ref={(el: HTMLDivElement | null) => {
+            bodyScrollRef.current = el;
+            containerRef.current = el;
+          }}
           onScroll={syncFromBody}
           sx={{
             flex: 1,
-            overflow: "auto",
+            overflow: isMaximized ? "hidden" : "auto",
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
-          <Box sx={{ width: contentWidth, minWidth: contentWidth }}>
+          <Box sx={{ width: isMaximized ? "100%" : contentWidth, minWidth: contentWidth }}>
             {categories.map((rid, rowIndex) => (
               <Box
                 key={rid}
@@ -298,6 +319,45 @@ export default function TimelinePanel() {
           </Box>
         </Box>
       </Box>
+
+      {/* Date Range Modal */}
+      <Dialog open={dateModalOpen} onClose={() => setDateModalOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Select Date Range</DialogTitle>
+        <DialogContent>
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
+              <DatePicker
+                label="Start Date"
+                value={startDate}
+                onChange={(newValue) => {
+                  if (newValue) {
+                    const d = new Date(newValue);
+                    d.setHours(0, 0, 0, 0);
+                    setStartDate(d);
+                  }
+                }}
+                slotProps={{ textField: { fullWidth: true } }}
+              />
+              <DatePicker
+                label="End Date"
+                value={endDate}
+                onChange={(newValue) => {
+                  if (newValue) {
+                    const d = new Date(newValue);
+                    d.setHours(23, 59, 59, 999);
+                    setEndDate(d);
+                  }
+                }}
+                slotProps={{ textField: { fullWidth: true } }}
+              />
+            </Box>
+          </LocalizationProvider>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDateModalOpen(false)}>Cancel</Button>
+          <Button onClick={() => setDateModalOpen(false)} variant="contained">Apply</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
