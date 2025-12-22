@@ -85,15 +85,20 @@ export default function TimelinePanel() {
 
   const timelineIntervals = useMemo(() => {
     const totalHours = Math.ceil((dateRange.end - dateRange.start) / MS_HOUR);
+    let step = 1;
+    if (totalHours > 168) step = 12;
+    else if (totalHours > 72) step = 6;
+    else if (totalHours > 24) step = 2;
     const out: { time: number; label: string }[] = [];
-    for (let i = 0; i <= totalHours; i++) {
+    for (let i = 0; i <= totalHours; i += step) {
       const d = new Date(dateRange.start + i * MS_HOUR);
       out.push({ time: d.getTime(), label: formatHourLabel(d) });
     }
     return out;
   }, [dateRange]);
 
-  const contentWidth = Math.max(1, timelineIntervals.length) * PX_PER_HOUR;
+  const totalHours = Math.ceil((dateRange.end - dateRange.start) / MS_HOUR);
+  const contentWidth = totalHours * PX_PER_HOUR;
 
   // Build shift bars only
   const shiftBarsByRow = useMemo(() => {
