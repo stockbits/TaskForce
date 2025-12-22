@@ -56,7 +56,7 @@ function formatHourLabel(d: Date, step: number) {
 export default function TimelinePanel({ isMaximized = false }: { isMaximized?: boolean }) {
   const [startDate, setStartDate] = useState<Date>(() => {
     const d = new Date();
-    d.setHours(0, 0, 0, 0); // start at midnight
+    d.setHours(4, 0, 0, 0); // start at 4:00 AM
     return d;
   });
   const [endDate, setEndDate] = useState<Date>(() => {
@@ -332,7 +332,7 @@ export default function TimelinePanel({ isMaximized = false }: { isMaximized?: b
                 onChange={(newValue) => {
                   if (newValue) {
                     const d = new Date(newValue);
-                    d.setHours(0, 0, 0, 0);
+                    d.setHours(4, 0, 0, 0); // start at 4:00 AM
                     setStartDate(d);
                   }
                 }}
