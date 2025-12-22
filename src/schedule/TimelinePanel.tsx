@@ -70,13 +70,12 @@ export default function TimelinePanel({
 }) {
   const [startDate, setStartDate] = useState<Date>(() => {
     const d = new Date();
-    d.setHours(4, 0, 0, 0); // start at 4:00 AM
+    d.setHours(0, 0, 0, 0); // start at beginning of current day
     return d;
   });
   const [endDate, setEndDate] = useState<Date>(() => {
     const d = new Date();
-    d.setDate(d.getDate() + 7); // end of next week
-    d.setHours(23, 59, 59, 999);
+    d.setHours(23, 59, 59, 999); // end at end of current day
     return d;
   });
   const [dateModalOpen, setDateModalOpen] = useState(false);
