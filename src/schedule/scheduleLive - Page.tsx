@@ -3,15 +3,15 @@
 // Fully wired to useLiveSelectEngine.ts (central selection engine)
 // ============================================================================
 
-import React, { useState, useMemo, useRef, useCallback } from "react";
+import React, { useState, useMemo, useRef, useCallback, lazy, Suspense } from "react";
+import type { ScheduleLiveSearchFilters } from "@/shared-ui";
 
-import MapLegend from "./MapLegend";
-import { ScheduleLiveSearch, ScheduleLiveSearchFilters } from "@/shared-ui";
-
-import TimelinePanel from "./TimelinePanel";
-import MapPanel from "./MapPanel";
-import TaskTablePanel from "./TaskTablePanel";
-import ResourceTablePanel from "./ResourceTablePanel";
+const MapLegend = lazy(() => import("./MapLegend"));
+const ScheduleLiveSearch = lazy(() => import("@/shared-ui").then(m => ({ default: m.ScheduleLiveSearch })));
+const TimelinePanel = lazy(() => import("./TimelinePanel"));
+const MapPanel = lazy(() => import("./MapPanel"));
+const TaskTablePanel = lazy(() => import("./TaskTablePanel"));
+const ResourceTablePanel = lazy(() => import("./ResourceTablePanel"));
 
 import mockTasks from "@/data/mockTasks.json";
 import ResourceMock from "@/data/ResourceMock.json";
@@ -431,46 +431,56 @@ export default function ScheduleLivePage() {
   const renderPanelBody = (key: PanelKey) => {
     switch (key) {
       case "timeline":
-        return <TimelinePanel isMaximized={!!maximizedPanel} />;
+        return (
+          <Suspense fallback={<div>Loading timeline...</div>}>
+            <TimelinePanel isMaximized={!!maximizedPanel} />
+          </Suspense>
+        );
 
       case "map":
         return (
-          <MapPanel
-            tasks={taskData}
-            resources={resourceData}
-            selectedTask={selectedTask}
-            selectedTasks={selectedTasks}
-            selectedResource={selectedResource}
-            selectedResources={selectedResources}
-            shouldZoom={shouldZoom}
-            handleTaskMapClick={handleTaskMapClick}
-            handleResourceMapClick={handleResourceMapClick}
-            notifyMapDragStart={notifyMapDragStart}
-            notifyMapDragEnd={notifyMapDragEnd}
-            showMarkers={true}
-          />
+          <Suspense fallback={<div>Loading map...</div>}>
+            <MapPanel
+              tasks={taskData}
+              resources={resourceData}
+              selectedTask={selectedTask}
+              selectedTasks={selectedTasks}
+              selectedResource={selectedResource}
+              selectedResources={selectedResources}
+              shouldZoom={shouldZoom}
+              handleTaskMapClick={handleTaskMapClick}
+              handleResourceMapClick={handleResourceMapClick}
+              notifyMapDragStart={notifyMapDragStart}
+              notifyMapDragEnd={notifyMapDragEnd}
+              showMarkers={true}
+            />
+          </Suspense>
         );
 
       case "resources":
         return (
-          <ResourceTablePanel
-            data={resourceData}
-            selectedResources={selectedResources}
-            onSelectionChange={handleResourceTableSelect}
-            selectionFromMap={selectionFromMap}
-            onClearSelection={clearResourceSelections}
-          />
+          <Suspense fallback={<div>Loading resources...</div>}>
+            <ResourceTablePanel
+              data={resourceData}
+              selectedResources={selectedResources}
+              onSelectionChange={handleResourceTableSelect}
+              selectionFromMap={selectionFromMap}
+              onClearSelection={clearResourceSelections}
+            />
+          </Suspense>
         );
 
       case "tasks":
         return (
-          <TaskTablePanel
-            data={taskData}
-            selectedTasks={selectedTasks}
-            onSelectionChange={handleTaskTableSelect}
-            selectionFromMap={selectionFromMap}
-            onClearSelection={clearTaskSelections}
-          />
+          <Suspense fallback={<div>Loading tasks...</div>}>
+            <TaskTablePanel
+              data={taskData}
+              selectedTasks={selectedTasks}
+              onSelectionChange={handleTaskTableSelect}
+              selectionFromMap={selectionFromMap}
+              onClearSelection={clearTaskSelections}
+            />
+          </Suspense>
         );
 
       default:
@@ -778,7 +788,8 @@ export default function ScheduleLivePage() {
                       minHeight: 0,
                     }}
                   >
-                    <ScheduleLiveSearch
+                    <Suspense fallback={<div>Loading search...</div>}>
+                      <ScheduleLiveSearch
                       mode={mapSelectedMode(selectedMode) === "resource-active" ? "resource" : "task"}
                       onSearch={(filters: ScheduleLiveSearchFilters) => {
                         currentFiltersRef.current = filters;
@@ -799,6 +810,7 @@ export default function ScheduleLivePage() {
                       resetKey={resetKey}
                       hideActions={true}
                     />
+                    </Suspense>
                   </Box>
                 </Stack>
 
@@ -904,7 +916,9 @@ export default function ScheduleLivePage() {
       <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", position: "relative" }}>
         {toolbar}
 
-        <MapLegend visible={legendOpen} onClose={() => setLegendOpen(false)} />
+        <Suspense fallback={<div>Loading legend...</div>}>
+          <MapLegend visible={legendOpen} onClose={() => setLegendOpen(false)} />
+        </Suspense>
 
         {searchToolPopper}
 
