@@ -56,7 +56,7 @@ function formatHourLabel(d: Date, step: number) {
 export default function TimelinePanel() {
   const [startDate, setStartDate] = useState<Date>(() => {
     const d = new Date();
-    d.setHours(4, 0, 0, 0); // start at 4 AM
+    d.setHours(0, 0, 0, 0); // start at midnight
     return d;
   });
   const [endDate, setEndDate] = useState<Date>(() => {
@@ -74,7 +74,6 @@ export default function TimelinePanel() {
   // Layout constants (keep simple + predictable)
   const LABEL_COL_WIDTH = 160;
   const ROW_HEIGHT = 40;
-  const PX_PER_HOUR = 50;
 
   const resources: ResourceRow[] = useMemo(() => {
     return Array.isArray(ResourceMock) ? (ResourceMock as ResourceRow[]) : [];
@@ -83,6 +82,7 @@ export default function TimelinePanel() {
   const dateRange = useMemo(() => getDateRange(startDate, endDate), [startDate, endDate]);
 
   const totalHours = Math.ceil((dateRange.end - dateRange.start) / MS_HOUR);
+  const PX_PER_HOUR = totalHours <= 24 ? 50 : Math.max(10, 50 * (24 / totalHours));
   let step = 1;
   if (totalHours > 24) step = 24;
 
@@ -315,13 +315,25 @@ export default function TimelinePanel() {
               <DatePicker
                 label="Start Date"
                 value={startDate}
-                onChange={(newValue) => newValue && setStartDate(newValue)}
+                onChange={(newValue) => {
+                  if (newValue) {
+                    const d = new Date(newValue);
+                    d.setHours(0, 0, 0, 0);
+                    setStartDate(d);
+                  }
+                }}
                 slotProps={{ textField: { fullWidth: true } }}
               />
               <DatePicker
                 label="End Date"
                 value={endDate}
-                onChange={(newValue) => newValue && setEndDate(newValue)}
+                onChange={(newValue) => {
+                  if (newValue) {
+                    const d = new Date(newValue);
+                    d.setHours(23, 59, 59, 999);
+                    setEndDate(d);
+                  }
+                }}
                 slotProps={{ textField: { fullWidth: true } }}
               />
             </Box>
