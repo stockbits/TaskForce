@@ -345,6 +345,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           checkboxSelection
           components={hideToolbar ? {} : { Toolbar: CustomToolbar }}
           density={density as 'compact' | 'standard' | 'comfortable'}
+          rowHeight={40}
           // Use client-side/native MUI sorting
           apiRef={apiRef}
           pagination={!disablePagination}

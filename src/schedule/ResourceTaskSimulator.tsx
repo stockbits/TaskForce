@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   Typography,
-  Paper,
   Grid,
   Card,
   CardContent,
@@ -19,7 +18,7 @@ import {
 import ShuffleIcon from '@mui/icons-material/Shuffle';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import resourceTaskMappingData from '../data/resourceTaskMapping.json';
+// import resourceTaskMappingData from '../data/resourceTaskMapping.json';
 
 interface Task {
   taskId: string;
@@ -43,7 +42,7 @@ interface ResourceAssignment {
 }
 
 export default function ResourceTaskSimulator() {
-  const [assignments, setAssignments] = useState<ResourceAssignment[]>(resourceTaskMappingData);
+  const [assignments, setAssignments] = useState<ResourceAssignment[]>([]);
   const [lastShuffleTime, setLastShuffleTime] = useState<Date | null>(null);
   const [travelStats, setTravelStats] = useState<{[key: string]: number}>({});
 

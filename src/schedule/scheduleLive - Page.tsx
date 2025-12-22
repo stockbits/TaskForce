@@ -27,7 +27,6 @@ import { useLiveSelectEngine } from "@/hooks/useLiveSelectEngine";
 
 import ExactGlobalSearchField from "@/shared-ui/text-fields/ExactGlobalSearchField";
 
-import Search from '@mui/icons-material/Search';
 import SlidersHorizontal from '@mui/icons-material/Tune';
 import Star from '@mui/icons-material/Star';
 import Info from '@mui/icons-material/Info';
@@ -52,7 +51,6 @@ import {
   Typography,
 } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
-import InputAdornment from "@mui/material/InputAdornment";
 import { alpha, useTheme } from "@mui/material/styles";
 import AppButton from '@/shared-ui/button';
 
@@ -79,16 +77,8 @@ function mapSelectedMode(id: string): string {
 export default function ScheduleLivePage() {
   const theme = useTheme();
   const accent = theme.palette.primary.main;
-  const accentHover = theme.palette.primary.dark;
-  const accentSoft = alpha(accent, 0.1);
   const borderColor = alpha(accent, 0.18);
   const surfaceShadow = "0 24px 54px rgba(8,58,97,0.22)";
-
-  /* ---------------- COMMON STYLES ---------------- */
-  const commonPaperSx = {
-    borderRadius: 3,
-    elevation: 2,
-  };
 
   /* ---------------- DOMAIN + DIVISION ---------------- */
   const [domain, setDomain] = useState<string>("");
@@ -256,7 +246,6 @@ export default function ScheduleLivePage() {
     visiblePanels,
     maximizedPanel,
     collapsedPanels,
-    isPanelMaximized,
     togglePanel,
     closePanel,
     maximizePanel,
@@ -391,14 +380,11 @@ export default function ScheduleLivePage() {
     const q = searchAnywhere.trim().toLowerCase();
     if (!q) return;
 
-    let matched = false;
-
     const taskMatches = (mockTasks as TaskRecord[]).filter(
       (t) => t.taskId && t.taskId.toLowerCase() === q
     );
     if (taskMatches.length) {
       setTaskData(taskMatches);
-      matched = true;
     }
 
     const resourceMatches = allResources.filter(
@@ -408,7 +394,6 @@ export default function ScheduleLivePage() {
       setResourceData(resourceMatches);
       // Select the matched resource for the timeline
       handleResourceTableSelect(resourceMatches);
-      matched = true;
     }
 
     // Removed handleCloseSearchPanel() to keep panel open with filters selected
@@ -496,14 +481,6 @@ export default function ScheduleLivePage() {
   /* ==========================================================================
      PANEL LAYOUT
   ============================================================================ */
-  const TOP = ["timeline", "map"] as PanelKey[];
-  const BOTTOM = ["resources", "tasks"] as PanelKey[];
-
-  const topRow = TOP.filter((k) => visiblePanels.includes(k));
-  const bottomRow = BOTTOM.filter((k) => visiblePanels.includes(k));
-
-  const effectiveTop = maximizedPanel ? [maximizedPanel] : topRow;
-  const effectiveBottom = maximizedPanel ? [] : bottomRow;
 
   const topLeftVisible = visiblePanels.includes('timeline');
   const topRightVisible = visiblePanels.includes('map');
@@ -523,36 +500,7 @@ export default function ScheduleLivePage() {
   const rightColHas = Number(topRightVisible || bottomRightVisible);
   const colsCount = leftColHas + rightColHas;
 
-  // splitter state: fraction of height occupied by top area (0..1)
-  const [topFraction, setTopFraction] = useState<number>(0.5);
   const panelsContainerRef = useRef<HTMLDivElement | null>(null);
-  const draggingRef = useRef(false);
-
-  const onSplitterMouseDown = (event: React.MouseEvent) => {
-    event.preventDefault();
-    draggingRef.current = true;
-    const startY = event.clientY;
-    const container = panelsContainerRef.current;
-    const startRect = container?.getBoundingClientRect();
-    const startHeight = startRect?.height ?? 0;
-
-    const onMove = (moveEvent: MouseEvent) => {
-      if (!draggingRef.current || !container) return;
-      const delta = moveEvent.clientY - startY;
-      const newTopPx = (startRect?.top ?? 0) >= 0 ? (startRect!.height * topFraction + delta) : 0;
-      const frac = Math.max(0.12, Math.min(0.88, newTopPx / startHeight));
-      setTopFraction(frac);
-    };
-
-    const onUp = () => {
-      draggingRef.current = false;
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
-    };
-
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
-  };
 
   /* ==========================================================================
      TOOLBAR
