@@ -396,6 +396,7 @@ export default function TimelinePanel({
               <DatePicker
                 label="Start Date"
                 value={startDate}
+                defaultValue={new Date()}
                 onChange={(newValue) => {
                   if (newValue) {
                     const d = new Date(newValue);
@@ -408,6 +409,7 @@ export default function TimelinePanel({
               <DatePicker
                 label="End Date"
                 value={endDate}
+                defaultValue={new Date()}
                 onChange={(newValue) => {
                   if (newValue) {
                     const d = new Date(newValue);
