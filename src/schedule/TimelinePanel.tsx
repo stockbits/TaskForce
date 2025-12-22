@@ -1,10 +1,11 @@
-import React, { useMemo, useRef } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Box, Paper, Typography } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 import ResourceMock from "../data/ResourceMock.json";
-
-type ViewMode = "5days";
 
 type ResourceRow = {
   resourceId?: string;
@@ -20,26 +21,12 @@ function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
-function getDateRange(mode: ViewMode) {
-  const today = new Date();
-  const startDate = new Date(today);
-  const endDate = new Date(today);
-
-  const startOfDay = (d: Date) => d.setHours(4, 0, 0, 0);
-  const endOfDay = (d: Date) => d.setHours(23, 59, 59, 999);
-
-  if (mode === "5days") {
-    startDate.setDate(today.getDate() - 2);
-    endDate.setDate(today.getDate() + 2);
-    startOfDay(startDate);
-    endOfDay(endDate);
-  }
-
+function getDateRange(start: Date, end: Date) {
   return {
-    start: startDate.getTime(),
-    end: endDate.getTime(),
-    startDate,
-    endDate,
+    start: start.getTime(),
+    end: end.getTime(),
+    startDate: start,
+    endDate: end,
   };
 }
 
@@ -63,7 +50,17 @@ function formatHourLabel(d: Date) {
 }
 
 export default function TimelinePanel() {
-  const viewMode: ViewMode = "5days";
+  const [startDate, setStartDate] = useState<Date>(() => {
+    const d = new Date();
+    d.setHours(4, 0, 0, 0); // start at 4 AM
+    return d;
+  });
+  const [endDate, setEndDate] = useState<Date>(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7); // end of next week
+    d.setHours(23, 59, 59, 999);
+    return d;
+  });
 
   const headerScrollRef = useRef<HTMLDivElement>(null);
   const bodyScrollRef = useRef<HTMLDivElement>(null);
@@ -78,7 +75,7 @@ export default function TimelinePanel() {
     return Array.isArray(ResourceMock) ? (ResourceMock as ResourceRow[]) : [];
   }, []);
 
-  const dateRange = useMemo(() => getDateRange(viewMode), [viewMode]);
+  const dateRange = useMemo(() => getDateRange(startDate, endDate), [startDate, endDate]);
 
   const categories = useMemo(() => {
     return resources.map((r) => String(r.resourceId ?? r.id ?? "UNKNOWN"));
@@ -173,7 +170,20 @@ export default function TimelinePanel() {
             borderRight: "1px solid #e0e0e0",
           }}
         >
-          {/* Removed buttons */}
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <DatePicker
+              label="Start"
+              value={startDate}
+              onChange={(newValue) => newValue && setStartDate(newValue)}
+              slotProps={{ textField: { size: 'small', sx: { minWidth: 120 } } }}
+            />
+            <DatePicker
+              label="End"
+              value={endDate}
+              onChange={(newValue) => newValue && setEndDate(newValue)}
+              slotProps={{ textField: { size: 'small', sx: { minWidth: 120 } } }}
+            />
+          </LocalizationProvider>
         </Box>
 
         {/* Timeline labels */}
