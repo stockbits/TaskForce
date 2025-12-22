@@ -79,25 +79,25 @@ export default function TimelinePanel() {
 
   const dateRange = useMemo(() => getDateRange(startDate, endDate), [startDate, endDate]);
 
+  const totalHours = Math.ceil((dateRange.end - dateRange.start) / MS_HOUR);
+  let step = 1;
+  if (totalHours > 168) step = 12;
+  else if (totalHours > 72) step = 6;
+  else if (totalHours > 24) step = 2;
+
   const categories = useMemo(() => {
     return resources.map((r) => String(r.resourceId ?? r.id ?? "UNKNOWN"));
   }, [resources]);
 
   const timelineIntervals = useMemo(() => {
-    const totalHours = Math.ceil((dateRange.end - dateRange.start) / MS_HOUR);
-    let step = 1;
-    if (totalHours > 168) step = 12;
-    else if (totalHours > 72) step = 6;
-    else if (totalHours > 24) step = 2;
     const out: { time: number; label: string }[] = [];
     for (let i = 0; i <= totalHours; i += step) {
       const d = new Date(dateRange.start + i * MS_HOUR);
       out.push({ time: d.getTime(), label: formatHourLabel(d) });
     }
     return out;
-  }, [dateRange]);
+  }, [dateRange, totalHours, step]);
 
-  const totalHours = Math.ceil((dateRange.end - dateRange.start) / MS_HOUR);
   const contentWidth = totalHours * PX_PER_HOUR;
 
   // Build shift bars only
@@ -198,7 +198,7 @@ export default function TimelinePanel() {
               <Box
                 key={it.time}
                 sx={{
-                  width: PX_PER_HOUR,
+                  width: step * PX_PER_HOUR,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
