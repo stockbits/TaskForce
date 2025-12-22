@@ -70,7 +70,7 @@ export default function TimelinePanel({
 }) {
   const [startDate, setStartDate] = useState<Date>(() => {
     const d = new Date();
-    d.setHours(0, 0, 0, 0); // start at beginning of current day
+    d.setHours(5, 0, 0, 0); // start at 5:00 AM
     return d;
   });
   const [endDate, setEndDate] = useState<Date>(() => {
@@ -399,7 +399,7 @@ export default function TimelinePanel({
                 onChange={(newValue) => {
                   if (newValue) {
                     const d = new Date(newValue);
-                    d.setHours(4, 0, 0, 0); // start at 4:00 AM
+                    d.setHours(5, 0, 0, 0); // start at 5:00 AM
                     setStartDate(d);
                   }
                 }}
