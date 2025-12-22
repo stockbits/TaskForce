@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import Close from '@mui/icons-material/Close';
 import OpenInFull from '@mui/icons-material/OpenInFull';
-import { Box, IconButton, Paper, Stack, Typography } from "@mui/material";
+import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import useFieldSizes from "../shared-ui/text-fields/useFieldSizes";
 
@@ -22,14 +22,12 @@ export function usePanelDocking(
   /* ---- ACTIONS ---- */
 
   const togglePanel = (key: PanelKey) => {
-    console.log('[usePanelDocking] togglePanel', key);
     setVisiblePanels((prev) =>
       prev.includes(key) ? prev.filter((p) => p !== key) : [...prev, key]
     );
   };
 
   const closePanel = (key: PanelKey) => {
-    console.log('[usePanelDocking] closePanel', key);
     setVisiblePanels((prev) => prev.filter((p) => p !== key));
     if (maximizedPanel === key) setMaximizedPanel(null);
   };
@@ -37,7 +35,6 @@ export function usePanelDocking(
   const maximizePanel = (key: PanelKey) => {
     // Only allow maximize if more than 1 panel is visible
     if (visiblePanels.length <= 1) return;
-    console.log('[usePanelDocking] maximizePanel', key);
     setMaximizedPanel((prev) => (prev === key ? null : key));
   };
 
@@ -132,7 +129,6 @@ export function PanelContainer({
             <IconButton
               size="small"
               onClick={() => {
-                console.log('[PanelContainer] maximize clicked', title);
                 try { onMaximize(); } catch (e) { console.error(e); }
               }}
               title={isMaximized ? "Restore" : "Maximize"}
@@ -163,7 +159,6 @@ export function PanelContainer({
           <IconButton
             size="small"
             onClick={() => {
-              console.log('[PanelContainer] close clicked', title);
               try { onClose(); } catch (e) { console.error(e); }
             }}
             title="Close"

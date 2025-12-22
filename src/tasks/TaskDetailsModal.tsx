@@ -24,7 +24,6 @@ import PlayArrow from '@mui/icons-material/PlayArrow';
 import Build from '@mui/icons-material/Build';
 import Check from '@mui/icons-material/Check';
 import type { TaskDetails, ProgressNoteEntry } from "@/types";
-import ResourceMock from "@/data/ResourceMock.json";
 import ExpandableSectionCard from "@/shared-ui/ExpandableSectionCard";
 
 export interface TaskDetailsModalProps {

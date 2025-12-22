@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import {
   Card,
   CardHeader,
@@ -24,7 +24,7 @@ interface ExpandableSectionCardProps {
   paperProps?: any;
 }
 
-const ExpandableSectionCard: React.FC<ExpandableSectionCardProps> = ({
+const ExpandableSectionCard: React.FC<ExpandableSectionCardProps> = memo(({
   title,
   children,
   defaultExpanded = false,
@@ -73,6 +73,8 @@ const ExpandableSectionCard: React.FC<ExpandableSectionCardProps> = ({
       </Collapse>
     </Card>
   );
-};
+});
+
+ExpandableSectionCard.displayName = "ExpandableSectionCard";
 
 export default ExpandableSectionCard;

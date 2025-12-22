@@ -11,7 +11,6 @@ import {
   CircularProgress,
   FormControl,
   IconButton,
-  MenuItem,
   Paper,
   Select,
   Stack,
@@ -34,7 +33,6 @@ import OpenInNew from '@mui/icons-material/OpenInNew';
 import RotateLeft from '@mui/icons-material/RotateLeft';
 import Person from '@mui/icons-material/Person';
 import { alpha, useTheme } from "@mui/material/styles";
-import type { SelectChangeEvent } from "@mui/material/Select";
 import { type CalloutHistoryEntry } from "@/hooks/useCalloutHistory";
 
 /* -------------------------------------------------------

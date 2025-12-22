@@ -7,15 +7,9 @@ import {
   Card,
   CardActionArea,
   CardContent,
-  Fade,
   Grid,
   IconButton,
-  InputAdornment,
-  List,
-  ListItemButton,
-  ListItemText,
   Paper,
-  TextField,
   Toolbar,
   Typography,
   useTheme,
@@ -34,7 +28,6 @@ import {
 import { CalloutLandingPage } from "@/callout/CalloutLandingPage";
 
 import Menu from '@mui/icons-material/Menu';
-import Search from '@mui/icons-material/Search';
 import Folder from '@mui/icons-material/Folder';
 import ClipboardList from '@mui/icons-material/ListAlt';
 import Settings from '@mui/icons-material/Settings';
@@ -47,7 +40,6 @@ import Globe from '@mui/icons-material/Public';
 import Calendar from '@mui/icons-material/CalendarMonth';
 import Cog from '@mui/icons-material/Build';
 import TaskPopoutPanel from "@/tasks/TaskPopoutPanel";
-import TaskRowContextMenu from '@/shared-ui/TaskRowContextMenu';
 import ProgressTasksDialog from '@/tasks/ProgressTasksDialog';
 import TaskSearchCard from '@/tasks/TaskSearchCardClean';
 import TaskTableAdvanced from '@/tasks/TaskTableAdvanced';
@@ -388,15 +380,8 @@ export default function MainLayout() {
   const [selectedRows, setSelectedRows] = useState<Record<string, any>[]>([]);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [globalResults, setGlobalResults] = useState<any[]>([]);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedDomain, setSelectedDomain] = useState("");
-  const [selectedDivision, setSelectedDivision] = useState("");
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const [windowHeight, setWindowHeight] = useState(window.innerHeight);
-  const [uiScale, setUiScale] = useState(1);
-  const [toastTop, setToastTop] = useState<number>(72);
 
   /* ---------------------- Data ---------------------- */
   const [allRows, setAllRows] = useState<Record<string, any>[]>([]);
@@ -405,7 +390,6 @@ export default function MainLayout() {
 
   // Resources for callout
   const [resources, setResources] = useState<ResourceRecord[]>([]);
-  const [resourceLoaded, setResourceLoaded] = useState(false);
 
   // AUTO-GENERATE callout groups from resource dataset
   const calloutGroups = useMemo(() => {
@@ -415,9 +399,6 @@ export default function MainLayout() {
 
     return Array.from(new Set(groups)).sort(); // unique + alphabetical
   }, [resources]);
-
-  // Inline expand (kept for future inline panel use)
-  const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
   /* ---------------------- External window hook ---------------------- */
   const {
@@ -690,7 +671,6 @@ export default function MainLayout() {
   useEffect(() => {
     try {
       setResources(ResourceMock as ResourceRecord[]);
-      setResourceLoaded(true);
     } catch {
       snackbar.error("Error loading resource data.");
     }
@@ -705,14 +685,12 @@ export default function MainLayout() {
 
     const resize = () => {
       setWindowWidth(window.innerWidth);
-      setWindowHeight(window.innerHeight);
       setVh();
 
       // Compute a conservative UI scale based on height so smaller viewports
       // get a denser/compact UI automatically. Clamp between 0.75 and 1.
       const h = window.innerHeight;
       const computed = Math.max(0.75, Math.min(1, h / 900));
-      setUiScale(Number(computed.toFixed(2)));
       // Also set a CSS var for access if needed
       document.documentElement.style.setProperty("--ui-scale", String(computed));
       // Adjust base font-size lightly to help density (keeps readable)
@@ -725,7 +703,6 @@ export default function MainLayout() {
     // also initialize scale + font
     const h0 = window.innerHeight;
     const initScale = Math.max(0.75, Math.min(1, h0 / 900));
-    setUiScale(Number(initScale.toFixed(2)));
     document.documentElement.style.setProperty("--ui-scale", String(initScale));
     const initFont = Math.max(13, Math.min(16, Math.round(h0 / 60)));
     document.documentElement.style.fontSize = `${initFont}px`;
@@ -739,12 +716,11 @@ export default function MainLayout() {
       try {
         const el = document.querySelector('.MuiAppBar-root') as HTMLElement | null;
         if (el) {
-          const rect = el.getBoundingClientRect();
-          setToastTop(Math.round(rect.bottom + 8));
+          // toastTop was unused, removed rect calculation and setToastTop calls
           return;
         }
       } catch {}
-      setToastTop(72);
+      // Default toast top position was 72px
     };
     computeTop();
     window.addEventListener('resize', computeTop);
@@ -762,17 +738,11 @@ export default function MainLayout() {
 
   useEffect(() => {
     if (!searchQuery.trim()) {
-      setGlobalResults([]);
-      setShowDropdown(false);
       return;
     }
 
-    const results = allCardsFlattened.filter((c) =>
-      c.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-    setGlobalResults(results);
-    setShowDropdown(results.length > 0);
+    // Note: globalResults and showDropdown were unused, removed
+    // Filtering logic was here but results were never used
   }, [searchQuery, allCardsFlattened]);
 
   /* ---------------------- Handlers ---------------------- */
@@ -789,8 +759,6 @@ export default function MainLayout() {
     setRows([]);
     setActiveSubPage(null);
     setSearchQuery("");
-    setGlobalResults([]);
-    setShowDropdown(false);
   }, []);
 
   const handleCardClick = useCallback((item: any) => {
@@ -826,7 +794,6 @@ export default function MainLayout() {
 
   const handleClear = useCallback(() => {
     setRows([]);
-    setExpandedSections([]);
     snackbar.info("Filters cleared.");
   }, []);
 
@@ -861,47 +828,6 @@ export default function MainLayout() {
 
     snackbar.success("Exported");
   }, [rows, canCopy]);
-
-  const handleHeaderSelectResult = useCallback((item: any) => {
-    setSearchQuery("");
-    setShowDropdown(false);
-
-    const label = item.category;
-    const menuCards = cardMap[label] || [];
-
-    setCurrentMenu({ label, icon: iconMap[label] || Folder });
-    setCards(menuCards);
-    setActiveSubPage(item.name === "Task Management" ? "TaskManagement" : null);
-  }, []);
-
-  // Build domain and division options from DB (mock JSON)
-  const domainOptions = useMemo(() => {
-    const set = new Set<string>();
-    (mockTasks as any[]).forEach((t) => {
-      const v = String(t.domain || "").toUpperCase();
-      if (v) set.add(v);
-    });
-    return Array.from(set).sort();
-  }, []);
-
-  const divisionOptions = useMemo(() => {
-    const set = new Set<string>();
-    (mockTasks as any[]).forEach((t) => {
-      const v = String(t.groupCode || "").toUpperCase();
-      if (v) set.add(v);
-    });
-    return Array.from(set).sort();
-  }, []);
-
-  const handleChangeDomain = useCallback((v: string) => {
-    setSelectedDomain(v);
-    // Optionally filter division list when domain changes (kept simple)
-    // No hard filter applied to options; use selection to drive data filters.
-  }, []);
-
-  const handleChangeDivision = useCallback((v: string) => {
-    setSelectedDivision(v);
-  }, []);
 
   // Callback passed into TaskTable_Advanced for popout
   const handleOpenPopout = useCallback(

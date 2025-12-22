@@ -1,6 +1,5 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { Paper, List, ListItemButton, ListItemIcon, Typography, Divider } from "@mui/material";
 import Visibility from '@mui/icons-material/Visibility';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import WarningAmber from '@mui/icons-material/WarningAmber';
@@ -265,7 +264,7 @@ export default function TaskRowContextMenu({
   // or stacking contexts from parent layout containers.
   try {
     return createPortal(menu, document.body);
-  } catch (err) {
+  } catch {
     // Fallback to in-place render if portal fails for any reason
     return menu;
   }

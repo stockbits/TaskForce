@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, MutableRefObject, useRef } from 'react';
+import React, { useMemo, useState, useEffect, MutableRefObject, useRef, memo } from 'react';
 import { Box, useTheme, Paper, Typography } from '@mui/material';
 import { useAppSnackbar } from '@/shared-ui/SnackbarProvider';
 import { GridColDef, useGridApiRef, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarDensitySelector } from '@mui/x-data-grid';
@@ -32,7 +32,7 @@ import TaskRowContextMenu from '@/shared-ui/TaskRowContextMenu';
   sortModel?: any[];
 };
 
-export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef, reserveBottom = 160, disablePagination = false, hideToolbar = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns, onSortChange, scrollToTopTrigger, sortingMode, sortModel }: Props) {
+const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef: _containerRef, reserveBottom: _reserveBottom = 160, disablePagination = false, hideToolbar = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns: _onRequestCloseColumns, onSortChange, scrollToTopTrigger, sortingMode, sortModel }: Props) {
   // Internal state for uncontrolled components
   const [selection, setSelection] = useState<string[]>([]);
   
@@ -63,7 +63,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           setCopied(true);
           snackbar.success('Copied to clipboard');
           window.setTimeout(() => setCopied(false), 1500);
-        } catch (err) {
+        } catch {
           try {
             const ta = document.createElement('textarea');
             ta.value = display;
@@ -74,7 +74,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
             setCopied(true);
             snackbar.success('Copied to clipboard');
             window.setTimeout(() => setCopied(false), 1500);
-          } catch (ee) {
+          } catch {
             snackbar.error('Copy failed');
           }
         }
@@ -175,7 +175,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
 
       // apply widths
       setColState((prev) => prev.map((c) => ({ ...c, width: widths[c.field] || c.width })));
-    } catch (err) {
+    } catch {
       // ignore
     }
      
@@ -202,7 +202,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
         }
         // We select the right-clicked row; let DataGrid manage selection indices for shift/range.
       }
-    } catch (err) {}
+    } catch {}
     setContextMenu({
       visible: true,
       x: event.clientX,
@@ -215,23 +215,20 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
   };
 
   // column menu state (simple column selector)
-  const [columnMenuVisible, setColumnMenuVisible] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [columnFilter, setColumnFilter] = useState('');
-  const [columnVisibilityModel, setColumnVisibilityModel] = useState<Record<string, boolean>>(() => {
-    const model: Record<string, boolean> = {};
-    columns.forEach((c) => { model[c.field] = !(c as any).hide; });
-    return model;
-  });
+  // const [columnVisibilityModel, setColumnVisibilityModel] = useState<Record<string, boolean>>(() => {
+  //   const model: Record<string, boolean> = {};
+  //   columns.forEach((c) => { model[c.field] = !(c as any).hide; });
+  //   return model;
+  // });
   
 
   useEffect(() => {
     // keep visibility model in sync when colState changes
-    setColumnVisibilityModel(() => {
-      const model: Record<string, boolean> = {};
-      (colState || columns).forEach((c) => { model[c.field] = !(c as any).hide; });
-      return model;
-    });
+    // setColumnVisibilityModel(() => {
+    //   const model: Record<string, boolean> = {};
+    //   (colState || columns).forEach((c) => { model[c.field] = !(c as any).hide; });
+    //   return model;
+    // });
   }, [colState, columns]);
 
   // controlled via prop from parent - open/close when anchor prop changes
@@ -240,7 +237,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
     if (openColumnsAnchor && apiRef && apiRef.current) {
       const field = (colState && colState.length && colState[0].field) ? colState[0].field : undefined;
       if (field) {
-        try { apiRef.current.toggleColumnMenu(field); } catch (err) {}
+        try { apiRef.current.toggleColumnMenu(field); } catch {}
       }
     }
   }, [openColumnsAnchor]);
@@ -253,21 +250,12 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
     return () => {};
   }, []);
 
-  const resetColumns = () => {
-    setColState(columns.map((c) => ({ ...c })));
-    setColumnVisibilityModel(() => {
-      const model: Record<string, boolean> = {};
-      columns.forEach((c) => { model[c.field] = true; });
-      return model;
-    });
-  };
-
   // Scroll to top when triggered
   useEffect(() => {
     if (scrollToTopTrigger !== undefined && apiRef.current) {
       try {
         apiRef.current.scrollToIndexes({ rowIndex: 0 });
-      } catch (err) {
+      } catch {
         // fallback
       }
     }
@@ -297,7 +285,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           const rowH = rowEl?.clientHeight ?? defaultRow;
           const computed = Math.max(50, Math.floor(available / Math.max(1, rowH)));
           if (computed && computed !== pageSize) setPageSize(computed);
-        } catch (err) {
+        } catch {
           // ignore
         }
       }
@@ -307,7 +295,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
       if (paperRef.current) ro.observe(paperRef.current);
       window.addEventListener('resize', computePageSize);
       return () => {
-        try { ro.disconnect(); } catch (e) {}
+        try { ro.disconnect(); } catch {}
         window.removeEventListener('resize', computePageSize);
       };
     }, [rows, density, tableHeight, disablePagination]);
@@ -362,7 +350,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
               if (!model) return;
               if (typeof model.pageSize === 'number') setPageSize(model.pageSize);
               if (typeof model.page === 'number') setPage(model.page);
-            } catch (e) {}
+            } catch {}
           }}
           onRowDoubleClick={(params: any, event: any) => {
             if (onOpenPopout) onOpenPopout([params.row as any], (event as any).screenX ?? 0, (event as any).screenY ?? 0);
@@ -402,7 +390,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           onSortModelChange={(model: any) => {
             try {
               if (onSortChange) onSortChange(Boolean(model && model.length > 0), model || []);
-            } catch (err) {}
+            } catch {}
           }}
           onColumnResize={(params: any) => {
             const { colDef, width } = params;
@@ -410,9 +398,9 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
           }}
           onColumnVisibilityModelChange={(model: any) => {
             try {
-              setColumnVisibilityModel(() => ({ ...(model || {}) }));
+              // setColumnVisibilityModel(() => ({ ...(model || {}) }));
               setColState((prev) => prev.map((c) => ({ ...c, hide: !((model || {})[c.field]) })));
-            } catch (e) {}
+            } catch {}
           }}
           onColumnOrderChange={(params: any) => {
             try {
@@ -427,7 +415,7 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
                   return ordered;
                 });
               }
-            } catch (e) {}
+            } catch {}
           }}
         />
       </Paper>
@@ -462,4 +450,8 @@ export default function TaskTableMUI({ rows, headerNames, tableHeight = 600, con
       />
     </Box>
   );
-}
+});
+
+TaskTableMUIComponent.displayName = "TaskTableMUI";
+
+export default TaskTableMUIComponent;

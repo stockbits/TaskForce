@@ -8,16 +8,9 @@ import {
   Card,
   CardActions,
   CardContent,
-  Checkbox,
-  Chip,
-  Collapse,
   Divider,
-  FormControl,
   IconButton,
-  InputAdornment,
-  InputLabel,
   ListItemIcon,
-  ListItem,
   ListItemText,
   Menu,
   MenuItem,
@@ -26,9 +19,7 @@ import {
   Tab,
   Stack,
   Tooltip,
-  Typography,
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
 import ListAlt from '@mui/icons-material/ListAlt';
 import StickyNote2 from '@mui/icons-material/StickyNote2';
 import WarningAmber from '@mui/icons-material/WarningAmber';
@@ -36,11 +27,10 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import TodayIcon from '@mui/icons-material/Today';
 import TodayOutlinedIcon from '@mui/icons-material/TodayOutlined';
 import DateTimePopover from '@/shared-ui/DateTimePopover';
-import { MultiSelectField, SingleSelectField, FreeTypeSelectField, CombinedLocationField } from '@/shared-ui';
+import { MultiSelectField, FreeTypeSelectField, CombinedLocationField } from '@/shared-ui';
 import ImpScoreField from '@/shared-ui/text-fields/ImpScoreField';
 import ExactGlobalSearchField from '@/shared-ui/text-fields/ExactGlobalSearchField';
 import AppButton from '@/shared-ui/button';
@@ -92,15 +82,7 @@ type ArrayFilterKey =
   | "capabilities"
   | "pwa";
 
-type ChipDescriptor = {
-  key: keyof Filters;
-  label: string;
-  displayValue: string;
-  isArray: boolean;
-};
-
 // use Card directly instead of motion-wrapped variant
-const SELECT_ALL_VALUE = "__SELECT_ALL__";
 
 const INITIAL_FILTERS: Filters = {
   taskSearch: "",
@@ -123,35 +105,14 @@ const INITIAL_FILTERS: Filters = {
   toTime: "",
 };
 
-const friendlyNames: Record<keyof Filters, string> = {
-  taskSearch: "Search",
-  division: "Division",
-  domainId: "Domain",
-  taskStatuses: "Task Status",
-  requester: "Requester",
-  responseCode: "Response",
-  commitType: "Commitment",
-  capabilities: "Capabilities",
-  pwa: "PWA",
-  jobType: "Job Type",
-  scoreCondition: "IMP Condition",
-  scoreValue: "IMP Value",
-  locationType: "Location Type",
-  locationValue: "Location Value",
-  fromDate: "From Date",
-  fromTime: "From Time",
-  toDate: "To Date",
-  toTime: "To Time",
-};
-
 export default function TaskSearchCard({
   onSearch,
   onClear,
   onCopy,
   onExport,
   canCopy = false,
-  forceCollapsed = false,
-  onOpenColumns,
+  forceCollapsed: _forceCollapsed = false,
+  onOpenColumns: _onOpenColumns,
   hasResults = false,
   selectedRows = [],
   onOpenPopout,
@@ -161,7 +122,6 @@ export default function TaskSearchCard({
 }: Props) {
   const theme = useTheme();
   const [filters, setFilters] = useState<Filters>(() => ({ ...INITIAL_FILTERS }));
-  const [cardCollapsed, setCardCollapsed] = useState(false);
   const [isFavourite, setIsFavourite] = useState(false);
   const [activeTab, setActiveTab] = useState<"basic" | "advanced">("basic");
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
@@ -219,284 +179,21 @@ export default function TaskSearchCard({
     return "Search by Task ID, Work ID, Estimate Number, Employee ID";
   }, []);
 
-  // helper: get the maximum option string length for a given field key
-  const getMaxOptionLength = (key: string) => {
-    const arrFor = (k: string): string[] | undefined => {
-      switch (k) {
-        case "division":
-          return divisionOptions;
-        case "domainId":
-          return domainOptions;
-        case "taskStatuses":
-          return statusOptions;
-        case "responseCode":
-          return responseOptions;
-        case "commitType":
-          return commitOptions;
-        case "capabilities":
-          return capabilityOptions;
-        case "pwa":
-          return pwaOptions;
-        case "requester":
-          return requesterOptions;
-        case "jobType":
-          return jobTypeOptions;
-        default:
-          return undefined;
-      }
-    };
-
-    const arr = arrFor(key);
-    if (!arr || !arr.length) return 0;
-    return arr.reduce((max, s) => Math.max(max, String(s).length), 0);
-  };
-
   // Use a responsive standard width for all boxes, but allow per-field
   // expansion based on the measured DB values (or overrides) so default
   // prompt/placeholder values (plus breathing room and the select-all icon)
   // are visible on load without forcing the control to resize later.
   // Measured pixel widths (client-only). We'll compute these on mount so the
   // box widths match the actual rendered prompt text + icon precisely.
-  const [measuredPx, setMeasuredPx] = React.useState<Record<string, number>>({});
-
-  React.useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      const bodyStyle = getComputedStyle(document.body);
-      ctx.font = bodyStyle.font || "14px Roboto, sans-serif";
-
-      const keys = [
-        "division",
-        "domainId",
-        "taskStatuses",
-        "commitType",
-        "responseCode",
-        "pwa",
-        "capabilities",
-        "requester",
-        "jobType",
-        "locationValue",
-      ];
-
-      const ICON_CHARS = 6; // spacing reserved for icon
-      const extra = 6; // breathing room in characters
-
-      const measureFor = (k: string) => {
-        const override = expectedMaxCharsOverrides[k];
-        // prefer an explicit override numeric width if provided (in chars)
-        if (override) {
-          const sample = "0".repeat(override + ICON_CHARS + extra);
-          return Math.ceil(ctx.measureText(sample).width);
-        }
-
-        // otherwise pick a representative string from options or label
-        const arrFor = (kk: string): string[] | undefined => {
-          switch (kk) {
-            case "division":
-              return divisionOptions;
-            case "domainId":
-              return domainOptions;
-            case "taskStatuses":
-              return statusOptions;
-            case "responseCode":
-              return responseOptions;
-            case "commitType":
-              return commitOptions;
-            case "capabilities":
-              return capabilityOptions;
-            case "pwa":
-              return pwaOptions;
-            case "requester":
-              return requesterOptions;
-            case "jobType":
-              return jobTypeOptions;
-            default:
-              return undefined;
-          }
-        };
-
-        const arr = arrFor(k);
-        let sampleText = (friendlyNames as Record<string, string>)[k] ?? k;
-        if (arr && arr.length) {
-          // choose the longest option as representative
-          sampleText = arr.reduce((cur, s) => (String(s).length > cur.length ? String(s) : cur), sampleText);
-        }
-
-        const sample = sampleText + " ".repeat(ICON_CHARS + extra);
-        return Math.ceil(ctx.measureText(sample).width);
-      };
-
-      const result: Record<string, number> = {};
-      keys.forEach((k) => {
-        try {
-          result[k] = measureFor(k);
-        } catch (e) {
-          // ignore
-        }
-      });
-
-      setMeasuredPx(result);
-    } catch (e) {
-      // ignore measurement errors
-    }
-  }, [divisionOptions, domainOptions, statusOptions, responseOptions, commitOptions, capabilityOptions, pwaOptions, requesterOptions, jobTypeOptions]);
-
-  const maxWidthFor = (key: string) => {
-    const extra = 6; // breathing room in characters
-    const labelPadding = 4; // extra chars to ensure label/placeholder fits
-
-    const override = expectedMaxCharsOverrides[key];
-    const measured = getMaxOptionLength(key);
-
-    const label = (friendlyNames as Record<string, string>)[key] ?? "";
-    const labelLen = label.length;
-
-    const toNum = (s: string) => parseInt(String(s).replace(/[^0-9]/g, ""), 10) || 0;
-
-    const baseXs = toNum(STANDARD_BOX.xs);
-    const baseSm = toNum(STANDARD_BOX.sm);
-    const baseMd = toNum(STANDARD_BOX.md);
-
-    const ICON_CHARS = 6; // reserve ~6ch for the select-all icon + spacing
-
-    // If we have a measured pixel width for this key, prefer it (client-only).
-    if (measuredPx && measuredPx[key]) {
-      const px = measuredPx[key];
-      // cap by STANDARD_BOX converted to px using approximate 'ch' -> px via body font
-      if (typeof window !== "undefined") {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        const bodyStyle = getComputedStyle(document.body);
-        ctx && (ctx.font = bodyStyle.font || "14px Roboto, sans-serif");
-        const chWidth = ctx ? ctx.measureText("0").width : 8;
-        const capPx = Math.max(baseXs, baseSm, baseMd) * chWidth;
-        const finalPx = Math.min(capPx, px);
-        return { xs: `${Math.round(finalPx)}px`, sm: `${Math.round(finalPx)}px`, md: `${Math.round(finalPx)}px` };
-      }
-    }
-
-    const source = override ?? (measured ? measured : labelLen);
-    const desired = Math.max(source + extra + ICON_CHARS, labelLen + labelPadding + ICON_CHARS);
-
-    const xs = Math.min(baseMd, Math.max(desired, baseXs));
-    const sm = Math.min(baseMd, Math.max(desired, baseSm));
-    const md = Math.min(baseMd, Math.max(desired, baseMd));
-
-    return { xs: `${xs}ch`, sm: `${sm}ch`, md: `${md}ch` };
-  };
 
   // Standard box width used across filter controls to keep consistent sizing.
   // Increased responsive values to give more breathing room so pills/numbers
   // and default placeholder text don't feel cramped.
-  const STANDARD_BOX = { xs: '100%', sm: '22ch', md: '28ch' };
-
-  // Shared Box sx for filter inputs so Basic and Advanced tabs match.
-  const FILTER_BOX_SX = {
-    width: "100%",
-    maxWidth: STANDARD_BOX,
-    px: 1,
-    display: "flex",
-    alignItems: "center",
-    minHeight: 40,
-    flex: "0 0 auto",
-    '& .MuiInputBase-root': { minHeight: 36 },
-    '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: 36 },
-    '& .MuiAutocomplete-inputRoot': { paddingTop: '4px', paddingBottom: '8px' },
-  } as const;
-  // We'll compute per-field widths after we have the options loaded so we can
-  // measure the prompt/DB-derived values. `expectedMaxCharsOverrides` is for
-  // manual tweaks; measurements from options will be used as the primary
-  // driver for prompt width.
-  const expectedMaxCharsOverrides: Record<string, number> = {
-    division: 36,
-    domainId: 14,
-    taskStatuses: 24,
-    commitType: 22,
-    responseCode: 10,
-    pwa: 20,
-    capabilities: 28,
-    requester: 28,
-    jobType: 22,
-    locationValue: 32,
-    locationType: 16,
-    scoreValue: 6,
-  };
 
   const canSearch = useMemo(() => {
     if (filters.taskSearch.trim().length > 0) return true;
     return filters.division.length > 0 && filters.domainId.length > 0 && filters.taskStatuses.length > 0;
   }, [filters.division.length, filters.domainId.length, filters.taskStatuses.length, filters.taskSearch]);
-
-  const activeChips = useMemo<ChipDescriptor[]>(() => {
-    const chips: ChipDescriptor[] = [];
-
-    const singleKeys: Array<keyof Filters> = [
-      "taskSearch",
-      "requester",
-      "jobType",
-      "scoreCondition",
-      "scoreValue",
-      "locationType",
-      "locationValue",
-    ];
-
-    singleKeys.forEach((key) => {
-      const value = filters[key];
-      if (typeof value === "string" && value.trim()) {
-        chips.push({
-          key,
-          label: friendlyNames[key],
-          displayValue: value,
-          isArray: false,
-        });
-      }
-    });
-
-    const arrayKeys: ArrayFilterKey[] = [
-      "division",
-      "domainId",
-      "taskStatuses",
-      "responseCode",
-      "commitType",
-      "capabilities",
-      "pwa",
-    ];
-
-    arrayKeys.forEach((key) => {
-      const value = filters[key];
-      if (value.length) {
-        chips.push({
-          key,
-          label: friendlyNames[key],
-          displayValue: value.join(", "),
-          isArray: true,
-        });
-      }
-    });
-
-    if (filters.fromDate) {
-      chips.push({
-        key: "fromDate",
-        label: friendlyNames.fromDate,
-        displayValue: filters.fromDate,
-        isArray: false,
-      });
-    }
-
-    if (filters.toDate) {
-      chips.push({
-        key: "toDate",
-        label: friendlyNames.toDate,
-        displayValue: filters.toDate,
-        isArray: false,
-      });
-    }
-
-    return chips;
-  }, [filters]);
 
   const handleFieldChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -523,11 +220,6 @@ export default function TaskSearchCard({
     setFilters({ ...INITIAL_FILTERS });
     onClear();
   }, [onClear]);
-
-  // auto-collapse when parent requests it (e.g., results visible)
-  React.useEffect(() => {
-    if (forceCollapsed) setCardCollapsed(true);
-  }, [forceCollapsed]);
 
   const handleMenuOpen = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -559,29 +251,6 @@ export default function TaskSearchCard({
   }, [canCopy, handleMenuClose, onExport]);
 
   const snackbar = useAppSnackbar();
-
-  const quickPresets = useMemo(
-    () => [
-      {
-        label: "My Tasks",
-        action: () => snackbar.info("Preset: My Tasks"),
-      },
-      {
-        label: "Due Today",
-        action: () => snackbar.info("Preset: Due Today"),
-      },
-      {
-        label: "High IMP",
-        action: () =>
-          setFilters((prev) => ({
-            ...prev,
-            scoreCondition: "greater",
-            scoreValue: "80",
-          })),
-      },
-    ],
-    [snackbar]
-  );
 
   return (
     <Card

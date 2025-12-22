@@ -34,7 +34,7 @@ import UserCog from '@mui/icons-material/AdminPanelSettings';
 import LogOut from '@mui/icons-material/Logout';
 import Folder from '@mui/icons-material/Folder';
 import Search from '@mui/icons-material/Search';
-import { cardMap, allTiles } from "./menuRegistry";
+import { allTiles } from "./menuRegistry";
 
 const userMenus = [
   { label: "Operation Toolkit", icon: ClipboardList },

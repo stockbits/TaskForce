@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, MutableRefObject } from 'react';
+import React, { useEffect, useRef, useState, MutableRefObject, memo } from 'react';
 import { Box } from '@mui/material';
 import { DataGrid, DataGridProps, useGridApiRef } from '@mui/x-data-grid';
 
@@ -9,13 +9,12 @@ type ResponsiveProps = Omit<DataGridProps, 'autoHeight'> & {
   autoReserveBottom?: boolean; // if true, detect footer space below container and include it
 } & Record<string, any>;
 
-export default function ResponsiveDataGrid(props: ResponsiveProps) {
+const ResponsiveDataGridComponent = memo(function ResponsiveDataGrid(props: ResponsiveProps) {
   const { reserveBottom = 140, minHeight = 220, containerRef, autoReserveBottom = true, sx, ...rest } = props;
   const innerRef = useRef<HTMLDivElement | null>(null);
   const hostRef = (containerRef as any) ?? innerRef;
   const [height, setHeight] = useState<number>(minHeight);
   const apiRef = useGridApiRef();
-  const apiRefLocal = apiRef;
 
   useEffect(() => {
     function compute() {
@@ -33,7 +32,7 @@ export default function ResponsiveDataGrid(props: ResponsiveProps) {
         const computed = Math.round(available);
         // compute available height
         setHeight(computed);
-      } catch (e) {
+      } catch {
         setHeight(minHeight);
       }
     }
@@ -59,4 +58,8 @@ export default function ResponsiveDataGrid(props: ResponsiveProps) {
       {/* dev pointer inspector removed */}
     </Box>
   );
-}
+});
+
+ResponsiveDataGridComponent.displayName = "ResponsiveDataGrid";
+
+export default ResponsiveDataGridComponent;

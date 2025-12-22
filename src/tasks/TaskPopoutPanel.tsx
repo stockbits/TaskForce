@@ -33,7 +33,7 @@ export default function TaskPopoutPanel({
   onToggleSection,
   onExpandAll,
   onCollapseAll,
-  onClose,
+  onClose: _onClose,
 }: TaskPopoutPanelProps) {
   const theme = useTheme();
   const pillRailRef = useRef<HTMLDivElement | null>(null);

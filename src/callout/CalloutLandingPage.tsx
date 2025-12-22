@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 // framer-motion removed — render static Box/Paper
-import { Box, Paper, Stack, TextField, Typography } from "@mui/material";
+import { Box, Paper, Stack, Typography } from "@mui/material";
 import AppButton from '@/shared-ui/button';
 import { alpha, useTheme } from "@mui/material/styles";
 import Users from '@mui/icons-material/People';
@@ -34,21 +34,12 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
   const theme = useTheme();
   const [selectedGroup, setSelectedGroup] = useState<string>("");
   const [query, setQuery] = useState<string>("");
-  const [isOpen, setIsOpen] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   // Auto-filter resources for selected group
   const resourcesForGroup: ResourceRecord[] = selectedGroup
     ? allResources.filter((r) => r.calloutGroup === selectedGroup)
     : [];
-
-  const filteredGroups = useMemo(() => {
-    if (!query.trim()) return calloutGroups;
-    const q = query.toLowerCase();
-    return calloutGroups.filter((group) =>
-      group.toLowerCase().includes(q)
-    );
-  }, [calloutGroups, query]);
 
   const resourceCountByGroup = useMemo(() => {
     const countMap = new Map<string, number>();
@@ -178,7 +169,6 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
                 const next = newValue ?? "";
                 setSelectedGroup(next);
                 setQuery(next);
-                setIsOpen(false);
                 if (next) onStart(next);
               }}
               renderOption={(props, option) => {
@@ -240,7 +230,6 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
           <Stack direction="row" justifyContent="flex-end">
               <AppButton
                 onClick={() => {
-                  setIsOpen(false);
                   onStart(selectedGroup);
                 }}
                 disabled={startDisabled}

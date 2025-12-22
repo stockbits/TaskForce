@@ -1,5 +1,5 @@
-import React, { useState, useRef, useCallback } from "react";
-import { Box, Chip, Popover, List, ListItemButton, ListItemText, Typography, useTheme, Stack } from "@mui/material";
+import React, { useState, useRef, useCallback, memo } from "react";
+import { Box, Chip, Popover, List, ListItemButton, ListItemText, Typography, Stack } from "@mui/material";
 import type { SxProps } from "@mui/material";
 
 export type PillItem = {
@@ -19,8 +19,7 @@ interface PillGroupProps {
   [key: string]: any;
 }
 
-const PillGroup = React.forwardRef<HTMLDivElement, PillGroupProps>(function PillGroup({ items, activeIds = [], maxVisible = 5, onToggle, onSelectAll, onClearAll, sx, ...rest }, ref) {
-  const theme = useTheme();
+const PillGroup = memo(React.forwardRef<HTMLDivElement, PillGroupProps>(function PillGroup({ items, activeIds = [], maxVisible = 5, onToggle, onSelectAll, onClearAll, sx, ...rest }, ref) {
   const visible = items.slice(0, maxVisible);
   const overflow = items.length > maxVisible ? items.slice(maxVisible) : [];
 
@@ -107,6 +106,8 @@ const PillGroup = React.forwardRef<HTMLDivElement, PillGroupProps>(function Pill
       )}
     </Box>
   );
-});
+}));
+
+PillGroup.displayName = "PillGroup";
 
 export default PillGroup;

@@ -1,12 +1,11 @@
-import { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useAppSnackbar } from '@/shared-ui/SnackbarProvider';
 import rawMockTasks from "@/data/mockTasks.json";
 import TaskSearchCard from "@/tasks/TaskSearchCardClean";
-import TaskTableAdvanced from "@/tasks/TaskTableAdvanced";
 import TaskTableMUI from "@/shared-ui/ResponsiveTable/TaskTableMUI";
 import ProgressTasksDialog, { ProgressPreview } from "@/tasks/ProgressTasksDialog";
 import { useExternalWindow } from "@/hooks/useExternalWindow";
-import { Box, Paper, Typography, Stack } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 
 const mockTasks = rawMockTasks as Record<string, any>[];
 
@@ -120,7 +119,7 @@ export default function TaskManagementPage() {
   useEffect(() => {
     try {
       localStorage.setItem("taskTableDensity", "compact");
-    } catch (err) {
+    } catch {
       // ignore
     }
   }, []);
@@ -311,7 +310,7 @@ export default function TaskManagementPage() {
       await new Promise((res) => setTimeout(res, 500));
       setProgressSuccess("Progress saved");
       setTimeout(() => { setProgressSaving(false); setProgressDialogOpen(false); }, 600);
-    } catch (err) {
+    } catch {
       setProgressError("Failed to save progress");
       setProgressSaving(false);
     }
@@ -323,11 +322,6 @@ export default function TaskManagementPage() {
     // dispatch to app-level listener (AppLayout) which manages callout modal
     window.dispatchEvent(new CustomEvent('taskforce:open-callout-incident', { detail: { task } }));
   }, []);
-
-  const handleCalloutFromSelection = useCallback((tasks: any[]) => {
-    if (!tasks || tasks.length !== 1) return snackbar.error('Callout Incident requires exactly one selected task');
-    handleOpenCalloutIncident(tasks[0]);
-  }, [handleOpenCalloutIncident]);
 
   const exportCSV = useCallback(() => {
     if (!canCopy) return snackbar.error("No results to export.");
@@ -409,7 +403,7 @@ export default function TaskManagementPage() {
               } else {
                 handleOpenCalloutIncident(task);
               }
-            } catch (err) {}
+            } catch {}
           }}
           
         />

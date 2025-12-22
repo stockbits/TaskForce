@@ -9,7 +9,6 @@ import ResourcePopoutPanel from "@/callout/ResourcePopoutPanel";
 import { TaskDetails } from "@/types";
 import type { ResourceRecord } from "@/callout/CalloutIncidentPanel";
 import type { CalloutHistoryEntry } from "@/hooks/useCalloutHistory";
-import { Box, Paper } from "@mui/material";
 
 declare global {
   interface Window {

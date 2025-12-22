@@ -103,7 +103,7 @@ export function useExternalWindow() {
   // OPEN POPUP (centered, dynamic width)
   // --------------------------------------------------------------------
   const openExternalWindow = useCallback(
-    (tasks: TaskDetails[], mouseX: number, mouseY: number) => {
+    (tasks: TaskDetails[], _mouseX: number, _mouseY: number) => {
       if (!tasks || tasks.length === 0) return;
 
       // Close any existing popup

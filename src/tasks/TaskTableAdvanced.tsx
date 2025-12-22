@@ -1,8 +1,8 @@
-import React, { useRef } from "react";
-import { Paper, Box } from "@mui/material";
+import React, { useRef, memo } from "react";
+import { Box } from "@mui/material";
 import TaskTableMUI from "@/shared-ui/ResponsiveTable/TaskTableMUI";
 
-const TaskTableAdvanced: React.FC<any> = ({ rows, columns, loading, disablePagination = false, ...rest }) => {
+const TaskTableAdvanced: React.FC<any> = memo(({ rows, columns: _columns, loading, disablePagination = false, ...rest }) => {
   const containerRef = useRef<HTMLElement | null>(null);
 
   return (
@@ -17,6 +17,8 @@ const TaskTableAdvanced: React.FC<any> = ({ rows, columns, loading, disablePagin
       />
     </Box>
   );
-};
+});
+
+TaskTableAdvanced.displayName = "TaskTableAdvanced";
 
 export default TaskTableAdvanced;
