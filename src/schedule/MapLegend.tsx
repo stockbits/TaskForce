@@ -1,5 +1,5 @@
 // src/SCH_Live/panels/MapLegend.tsx
-import React from "react";
+import React, { useRef } from "react";
 import { Box, IconButton, Paper, Stack, Typography, Tooltip } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import Close from '@mui/icons-material/Close';
@@ -20,24 +20,45 @@ interface ScheduleLegendProps {
 
 export default function ScheduleLegend({ visible, onClose }: ScheduleLegendProps) {
   const theme = useTheme();
+  const legendRef = useRef<HTMLDivElement>(null);
+
   if (!visible) return null;
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  };
+
+  const handleBackdropClick = (event: React.MouseEvent) => {
+    if (legendRef.current && !legendRef.current.contains(event.target as Node)) {
+      onClose();
     }
   };
 
   return (
     <Box
       sx={{
-        position: "absolute",
-        top: theme.spacing(7),
-        right: theme.spacing(4),
-        zIndex: 9999,
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 9998,
+        backgroundColor: 'rgba(0, 0, 0, 0.1)',
       }}
+      onClick={handleBackdropClick}
     >
+      <Box
+        ref={legendRef}
+        sx={{
+          position: "absolute",
+          top: theme.spacing(7),
+          right: theme.spacing(4),
+          zIndex: 9999,
+        }}
+      >
       <Paper
         elevation={14}
         sx={{
@@ -48,7 +69,7 @@ export default function ScheduleLegend({ visible, onClose }: ScheduleLegendProps
           border: `1px solid ${alpha(theme.palette.primary.main, 0.18)}`,
           boxShadow: "0 18px 46px rgba(8,58,97,0.22)",
           backgroundImage: "none",
-          maxHeight: theme.spacing(50), // 400px max height
+          maxHeight: '80vh', // Dynamic height based on viewport
           display: "flex",
           flexDirection: "column",
         }}
@@ -240,6 +261,7 @@ export default function ScheduleLegend({ visible, onClose }: ScheduleLegendProps
           </Box>
         </Box>
       </Paper>
+    </Box>
     </Box>
   );
 }
