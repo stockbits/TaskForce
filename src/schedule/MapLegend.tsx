@@ -1,8 +1,11 @@
 // src/SCH_Live/panels/MapLegend.tsx
 import React from "react";
-import { Box, IconButton, Paper, Stack, Typography } from "@mui/material";
+import { Box, IconButton, Paper, Stack, Typography, Tooltip } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import Close from '@mui/icons-material/Close';
+import GroupsIcon from '@mui/icons-material/Groups';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import TimelineIcon from '@mui/icons-material/Timeline';
 import {
   COMMIT_COLORS,
   STATUS_COLORS,
@@ -19,6 +22,13 @@ export default function ScheduleLegend({ visible, onClose }: ScheduleLegendProps
   const theme = useTheme();
   if (!visible) return null;
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -31,7 +41,7 @@ export default function ScheduleLegend({ visible, onClose }: ScheduleLegendProps
       <Paper
         elevation={14}
         sx={{
-          width: theme.spacing(36), // 288px
+          width: theme.spacing(40), // Increased width to accommodate navigation
           borderRadius: 3,
           px: 3,
           py: 2.5,
@@ -40,123 +50,189 @@ export default function ScheduleLegend({ visible, onClose }: ScheduleLegendProps
           backgroundImage: "none",
           maxHeight: theme.spacing(50), // 400px max height
           overflowY: "auto", // Make it scrollable
+          display: "flex",
         }}
       >
-        <Stack spacing={3}>
-          {/* HEADER */}
-          <Stack direction="row" alignItems="center" justifyContent="space-between">
-            <Typography variant="subtitle2" fontWeight={600} color="text.primary">
-              Schedule Legend
-            </Typography>
+        {/* LEFT NAVIGATION */}
+        <Box
+          sx={{
+            width: theme.spacing(6),
+            borderRight: `1px solid ${alpha(theme.palette.divider, 0.3)}`,
+            pr: 2,
+            mr: 2,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
+          <Tooltip title="Resources" placement="right">
             <IconButton
               size="small"
-              onClick={onClose}
+              onClick={() => scrollToSection('resources-section')}
               sx={{
-                color: alpha(theme.palette.text.primary, 0.6),
+                color: alpha(theme.palette.text.secondary, 0.7),
                 '&:hover': {
                   color: theme.palette.primary.main,
                   bgcolor: alpha(theme.palette.primary.main, 0.08),
                 },
               }}
-              aria-label="Close legend"
             >
-              <Close style={{ fontSize: 16 }} />
+              <GroupsIcon style={{ fontSize: 20 }} />
             </IconButton>
-          </Stack>
+          </Tooltip>
 
-          {/* RESOURCES */}
-          <Stack spacing={1.5}>
-            <Typography
-              variant="overline"
+          <Tooltip title="Tasks" placement="right">
+            <IconButton
+              size="small"
+              onClick={() => scrollToSection('tasks-section')}
               sx={{
-                fontWeight: 700,
-                letterSpacing: 1.1,
-                color: alpha(theme.palette.text.secondary, 0.85),
+                color: alpha(theme.palette.text.secondary, 0.7),
+                '&:hover': {
+                  color: theme.palette.primary.main,
+                  bgcolor: alpha(theme.palette.primary.main, 0.08),
+                },
               }}
             >
-              Resources
-            </Typography>
+              <AssignmentIcon style={{ fontSize: 20 }} />
+            </IconButton>
+          </Tooltip>
 
-            <Stack spacing={1.5}>
-              {Object.keys(STATUS_COLORS).map((status) => (
-                <Stack direction="row" spacing={2} alignItems="center" key={status}>
+          <Tooltip title="Timeline" placement="right">
+            <IconButton
+              size="small"
+              onClick={() => scrollToSection('timeline-section')}
+              sx={{
+                color: alpha(theme.palette.text.secondary, 0.7),
+                '&:hover': {
+                  color: theme.palette.primary.main,
+                  bgcolor: alpha(theme.palette.primary.main, 0.08),
+                },
+              }}
+            >
+              <TimelineIcon style={{ fontSize: 20 }} />
+            </IconButton>
+          </Tooltip>
+        </Box>
+
+        {/* MAIN CONTENT */}
+        <Box sx={{ flex: 1 }}>
+          <Stack spacing={3}>
+            {/* HEADER */}
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Typography variant="subtitle2" fontWeight={600} color="text.primary">
+                Schedule Legend
+              </Typography>
+              <IconButton
+                size="small"
+                onClick={onClose}
+                sx={{
+                  color: alpha(theme.palette.text.primary, 0.6),
+                  '&:hover': {
+                    color: theme.palette.primary.main,
+                    bgcolor: alpha(theme.palette.primary.main, 0.08),
+                  },
+                }}
+                aria-label="Close legend"
+              >
+                <Close style={{ fontSize: 16 }} />
+              </IconButton>
+            </Stack>
+
+            {/* RESOURCES */}
+            <Stack spacing={1.5} id="resources-section">
+              <Typography
+                variant="overline"
+                sx={{
+                  fontWeight: 700,
+                  letterSpacing: 1.1,
+                  color: alpha(theme.palette.text.secondary, 0.85),
+                }}
+              >
+                Resources
+              </Typography>
+
+              <Stack spacing={1.5}>
+                {Object.keys(STATUS_COLORS).map((status) => (
+                  <Stack direction="row" spacing={2} alignItems="center" key={status}>
+                    <Box
+                      sx={{ transform: "scale(0.75)", transformOrigin: "left center" }}
+                      dangerouslySetInnerHTML={{
+                        __html: createResourceSVG(status, false),
+                      }}
+                    />
+                    <Typography variant="caption" color="text.secondary">
+                      {status}
+                    </Typography>
+                  </Stack>
+                ))}
+              </Stack>
+            </Stack>
+
+            {/* TASKS */}
+            <Stack spacing={1.5} id="tasks-section">
+              <Typography
+                variant="overline"
+                sx={{
+                  fontWeight: 700,
+                  letterSpacing: 1.1,
+                  color: alpha(theme.palette.text.secondary, 0.85),
+                }}
+              >
+                Tasks
+              </Typography>
+
+              <Stack spacing={1.5}>
+                {Object.entries(COMMIT_COLORS).map(([type, color]) => (
+                  <Stack direction="row" spacing={2} alignItems="center" key={type}>
+                    <Box
+                      sx={{ transform: "scale(0.75)", transformOrigin: "left center" }}
+                      dangerouslySetInnerHTML={{
+                        __html: createTaskSVG(color, false),
+                      }}
+                    />
+                    <Typography variant="caption" color="text.secondary">
+                      {type}
+                    </Typography>
+                  </Stack>
+                ))}
+              </Stack>
+            </Stack>
+
+            {/* TIMELINE */}
+            <Stack spacing={1.5} id="timeline-section">
+              <Typography
+                variant="overline"
+                sx={{
+                  fontWeight: 700,
+                  letterSpacing: 1.1,
+                  color: alpha(theme.palette.text.secondary, 0.85),
+                }}
+              >
+                Timeline
+              </Typography>
+
+              <Stack spacing={1.5}>
+                <Stack direction="row" spacing={2} alignItems="center">
                   <Box
-                    sx={{ transform: "scale(0.75)", transformOrigin: "left center" }}
-                    dangerouslySetInnerHTML={{
-                      __html: createResourceSVG(status, false),
+                    sx={{
+                      width: 16,
+                      height: 16,
+                      bgcolor: "primary.main",
+                      opacity: 0.15,
+                      borderLeft: "3px solid #000000",
+                      borderRight: "3px solid #000000",
+                      borderRadius: 0,
                     }}
                   />
                   <Typography variant="caption" color="text.secondary">
-                    {status}
+                    Working Hours
                   </Typography>
                 </Stack>
-              ))}
-            </Stack>
-          </Stack>
-
-          {/* TASKS */}
-          <Stack spacing={1.5}>
-            <Typography
-              variant="overline"
-              sx={{
-                fontWeight: 700,
-                letterSpacing: 1.1,
-                color: alpha(theme.palette.text.secondary, 0.85),
-              }}
-            >
-              Tasks
-            </Typography>
-
-            <Stack spacing={1.5}>
-              {Object.entries(COMMIT_COLORS).map(([type, color]) => (
-                <Stack direction="row" spacing={2} alignItems="center" key={type}>
-                  <Box
-                    sx={{ transform: "scale(0.75)", transformOrigin: "left center" }}
-                    dangerouslySetInnerHTML={{
-                      __html: createTaskSVG(color, false),
-                    }}
-                  />
-                  <Typography variant="caption" color="text.secondary">
-                    {type}
-                  </Typography>
-                </Stack>
-              ))}
-            </Stack>
-          </Stack>
-
-          {/* TIMELINE */}
-          <Stack spacing={1.5}>
-            <Typography
-              variant="overline"
-              sx={{
-                fontWeight: 700,
-                letterSpacing: 1.1,
-                color: alpha(theme.palette.text.secondary, 0.85),
-              }}
-            >
-              Timeline
-            </Typography>
-
-            <Stack spacing={1.5}>
-              <Stack direction="row" spacing={2} alignItems="center">
-                <Box
-                  sx={{
-                    width: 16,
-                    height: 16,
-                    bgcolor: "primary.main",
-                    opacity: 0.15,
-                    borderLeft: "3px solid #000000",
-                    borderRight: "3px solid #000000",
-                    borderRadius: 0,
-                  }}
-                />
-                <Typography variant="caption" color="text.secondary">
-                  Working Hours
-                </Typography>
               </Stack>
             </Stack>
           </Stack>
-        </Stack>
+        </Box>
       </Paper>
     </Box>
   );
