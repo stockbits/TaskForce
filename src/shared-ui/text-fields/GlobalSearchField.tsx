@@ -37,7 +37,7 @@ const GlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function Glo
     ...rest
   } = props;
 
-  const { INPUT_HEIGHT, CHIP_SIZE, MIN_WIDTH } = useFieldSizes();
+  const { INPUT_HEIGHT, CHIP_SIZE } = useFieldSizes();
   const [error, setError] = React.useState<boolean>(false);
 
   // Default validation function for exact matches
@@ -100,7 +100,14 @@ const GlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function Glo
   );
 
   return (
-    <Box sx={{ minWidth: MIN_WIDTH, width: 'fit-content', maxWidth: { xs: '100%', sm: '90ch' }, ...sx }}>
+    <Box
+      sx={{
+        minWidth: '28ch',
+        width: 'fit-content',
+        maxWidth: { xs: '100%', sm: '90ch' },
+        ...sx
+      }}
+    >
       <TextField
         name={name}
         value={value}
@@ -112,7 +119,7 @@ const GlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function Glo
         placeholder="Search tasks..."
         size={size}
         sx={{
-          minWidth: MIN_WIDTH,
+          minWidth: '28ch',
           width: 'fit-content',
           '& input::placeholder': { color: 'text.secondary' },
           '& .MuiInputBase-input': {
