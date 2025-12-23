@@ -56,11 +56,31 @@ function parseShiftTime(timeStr: unknown): { h: number; m: number } | null {
   return { h, m: min };
 }
 
-function formatHourLabel(d: Date, step: number) {
+function formatHourLabel(d: Date, step: number, totalHours: number) {
+  const totalDays = Math.ceil(totalHours / 24);
+
+  // For many days (>7), show just dates
+  if (totalDays > 7) {
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  }
+
+  // For multiple days (3-7), show date + AM/PM
+  if (totalDays > 2) {
+    const hour = d.getHours();
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    return `${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })} ${ampm}`;
+  }
+
+  // For 1-2 days, show detailed time intervals
   if (step >= 24) {
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   }
-  return `${String(d.getHours()).padStart(2, "0")}:00`;
+
+  // For single day or short ranges, show hour intervals
+  const hour = d.getHours();
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+  return `${displayHour} ${ampm}`;
 }
 
 export default function TimelinePanel({
@@ -105,14 +125,26 @@ export default function TimelinePanel({
   );
 
   const totalHours = Math.ceil((dateRange.end - dateRange.start) / MS_HOUR);
+  const totalDays = Math.ceil(totalHours / 24);
+
   const PX_PER_HOUR =
     isMaximized && containerWidth > 0
       ? Math.max(10, containerWidth / totalHours)
       : totalHours <= 24
       ? 50
       : Math.max(10, 50 * (24 / totalHours));
+
+  // Dynamic step calculation based on total days
   let step = 1;
-  if (totalHours > 24) step = 24;
+  if (totalDays > 7) {
+    step = 24; // Show daily intervals for long ranges
+  } else if (totalDays > 2) {
+    step = 12; // Show 12-hour intervals (AM/PM) for medium ranges
+  } else if (totalHours > 24) {
+    step = 6; // Show 6-hour intervals for multi-day but short ranges
+  } else {
+    step = 1; // Show hourly intervals for single day
+  }
 
   useEffect(() => {
     if (containerRef.current) {
@@ -128,7 +160,7 @@ export default function TimelinePanel({
     const out: { time: number; label: string }[] = [];
     for (let i = 0; i <= totalHours; i += step) {
       const d = new Date(dateRange.start + i * MS_HOUR);
-      out.push({ time: d.getTime(), label: formatHourLabel(d, step) });
+      out.push({ time: d.getTime(), label: formatHourLabel(d, step, totalHours) });
     }
     return out;
   }, [dateRange, totalHours, step]);
