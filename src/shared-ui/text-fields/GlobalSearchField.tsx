@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, TextField, InputAdornment, IconButton, Tooltip } from '@mui/material';
 import type { TextFieldProps } from '@mui/material/TextField';
+import { SxProps, Theme } from '@mui/material/styles';
 import SearchIcon from '@mui/icons-material/Search';
 import useFieldSizes from './useFieldSizes';
 import mockTasks from '@/data/mockTasks.json';
@@ -12,7 +13,7 @@ type Props = {
   onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onSearch?: () => void;
   size?: 'small' | 'medium';
-  sx?: any;
+  sx?: SxProps<Theme>;
   name?: string;
   showSearchButton?: boolean;
   validateExact?: (value: string) => boolean;
