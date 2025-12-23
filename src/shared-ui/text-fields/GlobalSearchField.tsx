@@ -132,7 +132,7 @@ const GlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function Glo
             </InputAdornment>
           ),
           endAdornment,
-          sx: { height: INPUT_HEIGHT as any }
+          sx: { height: INPUT_HEIGHT } as React.CSSProperties
         }}
         inputRef={ref}
         {...rest}
