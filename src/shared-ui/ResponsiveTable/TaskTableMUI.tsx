@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, MutableRefObject, useRef, memo } from 'react';
-import { Box, useTheme, Paper, Typography } from '@mui/material';
+import { Box, useTheme, Paper, Typography, Skeleton, Fade, CircularProgress } from '@mui/material';
 import { useAppSnackbar } from '@/shared-ui/SnackbarProvider';
 import { GridColDef, useGridApiRef, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarDensitySelector } from '@mui/x-data-grid';
 import { DataGrid } from '@mui/x-data-grid';
@@ -17,6 +17,7 @@ import TaskRowContextMenu from '@/shared-ui/TaskRowContextMenu';
   debug?: boolean;
   disablePagination?: boolean;
   hideToolbar?: boolean;
+  loading?: boolean;
   controlledSelectedRowIds?: string[] | Set<string>;
   rowIdKey?: string;
   onOpenPopout?: (tasks: Record<string, any>[], mouseScreenX: number, mouseScreenY: number) => void;
@@ -32,7 +33,7 @@ import TaskRowContextMenu from '@/shared-ui/TaskRowContextMenu';
   sortModel?: any[];
 };
 
-const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef: _containerRef, reserveBottom: _reserveBottom = 160, disablePagination = false, hideToolbar = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns: _onRequestCloseColumns, onSortChange, scrollToTopTrigger, sortingMode, sortModel }: Props) {
+const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef: _containerRef, reserveBottom: _reserveBottom = 160, disablePagination = false, hideToolbar = false, loading = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns: _onRequestCloseColumns, onSortChange, scrollToTopTrigger, sortingMode, sortModel }: Props) {
   // Internal state for uncontrolled components
   const [selection, setSelection] = useState<string[]>([]);
   
@@ -337,6 +338,26 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
   const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number; clickedRow?: any; clickedColumnKey?: string | null; mouseScreenX?: number; mouseScreenY?: number }>({ visible: false, x: 0, y: 0 });
   const closeContextMenu = () => setContextMenu({ visible: false, x: 0, y: 0 });
 
+  // Skeleton loading component for smooth transitions
+  const TableSkeleton = () => (
+    <Box sx={{ p: 2 }}>
+      {/* Header skeleton */}
+      <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+        {Object.keys(headerNames).map((key, index) => (
+          <Skeleton key={key} variant="rectangular" width={120} height={40} />
+        ))}
+      </Box>
+      {/* Row skeletons */}
+      {Array.from({ length: 10 }).map((_, rowIndex) => (
+        <Box key={rowIndex} sx={{ display: 'flex', gap: 2, mb: 1 }}>
+          <Skeleton variant="rectangular" width={50} height={36} /> {/* Checkbox */}
+          {Object.keys(headerNames).map((key) => (
+            <Skeleton key={key} variant="rectangular" width={120} height={36} />
+          ))}
+        </Box>
+      ))}
+    </Box>
+  );
 
   const paperSx: any = (typeof tableHeight === 'string' && tableHeight.trim().endsWith('%'))
     ? { width: '100%', zIndex: 0, display: 'flex', flex: 1, minHeight: 0, flexDirection: 'column', height: '100%', overflow: 'hidden' }
@@ -348,7 +369,16 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
       {/* DataGrid's built-in column menu/panel is used instead of a custom Popper */}
 
       <Paper ref={paperRef as any} sx={paperSx}>
-        <DataGrid
+        {loading ? (
+          <Fade in={loading} timeout={300}>
+            <Box>
+              <TableSkeleton />
+            </Box>
+          </Fade>
+        ) : (
+          <Fade in={!loading} timeout={300}>
+            <Box sx={{ height: '100%' }}>
+              <DataGrid
           rows={gridRows}
           columns={colState}
           checkboxSelection={true}
@@ -480,6 +510,9 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
           }}
 
         />
+            </Box>
+          </Fade>
+        )}
       </Paper>
       {/* debug badge removed */}
       {/* Toolbar rendered inside DataGrid to maintain proper context */}
