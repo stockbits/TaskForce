@@ -25,7 +25,7 @@ import { useSearchLeftMenu } from "@/hooks/useSearchLeftMenu";
 
 import { useLiveSelectEngine } from "@/hooks/useLiveSelectEngine";
 
-import ExactGlobalSearchField from "@/shared-ui/text-fields/ExactGlobalSearchField";
+import GlobalSearchField from "@/shared-ui/text-fields/GlobalSearchField";
 
 import SlidersHorizontal from '@mui/icons-material/Tune';
 import Star from '@mui/icons-material/Star';
@@ -589,7 +589,7 @@ export default function ScheduleLivePage() {
         ))}
       </TextField>
 
-      <ExactGlobalSearchField
+      <GlobalSearchField
         value={searchAnywhere}
         onChange={(e) => setSearchAnywhere(e.target.value)}
         onSearch={runGlobalSearch}

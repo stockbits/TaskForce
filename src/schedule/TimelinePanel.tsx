@@ -575,8 +575,6 @@ export default function TimelinePanel({
                         borderRadius: 0,
                         bgcolor: "#ff9800", // Orange color for lunch breaks
                         opacity: 0.25,
-                        borderLeft: "2px solid #e65100",
-                        borderRight: "2px solid #e65100",
                         boxSizing: "border-box",
                         cursor: "pointer",
                       }}

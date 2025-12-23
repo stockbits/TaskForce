@@ -3,6 +3,8 @@ import { Box, TextField, InputAdornment, IconButton, Tooltip } from '@mui/materi
 import type { TextFieldProps } from '@mui/material/TextField';
 import SearchIcon from '@mui/icons-material/Search';
 import useFieldSizes from './useFieldSizes';
+import mockTasks from '@/data/mockTasks.json';
+import ResourceMock from '@/data/ResourceMock.json';
 
 type Props = {
   value: string;
@@ -14,6 +16,7 @@ type Props = {
   name?: string;
   showSearchButton?: boolean;
   validateExact?: (value: string) => boolean;
+  enableValidation?: boolean;
   searchTooltip?: string;
 } & Partial<TextFieldProps>;
 
@@ -28,6 +31,7 @@ const GlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function Glo
     name = 'taskSearch',
     showSearchButton = false,
     validateExact,
+    enableValidation = true,
     searchTooltip,
     ...rest
   } = props;
@@ -35,9 +39,34 @@ const GlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function Glo
   const { INPUT_HEIGHT, CHIP_SIZE, MIN_WIDTH } = useFieldSizes();
   const [error, setError] = React.useState<boolean>(false);
 
+  // Default validation function for exact matches
+  const defaultValidateExact = (v: string) => {
+    const q = String(v || '').trim().toLowerCase();
+    if (!q) return false;
+
+    const tasks = mockTasks as any[];
+    const resources = (ResourceMock as any[]) || [];
+
+    const foundInTasks = tasks.some((t) => {
+      return (
+        (t.taskId && String(t.taskId).toLowerCase() === q) ||
+        (t.workId && String(t.workId).toLowerCase() === q) ||
+        (t.estimateNumber && String(t.estimateNumber).toLowerCase() === q) ||
+        (t.employeeId && String(t.employeeId).toLowerCase() === q)
+      );
+    });
+    if (foundInTasks) return true;
+
+    const foundInResources = resources.some((r) => r.resourceId && String(r.resourceId).toLowerCase() === q);
+    return foundInResources;
+  };
+
+  // Use provided validation function or default if enableValidation is true
+  const validationFunction = validateExact || (enableValidation ? defaultValidateExact : undefined);
+
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && onSearch) {
-      if (validateExact && !validateExact(value)) {
+      if (validationFunction && !validationFunction(value)) {
         setError(true);
         return;
       }
@@ -53,7 +82,7 @@ const GlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function Glo
           <IconButton
             size="small"
             onClick={() => {
-              if (validateExact && !validateExact(value)) {
+              if (validationFunction && !validationFunction(value)) {
                 setError(true);
                 return;
               }

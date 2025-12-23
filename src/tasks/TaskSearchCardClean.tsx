@@ -32,7 +32,7 @@ import TodayOutlinedIcon from '@mui/icons-material/TodayOutlined';
 import DateTimePopover from '@/shared-ui/DateTimePopover';
 import { MultiSelectField, FreeTypeSelectField, CombinedLocationField } from '@/shared-ui';
 import ImpScoreField from '@/shared-ui/text-fields/ImpScoreField';
-import ExactGlobalSearchField from '@/shared-ui/text-fields/ExactGlobalSearchField';
+import GlobalSearchField from '@/shared-ui/text-fields/GlobalSearchField';
 import AppButton from '@/shared-ui/button';
 import Visibility from '@mui/icons-material/Visibility';
 
@@ -174,11 +174,6 @@ export default function TaskSearchCard({
     []
   );
 
-  // Prefill header describing what users can search (no example values)
-  const prefillPrompt = useMemo(() => {
-    return "Search by Task ID, Work ID, Estimate Number, Employee ID";
-  }, []);
-
   // Use a responsive standard width for all boxes, but allow per-field
   // expansion based on the measured DB values (or overrides) so default
   // prompt/placeholder values (plus breathing room and the select-all icon)
@@ -277,16 +272,15 @@ export default function TaskSearchCard({
 
           <Box sx={{ flex: 1 }} />
 
-          <ExactGlobalSearchField
+          <GlobalSearchField
             name="taskSearch"
             value={filters.taskSearch}
             onChange={handleFieldChange}
             onSearch={handleSearch}
-            placeholder={prefillPrompt}
+            placeholder="Global Search"
             size="small"
             showSearchButton={true}
-            enableValidation={filters.taskSearch.trim().length > 0 || (filters.division.length === 0 || filters.domainId.length === 0 || filters.taskStatuses.length === 0)}
-            searchTooltip={prefillPrompt}
+            searchTooltip="Search by Task ID, Work ID, Estimate Number, Employee ID"
             sx={{}}
           />
           {/* debug badge removed */}
