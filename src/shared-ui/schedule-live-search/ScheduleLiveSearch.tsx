@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Box,
   Tab,
@@ -167,7 +167,7 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
   const makeFilter = (list: string[], q?: string) =>
     list.filter((option) => (option ?? "").toLowerCase().includes((q ?? "").toLowerCase()));
 
-  const filtered = {
+  const filtered = useMemo(() => ({
     division: makeFilter(safe(dropdownData.division), query.division),
     domainId: makeFilter(safe(dropdownData.domainId), query.domainId),
     taskStatuses: makeFilter(
@@ -193,7 +193,7 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
     ),
     requester: safe(dropdownData.requester),
     jobType: safe(dropdownData.jobType),
-  };
+  }), [dropdownData, query]);
 
   const renderFieldGrid = (fields: React.ReactNode[]) => (
     <Grid container spacing={3}>

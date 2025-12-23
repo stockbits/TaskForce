@@ -17,7 +17,7 @@ import TaskRowContextMenu from '@/shared-ui/TaskRowContextMenu';
   debug?: boolean;
   disablePagination?: boolean;
   hideToolbar?: boolean;
-  controlledSelectedRowIds?: string[];
+  controlledSelectedRowIds?: string[] | Set<string>;
   rowIdKey?: string;
   onOpenPopout?: (tasks: Record<string, any>[], mouseScreenX: number, mouseScreenY: number) => void;
   onSelectionChange?: (rows: Record<string, any>[]) => void;
@@ -37,16 +37,36 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
   const [selection, setSelection] = useState<string[]>([]);
   
   // For controlled components, use controlledSelectedRowIds directly as rowSelectionModel
-  const rowSelectionModel = controlledSelectedRowIds !== undefined
-    ? (Array.isArray(controlledSelectedRowIds)
+  const rowSelectionModel = useMemo(() => {
+    let ids: string[] = [];
+    if (controlledSelectedRowIds !== undefined) {
+      ids = Array.isArray(controlledSelectedRowIds)
         ? controlledSelectedRowIds
-        : Array.from(controlledSelectedRowIds as Set<string>))
-    : selection;
+        : Array.from(controlledSelectedRowIds as Set<string>);
+      // Ensure all IDs are strings and filter out any invalid ones
+      ids = ids.filter(id => id != null).map(id => String(id));
+    } else {
+      // For uncontrolled components, ensure selection is always an array
+      ids = Array.isArray(selection) ? selection : [];
+    }
+    
+    return { type: 'include' as const, ids: new Set(ids) };
+  }, [controlledSelectedRowIds, selection]);
   const theme = useTheme();
   const colStateRef = useRef<GridColDef[]>([]);
   
 
-  const density = (typeof window !== 'undefined' && localStorage.getItem('taskTableDensity')) || 'compact';
+  const [density, setDensity] = useState<'compact' | 'standard' | 'comfortable'>(
+    (typeof window !== 'undefined' && localStorage.getItem('taskTableDensity') as 'compact' | 'standard' | 'comfortable') || 'compact'
+  );
+
+  // Handle density changes and persist to localStorage
+  const handleDensityChange = (newDensity: 'compact' | 'standard' | 'comfortable') => {
+    setDensity(newDensity);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('taskTableDensity', newDensity);
+    }
+  };
 
   const columns: GridColDef[] = useMemo(() => {
     // Small component for rendering a copyable cell: clicking the text copies value and flashes a highlight
@@ -129,10 +149,12 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
     setColState(columns);
   }, [columns]);
 
-  // keep ref in sync
+  // Ensure selection state is properly initialized
   useEffect(() => {
-    colStateRef.current = colState;
-  }, [colState]);
+    if (controlledSelectedRowIds === undefined) {
+      setSelection([]);
+    }
+  }, [controlledSelectedRowIds]);
 
   // Auto-fit column widths: measure header + cell text and set widths on first load or when rows change
   const autoFitDoneRef = useRef<string | null>(null);
@@ -326,63 +348,102 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
       {/* DataGrid's built-in column menu/panel is used instead of a custom Popper */}
 
       <Paper ref={paperRef as any} sx={paperSx}>
-        <AnyDataGrid
+        <DataGrid
           rows={gridRows}
           columns={colState}
+          checkboxSelection={true}
+          disableVirtualization={true}
           rowSelectionModel={rowSelectionModel}
-          checkboxSelection
-          components={hideToolbar ? {} : { Toolbar: CustomToolbar }}
-          density={density as 'compact' | 'standard' | 'comfortable'}
-          rowHeight={40}
-          // Use client-side/native MUI sorting
-          apiRef={apiRef}
-          pagination={!disablePagination}
-          hideFooter={disablePagination}
-          // ensure current pageSize is present in options to avoid MUI warning
-          pageSizeOptions={(function(){
-            const opts = [50,100,500];
-            if (!opts.includes(pageSize)) opts.push(pageSize);
-            return opts.sort((a,b)=>a-b);
-          })()}
-          paginationModel={{ page, pageSize }}
-          onPaginationModelChange={(model: any) => {
-            try {
-              if (!model) return;
-              if (typeof model.pageSize === 'number') setPageSize(model.pageSize);
-              if (typeof model.page === 'number') setPage(model.page);
-            } catch {}
-          }}
-          onRowDoubleClick={(params: any, event: any) => {
-            if (onOpenPopout) onOpenPopout([params.row as any], (event as any).screenX ?? 0, (event as any).screenY ?? 0);
-          }}
-          onRowContextMenu={onRowContextMenu as any}
-          onCellContextMenu={onRowContextMenu as any}
-          // rely on MUI client-side sorting; no server callbacks
-          onRowSelectionModelChange={(model: any) => {
-            try {
-              // model may be an array of ids (strings/numbers) or an object for checkboxSelection
-              const ids = Array.isArray(model) ? model : Object.keys(model || {});
-              const newSelection = (ids || []).map(String) as string[];
-
-              // For controlled components, always notify parent of changes
+          onRowSelectionModelChange={(newSelectionModel: any) => {
+            // Handle the new GridRowSelectionModel format
+            const safeSelectionIds: string[] = newSelectionModel?.ids ? Array.from(newSelectionModel.ids).map(String) : [];
+            
+            if (controlledSelectedRowIds !== undefined && onSelectionChange) {
+              // For controlled components, notify parent of selection change
+              const selectedRows = gridRows.filter(r => safeSelectionIds.includes(String(r.id)));
+              onSelectionChange(selectedRows as Record<string, any>[]);
+            } else {
               // For uncontrolled components, update internal state
-              if (controlledSelectedRowIds !== undefined) {
-                if (onSelectionChange) {
-                  const selected = (gridRows || []).filter((r) => newSelection.includes(String(r.id)));
-                  onSelectionChange(selected as Record<string, any>[]);
-                }
-              } else {
-                setSelection(newSelection);
-                if (onSelectionChange) {
-                  const selected = (gridRows || []).filter((r) => newSelection.includes(String(r.id)));
-                  onSelectionChange(selected as Record<string, any>[]);
-                }
-              }
-            } catch (err) {
-              console.error('Error in onRowSelectionModelChange:', err);
+              setSelection(safeSelectionIds);
             }
           }}
-          sx={{ flex: 1, minHeight: 0, border: 0, overflow: 'hidden', '& .MuiDataGrid-cell': { py: density === 'compact' ? 0.5 : 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }, '& .MuiDataGrid-columnHeaders': { backgroundColor: theme.palette.action.hover }, '& .MuiDataGrid-columnHeaderTitle': { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }}
+          getRowClassName={(params: any) => {
+            if (controlledSelectedRowIds) {
+              const selectedIds = Array.isArray(controlledSelectedRowIds) 
+                ? controlledSelectedRowIds 
+                : Array.from(controlledSelectedRowIds);
+              if (selectedIds.includes(String(params.id))) {
+                return 'selected-row';
+              }
+            }
+            return '';
+          }}
+          onRowClick={(params: any) => {
+            if (!controlledSelectedRowIds || !onSelectionChange) return;
+            
+            // Toggle selection for this row (additional functionality beyond checkboxes)
+            const rowId = String(params.id);
+            const currentSelection = Array.isArray(controlledSelectedRowIds) 
+              ? controlledSelectedRowIds 
+              : Array.from(controlledSelectedRowIds);
+            const isSelected = currentSelection.includes(rowId);
+            
+            let newSelection;
+            if (isSelected) {
+              // Remove from selection
+              newSelection = currentSelection.filter(id => id !== rowId);
+            } else {
+              // Add to selection
+              newSelection = [...currentSelection, rowId];
+            }
+            
+            // Convert back to the same type as input for the parent component
+            const selectedRows = gridRows.filter(r => newSelection.includes(String(r.id)));
+            onSelectionChange(selectedRows as Record<string, any>[]);
+          }}
+          pagination={true}
+          hideFooter={disablePagination}
+          pageSizeOptions={[25, 50, 100]}
+          paginationModel={{ page, pageSize }}
+          onPaginationModelChange={(model: any) => {
+            setPage(model.page);
+            setPageSize(model.pageSize);
+          }}
+          slots={hideToolbar ? {} : { toolbar: CustomToolbar }}
+          density={density}
+          onDensityChange={handleDensityChange}
+          sx={{ 
+            flex: 1, 
+            minHeight: 0, 
+            border: 0, 
+            overflow: 'hidden', 
+            '& .MuiDataGrid-cell': { 
+              py: density === 'compact' ? 0.5 : 1, 
+              whiteSpace: 'nowrap', 
+              overflow: 'hidden', 
+              textOverflow: 'ellipsis' 
+            }, 
+            '& .MuiDataGrid-columnHeaders': { 
+              backgroundColor: theme.palette.action.hover 
+            }, 
+            '& .MuiDataGrid-columnHeaderTitle': { 
+              whiteSpace: 'nowrap', 
+              overflow: 'hidden', 
+              textOverflow: 'ellipsis' 
+            },
+            '& .MuiDataGrid-row': {
+              cursor: controlledSelectedRowIds ? 'pointer' : 'default',
+              '&:hover': {
+                backgroundColor: controlledSelectedRowIds ? theme.palette.action.hover : 'transparent',
+              },
+            },
+            '& .selected-row': {
+              backgroundColor: theme.palette.primary.main + '20',
+              '&:hover': {
+                backgroundColor: theme.palette.primary.main + '30',
+              },
+            },
+          }}
           // ensure DataGrid performs client-side sorting (do not accidentally enter server-mode)
           sortingMode={sortingMode || 'client'}
           sortModel={sortModel}
@@ -417,6 +478,7 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
               }
             } catch {}
           }}
+
         />
       </Paper>
       {/* debug badge removed */}
@@ -429,7 +491,7 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
         visible={contextMenu.visible}
         x={contextMenu.x}
         y={contextMenu.y}
-        selectedRows={gridRows.filter((r) => (selection || []).includes(String(r.id)))}
+        selectedRows={gridRows.filter((r) => rowSelectionModel.ids.has(String(r.id)))}
         clickedColumnKey={contextMenu.clickedColumnKey ?? null}
         clickedRow={contextMenu.clickedRow ?? null}
         onClose={closeContextMenu}
