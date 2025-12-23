@@ -20,6 +20,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
 import ResourceMock from "../data/ResourceMock.json";
+import TimelineZoomControl from "./TimelineZoomControl";
 
 type ResourceRow = {
   resourceId?: string;
@@ -113,6 +114,7 @@ export default function TimelinePanel({
   const setEndDate = onEndDateChange;
 
   const [dateModalOpen, setDateModalOpen] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1); // Default zoom level (1x)
 
   // Quick date range selection
   const handleQuickSelect = (days: number) => {
@@ -152,11 +154,11 @@ export default function TimelinePanel({
   const totalDays = Math.ceil(totalHours / 24);
 
   const PX_PER_HOUR =
-    isMaximized && containerWidth > 0
-      ? Math.max(10, containerWidth / totalHours)
+    containerWidth > 0
+      ? Math.max(10, (containerWidth / totalHours) * zoomLevel)
       : totalHours <= 24
-      ? 50
-      : Math.max(10, 50 * (24 / totalHours));
+      ? 50 * zoomLevel
+      : Math.max(10, 50 * (24 / totalHours) * zoomLevel);
 
   // Dynamic step calculation based on total days
   let step = 1;
@@ -174,7 +176,7 @@ export default function TimelinePanel({
     if (containerRef.current) {
       setContainerWidth(containerRef.current.clientWidth);
     }
-  }, [isMaximized, totalHours]); // update when maximized or hours change
+  }, [isMaximized, totalHours, zoomLevel]); // update when maximized, hours, or zoom changes
 
   const categories = useMemo(() => {
     return resources.map((r) => String(r.resourceId ?? r.id ?? "UNKNOWN"));
@@ -341,6 +343,12 @@ export default function TimelinePanel({
           <IconButton onClick={() => setDateModalOpen(true)} size="small">
             <CalendarTodayIcon />
           </IconButton>
+          <TimelineZoomControl
+            onZoomChange={setZoomLevel}
+            currentZoom={zoomLevel}
+            totalHours={totalHours}
+            containerWidth={containerWidth}
+          />
         </Box>
 
         {/* Timeline labels */}
@@ -546,7 +554,10 @@ export default function TimelinePanel({
                     setStartDate(d);
                   }
                 }}
-                slotProps={{ textField: { fullWidth: true } }}
+                slotProps={{
+                  textField: { fullWidth: true, size: "small" },
+                  openPickerButton: { size: "small" }
+                }}
               />
               <DatePicker
                 label="End Date"
@@ -560,7 +571,10 @@ export default function TimelinePanel({
                     setEndDate(d);
                   }
                 }}
-                slotProps={{ textField: { fullWidth: true } }}
+                slotProps={{
+                  textField: { fullWidth: true, size: "small" },
+                  openPickerButton: { size: "small" }
+                }}
               />
             </Box>
 
