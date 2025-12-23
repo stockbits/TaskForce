@@ -65,12 +65,12 @@ function parseShiftTime(timeStr: unknown): { h: number; m: number } | null {
 function formatHourLabel(d: Date, step: number, totalHours: number) {
   const totalDays = Math.ceil(totalHours / 24);
 
-  // For many days (>7), show just dates
+  // For many days (>7), show just dates - keep as single day labels
   if (totalDays > 7) {
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   }
 
-  // For multiple days (3-7), show date + AM/PM
+  // For multiple days (3-7), show date + AM/PM - keep as single day labels
   if (totalDays > 2) {
     const hour = d.getHours();
     const ampm = hour >= 12 ? 'PM' : 'AM';
@@ -82,10 +82,26 @@ function formatHourLabel(d: Date, step: number, totalHours: number) {
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   }
 
-  // For single day or short ranges, show hour intervals
+  // For single day or short ranges, show hour intervals with "till" format
   const hour = d.getHours();
   const ampm = hour >= 12 ? 'PM' : 'AM';
   const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+
+  // For step intervals > 1, show ranges like "6 till 12"
+  if (step > 1) {
+    const endHour = hour + step;
+    const endDisplayHour = endHour === 0 ? 12 : endHour > 12 ? endHour - 12 : endHour;
+    const endAmpm = endHour >= 12 ? 'PM' : 'AM';
+
+    // If the range crosses AM/PM boundary, show both
+    if (ampm !== endAmpm) {
+      return `${displayHour} ${ampm} till ${endDisplayHour} ${endAmpm}`;
+    } else {
+      return `${displayHour} till ${endDisplayHour} ${ampm}`;
+    }
+  }
+
+  // For single hour intervals, just show the hour
   return `${displayHour} ${ampm}`;
 }
 
@@ -427,25 +443,37 @@ export default function TimelinePanel({
               display: "flex",
             }}
           >
-            {timelineIntervals.map((it, i) => (
-              <Box
-                key={it.time}
-                sx={{
-                  width: step * PX_PER_HOUR,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "0.75rem",
-                  color: "#666",
-                  borderRight:
-                    i < timelineIntervals.length - 1
-                      ? "1px solid #eee"
-                      : "none",
-                }}
-              >
-                {it.label}
-              </Box>
-            ))}
+            {timelineIntervals.map((it, i) => {
+              const intervalWidth = step * PX_PER_HOUR;
+              const minLabelWidth = 60; // Minimum width to prevent text wrapping
+              const actualWidth = Math.max(intervalWidth, minLabelWidth);
+
+              return (
+                <Box
+                  key={it.time}
+                  sx={{
+                    width: actualWidth,
+                    minWidth: minLabelWidth,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "0.75rem",
+                    color: "#666",
+                    borderRight:
+                      i < timelineIntervals.length - 1
+                        ? "1px solid #eee"
+                        : "none",
+                    px: 0.5, // Add padding to prevent text cutoff
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                  title={it.label} // Show full label on hover if truncated
+                >
+                  {it.label}
+                </Box>
+              );
+            })}
           </Box>
         </Box>
       </Box>
