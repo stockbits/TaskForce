@@ -38,28 +38,28 @@ import LogOut from '@mui/icons-material/Logout';
 import Folder from '@mui/icons-material/Folder';
 import Search from '@mui/icons-material/Search';
 import Clear from '@mui/icons-material/Clear';
-import { allTiles } from "./menuRegistry";
+import { cardMap } from "./menuRegistry";
 
 const userMenus = [
-  { label: "Operation Toolkit", icon: ClipboardList },
-  { label: "General Settings", icon: Settings },
+  { label: "Operation Toolkit", icon: ClipboardList, children: cardMap["Operation Toolkit"] || [] },
+  { label: "General Settings", icon: Settings, children: cardMap["General Settings"] || [] },
 ];
 
 const taskAdminMenus = [
-  { label: "Task Admin", icon: ListChecks },
-  { label: "Jeopardy Admin", icon: AlertTriangle },
+  { label: "Task Admin", icon: ListChecks, children: cardMap["Task Admin"] || [] },
+  { label: "Jeopardy Admin", icon: AlertTriangle, children: cardMap["Jeopardy Admin"] || [] },
 ];
 
 const peopleMenus = [
-  { label: "Resource Admin", icon: Users },
-  { label: "Self Service Admin", icon: Settings },
-  { label: "User Admin", icon: UserCog },
+  { label: "Resource Admin", icon: Users, children: cardMap["Resource Admin"] || [] },
+  { label: "Self Service Admin", icon: Settings, children: cardMap["Self Service Admin"] || [] },
+  { label: "User Admin", icon: UserCog, children: cardMap["User Admin"] || [] },
 ];
 
 const systemMenus = [
-  { label: "Domain Admin", icon: Globe },
-  { label: "Schedule Admin", icon: Calendar },
-  { label: "System Admin", icon: Cog },
+  { label: "Domain Admin", icon: Globe, children: cardMap["Domain Admin"] || [] },
+  { label: "Schedule Admin", icon: Calendar, children: cardMap["Schedule Admin"] || [] },
+  { label: "System Admin", icon: Cog, children: cardMap["System Admin"] || [] },
 ];
 
 interface SidebarProps {
@@ -124,42 +124,17 @@ export const Sidebar = memo(function Sidebar({
     []
   );
 
-  // Filter sections and menus based on filter text
-  const filteredSections = useMemo(() => {
-    if (!filterText.trim()) return sections;
+  const allMenus = useMemo(() => sections.flatMap(section => section.menus), [sections]);
 
-    const filteredMenuSections = sections
-      .map(section => ({
-        ...section,
-        menus: section.menus.filter(menu =>
-          menu.label.toLowerCase().includes(filterText.toLowerCase()) ||
-          section.title.toLowerCase().includes(filterText.toLowerCase())
-        )
-      }))
-      .filter(section => section.menus.length > 0);
+  // Filter menus based on filter text
+  const filteredMenus = useMemo(() => {
+    if (!filterText.trim()) return [];
 
-    // Add cards section if any cards match
-    const matchingCards = allTiles.filter(card =>
-      card.name.toLowerCase().includes(filterText.toLowerCase()) ||
-      card.description.toLowerCase().includes(filterText.toLowerCase()) ||
-      card.menuLabel.toLowerCase().includes(filterText.toLowerCase())
+    return allMenus.filter(menu =>
+      menu.label.toLowerCase().includes(filterText.toLowerCase()) ||
+      menu.children.some(child => child.name.toLowerCase().includes(filterText.toLowerCase()))
     );
-
-    if (matchingCards.length > 0) {
-      const cardMenus = matchingCards.map(card => ({
-        label: card.name,
-        icon: Folder, // Use Folder as default icon for cards
-        cardData: card // Store card data for navigation
-      }));
-
-      filteredMenuSections.push({
-        title: "Cards",
-        menus: cardMenus
-      });
-    }
-
-    return filteredMenuSections;
-  }, [sections, filterText]);
+  }, [allMenus, filterText]);
 
   const handleMenuSelect = useCallback(
     (menu: any) => {
@@ -262,11 +237,14 @@ export const Sidebar = memo(function Sidebar({
           }}
         />
 
-        {/* Tree View Filter Results */}
-        {filterText.trim() && (
-          <Box sx={{ mt: 2, maxHeight: 300, overflowY: 'auto' }}>
+        {/* Tree View Filter Results moved to main content */}
+      </Box>
+
+      <Box sx={{ flex: 1, overflowY: "auto", py: 1 }}>
+        {filterText.trim() ? (
+          <Box sx={{ px: 2, py: 1 }}>
             <SimpleTreeView
-              expandedItems={filteredSections.map((_, index) => `section-${index}`)}
+              expandedItems={filteredMenus.map((_, index) => `menu-${index}`)}
               sx={{
                 '& .MuiTreeItem-root': {
                   '& .MuiTreeItem-content': {
@@ -283,69 +261,108 @@ export const Sidebar = memo(function Sidebar({
                       },
                     },
                   },
+                  '& .MuiTreeItem-iconContainer': {
+                    display: 'none', // Hide chevron icons
+                  },
+                },
+                '& .MuiTreeItem-group': {
+                  ml: 3, // Increase indentation for sub-menus
+                },
+                '& .MuiTreeItem-root .MuiTreeItem-root .MuiTreeItem-content': {
+                  pl: 3, // Additional padding for child items
                 },
               }}
             >
-              {filteredSections.map((section, sectionIndex) => (
-                <TreeItem
-                  key={section.title}
-                  itemId={`section-${sectionIndex}`}
-                  label={
-                    <Typography variant="subtitle2" fontWeight={600} sx={{ py: 0.5 }}>
-                      {section.title}
-                    </Typography>
-                  }
-                >
-                  {section.menus.map((menu, menuIndex) => {
-                    const IconComponent = menu.icon;
-                    return (
+              {filteredMenus.map((menu, index) => {
+                const IconComponent = menu.icon;
+                return (
+                  <TreeItem
+                    key={menu.label}
+                    itemId={`menu-${index}`}
+                    label={
+                      <Box sx={{ py: 0.5 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <IconComponent sx={{ fontSize: 18, mr: 1, color: alpha(theme.palette.text.primary, 0.7) }} />
+                          <Typography variant="body2" fontWeight={500}>{menu.label}</Typography>
+                        </Box>
+                      </Box>
+                    }
+                    onClick={() => handleMenuSelect(menu)}
+                  >
+                    {menu.children.map((child, childIndex) => (
                       <TreeItem
-                        key={`${section.title}-${menuIndex}`}
-                        itemId={`menu-${sectionIndex}-${menuIndex}`}
+                        key={`${menu.label}-${childIndex}`}
+                        itemId={`menu-${index}-${childIndex}`}
                         label={
-                          <Box sx={{ py: 0.5 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              <IconComponent sx={{ fontSize: 18, mr: 1, color: alpha(theme.palette.text.primary, 0.7) }} />
-                              <Typography variant="body2" fontWeight={500}>{menu.label}</Typography>
-                            </Box>
-                            {(menu as any).cardData && (menu as any).cardData.description && (
-                              <Typography 
-                                variant="caption" 
-                                sx={{ 
-                                  color: alpha(theme.palette.text.primary, 0.6),
-                                  ml: 3.5, // Align with text after icon
-                                  display: 'block',
-                                  mt: 0.25
-                                }}
-                              >
-                                {(menu as any).cardData.description}
-                              </Typography>
-                            )}
-                          </Box>
+                          <Typography variant="body2" sx={{ py: 0.5, pl: 2 }}>{child.name}</Typography>
                         }
                         onClick={() => handleMenuSelect(menu)}
                       />
-                    );
-                  })}
-                </TreeItem>
-              ))}
+                    ))}
+                  </TreeItem>
+                );
+              })}
             </SimpleTreeView>
           </Box>
-        )}
-      </Box>
+        ) : (
+          <Box sx={{ px: 2, py: 1 }}>
+            <List disablePadding>
+              {allMenus.map((menu) => {
+                const IconComponent = menu.icon;
+                const isActive = activeMenuLabel === menu.label;
 
-      <Box sx={{ flex: 1, overflowY: "auto", py: 1 }}>
-        {!filterText.trim() && filteredSections.map(({ title, menus }) => (
-          <React.Fragment key={title}>
-            <SectionBlock
-              title={title}
-              menus={menus}
-              activeMenuLabel={activeMenuLabel}
-              onMenuClick={handleMenuSelect}
-            />
-            <Divider sx={{ mx: 2, my: 1, borderColor: alpha(theme.palette.text.primary, 0.08) }} />
-          </React.Fragment>
-        ))}
+                return (
+                  <ListItemButton
+                    key={menu.label}
+                    onClick={() => handleMenuSelect(menu)}
+                    selected={isActive}
+                    sx={{
+                      borderRadius: 1.5,
+                      mb: 0.5,
+                      alignItems: "center",
+                      px: 2,
+                      py: 1,
+                      position: "relative",
+                      minHeight: 40,
+                      ...(isActive
+                        ? {
+                            backgroundColor: alpha(theme.palette.primary.main, 0.12),
+                            color: theme.palette.primary.main,
+                            "&::before": {
+                              content: '""',
+                              position: "absolute",
+                              left: 8,
+                              top: 8,
+                              bottom: 8,
+                              width: 3,
+                              borderRadius: 999,
+                              backgroundColor: theme.palette.primary.main,
+                            },
+                          }
+                        : {
+                            color: theme.palette.text.primary,
+                            "&:hover": {
+                              backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                            },
+                          }),
+                    }}
+                  >
+                    <ListItemIcon sx={{ minWidth: theme.spacing(4), color: "inherit" }}>
+                      <IconComponent sx={{ fontSize: 16 }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={menu.label}
+                      primaryTypographyProps={{
+                        fontSize: 13,
+                        fontWeight: isActive ? 600 : 500,
+                      }}
+                    />
+                  </ListItemButton>
+                );
+              })}
+            </List>
+          </Box>
+        )}
       </Box>
 
       <Footer />
@@ -353,94 +370,6 @@ export const Sidebar = memo(function Sidebar({
   );
 });
 
-interface SectionBlockProps {
-  title: string;
-  menus: Array<{ label: string; icon?: any; cardData?: any }>;
-  activeMenuLabel: string | null;
-  onMenuClick: (menu: any) => void;
-}
-
-const SectionBlock = memo(function SectionBlock({
-  title,
-  menus,
-  activeMenuLabel,
-  onMenuClick,
-}: SectionBlockProps) {
-  const theme = useTheme();
-
-  return (
-    <Box sx={{ px: 2, py: 0.5 }}>
-      <Typography
-        variant="overline"
-        color="text.secondary"
-        sx={{
-          px: 1.5,
-          mb: 0.5,
-          letterSpacing: 1.4,
-          fontSize: 11,
-        }}
-      >
-        {title}
-      </Typography>
-
-      <List disablePadding>
-        {menus.map((menu) => {
-          const Icon = menu.icon || Folder;
-          const isActive = activeMenuLabel === menu.label;
-
-          return (
-            <ListItemButton
-              key={menu.label}
-              onClick={() => onMenuClick(menu)}
-              selected={isActive}
-              sx={{
-                borderRadius: 1.5,
-                mb: 0.5,
-                alignItems: "center",
-                px: 2,
-                py: 1,
-                position: "relative",
-                minHeight: 40,
-                ...(isActive
-                  ? {
-                      backgroundColor: alpha(theme.palette.primary.main, 0.12),
-                      color: theme.palette.primary.main,
-                      "&::before": {
-                        content: '""',
-                        position: "absolute",
-                        left: 8,
-                        top: 8,
-                        bottom: 8,
-                        width: 3,
-                        borderRadius: 999,
-                        backgroundColor: theme.palette.primary.main,
-                      },
-                    }
-                  : {
-                      color: theme.palette.text.primary,
-                      "&:hover": {
-                        backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                      },
-                    }),
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: theme.spacing(4), color: "inherit" }}>
-                {React.createElement(Icon, { size: 16, strokeWidth: 2 })}
-              </ListItemIcon>
-              <ListItemText
-                primary={menu.label}
-                primaryTypographyProps={{
-                  fontSize: 13,
-                  fontWeight: isActive ? 600 : 500,
-                }}
-              />
-            </ListItemButton>
-          );
-        })}
-      </List>
-    </Box>
-  );
-});
 
 const Footer = memo(function Footer() {
   const theme = useTheme();
