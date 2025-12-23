@@ -426,10 +426,8 @@ export default function TimelinePanel({
                       borderRadius: 0,
                       bgcolor: "primary.main",
                       opacity: 0.15,
-                      borderLeft: "2px solid",
-                      borderLeftColor: "text.primary",
-                      borderRight: "2px solid",
-                      borderRightColor: "text.primary",
+                      borderLeft: "3px solid #000000",
+                      borderRight: "3px solid #000000",
                       boxSizing: "border-box",
                     }}
                   />

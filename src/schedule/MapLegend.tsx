@@ -38,6 +38,8 @@ export default function ScheduleLegend({ visible, onClose }: ScheduleLegendProps
           border: `1px solid ${alpha(theme.palette.primary.main, 0.18)}`,
           boxShadow: "0 18px 46px rgba(8,58,97,0.22)",
           backgroundImage: "none",
+          maxHeight: theme.spacing(50), // 400px max height
+          overflowY: "auto", // Make it scrollable
         }}
       >
         <Stack spacing={3}>
@@ -143,10 +145,8 @@ export default function ScheduleLegend({ visible, onClose }: ScheduleLegendProps
                     height: 16,
                     bgcolor: "primary.main",
                     opacity: 0.15,
-                    borderLeft: "2px solid",
-                    borderLeftColor: "text.primary",
-                    borderRight: "2px solid",
-                    borderRightColor: "text.primary",
+                    borderLeft: "3px solid #000000",
+                    borderRight: "3px solid #000000",
                     borderRadius: 0,
                   }}
                 />
