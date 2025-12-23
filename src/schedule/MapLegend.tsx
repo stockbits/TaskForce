@@ -1,6 +1,6 @@
 // src/SCH_Live/panels/MapLegend.tsx
-import React, { useRef } from "react";
-import { Box, IconButton, Paper, Stack, Typography, Tooltip } from "@mui/material";
+import React, { useRef, useState } from "react";
+import { Box, IconButton, Paper, Stack, Typography, Tabs, Tab } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import Close from '@mui/icons-material/Close';
 import GroupsIcon from '@mui/icons-material/Groups';
@@ -21,20 +21,18 @@ interface ScheduleLegendProps {
 export default function ScheduleLegend({ visible, onClose }: ScheduleLegendProps) {
   const theme = useTheme();
   const legendRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState(0);
 
   if (!visible) return null;
-
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-  };
 
   const handleBackdropClick = (event: React.MouseEvent) => {
     if (legendRef.current && !legendRef.current.contains(event.target as Node)) {
       onClose();
     }
+  };
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
   };
 
   return (
@@ -62,14 +60,14 @@ export default function ScheduleLegend({ visible, onClose }: ScheduleLegendProps
       <Paper
         elevation={14}
         sx={{
-          width: theme.spacing(40), // Increased width to accommodate navigation
+          width: theme.spacing(40),
           borderRadius: 3,
           px: 3,
           py: 2.5,
           border: `1px solid ${alpha(theme.palette.primary.main, 0.18)}`,
           boxShadow: "0 18px 46px rgba(8,58,97,0.22)",
           backgroundImage: "none",
-          maxHeight: '80vh', // Dynamic height based on viewport
+          maxHeight: '80vh',
           display: "flex",
           flexDirection: "column",
         }}
@@ -95,170 +93,141 @@ export default function ScheduleLegend({ visible, onClose }: ScheduleLegendProps
           </IconButton>
         </Stack>
 
-        {/* CONTENT AREA WITH NAVIGATION */}
-        <Box sx={{ display: "flex", flex: 1, minHeight: 0 }}>
-          {/* STICKY LEFT NAVIGATION */}
-          <Box
+        {/* TABS */}
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            aria-label="legend sections"
+            variant="fullWidth"
             sx={{
-              width: theme.spacing(6),
-              borderRight: `1px solid ${alpha(theme.palette.divider, 0.3)}`,
-              pr: 2,
-              mr: 2,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 1,
-              position: "sticky",
-              top: 0,
-              alignSelf: "flex-start",
+              minHeight: 40,
+              '& .MuiTab-root': {
+                minHeight: 40,
+                textTransform: 'none',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+              },
             }}
           >
-            <Tooltip title="Resources" placement="right">
-              <IconButton
-                size="small"
-                onClick={() => scrollToSection('resources-section')}
+            <Tab
+              icon={<GroupsIcon />}
+              label="Resources"
+              iconPosition="start"
+              sx={{ minHeight: 40 }}
+            />
+            <Tab
+              icon={<AssignmentIcon />}
+              label="Tasks"
+              iconPosition="start"
+              sx={{ minHeight: 40 }}
+            />
+            <Tab
+              icon={<TimelineIcon />}
+              label="Timeline"
+              iconPosition="start"
+              sx={{ minHeight: 40 }}
+            />
+          </Tabs>
+        </Box>
+
+        {/* TAB CONTENT */}
+        <Box sx={{ flex: 1, overflowY: "auto", pr: 1 }}>
+          {/* RESOURCES TAB */}
+          {activeTab === 0 && (
+            <Stack spacing={1.5}>
+              <Typography
+                variant="overline"
                 sx={{
-                  color: alpha(theme.palette.text.secondary, 0.7),
-                  '&:hover': {
-                    color: theme.palette.primary.main,
-                    bgcolor: alpha(theme.palette.primary.main, 0.08),
-                  },
+                  fontWeight: 700,
+                  letterSpacing: 1.1,
+                  color: alpha(theme.palette.text.secondary, 0.85),
                 }}
               >
-                <GroupsIcon style={{ fontSize: 20 }} />
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title="Tasks" placement="right">
-              <IconButton
-                size="small"
-                onClick={() => scrollToSection('tasks-section')}
-                sx={{
-                  color: alpha(theme.palette.text.secondary, 0.7),
-                  '&:hover': {
-                    color: theme.palette.primary.main,
-                    bgcolor: alpha(theme.palette.primary.main, 0.08),
-                  },
-                }}
-              >
-                <AssignmentIcon style={{ fontSize: 20 }} />
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title="Timeline" placement="right">
-              <IconButton
-                size="small"
-                onClick={() => scrollToSection('timeline-section')}
-                sx={{
-                  color: alpha(theme.palette.text.secondary, 0.7),
-                  '&:hover': {
-                    color: theme.palette.primary.main,
-                    bgcolor: alpha(theme.palette.primary.main, 0.08),
-                  },
-                }}
-              >
-                <TimelineIcon style={{ fontSize: 20 }} />
-              </IconButton>
-            </Tooltip>
-          </Box>
-
-          {/* SCROLLABLE CONTENT */}
-          <Box sx={{ flex: 1, overflowY: "auto", pr: 1 }}>
-            <Stack spacing={3}>
-              {/* RESOURCES */}
-              <Stack spacing={1.5} id="resources-section">
-                <Typography
-                  variant="overline"
-                  sx={{
-                    fontWeight: 700,
-                    letterSpacing: 1.1,
-                    color: alpha(theme.palette.text.secondary, 0.85),
-                  }}
-                >
-                  Resources
-                </Typography>
-
-                <Stack spacing={1.5}>
-                  {Object.keys(STATUS_COLORS).map((status) => (
-                    <Stack direction="row" spacing={2} alignItems="center" key={status}>
-                      <Box
-                        sx={{ transform: "scale(0.75)", transformOrigin: "left center" }}
-                        dangerouslySetInnerHTML={{
-                          __html: createResourceSVG(status, false),
-                        }}
-                      />
-                      <Typography variant="caption" color="text.secondary">
-                        {status}
-                      </Typography>
-                    </Stack>
-                  ))}
-                </Stack>
-              </Stack>
-
-              {/* TASKS */}
-              <Stack spacing={1.5} id="tasks-section">
-                <Typography
-                  variant="overline"
-                  sx={{
-                    fontWeight: 700,
-                    letterSpacing: 1.1,
-                    color: alpha(theme.palette.text.secondary, 0.85),
-                  }}
-                >
-                  Tasks
-                </Typography>
-
-                <Stack spacing={1.5}>
-                  {Object.entries(COMMIT_COLORS).map(([type, color]) => (
-                    <Stack direction="row" spacing={2} alignItems="center" key={type}>
-                      <Box
-                        sx={{ transform: "scale(0.75)", transformOrigin: "left center" }}
-                        dangerouslySetInnerHTML={{
-                          __html: createTaskSVG(color, false),
-                        }}
-                      />
-                      <Typography variant="caption" color="text.secondary">
-                        {type}
-                      </Typography>
-                    </Stack>
-                  ))}
-                </Stack>
-              </Stack>
-
-              {/* TIMELINE */}
-              <Stack spacing={1.5} id="timeline-section">
-                <Typography
-                  variant="overline"
-                  sx={{
-                    fontWeight: 700,
-                    letterSpacing: 1.1,
-                    color: alpha(theme.palette.text.secondary, 0.85),
-                  }}
-                >
-                  Timeline
-                </Typography>
-
-                <Stack spacing={1.5}>
-                  <Stack direction="row" spacing={2} alignItems="center">
+                Resources
+              </Typography>
+              <Stack spacing={1.5}>
+                {Object.keys(STATUS_COLORS).map((status) => (
+                  <Stack direction="row" spacing={2} alignItems="center" key={status}>
                     <Box
-                      sx={{
-                        width: 16,
-                        height: 16,
-                        bgcolor: "primary.main",
-                        opacity: 0.15,
-                        borderLeft: "3px solid #000000",
-                        borderRight: "3px solid #000000",
-                        borderRadius: 0,
+                      sx={{ transform: "scale(0.75)", transformOrigin: "left center" }}
+                      dangerouslySetInnerHTML={{
+                        __html: createResourceSVG(status, false),
                       }}
                     />
                     <Typography variant="caption" color="text.secondary">
-                      Working Hours
+                      {status}
                     </Typography>
                   </Stack>
+                ))}
+              </Stack>
+            </Stack>
+          )}
+
+          {/* TASKS TAB */}
+          {activeTab === 1 && (
+            <Stack spacing={1.5}>
+              <Typography
+                variant="overline"
+                sx={{
+                  fontWeight: 700,
+                  letterSpacing: 1.1,
+                  color: alpha(theme.palette.text.secondary, 0.85),
+                }}
+              >
+                Tasks
+              </Typography>
+              <Stack spacing={1.5}>
+                {Object.entries(COMMIT_COLORS).map(([type, color]) => (
+                  <Stack direction="row" spacing={2} alignItems="center" key={type}>
+                    <Box
+                      sx={{ transform: "scale(0.75)", transformOrigin: "left center" }}
+                      dangerouslySetInnerHTML={{
+                        __html: createTaskSVG(color, false),
+                      }}
+                    />
+                    <Typography variant="caption" color="text.secondary">
+                      {type}
+                    </Typography>
+                  </Stack>
+                ))}
+              </Stack>
+            </Stack>
+          )}
+
+          {/* TIMELINE TAB */}
+          {activeTab === 2 && (
+            <Stack spacing={1.5}>
+              <Typography
+                variant="overline"
+                sx={{
+                  fontWeight: 700,
+                  letterSpacing: 1.1,
+                  color: alpha(theme.palette.text.secondary, 0.85),
+                }}
+              >
+                Timeline
+              </Typography>
+              <Stack spacing={1.5}>
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box
+                    sx={{
+                      width: 16,
+                      height: 16,
+                      bgcolor: "primary.main",
+                      opacity: 0.15,
+                      borderLeft: "3px solid #000000",
+                      borderRight: "3px solid #000000",
+                      borderRadius: 0,
+                    }}
+                  />
+                  <Typography variant="caption" color="text.secondary">
+                    Working Hours
+                  </Typography>
                 </Stack>
               </Stack>
             </Stack>
-          </Box>
+          )}
         </Box>
       </Paper>
     </Box>
