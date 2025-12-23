@@ -1,6 +1,5 @@
-// src/SCH_Live/panels/MapLegend.tsx
-import React, { useRef, useState } from "react";
-import { Box, IconButton, Paper, Stack, Typography, Tabs, Tab } from "@mui/material";
+import React, { useState } from "react";
+import { Box, IconButton, Paper, Stack, Typography, Tabs, Tab, Popper, Fade } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import Close from '@mui/icons-material/Close';
 import GroupsIcon from '@mui/icons-material/Groups';
@@ -16,48 +15,34 @@ import {
 interface ScheduleLegendProps {
   visible: boolean;
   onClose: () => void;
+  anchorEl: HTMLElement | null;
 }
 
-export default function ScheduleLegend({ visible, onClose }: ScheduleLegendProps) {
+export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleLegendProps) {
   const theme = useTheme();
-  const legendRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState(0);
-
-  if (!visible) return null;
-
-  const handleBackdropClick = (event: React.MouseEvent) => {
-    if (legendRef.current && !legendRef.current.contains(event.target as Node)) {
-      onClose();
-    }
-  };
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
   };
 
   return (
-    <Box
-      sx={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 9998,
-        backgroundColor: 'rgba(0, 0, 0, 0.1)',
-      }}
-      onClick={handleBackdropClick}
+    <Popper
+      open={visible}
+      anchorEl={anchorEl}
+      placement="bottom-end"
+      transition
+      sx={{ zIndex: 9999 }}
     >
-      <Box
-        ref={legendRef}
-        sx={{
-          position: "absolute",
-          top: theme.spacing(7),
-          right: theme.spacing(4),
-          zIndex: 9999,
-        }}
-      >
-      <Paper
+      {({ TransitionProps }) => (
+        <Fade {...TransitionProps} timeout={200}>
+          <Box
+            sx={{
+              position: "relative",
+              mt: 1, // Small gap from the button
+            }}
+          >
+            <Paper
         elevation={14}
         sx={{
           width: theme.spacing(40),
@@ -230,7 +215,9 @@ export default function ScheduleLegend({ visible, onClose }: ScheduleLegendProps
           )}
         </Box>
       </Paper>
-    </Box>
-    </Box>
+          </Box>
+        </Fade>
+      )}
+    </Popper>
   );
 }

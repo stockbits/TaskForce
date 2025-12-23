@@ -87,6 +87,7 @@ export default function ScheduleLivePage() {
 
   /* ---------------- LEGEND ---------------- */
   const [legendOpen, setLegendOpen] = useState(false);
+  const legendButtonRef = useRef<HTMLButtonElement | null>(null);
 
   /* ---------------- SEARCH TOOL ---------------- */
   const [searchOpen, setSearchOpen] = useState(false);
@@ -639,6 +640,7 @@ export default function ScheduleLivePage() {
       </IconButton>
 
       <IconButton
+        ref={legendButtonRef}
         size="small"
         onClick={() => setLegendOpen((o) => !o)}
         color={legendOpen ? "primary" : "default"}
@@ -935,7 +937,11 @@ export default function ScheduleLivePage() {
         {toolbar}
 
         <Suspense fallback={<div>Loading legend...</div>}>
-          <ScheduleLegend visible={legendOpen} onClose={() => setLegendOpen(false)} />
+          <ScheduleLegend 
+            visible={legendOpen} 
+            onClose={() => setLegendOpen(false)}
+            anchorEl={legendButtonRef.current}
+          />
         </Suspense>
 
         {searchToolPopper}
