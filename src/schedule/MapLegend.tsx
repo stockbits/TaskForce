@@ -30,7 +30,7 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
     <Popper
       open={visible}
       anchorEl={anchorEl}
-      placement="bottom-end"
+      placement="bottom-start"
       transition
       sx={{ zIndex: 9999 }}
     >
@@ -45,7 +45,8 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
             <Paper
         elevation={14}
         sx={{
-          width: theme.spacing(40),
+          minWidth: theme.spacing(32),
+          maxWidth: theme.spacing(45),
           borderRadius: 3,
           px: 3,
           py: 2.5,
@@ -86,12 +87,14 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
             aria-label="legend sections"
             variant="fullWidth"
             sx={{
-              minHeight: 40,
+              minHeight: 48,
               '& .MuiTab-root': {
-                minHeight: 40,
+                minHeight: 48,
                 textTransform: 'none',
                 fontSize: '0.875rem',
                 fontWeight: 500,
+                px: 2,
+                py: 1.5,
               },
             }}
           >
@@ -99,19 +102,19 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
               icon={<GroupsIcon />}
               label="Resources"
               iconPosition="start"
-              sx={{ minHeight: 40 }}
+              sx={{ minHeight: 48 }}
             />
             <Tab
               icon={<AssignmentIcon />}
               label="Tasks"
               iconPosition="start"
-              sx={{ minHeight: 40 }}
+              sx={{ minHeight: 48 }}
             />
             <Tab
               icon={<TimelineIcon />}
               label="Timeline"
               iconPosition="start"
-              sx={{ minHeight: 40 }}
+              sx={{ minHeight: 48 }}
             />
           </Tabs>
         </Box>
