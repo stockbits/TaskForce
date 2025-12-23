@@ -70,11 +70,9 @@ function formatHourLabel(d: Date, step: number, totalHours: number) {
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   }
 
-  // For multiple days (3-7), show date + AM/PM - keep as single day labels
+  // For multiple days (3-7), show just the date (full day columns)
   if (totalDays > 2) {
-    const hour = d.getHours();
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    return `${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })} ${ampm}`;
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   }
 
   // For 1-2 days, show detailed time intervals
@@ -181,7 +179,7 @@ export default function TimelinePanel({
   if (totalDays > 7) {
     step = 24; // Show daily intervals for long ranges
   } else if (totalDays > 2) {
-    step = 12; // Show 12-hour intervals (AM/PM) for medium ranges
+    step = 24; // Show full day intervals for medium ranges (3-7 days)
   } else if (totalHours > 24) {
     step = 6; // Show 6-hour intervals for multi-day but short ranges
   } else {
