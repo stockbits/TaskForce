@@ -303,9 +303,24 @@ export const Sidebar = memo(function Sidebar({
                         key={`${section.title}-${menuIndex}`}
                         itemId={`menu-${sectionIndex}-${menuIndex}`}
                         label={
-                          <Box sx={{ display: 'flex', alignItems: 'center', py: 0.5 }}>
-                            <IconComponent sx={{ fontSize: 18, mr: 1, color: alpha(theme.palette.text.primary, 0.7) }} />
-                            <Typography variant="body2">{menu.label}</Typography>
+                          <Box sx={{ py: 0.5 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <IconComponent sx={{ fontSize: 18, mr: 1, color: alpha(theme.palette.text.primary, 0.7) }} />
+                              <Typography variant="body2" fontWeight={500}>{menu.label}</Typography>
+                            </Box>
+                            {(menu as any).cardData && (menu as any).cardData.description && (
+                              <Typography 
+                                variant="caption" 
+                                sx={{ 
+                                  color: alpha(theme.palette.text.primary, 0.6),
+                                  ml: 3.5, // Align with text after icon
+                                  display: 'block',
+                                  mt: 0.25
+                                }}
+                              >
+                                {(menu as any).cardData.description}
+                              </Typography>
+                            )}
                           </Box>
                         }
                         onClick={() => handleMenuSelect(menu)}
