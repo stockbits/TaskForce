@@ -178,6 +178,66 @@ export default function TimelinePanel({
     }
   }, [isMaximized, totalHours, zoomLevel]); // update when maximized, hours, or zoom changes
 
+  // Mouse and wheel event handling for cursor-based zoom
+  useEffect(() => {
+    const handleWheel = (event: WheelEvent) => {
+      // Only handle zoom if Ctrl is pressed
+      if (!event.ctrlKey) return;
+
+      event.preventDefault();
+
+      const rect = bodyScrollRef.current?.getBoundingClientRect();
+      if (!rect || !bodyScrollRef.current) return;
+
+      // Calculate cursor position relative to timeline content
+      const cursorX = event.clientX - rect.left + bodyScrollRef.current.scrollLeft;
+      
+      // Calculate the time point under cursor before zoom
+      const timeUnderCursor = dateRange.start + (cursorX / PX_PER_HOUR) * MS_HOUR;
+      
+      // Determine zoom direction and calculate new zoom level
+      let newZoomLevel = zoomLevel;
+      if (event.deltaY < 0) {
+        // Zoom in
+        newZoomLevel = Math.min(4, zoomLevel * 1.2);
+      } else {
+        // Zoom out (but not below 1x to prevent wasted space)
+        newZoomLevel = Math.max(1, zoomLevel / 1.2);
+      }
+
+      // Only update if zoom actually changed
+      if (newZoomLevel !== zoomLevel) {
+        setZoomLevel(newZoomLevel);
+        
+        // After zoom change, adjust scroll to keep cursor point centered
+        // Use setTimeout to ensure DOM updates after zoom level change
+        setTimeout(() => {
+          if (!bodyScrollRef.current) return;
+          
+          const newPxPerHour = containerWidth > 0 
+            ? Math.max(10, (containerWidth / totalHours) * newZoomLevel)
+            : 50 * newZoomLevel;
+            
+          // Calculate new scroll position to keep timeUnderCursor at cursorX
+          const newScrollLeft = ((timeUnderCursor - dateRange.start) / MS_HOUR) * newPxPerHour - cursorX;
+          bodyScrollRef.current.scrollTo({ left: Math.max(0, newScrollLeft), behavior: 'auto' });
+        }, 0);
+      }
+    };
+
+    // Add event listeners
+    const timelineElement = bodyScrollRef.current;
+    if (timelineElement) {
+      timelineElement.addEventListener('wheel', handleWheel, { passive: false });
+    }
+
+    return () => {
+      if (timelineElement) {
+        timelineElement.removeEventListener('wheel', handleWheel);
+      }
+    };
+  }, [zoomLevel, dateRange, PX_PER_HOUR, totalHours, containerWidth]);
+
   const categories = useMemo(() => {
     return resources.map((r) => String(r.resourceId ?? r.id ?? "UNKNOWN"));
   }, [resources]);
@@ -341,13 +401,11 @@ export default function TimelinePanel({
           }}
         >
           <IconButton onClick={() => setDateModalOpen(true)} size="small">
-            <CalendarTodayIcon />
+            <CalendarTodayIcon sx={{ fontSize: 16 }} />
           </IconButton>
           <TimelineZoomControl
             onZoomChange={setZoomLevel}
             currentZoom={zoomLevel}
-            totalHours={totalHours}
-            containerWidth={containerWidth}
           />
         </Box>
 

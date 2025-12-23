@@ -7,14 +7,12 @@ import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 interface TimelineZoomControlProps {
   onZoomChange: (zoomLevel: number) => void;
   currentZoom: number;
-  totalHours: number;
-  containerWidth: number;
 }
 
 const ZOOM_LEVELS = [0.5, 0.75, 1, 1.5, 2, 3, 4]; // Zoom multipliers
 const DEFAULT_ZOOM_INDEX = 2; // Index 2 = 1x (normal zoom)
 
-export default function TimelineZoomControl({ onZoomChange, currentZoom: _currentZoom, totalHours: _totalHours, containerWidth: _containerWidth }: TimelineZoomControlProps) {
+export default function TimelineZoomControl({ onZoomChange, currentZoom: _currentZoom }: TimelineZoomControlProps) {
   const [zoomIndex, setZoomIndex] = useState(DEFAULT_ZOOM_INDEX);
   const [isCtrlPressed, setIsCtrlPressed] = useState(false);
 
@@ -31,38 +29,14 @@ export default function TimelineZoomControl({ onZoomChange, currentZoom: _curren
       }
     };
 
-    const handleWheel = (event: WheelEvent) => {
-      if (!isCtrlPressed) return;
-
-      event.preventDefault();
-
-      if (event.deltaY < 0) {
-        // Scroll up - zoom in
-        if (zoomIndex < ZOOM_LEVELS.length - 1) {
-          const newIndex = zoomIndex + 1;
-          setZoomIndex(newIndex);
-          onZoomChange(ZOOM_LEVELS[newIndex]);
-        }
-      } else {
-        // Scroll down - zoom out (prevent going below 1x to avoid wasted space)
-        if (zoomIndex > 2) { // Index 2 is 1x zoom
-          const newIndex = zoomIndex - 1;
-          setZoomIndex(newIndex);
-          onZoomChange(ZOOM_LEVELS[newIndex]);
-        }
-      }
-    };
-
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-    window.addEventListener('wheel', handleWheel, { passive: false });
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
-      window.removeEventListener('wheel', handleWheel);
     };
-  }, [isCtrlPressed, zoomIndex, onZoomChange]);
+  }, []);
 
   const handleResetZoom = () => {
     setZoomIndex(DEFAULT_ZOOM_INDEX);
@@ -76,9 +50,9 @@ export default function TimelineZoomControl({ onZoomChange, currentZoom: _curren
     <Tooltip
       title={
         isCtrlPressed
-          ? `Zoom: ${currentZoomLevel}x - Scroll to zoom in/out, click to reset`
+          ? `Zoom: ${currentZoomLevel}x - Use mouse wheel to zoom at cursor position`
           : isAtDefault
-          ? "Hold Ctrl + scroll to zoom timeline"
+          ? "Hold Ctrl + mouse wheel to zoom timeline at cursor"
           : `Zoom: ${currentZoomLevel}x - Click to reset to default`
       }
     >
@@ -87,18 +61,21 @@ export default function TimelineZoomControl({ onZoomChange, currentZoom: _curren
         onClick={handleResetZoom}
         sx={{
           opacity: isAtDefault ? 0.5 : 1,
-          transition: 'opacity 0.2s',
+          transition: 'all 0.2s',
+          border: !isAtDefault ? '1px solid rgba(0, 0, 0, 0.23)' : 'none',
+          bgcolor: !isAtDefault ? 'rgba(25, 118, 210, 0.08)' : 'transparent',
           '&:hover': {
-            bgcolor: 'action.hover',
+            bgcolor: !isAtDefault ? 'rgba(25, 118, 210, 0.12)' : 'action.hover',
+            border: !isAtDefault ? '1px solid rgba(25, 118, 210, 0.5)' : 'none',
           },
         }}
       >
         {isAtDefault ? (
-          <CenterFocusStrongIcon fontSize="small" />
+          <CenterFocusStrongIcon sx={{ fontSize: 16 }} />
         ) : currentZoomLevel > 1 ? (
-          <ZoomInIcon fontSize="small" />
+          <ZoomInIcon sx={{ fontSize: 16 }} />
         ) : (
-          <ZoomOutIcon fontSize="small" />
+          <ZoomOutIcon sx={{ fontSize: 16 }} />
         )}
       </IconButton>
     </Tooltip>
