@@ -20,8 +20,11 @@ import {
   useTheme,
   TextField,
   InputAdornment,
+  IconButton,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
+import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
+import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import ClipboardList from '@mui/icons-material/ListAlt';
 import Globe from '@mui/icons-material/Public';
 import Calendar from '@mui/icons-material/CalendarMonth';
@@ -34,6 +37,7 @@ import UserCog from '@mui/icons-material/AdminPanelSettings';
 import LogOut from '@mui/icons-material/Logout';
 import Folder from '@mui/icons-material/Folder';
 import Search from '@mui/icons-material/Search';
+import Clear from '@mui/icons-material/Clear';
 import { allTiles } from "./menuRegistry";
 
 const userMenus = [
@@ -231,6 +235,18 @@ export const Sidebar = memo(function Sidebar({
                 <Search sx={{ fontSize: 16, color: alpha(theme.palette.text.primary, 0.6) }} />
               </InputAdornment>
             ),
+            endAdornment: filterText && (
+              <InputAdornment position="end">
+                <IconButton
+                  size="small"
+                  onClick={() => setFilterText("")}
+                  sx={{ mr: 0.5 }}
+                  aria-label="clear search"
+                >
+                  <Clear sx={{ fontSize: 16 }} />
+                </IconButton>
+              </InputAdornment>
+            ),
             sx: {
               fontSize: 14,
               "& .MuiOutlinedInput-notchedOutline": {
@@ -245,10 +261,65 @@ export const Sidebar = memo(function Sidebar({
             },
           }}
         />
+
+        {/* Tree View Filter Results */}
+        {filterText.trim() && (
+          <Box sx={{ mt: 2, maxHeight: 300, overflowY: 'auto' }}>
+            <SimpleTreeView
+              sx={{
+                '& .MuiTreeItem-root': {
+                  '& .MuiTreeItem-content': {
+                    py: 0.5,
+                    px: 1,
+                    borderRadius: 1,
+                    '&:hover': {
+                      backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                    },
+                    '&.Mui-selected': {
+                      backgroundColor: alpha(theme.palette.primary.main, 0.12),
+                      '&:hover': {
+                        backgroundColor: alpha(theme.palette.primary.main, 0.16),
+                      },
+                    },
+                  },
+                },
+              }}
+            >
+              {filteredSections.map((section, sectionIndex) => (
+                <TreeItem
+                  key={section.title}
+                  itemId={`section-${sectionIndex}`}
+                  label={
+                    <Typography variant="subtitle2" fontWeight={600} sx={{ py: 0.5 }}>
+                      {section.title}
+                    </Typography>
+                  }
+                >
+                  {section.menus.map((menu, menuIndex) => {
+                    const IconComponent = menu.icon;
+                    return (
+                      <TreeItem
+                        key={`${section.title}-${menuIndex}`}
+                        itemId={`menu-${sectionIndex}-${menuIndex}`}
+                        label={
+                          <Box sx={{ display: 'flex', alignItems: 'center', py: 0.5 }}>
+                            <IconComponent sx={{ fontSize: 18, mr: 1, color: alpha(theme.palette.text.primary, 0.7) }} />
+                            <Typography variant="body2">{menu.label}</Typography>
+                          </Box>
+                        }
+                        onClick={() => handleMenuSelect(menu)}
+                      />
+                    );
+                  })}
+                </TreeItem>
+              ))}
+            </SimpleTreeView>
+          </Box>
+        )}
       </Box>
 
       <Box sx={{ flex: 1, overflowY: "auto", py: 1 }}>
-        {filteredSections.map(({ title, menus }) => (
+        {!filterText.trim() && filteredSections.map(({ title, menus }) => (
           <React.Fragment key={title}>
             <SectionBlock
               title={title}

@@ -16,6 +16,7 @@
     "@mui/material": "^6.1.7",
     "@mui/x-data-grid": "^6.1.0",
     "@mui/x-date-pickers": "^8.22.1",
+    "@mui/x-tree-view": "^8.22.0",
     "@types/node": "24.10.0",
     "date-fns": "^4.1.0",
     "leaflet": "^1.9.4",
