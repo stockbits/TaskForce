@@ -9,6 +9,8 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  Chip,
+  Stack,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
@@ -103,6 +105,20 @@ export default function TimelinePanel({
   const setEndDate = onEndDateChange;
 
   const [dateModalOpen, setDateModalOpen] = useState(false);
+
+  // Quick date range selection
+  const handleQuickSelect = (days: number) => {
+    const today = new Date();
+    const start = new Date(today);
+    start.setHours(5, 0, 0, 0); // start at 5:00 AM
+
+    const end = new Date(today);
+    end.setDate(end.getDate() + (days - 1)); // Add days - 1 to get the correct end date
+    end.setHours(23, 59, 59, 999); // end at 11:59:59 PM
+
+    onStartDateChange(start);
+    onEndDateChange(end);
+  };
 
   const headerScrollRef = useRef<HTMLDivElement>(null);
   const bodyScrollRef = useRef<HTMLDivElement>(null);
@@ -456,6 +472,25 @@ export default function TimelinePanel({
                 }}
                 slotProps={{ textField: { fullWidth: true } }}
               />
+            </Box>
+
+            {/* Quick Selection Chips */}
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
+                Quick Select:
+              </Typography>
+              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                {[1, 2, 4, 6, 8, 10, 12].map((days) => (
+                  <Chip
+                    key={days}
+                    label={days === 1 ? 'Today' : `${days} days`}
+                    size="small"
+                    variant="outlined"
+                    onClick={() => handleQuickSelect(days)}
+                    sx={{ minWidth: 70 }}
+                  />
+                ))}
+              </Stack>
             </Box>
           </LocalizationProvider>
         </DialogContent>
