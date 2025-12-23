@@ -419,13 +419,14 @@ export default function TimelinePanel({
                     title="Working Time"
                     sx={{
                       position: "absolute",
-                      top: 14,
+                      top: 0,
                       left: b.leftPx,
                       width: b.widthPx,
-                      height: 28,
-                      borderRadius: 1,
-                      bgcolor: "rgba(220, 0, 0, 0.18)",
-                      border: "1px solid rgba(220, 0, 0, 0.45)",
+                      height: ROW_HEIGHT,
+                      borderRadius: 0,
+                      bgcolor: "rgba(220, 0, 0, 0.12)",
+                      borderLeft: "2px solid rgba(220, 0, 0, 0.6)",
+                      borderRight: "2px solid rgba(220, 0, 0, 0.6)",
                       boxSizing: "border-box",
                     }}
                   />
