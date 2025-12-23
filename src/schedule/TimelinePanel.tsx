@@ -424,9 +424,12 @@ export default function TimelinePanel({
                       width: b.widthPx,
                       height: ROW_HEIGHT,
                       borderRadius: 0,
-                      bgcolor: "rgba(220, 0, 0, 0.12)",
-                      borderLeft: "2px solid rgba(220, 0, 0, 0.6)",
-                      borderRight: "2px solid rgba(220, 0, 0, 0.6)",
+                      bgcolor: "primary.main",
+                      opacity: 0.15,
+                      borderLeft: "2px solid",
+                      borderLeftColor: "primary.main",
+                      borderRight: "2px solid",
+                      borderRightColor: "primary.main",
                       boxSizing: "border-box",
                     }}
                   />
