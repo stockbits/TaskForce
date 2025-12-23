@@ -6,7 +6,7 @@
 import React, { useState, useMemo, useRef, useCallback, lazy, Suspense } from "react";
 import type { ScheduleLiveSearchFilters } from "@/shared-ui";
 
-const ScheduleLegend = lazy(() => import("./MapLegend"));
+const ScheduleLegend = lazy(() => import("./UILegend"));
 const ScheduleLiveSearch = lazy(() => import("@/shared-ui").then(m => ({ default: m.ScheduleLiveSearch })));
 const TimelinePanel = lazy(() => import("./TimelinePanel"));
 const MapPanel = lazy(() => import("./MapPanel"));

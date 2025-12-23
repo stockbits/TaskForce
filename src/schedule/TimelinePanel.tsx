@@ -11,6 +11,7 @@ import {
   Button,
   Chip,
   Stack,
+  Tooltip,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
@@ -25,6 +26,8 @@ type ResourceRow = {
   id?: string;
   shiftStart?: string; // e.g. "6:00 AM"
   shiftEnd?: string; // e.g. "2:00 PM"
+  lunchStart?: string; // e.g. "12:00 PM"
+  lunchEnd?: string; // e.g. "12:30 PM"
 };
 
 const MS_HOUR = 60 * 60 * 1000;
@@ -83,6 +86,11 @@ function formatHourLabel(d: Date, step: number, totalHours: number) {
   const ampm = hour >= 12 ? 'PM' : 'AM';
   const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
   return `${displayHour} ${ampm}`;
+}
+
+function formatLunchTooltip(lunchStart?: string, lunchEnd?: string): string {
+  if (!lunchStart || !lunchEnd) return "Lunch Break";
+  return `Expected Lunch Time: ${lunchStart} - ${lunchEnd}`;
 }
 
 export default function TimelinePanel({
@@ -212,6 +220,57 @@ export default function TimelinePanel({
         let endMs = end.getTime();
 
         // Overnight shift support (e.g. 10PM -> 6AM)
+        if (endMs <= startMs) endMs += MS_DAY;
+
+        // Clip to visible range
+        const clippedStart = clamp(startMs, dateRange.start, dateRange.end);
+        const clippedEnd = clamp(endMs, dateRange.start, dateRange.end);
+
+        if (clippedEnd > clippedStart) {
+          const leftPx =
+            ((clippedStart - dateRange.start) / MS_HOUR) * PX_PER_HOUR;
+          const widthPx = ((clippedEnd - clippedStart) / MS_HOUR) * PX_PER_HOUR;
+          bars.push({ leftPx, widthPx });
+        }
+
+        cursor.setDate(cursor.getDate() + 1);
+      }
+
+      rows.push(bars);
+    }
+
+    return rows;
+  }, [resources, dateRange, PX_PER_HOUR]);
+
+  // Build lunch break bars
+  const lunchBarsByRow = useMemo(() => {
+    const rows: Array<Array<{ leftPx: number; widthPx: number }>> = [];
+
+    for (let y = 0; y < resources.length; y++) {
+      const r = resources[y];
+      const lunchStartT = parseShiftTime(r.lunchStart);
+      const lunchEndT = parseShiftTime(r.lunchEnd);
+
+      const bars: Array<{ leftPx: number; widthPx: number }> = [];
+      if (!lunchStartT || !lunchEndT) {
+        rows.push(bars);
+        continue;
+      }
+
+      const cursor = new Date(dateRange.startDate);
+      const last = new Date(dateRange.endDate);
+
+      while (cursor <= last) {
+        const start = new Date(cursor);
+        const end = new Date(cursor);
+
+        start.setHours(lunchStartT.h, lunchStartT.m, 0, 0);
+        end.setHours(lunchEndT.h, lunchEndT.m, 0, 0);
+
+        let startMs = start.getTime();
+        let endMs = end.getTime();
+
+        // Overnight lunch support (unlikely but possible)
         if (endMs <= startMs) endMs += MS_DAY;
 
         // Clip to visible range
@@ -431,6 +490,32 @@ export default function TimelinePanel({
                       boxSizing: "border-box",
                     }}
                   />
+                ))}
+
+                {/* lunch break bars */}
+                {lunchBarsByRow[rowIndex]?.map((b, i) => (
+                  <Tooltip
+                    key={`${rid}-lunch-${i}`}
+                    title={formatLunchTooltip(resources[rowIndex]?.lunchStart, resources[rowIndex]?.lunchEnd)}
+                    placement="top"
+                  >
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 0,
+                        left: b.leftPx,
+                        width: b.widthPx,
+                        height: ROW_HEIGHT,
+                        borderRadius: 0,
+                        bgcolor: "#ff9800", // Orange color for lunch breaks
+                        opacity: 0.25,
+                        borderLeft: "2px solid #e65100",
+                        borderRight: "2px solid #e65100",
+                        boxSizing: "border-box",
+                        cursor: "pointer",
+                      }}
+                    />
+                  </Tooltip>
                 ))}
               </Box>
             ))}

@@ -213,6 +213,20 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
                     Working Hours
                   </Typography>
                 </Stack>
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box
+                    sx={{
+                      width: 16,
+                      height: 16,
+                      bgcolor: "#ff9800",
+                      opacity: 0.8,
+                      borderRadius: 0,
+                    }}
+                  />
+                  <Typography variant="caption" color="text.secondary">
+                    Lunch Break
+                  </Typography>
+                </Stack>
               </Stack>
             </Stack>
           )}

@@ -18,7 +18,9 @@
     "homeLat": 51.71352,
     "homeLng": -3.44879,
     "shiftStart": "6:00 AM",
-    "shiftEnd": "2:00 PM"
+    "shiftEnd": "2:00 PM",
+    "lunchStart": "12:00 PM",
+    "lunchEnd": "12:30 PM"
   },
   {
     "resourceId": "QWERB33",
@@ -45,7 +47,9 @@
     "homeLat": 51.71114,
     "homeLng": -3.43291,
     "shiftStart": "7:00 AM",
-    "shiftEnd": "3:00 PM"
+    "shiftEnd": "3:00 PM",
+    "lunchStart": "12:30 PM",
+    "lunchEnd": "1:00 PM"
   },
   {
     "resourceId": "PLMKC14",
@@ -66,7 +70,9 @@
     "homeLat": 51.72127,
     "homeLng": -3.44844,
     "shiftStart": "8:00 AM",
-    "shiftEnd": "4:00 PM"
+    "shiftEnd": "4:00 PM",
+    "lunchStart": "12:00 PM",
+    "lunchEnd": "12:30 PM"
   },
   {
     "resourceId": "GHJTQ55",
@@ -87,7 +93,9 @@
     "homeLat": 51.69994,
     "homeLng": -3.43041,
     "shiftStart": "9:00 AM",
-    "shiftEnd": "5:00 PM"
+    "shiftEnd": "5:00 PM",
+    "lunchStart": "12:30 PM",
+    "lunchEnd": "1:00 PM"
   },
   {
     "resourceId": "MNBGD82",
@@ -108,7 +116,9 @@
     "homeLat": 51.73152,
     "homeLng": -3.50623,
     "shiftStart": "6:30 AM",
-    "shiftEnd": "2:30 PM"
+    "shiftEnd": "2:30 PM",
+    "lunchStart": "12:00 PM",
+    "lunchEnd": "12:30 PM"
   },
   {
     "resourceId": "LKJHF22",
@@ -129,7 +139,9 @@
     "homeLat": 51.68691,
     "homeLng": -3.37852,
     "shiftStart": "7:30 AM",
-    "shiftEnd": "3:30 PM"
+    "shiftEnd": "3:30 PM",
+    "lunchStart": "12:00 PM",
+    "lunchEnd": "12:30 PM"
   },
   {
     "resourceId": "ASDFR91",
@@ -156,7 +168,9 @@
     "homeLat": 51.74842,
     "homeLng": -3.38123,
     "shiftStart": "8:30 AM",
-    "shiftEnd": "4:30 PM"
+    "shiftEnd": "4:30 PM",
+    "lunchStart": "12:30 PM",
+    "lunchEnd": "1:00 PM"
   },
   {
     "resourceId": "ZXCVS67",
@@ -177,7 +191,9 @@
     "homeLat": 51.70887,
     "homeLng": -3.43811,
     "shiftStart": "6:00 AM",
-    "shiftEnd": "6:00 PM"
+    "shiftEnd": "6:00 PM",
+    "lunchStart": "12:00 PM",
+    "lunchEnd": "1:00 PM"
   },
   {
     "resourceId": "BNMAS49",
@@ -198,7 +214,9 @@
     "homeLat": 51.65761,
     "homeLng": -3.50744,
     "shiftStart": "7:00 AM",
-    "shiftEnd": "7:00 PM"
+    "shiftEnd": "7:00 PM",
+    "lunchStart": "12:30 PM",
+    "lunchEnd": "1:30 PM"
   },
   {
     "resourceId": "POIUY73",
@@ -219,7 +237,9 @@
     "homeLat": 51.71601,
     "homeLng": -3.45192,
     "shiftStart": "8:00 AM",
-    "shiftEnd": "8:00 PM"
+    "shiftEnd": "8:00 PM",
+    "lunchStart": "1:00 PM",
+    "lunchEnd": "2:00 PM"
   },
   {
     "resourceId": "UJMKL89",
@@ -240,7 +260,9 @@
     "homeLat": 51.71074,
     "homeLng": -3.44591,
     "shiftStart": "6:00 AM",
-    "shiftEnd": "2:00 PM"
+    "shiftEnd": "2:00 PM",
+    "lunchStart": "12:00 PM",
+    "lunchEnd": "12:30 PM"
   },
   {
     "resourceId": "KJHGF02",
@@ -261,7 +283,9 @@
     "homeLat": 51.70818,
     "homeLng": -3.42742,
     "shiftStart": "7:00 AM",
-    "shiftEnd": "3:00 PM"
+    "shiftEnd": "3:00 PM",
+    "lunchStart": "12:00 PM",
+    "lunchEnd": "12:30 PM"
   },
   {
     "resourceId": "RTYHN44",
@@ -282,7 +306,9 @@
     "homeLat": 51.72475,
     "homeLng": -3.4862,
     "shiftStart": "8:00 AM",
-    "shiftEnd": "4:00 PM"
+    "shiftEnd": "4:00 PM",
+    "lunchStart": "12:00 PM",
+    "lunchEnd": "12:30 PM"
   },
   {
     "resourceId": "SDNEW21",
@@ -303,7 +329,9 @@
     "homeLat": 51.71955,
     "homeLng": -3.45591,
     "shiftStart": "9:00 AM",
-    "shiftEnd": "5:00 PM"
+    "shiftEnd": "5:00 PM",
+    "lunchStart": "12:30 PM",
+    "lunchEnd": "1:00 PM"
   },
   {
     "resourceId": "SDNEW22",
@@ -324,7 +352,9 @@
     "homeLat": 51.70082,
     "homeLng": -3.4211,
     "shiftStart": "6:30 AM",
-    "shiftEnd": "2:30 PM"
+    "shiftEnd": "2:30 PM",
+    "lunchStart": "12:00 PM",
+    "lunchEnd": "12:30 PM"
   },
   {
     "resourceId": "SDNEW23",
@@ -345,7 +375,9 @@
     "homeLat": 51.70692,
     "homeLng": -3.43092,
     "shiftStart": "7:30 AM",
-    "shiftEnd": "3:30 PM"
+    "shiftEnd": "3:30 PM",
+    "lunchStart": "12:00 PM",
+    "lunchEnd": "12:30 PM"
   },
   {
     "resourceId": "SDNEW24",
@@ -366,7 +398,9 @@
     "homeLat": 51.71381,
     "homeLng": -3.45514,
     "shiftStart": "8:30 AM",
-    "shiftEnd": "4:30 PM"
+    "shiftEnd": "4:30 PM",
+    "lunchStart": "12:30 PM",
+    "lunchEnd": "1:00 PM"
   },
   {
     "resourceId": "SDNEW25",
@@ -393,7 +427,9 @@
     "homeLat": 51.7261,
     "homeLng": -3.49125,
     "shiftStart": "6:00 AM",
-    "shiftEnd": "6:00 PM"
+    "shiftEnd": "6:00 PM",
+    "lunchStart": "12:00 PM",
+    "lunchEnd": "1:00 PM"
   },
   {
     "resourceId": "SDNEW26",
@@ -414,7 +450,9 @@
     "homeLat": 51.70102,
     "homeLng": -3.43274,
     "shiftStart": "7:00 AM",
-    "shiftEnd": "7:00 PM"
+    "shiftEnd": "7:00 PM",
+    "lunchStart": "12:30 PM",
+    "lunchEnd": "1:30 PM"
   },
   {
     "resourceId": "SDNEW27",
@@ -435,7 +473,9 @@
     "homeLat": 51.72982,
     "homeLng": -3.50008,
     "shiftStart": "8:00 AM",
-    "shiftEnd": "8:00 PM"
+    "shiftEnd": "8:00 PM",
+    "lunchStart": "1:00 PM",
+    "lunchEnd": "2:00 PM"
   },
   {
     "resourceId": "FJNEW28",
@@ -456,7 +496,9 @@
     "homeLat": 51.71743,
     "homeLng": -3.45271,
     "shiftStart": "6:00 AM",
-    "shiftEnd": "2:00 PM"
+    "shiftEnd": "2:00 PM",
+    "lunchStart": "12:00 PM",
+    "lunchEnd": "12:30 PM"
   },
   {
     "resourceId": "FJNEW29",
@@ -477,7 +519,9 @@
     "homeLat": 51.72288,
     "homeLng": -3.45934,
     "shiftStart": "7:00 AM",
-    "shiftEnd": "3:00 PM"
+    "shiftEnd": "3:00 PM",
+    "lunchStart": "12:00 PM",
+    "lunchEnd": "12:30 PM"
   },
   {
     "resourceId": "FJNEW30",
@@ -498,6 +542,8 @@
     "homeLat": 51.70412,
     "homeLng": -3.42566,
     "shiftStart": "8:00 AM",
-    "shiftEnd": "4:00 PM"
+    "shiftEnd": "4:00 PM",
+    "lunchStart": "12:00 PM",
+    "lunchEnd": "12:30 PM"
   }
 ]
