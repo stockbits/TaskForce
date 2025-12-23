@@ -427,9 +427,9 @@ export default function TimelinePanel({
                       bgcolor: "primary.main",
                       opacity: 0.15,
                       borderLeft: "2px solid",
-                      borderLeftColor: "primary.main",
+                      borderLeftColor: "text.primary",
                       borderRight: "2px solid",
-                      borderRightColor: "primary.main",
+                      borderRightColor: "text.primary",
                       boxSizing: "border-box",
                     }}
                   />

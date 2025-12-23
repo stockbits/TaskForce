@@ -10,12 +10,12 @@ import {
   createResourceSVG,
 } from "@/shared-config/pins";
 
-interface MapLegendProps {
+interface ScheduleLegendProps {
   visible: boolean;
   onClose: () => void;
 }
 
-export default function MapLegend({ visible, onClose }: MapLegendProps) {
+export default function ScheduleLegend({ visible, onClose }: ScheduleLegendProps) {
   const theme = useTheme();
   if (!visible) return null;
 
@@ -44,7 +44,7 @@ export default function MapLegend({ visible, onClose }: MapLegendProps) {
           {/* HEADER */}
           <Stack direction="row" alignItems="center" justifyContent="space-between">
             <Typography variant="subtitle2" fontWeight={600} color="text.primary">
-              Map Legend
+              Schedule Legend
             </Typography>
             <IconButton
               size="small"
@@ -119,6 +119,41 @@ export default function MapLegend({ visible, onClose }: MapLegendProps) {
                   </Typography>
                 </Stack>
               ))}
+            </Stack>
+          </Stack>
+
+          {/* TIMELINE */}
+          <Stack spacing={1.5}>
+            <Typography
+              variant="overline"
+              sx={{
+                fontWeight: 700,
+                letterSpacing: 1.1,
+                color: alpha(theme.palette.text.secondary, 0.85),
+              }}
+            >
+              Timeline
+            </Typography>
+
+            <Stack spacing={1.5}>
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Box
+                  sx={{
+                    width: 16,
+                    height: 16,
+                    bgcolor: "primary.main",
+                    opacity: 0.15,
+                    borderLeft: "2px solid",
+                    borderLeftColor: "text.primary",
+                    borderRight: "2px solid",
+                    borderRightColor: "text.primary",
+                    borderRadius: 0,
+                  }}
+                />
+                <Typography variant="caption" color="text.secondary">
+                  Working Hours
+                </Typography>
+              </Stack>
             </Stack>
           </Stack>
         </Stack>

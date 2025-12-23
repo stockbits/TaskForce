@@ -6,7 +6,7 @@
 import React, { useState, useMemo, useRef, useCallback, lazy, Suspense } from "react";
 import type { ScheduleLiveSearchFilters } from "@/shared-ui";
 
-const MapLegend = lazy(() => import("./MapLegend"));
+const ScheduleLegend = lazy(() => import("./MapLegend"));
 const ScheduleLiveSearch = lazy(() => import("@/shared-ui").then(m => ({ default: m.ScheduleLiveSearch })));
 const TimelinePanel = lazy(() => import("./TimelinePanel"));
 const MapPanel = lazy(() => import("./MapPanel"));
@@ -655,7 +655,7 @@ export default function ScheduleLivePage() {
           }),
           mr: 1,
         }}
-        title="Map Legend"
+        title="Schedule Legend"
       >
         <Info sx={{ fontSize: 16 }} />
       </IconButton>
@@ -935,7 +935,7 @@ export default function ScheduleLivePage() {
         {toolbar}
 
         <Suspense fallback={<div>Loading legend...</div>}>
-          <MapLegend visible={legendOpen} onClose={() => setLegendOpen(false)} />
+          <ScheduleLegend visible={legendOpen} onClose={() => setLegendOpen(false)} />
         </Suspense>
 
         {searchToolPopper}
