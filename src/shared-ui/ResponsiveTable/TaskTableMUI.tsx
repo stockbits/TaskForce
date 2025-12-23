@@ -220,8 +220,12 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
             onSelectionChange(selected as Record<string, any>[]);
           }
         } else {
-          // For uncontrolled components, update internal state
+          // For uncontrolled components, update internal state and notify parent
           setSelection((prev) => (Array.isArray(prev) && prev.includes(String(id)) ? prev : [String(id)]));
+          if (onSelectionChange) {
+            const selected = (gridRows || []).filter((r) => String(r.id) === String(id));
+            onSelectionChange(selected as Record<string, any>[]);
+          }
         }
         // We select the right-clicked row; let DataGrid manage selection indices for shift/range.
       }
@@ -393,8 +397,12 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
               const selectedRows = gridRows.filter(r => safeSelectionIds.includes(String(r.id)));
               onSelectionChange(selectedRows as Record<string, any>[]);
             } else {
-              // For uncontrolled components, update internal state
+              // For uncontrolled components, update internal state and notify parent
               setSelection(safeSelectionIds);
+              if (onSelectionChange) {
+                const selectedRows = gridRows.filter(r => safeSelectionIds.includes(String(r.id)));
+                onSelectionChange(selectedRows as Record<string, any>[]);
+              }
             }
           }}
           getRowClassName={(params: any) => {

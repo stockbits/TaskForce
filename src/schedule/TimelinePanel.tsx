@@ -151,6 +151,21 @@ export default function TimelinePanel({
 
   const [containerWidth, setContainerWidth] = useState(0);
 
+  // ResizeObserver to track container size changes
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContainerWidth(entry.contentRect.width);
+      }
+    });
+
+    resizeObserver.observe(element);
+    return () => resizeObserver.disconnect();
+  }, []);
+
   // Layout constants (keep simple + predictable)
   const LABEL_COL_WIDTH = 160;
   const ROW_HEIGHT = 40;
@@ -167,12 +182,9 @@ export default function TimelinePanel({
   const totalHours = Math.ceil((dateRange.end - dateRange.start) / MS_HOUR);
   const totalDays = Math.ceil(totalHours / 24);
 
-  const PX_PER_HOUR =
-    containerWidth > 0
-      ? Math.max(10, (containerWidth / totalHours) * zoomLevel)
-      : totalHours <= 24
-      ? 50 * zoomLevel
-      : Math.max(10, 50 * (24 / totalHours) * zoomLevel);
+  const PX_PER_HOUR = totalHours <= 24
+    ? 50 * zoomLevel
+    : Math.max(10, 50 * (24 / totalHours) * zoomLevel);
 
   // Dynamic step calculation based on total days
   let step = 1;
@@ -185,12 +197,6 @@ export default function TimelinePanel({
   } else {
     step = 1; // Show hourly intervals for single day
   }
-
-  useEffect(() => {
-    if (containerRef.current) {
-      setContainerWidth(containerRef.current.clientWidth);
-    }
-  }, [isMaximized, totalHours, zoomLevel]); // update when maximized, hours, or zoom changes
 
   // Mouse and wheel event handling for cursor-based zoom
   useEffect(() => {
@@ -228,9 +234,9 @@ export default function TimelinePanel({
         setTimeout(() => {
           if (!bodyScrollRef.current) return;
           
-          const newPxPerHour = containerWidth > 0 
-            ? Math.max(10, (containerWidth / totalHours) * newZoomLevel)
-            : 50 * newZoomLevel;
+          const newPxPerHour = totalHours <= 24
+            ? 50 * newZoomLevel
+            : Math.max(10, 50 * (24 / totalHours) * newZoomLevel);
             
           // Calculate new scroll position to keep timeUnderCursor at cursorX
           const newScrollLeft = ((timeUnderCursor - dateRange.start) / MS_HOUR) * newPxPerHour - cursorX;
@@ -265,7 +271,7 @@ export default function TimelinePanel({
     return out;
   }, [dateRange, totalHours, step]);
 
-  const contentWidth = totalHours * PX_PER_HOUR;
+  const contentWidth = Math.max(containerWidth || 0, totalHours * PX_PER_HOUR);
 
   // Build shift bars only
   const shiftBarsByRow = useMemo(() => {
@@ -371,15 +377,29 @@ export default function TimelinePanel({
 
   const syncFromBody = () => {
     if (!headerScrollRef.current || !bodyScrollRef.current) return;
-    headerScrollRef.current.scrollLeft = bodyScrollRef.current.scrollLeft;
+    const header = headerScrollRef.current;
+    const body = bodyScrollRef.current;
+    const headerScrollMax = header.scrollWidth - header.clientWidth;
+    const bodyScrollMax = body.scrollWidth - body.clientWidth;
+    if (headerScrollMax > 0 && bodyScrollMax > 0) {
+      const fraction = body.scrollLeft / bodyScrollMax;
+      header.scrollLeft = fraction * headerScrollMax;
+    }
     if (leftScrollRef.current) {
-      leftScrollRef.current.scrollTop = bodyScrollRef.current.scrollTop;
+      leftScrollRef.current.scrollTop = body.scrollTop;
     }
   };
 
   const syncBodyFromHeader = () => {
     if (!headerScrollRef.current || !bodyScrollRef.current) return;
-    bodyScrollRef.current.scrollLeft = headerScrollRef.current.scrollLeft;
+    const header = headerScrollRef.current;
+    const body = bodyScrollRef.current;
+    const headerScrollMax = header.scrollWidth - header.clientWidth;
+    const bodyScrollMax = body.scrollWidth - body.clientWidth;
+    if (headerScrollMax > 0 && bodyScrollMax > 0) {
+      const fraction = header.scrollLeft / headerScrollMax;
+      body.scrollLeft = fraction * bodyScrollMax;
+    }
   };
 
   return (
@@ -390,6 +410,7 @@ export default function TimelinePanel({
         display: "flex",
         flexDirection: "column",
         bgcolor: "#fafafa",
+        overflow: isMaximized ? "hidden" : "visible",
       }}
     >
       {/* Header */}
@@ -430,7 +451,7 @@ export default function TimelinePanel({
           sx={{
             flex: 1,
             overflowX: isMaximized ? "hidden" : "auto",
-            overflowY: "auto",
+            overflowY: "hidden",
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >

@@ -173,23 +173,45 @@ export default function TaskRowContextMenu({
           left: x,
           minWidth: `min(90vw, ${24 * 14.1667}px)`, // 340px, use theme.spacing(42.5) if available
           zIndex: 99999,
+          pointerEvents: "auto",
+          backgroundColor: "white",
+          border: "1px solid #ccc",
+          borderRadius: "8px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          padding: "8px 0",
+          listStyle: "none",
+          margin: 0,
         }}
-        className="rounded-xl border border-gray-200 bg-white shadow-xl text-sm text-gray-800 py-1 overflow-hidden"
         onMouseDown={(e) => e.stopPropagation()}
       >
+          {/* Debug info */}
+          <li style={{ padding: "8px 16px", fontSize: "12px", color: "#666", borderBottom: "1px solid #eee" }}>
+            Debug: actionableRows={actionableRows.length}, selectedRows={selectedRows.length}, clickedRow={clickedRow ? "yes" : "no"}
+          </li>
+
           {/* ---------------------------
               COPY VALUE
           --------------------------- */}
           {clickedColumnKey && clickedRow && (
             <li
               onClick={handleCopyValue}
-              className="px-4 py-2.5 flex items-center gap-3 cursor-pointer 
-                         hover:bg-gray-50 transition-all"
+              onMouseDown={(e) => e.stopPropagation()}
+              style={{
+                padding: "10px 16px",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                cursor: "pointer",
+                backgroundColor: "transparent",
+                transition: "background-color 0.2s",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f5f5f5"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
             >
-              <ContentCopy sx={{ fontSize: 15 }} className="text-gray-700" />
-              <span className="text-gray-800">
+              <ContentCopy sx={{ fontSize: 15 }} style={{ color: "#666" }} />
+              <span style={{ color: "#333", fontSize: "14px" }}>
                 Copy value:{" "}
-                <span className="font-semibold">{previewValue}</span>
+                <span style={{ fontWeight: "bold" }}>{previewValue}</span>
               </span>
             </li>
           )}
@@ -200,11 +222,21 @@ export default function TaskRowContextMenu({
           {actionableRows.length > 0 && onProgressTasks && (
             <li
               onClick={handleProgressTasks}
-              className="px-4 py-2.5 flex items-center gap-3 cursor-pointer 
-                         hover:bg-gray-50 transition-all"
+              onMouseDown={(e) => e.stopPropagation()}
+              style={{
+                padding: "10px 16px",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                cursor: "pointer",
+                backgroundColor: "transparent",
+                transition: "background-color 0.2s",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f5f5f5"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
             >
-              <ListAlt style={{ fontSize: 15 }} className="text-[#0A4A7A]" />
-              <span className="font-medium text-gray-800">
+              <ListAlt style={{ fontSize: 15, color: "#0A4A7A" }} />
+              <span style={{ color: "#333", fontSize: "14px", fontWeight: "500" }}>
                 {multiCount > 1 ? `Progress Tasks (${multiCount})` : "Progress Task"}
               </span>
             </li>
@@ -216,11 +248,21 @@ export default function TaskRowContextMenu({
           {actionableRows.length > 0 && onProgressNotes && (
             <li
               onClick={handleProgressNotes}
-              className="px-4 py-2.5 flex items-center gap-3 cursor-pointer 
-                         hover:bg-gray-50 transition-all"
+              onMouseDown={(e) => e.stopPropagation()}
+              style={{
+                padding: "10px 16px",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                cursor: "pointer",
+                backgroundColor: "transparent",
+                transition: "background-color 0.2s",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f5f5f5"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
             >
-              <StickyNote2 style={{ fontSize: 15 }} className="text-[#0A4A7A]" />
-              <span className="font-medium text-gray-800">
+              <StickyNote2 style={{ fontSize: 15, color: "#0A4A7A" }} />
+              <span style={{ color: "#333", fontSize: "14px", fontWeight: "500" }}>
                 {multiCount > 1
                   ? `Progress Notes (${multiCount})`
                   : "Progress Notes"}
@@ -233,11 +275,21 @@ export default function TaskRowContextMenu({
           --------------------------- */}
           <li
             onClick={handleOpen}
-            className="px-4 py-2.5 flex items-center gap-3 cursor-pointer 
-                       hover:bg-gray-50 transition-all"
+            onMouseDown={(e) => e.stopPropagation()}
+            style={{
+              padding: "10px 16px",
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              cursor: "pointer",
+              backgroundColor: "transparent",
+              transition: "background-color 0.2s",
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f5f5f5"}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
           >
-            <Visibility style={{ fontSize: 15 }} className="text-gray-700" />
-            <span className="font-medium text-gray-800">{viewLabel}</span>
+            <Visibility style={{ fontSize: 15, color: "#666" }} />
+            <span style={{ color: "#333", fontSize: "14px", fontWeight: "500" }}>{viewLabel}</span>
           </li>
 
           {/* ---------------------------
@@ -245,17 +297,24 @@ export default function TaskRowContextMenu({
           --------------------------- */}
           <li
             onClick={handleCalloutIncident}
-            className={
-              `px-4 py-2.5 flex items-center gap-3 transition-all ` +
-              (actionableRows.length === 1
-                ? 'cursor-pointer hover:bg-red-50 text-red-700'
-                : 'opacity-40 cursor-not-allowed text-gray-500')
-            }
-            role="menuitem"
-            aria-disabled={actionableRows.length !== 1}
+            onMouseDown={(e) => e.stopPropagation()}
+            style={{
+              padding: "10px 16px",
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              cursor: actionableRows.length === 1 ? "pointer" : "not-allowed",
+              backgroundColor: "transparent",
+              transition: "background-color 0.2s",
+              opacity: actionableRows.length === 1 ? 1 : 0.4,
+            }}
+            onMouseEnter={(e) => {
+              if (actionableRows.length === 1) e.currentTarget.style.backgroundColor = "#fef2f2";
+            }}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
           >
-            <WarningAmber style={{ fontSize: 15 }} className={actionableRows.length === 1 ? 'text-red-600' : 'text-gray-400'} />
-            <span className="font-semibold">{incidentLabel}</span>
+            <WarningAmber style={{ fontSize: 15, color: actionableRows.length === 1 ? "#dc2626" : "#999" }} />
+            <span style={{ color: actionableRows.length === 1 ? "#dc2626" : "#999", fontSize: "14px", fontWeight: "600" }}>{incidentLabel}</span>
           </li>
       </ul>
     ) : null;
