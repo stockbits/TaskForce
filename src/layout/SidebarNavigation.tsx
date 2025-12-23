@@ -266,6 +266,7 @@ export const Sidebar = memo(function Sidebar({
         {filterText.trim() && (
           <Box sx={{ mt: 2, maxHeight: 300, overflowY: 'auto' }}>
             <SimpleTreeView
+              expandedItems={filteredSections.map((_, index) => `section-${index}`)}
               sx={{
                 '& .MuiTreeItem-root': {
                   '& .MuiTreeItem-content': {
