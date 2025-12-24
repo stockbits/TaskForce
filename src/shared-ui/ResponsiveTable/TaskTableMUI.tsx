@@ -493,10 +493,6 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
               if (onSortChange) onSortChange(Boolean(model && model.length > 0), model || []);
             } catch {}
           }}
-          onColumnWidthChange={(params: any) => {
-            const { colDef, width } = params;
-            setColState((prev) => prev.map((c) => (c.field === colDef.field ? { ...c, width } : c)));
-          }}
           onColumnVisibilityModelChange={(model: any) => {
             try {
               // setColumnVisibilityModel(() => ({ ...(model || {}) }));
