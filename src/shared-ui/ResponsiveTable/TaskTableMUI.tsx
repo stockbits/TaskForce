@@ -62,15 +62,6 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
 
   const density: 'compact' | 'standard' | 'comfortable' = (typeof window !== 'undefined' && localStorage.getItem('taskTableDensity') as 'compact' | 'standard' | 'comfortable') || 'compact';
 
-  // Handle density changes and persist to localStorage
-  const handleDensityChange = (newDensity: 'compact' | 'standard' | 'comfortable') => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('taskTableDensity', newDensity);
-    }
-    // Note: Since density is controlled externally, we can't update it here
-    // This is just for persistence
-  };
-
   const columns: GridColDef[] = useMemo(() => {
     // Small component for rendering a copyable cell: clicking the text copies value and flashes a highlight
     const CellWithCopy: React.FC<{ value: any }> = ({ value }) => {
@@ -450,7 +441,6 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
           }}
           slots={hideToolbar ? {} : { toolbar: CustomToolbar }}
           density={density}
-          onDensityChange={handleDensityChange}
           sx={{ 
             flex: 1, 
             minHeight: 0, 
