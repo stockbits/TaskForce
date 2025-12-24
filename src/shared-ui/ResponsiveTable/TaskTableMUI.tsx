@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect, MutableRefObject, useRef, memo } f
 import { Box, useTheme, Paper, Typography, Skeleton, Fade } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { useAppSnackbar } from '@/shared-ui/SnackbarProvider';
-import { GridColDef, useGridApiRef, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton } from '@mui/x-data-grid';
+import { GridColDef, useGridApiRef, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarDensitySelector } from '@mui/x-data-grid';
 import { DataGrid } from '@mui/x-data-grid';
 // keep imports minimal: use built-in DataGrid behavior
 // framer-motion removed — using static elements
@@ -61,6 +61,15 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
   
 
   const density: 'compact' | 'standard' | 'comfortable' = (typeof window !== 'undefined' && localStorage.getItem('taskTableDensity') as 'compact' | 'standard' | 'comfortable') || 'compact';
+
+  // Handle density changes and persist to localStorage
+  const handleDensityChange = (newDensity: 'compact' | 'standard' | 'comfortable') => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('taskTableDensity', newDensity);
+    }
+    // Note: Since density is controlled externally, we can't update it here
+    // This is just for persistence
+  };
 
   const columns: GridColDef[] = useMemo(() => {
     // Small component for rendering a copyable cell: clicking the text copies value and flashes a highlight
@@ -326,6 +335,7 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
         <Box sx={{ flex: 1 }} />
         <GridToolbarColumnsButton />
         <GridToolbarFilterButton />
+        <GridToolbarDensitySelector />
       </GridToolbarContainer>
     );
 
@@ -440,6 +450,7 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
           }}
           slots={hideToolbar ? {} : { toolbar: CustomToolbar }}
           density={density}
+          onDensityChange={handleDensityChange}
           sx={{ 
             flex: 1, 
             minHeight: 0, 
@@ -491,6 +502,10 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
             try {
               if (onSortChange) onSortChange(Boolean(model && model.length > 0), model || []);
             } catch {}
+          }}
+          onColumnWidthChange={(params: any) => {
+            const { colDef, width } = params;
+            setColState((prev) => prev.map((c) => (c.field === colDef.field ? { ...c, width } : c)));
           }}
           onColumnVisibilityModelChange={(model: any) => {
             try {
