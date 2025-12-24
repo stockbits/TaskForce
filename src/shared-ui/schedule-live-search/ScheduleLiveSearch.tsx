@@ -305,8 +305,17 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
 
   return (
     <Box sx={{ p: { xs: 2, sm: 2.5, md: 3 }, minWidth: 0, m: 0 }}>
-<Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-          <Tabs value={activeTab} onChange={(_e, v) => setActiveTab(v)} variant="standard">
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+          <Tabs 
+            value={activeTab} 
+            onChange={(_e, v) => setActiveTab(v)} 
+            variant="standard"
+            sx={{
+              '& .MuiTabs-indicator': (theme) => ({
+                backgroundColor: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.primary.main,
+              }),
+            }}
+          >
             <Tab value="basic" label="Basic" />
             <Tab value="advanced" label="Advanced" />
           </Tabs>

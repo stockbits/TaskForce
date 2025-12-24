@@ -326,8 +326,12 @@ export const Sidebar = memo(function Sidebar({
                       minHeight: 40,
                       ...(isActive
                         ? {
-                            backgroundColor: alpha(theme.palette.primary.main, 0.12),
-                            color: theme.palette.primary.main,
+                            backgroundColor: theme.palette.mode === 'dark' 
+                              ? alpha(theme.palette.primary.main, 0.2) 
+                              : alpha(theme.palette.primary.main, 0.12),
+                            color: theme.palette.mode === 'dark' 
+                              ? '#ffffff' 
+                              : theme.palette.primary.main,
                             "&::before": {
                               content: '""',
                               position: "absolute",
@@ -336,7 +340,9 @@ export const Sidebar = memo(function Sidebar({
                               bottom: 8,
                               width: 3,
                               borderRadius: 999,
-                              backgroundColor: theme.palette.primary.main,
+                              backgroundColor: theme.palette.mode === 'dark' 
+                                ? '#ffffff' 
+                                : theme.palette.primary.main,
                             },
                           }
                         : {

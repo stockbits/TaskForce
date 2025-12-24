@@ -26,7 +26,7 @@ import WarningAmber from '@mui/icons-material/WarningAmber';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
-import TodayIcon from '@mui/icons-material/Today';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import DateTimePopover from '@/shared-ui/DateTimePopover';
 import { MultiSelectField, FreeTypeSelectField, CombinedLocationField } from '@/shared-ui';
 import ImpScoreField from '@/shared-ui/text-fields/ImpScoreField';
@@ -262,7 +262,12 @@ export default function TaskSearchCard({
             value={activeTab}
             onChange={(_e, v) => setActiveTab(v)}
             variant="standard"
-            sx={{ minHeight: 36 }}
+            sx={{ 
+              minHeight: 36,
+              '& .MuiTabs-indicator': (theme) => ({
+                backgroundColor: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.primary.main,
+              }),
+            }}
           >
             <Tab value="basic" label="Basic" sx={{ minHeight: 36, px: 1 }} />
             <Tab value="advanced" label="Advanced" sx={{ minHeight: 36, px: 1 }} />
@@ -288,7 +293,7 @@ export default function TaskSearchCard({
             sx={{ ml: 1 }}
             aria-label="date-filter"
           >
-            <TodayIcon sx={{ fontSize: 20, color: (filters.fromDate || filters.toDate || filters.fromTime || filters.toTime) ? theme.palette.primary.main : 'inherit' }} />
+            <CalendarMonthIcon sx={{ fontSize: 20, color: (filters.fromDate || filters.toDate || filters.fromTime || filters.toTime) ? theme.palette.primary.main : 'inherit' }} />
           </IconButton>
 
           <IconButton onClick={() => setIsFavourite((p) => !p)} size="small" sx={{ ml: 1 }} aria-label="favourite">

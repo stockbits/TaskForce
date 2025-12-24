@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Menu, Box, Stack, TextField, InputAdornment } from '@mui/material';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ScheduleIcon from '@mui/icons-material/Schedule';
@@ -27,6 +27,10 @@ export default function DateTimePopover({
   onChangeField,
   onClear,
 }: Props) {
+  const fromDateRef = useRef<HTMLInputElement>(null);
+  const fromTimeRef = useRef<HTMLInputElement>(null);
+  const toDateRef = useRef<HTMLInputElement>(null);
+  const toTimeRef = useRef<HTMLInputElement>(null);
   return (
     <Menu
       anchorEl={anchorEl}
@@ -35,7 +39,7 @@ export default function DateTimePopover({
       anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       transformOrigin={{ vertical: 'top', horizontal: 'right' }}
     >
-      <Box sx={{ p: 1, display: 'flex', flexDirection: 'column', gap: 1, minWidth: 220 }}>
+      <Box sx={{ p: 1, display: 'flex', flexDirection: 'column', gap: 1, minWidth: 280 }}>
         <Stack direction="row" spacing={1} alignItems="center">
           <TextField
             type="date"
@@ -45,27 +49,53 @@ export default function DateTimePopover({
             onChange={(e) => onChangeField('fromDate', e.target.value)}
             size="small"
             InputLabelProps={{ shrink: true }}
+            inputRef={fromDateRef}
             InputProps={{
               endAdornment: (
-                <InputAdornment position="end">
+                <InputAdornment position="end" sx={{ mr: 1 }}>
                   <CalendarMonthIcon 
-                    sx={{ fontSize: 18, color: 'action.active', cursor: 'pointer' }} 
+                    sx={{ 
+                      fontSize: 18, 
+                      color: 'action.active', 
+                      cursor: 'pointer',
+                      pointerEvents: 'auto',
+                      zIndex: 10
+                    }} 
                     onClick={(e) => {
                       e.stopPropagation();
-                      const input = e.currentTarget.closest('.MuiTextField-root')?.querySelector('input');
-                      input?.focus();
-                      input?.click();
+                      const input = fromDateRef.current;
+                      if (input) {
+                        // Temporarily enable pointer events to allow the click
+                        input.style.pointerEvents = 'auto';
+                        // Use showPicker if available (modern browsers), otherwise click
+                        if ('showPicker' in input && typeof input.showPicker === 'function') {
+                          input.showPicker();
+                        } else {
+                          input.click();
+                        }
+                        // Reset pointer events after a short delay
+                        setTimeout(() => {
+                          input.style.pointerEvents = 'none';
+                        }, 100);
+                      }
                     }}
                   />
                 </InputAdornment>
               ),
             }}
             sx={{ 
-              maxWidth: { xs: '100%', sm: '15ch' }, 
-              minWidth: '15ch',
+              maxWidth: { xs: '100%', sm: '20ch' }, 
+              minWidth: '20ch',
               '& input[type="date"]::-webkit-calendar-picker-indicator': {
                 display: 'none',
                 WebkitAppearance: 'none',
+              },
+              '& .MuiInputBase-input': {
+                cursor: 'default',
+                pointerEvents: 'none',
+                '&:focus': {
+                  cursor: 'default',
+                }
               },
             }}
           />
@@ -75,27 +105,50 @@ export default function DateTimePopover({
             value={fromTime}
             onChange={(e) => onChangeField('fromTime', e.target.value)}
             size="small"
+            inputRef={fromTimeRef}
             InputProps={{
               endAdornment: (
-                <InputAdornment position="end">
+                <InputAdornment position="end" sx={{ mr: 1 }}>
                   <ScheduleIcon 
-                    sx={{ fontSize: 18, color: 'action.active', cursor: 'pointer' }} 
+                    sx={{ 
+                      fontSize: 18, 
+                      color: 'action.active', 
+                      cursor: 'pointer',
+                      pointerEvents: 'auto',
+                      zIndex: 10
+                    }} 
                     onClick={(e) => {
                       e.stopPropagation();
-                      const input = e.currentTarget.closest('.MuiTextField-root')?.querySelector('input');
-                      input?.focus();
-                      input?.click();
+                      const input = fromTimeRef.current;
+                      if (input) {
+                        input.style.pointerEvents = 'auto';
+                        if ('showPicker' in input && typeof input.showPicker === 'function') {
+                          input.showPicker();
+                        } else {
+                          input.click();
+                        }
+                        setTimeout(() => {
+                          input.style.pointerEvents = 'none';
+                        }, 100);
+                      }
                     }}
                   />
                 </InputAdornment>
               ),
             }}
             sx={{ 
-              maxWidth: { xs: '100%', sm: '10ch' }, 
-              minWidth: '10ch',
+              maxWidth: { xs: '100%', sm: '18ch' }, 
+              minWidth: '18ch',
               '& input[type="time"]::-webkit-calendar-picker-indicator': {
                 display: 'none',
                 WebkitAppearance: 'none',
+              },
+              '& .MuiInputBase-input': {
+                cursor: 'default',
+                pointerEvents: 'none',
+                '&:focus': {
+                  cursor: 'default',
+                }
               },
             }}
           />
@@ -109,27 +162,50 @@ export default function DateTimePopover({
             onChange={(e) => onChangeField('toDate', e.target.value)}
             size="small"
             InputLabelProps={{ shrink: true }}
+            inputRef={toDateRef}
             InputProps={{
               endAdornment: (
-                <InputAdornment position="end">
+                <InputAdornment position="end" sx={{ mr: 1 }}>
                   <CalendarMonthIcon 
-                    sx={{ fontSize: 18, color: 'action.active', cursor: 'pointer' }} 
+                    sx={{ 
+                      fontSize: 18, 
+                      color: 'action.active', 
+                      cursor: 'pointer',
+                      pointerEvents: 'auto',
+                      zIndex: 10
+                    }} 
                     onClick={(e) => {
                       e.stopPropagation();
-                      const input = e.currentTarget.closest('.MuiTextField-root')?.querySelector('input');
-                      input?.focus();
-                      input?.click();
+                      const input = toDateRef.current;
+                      if (input) {
+                        input.style.pointerEvents = 'auto';
+                        if ('showPicker' in input && typeof input.showPicker === 'function') {
+                          input.showPicker();
+                        } else {
+                          input.click();
+                        }
+                        setTimeout(() => {
+                          input.style.pointerEvents = 'none';
+                        }, 100);
+                      }
                     }}
                   />
                 </InputAdornment>
               ),
             }}
             sx={{ 
-              maxWidth: { xs: '100%', sm: '15ch' }, 
-              minWidth: '15ch',
+              maxWidth: { xs: '100%', sm: '20ch' }, 
+              minWidth: '20ch',
               '& input[type="date"]::-webkit-calendar-picker-indicator': {
                 display: 'none',
                 WebkitAppearance: 'none',
+              },
+              '& .MuiInputBase-input': {
+                cursor: 'default',
+                pointerEvents: 'none',
+                '&:focus': {
+                  cursor: 'default',
+                }
               },
             }}
           />
@@ -139,27 +215,50 @@ export default function DateTimePopover({
             value={toTime}
             onChange={(e) => onChangeField('toTime', e.target.value)}
             size="small"
+            inputRef={toTimeRef}
             InputProps={{
               endAdornment: (
-                <InputAdornment position="end">
+                <InputAdornment position="end" sx={{ mr: 1 }}>
                   <ScheduleIcon 
-                    sx={{ fontSize: 18, color: 'action.active', cursor: 'pointer' }} 
+                    sx={{ 
+                      fontSize: 18, 
+                      color: 'action.active', 
+                      cursor: 'pointer',
+                      pointerEvents: 'auto',
+                      zIndex: 10
+                    }} 
                     onClick={(e) => {
                       e.stopPropagation();
-                      const input = e.currentTarget.closest('.MuiTextField-root')?.querySelector('input');
-                      input?.focus();
-                      input?.click();
+                      const input = toTimeRef.current;
+                      if (input) {
+                        input.style.pointerEvents = 'auto';
+                        if ('showPicker' in input && typeof input.showPicker === 'function') {
+                          input.showPicker();
+                        } else {
+                          input.click();
+                        }
+                        setTimeout(() => {
+                          input.style.pointerEvents = 'none';
+                        }, 100);
+                      }
                     }}
                   />
                 </InputAdornment>
               ),
             }}
             sx={{ 
-              maxWidth: { xs: '100%', sm: '10ch' }, 
-              minWidth: '10ch',
+              maxWidth: { xs: '100%', sm: '18ch' }, 
+              minWidth: '18ch',
               '& input[type="time"]::-webkit-calendar-picker-indicator': {
                 display: 'none',
                 WebkitAppearance: 'none',
+              },
+              '& .MuiInputBase-input': {
+                cursor: 'default',
+                pointerEvents: 'none',
+                '&:focus': {
+                  cursor: 'default',
+                }
               },
             }}
           />
