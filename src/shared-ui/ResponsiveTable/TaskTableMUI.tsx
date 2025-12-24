@@ -389,7 +389,7 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
           columns={colState}
           checkboxSelection={true}
           disableVirtualization={true}
-          rowSelectionModel={rowSelectionModel}
+          rowSelectionModel={rowSelectionModel as any}
           onRowSelectionModelChange={(newSelectionModel: any) => {
             // Handle the new GridRowSelectionModel format
             const safeSelectionIds: string[] = newSelectionModel?.ids ? Array.from(newSelectionModel.ids).map(String) : [];
