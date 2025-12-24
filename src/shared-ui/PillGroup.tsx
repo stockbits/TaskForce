@@ -37,26 +37,23 @@ const PillGroup = memo(React.forwardRef<HTMLDivElement, PillGroupProps>(function
 
   return (
     <Box ref={ref} sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "nowrap", overflow: "hidden", ...((sx as any) || {}) }} {...rest}>
-      {visible.map((it: PillItem) => {
-        const active = activeIds.includes(it.id);
-        return (
-          <Chip
-            key={it.id}
-            label={it.label}
-            clickable={Boolean(onToggle)}
-            onClick={onToggle ? () => onToggle(it.id) : undefined}
-            variant={active ? "filled" : "outlined"}
-            size="small"
-            sx={{
-              borderRadius: 999,
-              fontSize: "0.75rem",
-              px: 1.25,
-              py: 0.4,
-              mr: 0,
-            }}
-          />
-        );
-      })}
+      {visible.map((it: PillItem) => (
+        <Chip
+          key={it.id}
+          label={it.label}
+          clickable={Boolean(onToggle)}
+          onClick={onToggle ? () => onToggle(it.id) : undefined}
+          variant="filled"
+          size="small"
+          sx={{
+            borderRadius: 999,
+            fontSize: "0.75rem",
+            px: 1.25,
+            py: 0.4,
+            mr: 0,
+          }}
+        />
+      ))}
 
       {overflow.length > 0 && (
         <>

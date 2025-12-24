@@ -12,9 +12,10 @@ import {
   Chip,
   Stack,
   Tooltip,
+  useTheme,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -126,6 +127,8 @@ export default function TimelinePanel({
   const endDate = propEndDate;
   const setStartDate = onStartDateChange;
   const setEndDate = onEndDateChange;
+
+  const theme = useTheme();
 
   const [dateModalOpen, setDateModalOpen] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1); // Default zoom level (1x)
@@ -409,7 +412,7 @@ export default function TimelinePanel({
         width: "100%",
         display: "flex",
         flexDirection: "column",
-        bgcolor: "#fafafa",
+        bgcolor: theme.palette.background.default,
         overflow: isMaximized ? "hidden" : "visible",
       }}
     >
@@ -418,8 +421,8 @@ export default function TimelinePanel({
         sx={{
           display: "flex",
           height: 40,
-          bgcolor: "white",
-          borderBottom: "1px solid #e0e0e0",
+          bgcolor: theme.palette.background.paper,
+          borderBottom: `1px solid ${theme.palette.divider}`,
           position: "sticky",
           top: 0,
           zIndex: 10,
@@ -436,7 +439,7 @@ export default function TimelinePanel({
           }}
         >
           <IconButton onClick={() => setDateModalOpen(true)} size="small">
-            <CalendarTodayIcon sx={{ fontSize: 16 }} />
+            <CalendarMonthIcon sx={{ fontSize: 16 }} />
           </IconButton>
           <TimelineZoomControl
             onZoomChange={setZoomLevel}
@@ -506,7 +509,7 @@ export default function TimelinePanel({
           sx={{
             width: LABEL_COL_WIDTH,
             flexShrink: 0,
-            borderRight: "1px solid #e0e0e0",
+            borderRight: `1px solid ${theme.palette.divider}`,
             bgcolor: "transparent",
             overflow: "auto",
             "&::-webkit-scrollbar": { display: "none" },
@@ -520,7 +523,7 @@ export default function TimelinePanel({
                 display: "flex",
                 alignItems: "center",
                 px: 1,
-                borderBottom: "1px solid #f0f0f0",
+                borderBottom: `1px solid ${theme.palette.divider}`,
               }}
             >
               <PersonIcon
@@ -561,29 +564,6 @@ export default function TimelinePanel({
                   borderBottom: "1px solid #f0f0f0",
                 }}
               >
-                {/* optional vertical hour dividers */}
-                <Box
-                  sx={{
-                    position: "absolute",
-                    inset: 0,
-                    display: "flex",
-                    pointerEvents: "none",
-                  }}
-                >
-                  {timelineIntervals.map((it, i) => (
-                    <Box
-                      key={it.time}
-                      sx={{
-                        width: PX_PER_HOUR,
-                        borderRight:
-                          i < timelineIntervals.length - 1
-                            ? "1px solid #f5f5f5"
-                            : "none",
-                      }}
-                    />
-                  ))}
-                </Box>
-
                 {/* shift bars */}
                 {shiftBarsByRow[rowIndex]?.map((b, i) => (
                   <Box
@@ -596,10 +576,10 @@ export default function TimelinePanel({
                       width: b.widthPx,
                       height: ROW_HEIGHT,
                       borderRadius: 0,
-                      bgcolor: "primary.main",
-                      opacity: 0.15,
-                      borderLeft: "3px solid #000000",
-                      borderRight: "3px solid #000000",
+                      bgcolor: theme.palette.mode === 'dark' ? "rgba(59, 224, 137, 0.3)" : "primary.main",
+                      opacity: theme.palette.mode === 'dark' ? 1 : 0.15,
+                      borderLeft: `3px solid ${theme.palette.mode === 'dark' ? "#3BE089" : "#000000"}`,
+                      borderRight: `3px solid ${theme.palette.mode === 'dark' ? "#3BE089" : "#000000"}`,
                       boxSizing: "border-box",
                     }}
                   />
@@ -620,7 +600,7 @@ export default function TimelinePanel({
                         width: b.widthPx,
                         height: ROW_HEIGHT,
                         borderRadius: 0,
-                        bgcolor: "#ff9800", // Orange color for lunch breaks
+                        bgcolor: theme.palette.mode === 'dark' ? "#ff8c00" : "#ff9800", // Orange color for lunch breaks
                         opacity: 0.25,
                         boxSizing: "border-box",
                         cursor: "pointer",
@@ -702,7 +682,7 @@ export default function TimelinePanel({
           </LocalizationProvider>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDateModalOpen(false)}>Cancel</Button>
+          <Button onClick={() => setDateModalOpen(false)} variant="contained">Cancel</Button>
           <Button onClick={() => setDateModalOpen(false)} variant="contained">
             Apply
           </Button>

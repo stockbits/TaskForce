@@ -249,33 +249,8 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
                 <Chip
                   label={`+${overflowCount}`}
                   size="small"
-                  variant="outlined"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={(e) => { e.stopPropagation(); setOpen(true); }}
-                  sx={{
-                    cursor: 'pointer',
-                    '&:hover': { backgroundColor: 'action.hover' },
-                    flex: '0 0 auto',
-                    height: COMPACT_CHIP_HEIGHT,
-                    minWidth: 44,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    px: 1,
-                    boxSizing: 'border-box',
-                    fontWeight: 600,
-                    fontSize: overflowCount >= 100 ? 10 : overflowCount >= 10 ? 11 : 12,
-                    lineHeight: `${COMPACT_CHIP_HEIGHT}px`,
-                    borderRadius: '999px',
-                    color: 'primary.main',
-                    borderColor: 'primary.main',
-                    ml: 0,
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    zIndex: 30,
-                    mr: 0.5,
-                  }}
                 />
               </Tooltip>
             )}
@@ -293,7 +268,12 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
                   aria-label={allFilteredSelected ? "Clear filtered" : "Select filtered"}
                   sx={{ mr: 1.5, px: 0.75, pointerEvents: 'auto' }}
                 >
-                  <DoneAllIcon fontSize="small" color={allFilteredSelected ? 'primary' : 'action'} />
+                  <DoneAllIcon 
+                    fontSize="small" 
+                    sx={{ 
+                      opacity: allFilteredSelected ? 1 : 0.8
+                    }}
+                  />
                 </MuiIconButton>
               </Tooltip>
             )}

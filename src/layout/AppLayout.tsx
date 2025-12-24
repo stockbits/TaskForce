@@ -15,6 +15,8 @@ import {
   useTheme,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
+import Brightness2Icon from '@mui/icons-material/Brightness2';
+import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import mockTasks from "@/data/mockTasks.json";
 import ResourceMock from "@/data/ResourceMock.json";
 const ScheduleLivePage = lazy(() => import("@/schedule/scheduleLive - Page"));
@@ -45,6 +47,7 @@ import TaskSearchCard from '@/tasks/TaskSearchCardClean';
 import TaskTableAdvanced from '@/tasks/TaskTableAdvanced';
 import { useAppSnackbar } from '@/shared-ui/SnackbarProvider';
 import { Sidebar as SidebarNavigation } from '@/layout/SidebarNavigation';
+import { useTheme as useAppTheme } from '@/ThemeContext';
 
 import { cardMap } from "@/layout/menuRegistry";
 import { TaskDetails, ProgressNoteEntry } from "@/types";
@@ -160,6 +163,7 @@ const Header: React.FC<HeaderProps> = memo(
     whiteBackground = false,
   }) => {
     const theme = useTheme();
+    const { mode, toggleTheme } = useAppTheme();
     const displayLabel = useMemo(() => {
       if (overrideTitle) return overrideTitle;
       if (!currentMenu?.label) return "Dashboard";
@@ -211,11 +215,7 @@ const Header: React.FC<HeaderProps> = memo(
                 width: theme.spacing(5.5), // 44px
                 height: theme.spacing(5.5),
                 borderRadius: 2,
-                bgcolor: alpha(theme.palette.common.white, 0.12),
                 color: theme.palette.common.white,
-                '&:hover': {
-                  bgcolor: alpha(theme.palette.common.white, 0.2),
-                },
               }}
             >
               <Menu sx={{ fontSize: 26 }} />
@@ -234,6 +234,37 @@ const Header: React.FC<HeaderProps> = memo(
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+            <IconButton
+              onClick={toggleTheme}
+              sx={{
+                color: theme.palette.common.white,
+                transition: 'all 0.3s ease-in-out',
+                borderRadius: '50%',
+                padding: theme.spacing(1),
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  transform: 'scale(1.2)',
+                },
+              }}
+            >
+              {mode === 'dark' ? (
+                <Brightness2Icon 
+                  sx={{ 
+                    fontSize: 20,
+                    transition: 'all 0.3s ease-in-out',
+                    transform: mode === 'dark' ? 'rotate(0deg)' : 'rotate(180deg)',
+                  }} 
+                />
+              ) : (
+                <WbSunnyIcon 
+                  sx={{ 
+                    fontSize: 20,
+                    transition: 'all 0.3s ease-in-out',
+                    transform: mode === 'light' ? 'rotate(0deg)' : 'rotate(180deg)',
+                  }} 
+                />
+              )}
+            </IconButton>
 
             <Avatar
               sx={{

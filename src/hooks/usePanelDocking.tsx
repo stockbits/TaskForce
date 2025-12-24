@@ -83,7 +83,6 @@ export function PanelContainer({
 }) {
   const theme = useTheme();
   const { INPUT_HEIGHT } = useFieldSizes();
-  const borderColor = alpha(theme.palette.primary.main, 0.12);
   const headerBg = alpha(theme.palette.primary.main, 0.05);
   const iconTone = alpha(theme.palette.text.primary, 0.6);
 
@@ -95,7 +94,6 @@ export function PanelContainer({
         height: "100%",
         width: "100%",
         borderRadius: 1,
-        border: `1px solid ${borderColor}`,
         overflow: "hidden",
         backgroundColor: theme.palette.background.paper,
         position: "relative",
@@ -109,7 +107,6 @@ export function PanelContainer({
         sx={{
           px: 2,
           py: 1,
-          borderBottom: `1px solid ${borderColor}`,
           backgroundColor: headerBg,
           minHeight: INPUT_HEIGHT,
         }}
@@ -127,19 +124,16 @@ export function PanelContainer({
         <Stack direction="row" alignItems="center" spacing={0.5}>
           {visibleCount > 1 && (
             <IconButton
-              size="small"
+              size="medium"
               onClick={() => {
                 try { onMaximize(); } catch (e) { console.error(e); }
               }}
               title={isMaximized ? "Restore" : "Maximize"}
               sx={{
-                width: 32,
-                height: 32,
                 borderRadius: 1.5,
-                border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
                 bgcolor: isMaximized
                   ? alpha(theme.palette.primary.main, 0.12)
-                  : theme.palette.common.white,
+                  : theme.palette.background.paper,
                 '&:hover': {
                   bgcolor: alpha(theme.palette.primary.main, 0.18),
                 },
@@ -147,7 +141,7 @@ export function PanelContainer({
             >
               <OpenInFull
                 style={{
-                  fontSize: 16,
+                  fontSize: 18,
                   color: theme.palette.text.primary,
                   transform: isMaximized ? "rotate(180deg)" : "none",
                   transition: "transform 150ms ease",
@@ -157,23 +151,20 @@ export function PanelContainer({
           )}
 
           <IconButton
-            size="small"
+            size="medium"
             onClick={() => {
               try { onClose(); } catch (e) { console.error(e); }
             }}
             title="Close"
             sx={{
-              width: 32,
-              height: 32,
               borderRadius: 1.5,
-              border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
-              bgcolor: theme.palette.common.white,
+              bgcolor: theme.palette.background.paper,
               '&:hover': {
                   bgcolor: alpha(theme.palette.primary.main, 0.18),
                 },
               }}
             >
-              <Close style={{ fontSize: 16, color: theme.palette.text.primary }} />
+              <Close style={{ fontSize: 18, color: theme.palette.text.primary }} />
             </IconButton>
         </Stack>
       </Stack>

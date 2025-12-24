@@ -202,10 +202,10 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
                     sx={{
                       width: 16,
                       height: 16,
-                      bgcolor: "primary.main",
-                      opacity: 0.15,
-                      borderLeft: "3px solid #000000",
-                      borderRight: "3px solid #000000",
+                      bgcolor: theme.palette.mode === 'dark' ? "rgba(59, 224, 137, 0.3)" : "primary.main",
+                      opacity: theme.palette.mode === 'dark' ? 1 : 0.15,
+                      borderLeft: `3px solid ${theme.palette.mode === 'dark' ? "#3BE089" : "#000000"}`,
+                      borderRight: `3px solid ${theme.palette.mode === 'dark' ? "#3BE089" : "#000000"}`,
                       borderRadius: 0,
                     }}
                   />
@@ -218,8 +218,8 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
                     sx={{
                       width: 16,
                       height: 16,
-                      bgcolor: "#ff9800",
-                      opacity: 0.8,
+                      bgcolor: theme.palette.mode === 'dark' ? '#ffb74d' : '#ff9800',
+                      opacity: theme.palette.mode === 'dark' ? 1 : 0.8,
                       borderRadius: 0,
                     }}
                   />

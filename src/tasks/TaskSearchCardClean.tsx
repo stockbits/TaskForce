@@ -26,9 +26,7 @@ import WarningAmber from '@mui/icons-material/WarningAmber';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
-import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import TodayIcon from '@mui/icons-material/Today';
-import TodayOutlinedIcon from '@mui/icons-material/TodayOutlined';
 import DateTimePopover from '@/shared-ui/DateTimePopover';
 import { MultiSelectField, FreeTypeSelectField, CombinedLocationField } from '@/shared-ui';
 import ImpScoreField from '@/shared-ui/text-fields/ImpScoreField';
@@ -290,19 +288,11 @@ export default function TaskSearchCard({
             sx={{ ml: 1 }}
             aria-label="date-filter"
           >
-            { (filters.fromDate || filters.toDate || filters.fromTime || filters.toTime) ? (
-              <TodayIcon sx={{ fontSize: 20, color: theme.palette.primary.main }} />
-            ) : (
-              <TodayOutlinedIcon sx={{ fontSize: 20 }} />
-            )}
+            <TodayIcon sx={{ fontSize: 20, color: (filters.fromDate || filters.toDate || filters.fromTime || filters.toTime) ? theme.palette.primary.main : 'inherit' }} />
           </IconButton>
 
           <IconButton onClick={() => setIsFavourite((p) => !p)} size="small" sx={{ ml: 1 }} aria-label="favourite">
-            {isFavourite ? (
-              <BookmarkIcon sx={{ fontSize: 20, color: theme.palette.primary.main }} />
-            ) : (
-              <BookmarkBorderIcon sx={{ fontSize: 20 }} />
-            )}
+            <BookmarkIcon sx={{ fontSize: 20 }} />
           </IconButton>
         </Box>
       </Box>
@@ -461,7 +451,7 @@ export default function TaskSearchCard({
         sx={{
           px: 2,
           py: 1,
-          bgcolor: theme.palette.grey[50],
+          bgcolor: theme.palette.mode === 'dark' ? theme.palette.background.paper : theme.palette.grey[50],
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
@@ -470,7 +460,7 @@ export default function TaskSearchCard({
         <Box>
           {hasResults ? (
             <AppButton
-              variant="outlined"
+              variant="contained"
               size="small"
               onClick={handleMenuOpen}
               sx={{
@@ -485,7 +475,7 @@ export default function TaskSearchCard({
           {hasResults && (
             <>
               <AppButton
-                variant="outlined"
+                variant="contained"
                 size="small"
                 onClick={(e) => setActionsAnchorEl(e.currentTarget)}
                 sx={{ ml: 1 }}
@@ -591,7 +581,7 @@ export default function TaskSearchCard({
 
         <Stack direction="row" spacing={1} alignItems="center">
           <AppButton
-            variant="outlined"
+            variant="contained"
             size="small"
             onClick={handleClear}
           >

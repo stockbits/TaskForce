@@ -5,6 +5,7 @@ declare module '@mui/material/styles' {
     custom: {
       inputHeight: number;
       chipSize: number;
+      selectionColor: string;
     };
   }
   // allow configuration when creating the theme
@@ -12,6 +13,7 @@ declare module '@mui/material/styles' {
     custom?: {
       inputHeight?: number;
       chipSize?: number;
+      selectionColor?: string;
     };
   }
 }
@@ -24,9 +26,9 @@ const accentMint = "#3BE089"; // mint ring
 const accentMintDark = "#1EA46A";
 const neutralBackground = "#F3F6F8";
 
-export const appTheme = createTheme({
+export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme({
   palette: {
-    mode: "light",
+    mode,
     primary: {
       main: primaryNavy,
       light: primaryNavyLight,
@@ -37,17 +39,49 @@ export const appTheme = createTheme({
       main: accentMint,
       light: "#7FF2B6",
       dark: accentMintDark,
-      contrastText: "#052035",
+      contrastText: mode === 'dark' ? "#052035" : "#FFFFFF",
     },
     background: {
-      default: neutralBackground,
-      paper: "#FFFFFF",
+      default: mode === 'dark' ? "#121212" : neutralBackground,
+      paper: mode === 'dark' ? "#1e1e1e" : "#FFFFFF",
     },
     text: {
-      primary: "#0B2233",
-      secondary: "#475569",
+      primary: mode === 'dark' ? "#ffffff" : "#0B2233",
+      secondary: mode === 'dark' ? "#b0b0b0" : "#475569",
     },
-    divider: "rgba(15, 39, 64, 0.08)",
+    divider: mode === 'dark' ? "rgba(255, 255, 255, 0.12)" : "rgba(15, 39, 64, 0.08)",
+    action: {
+      active: mode === 'dark' ? "rgba(255, 255, 255, 0.56)" : "rgba(0, 0, 0, 0.54)",
+      hover: mode === 'dark' ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.04)",
+      selected: mode === 'dark' ? "rgba(255, 255, 255, 0.16)" : "rgba(0, 0, 0, 0.08)",
+      disabled: mode === 'dark' ? "rgba(255, 255, 255, 0.26)" : "rgba(0, 0, 0, 0.26)",
+      disabledBackground: mode === 'dark' ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.12)",
+      focus: mode === 'dark' ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.12)",
+    },
+    error: {
+      main: mode === 'dark' ? "#f85149" : "#d32f2f",
+      light: mode === 'dark' ? "#da7d82" : "#ef5350",
+      dark: mode === 'dark' ? "#c93c37" : "#c62828",
+      contrastText: "#ffffff",
+    },
+    warning: {
+      main: mode === 'dark' ? "#d29922" : "#ed6c02",
+      light: mode === 'dark' ? "#e0a82e" : "#ff9800",
+      dark: mode === 'dark' ? "#b87d1e" : "#e65100",
+      contrastText: mode === 'dark' ? "#000000" : "#ffffff",
+    },
+    info: {
+      main: mode === 'dark' ? "#79c0ff" : "#0288d1",
+      light: mode === 'dark' ? "#a5d4ff" : "#03a9f4",
+      dark: mode === 'dark' ? "#58a6ff" : "#01579b",
+      contrastText: mode === 'dark' ? "#000000" : "#ffffff",
+    },
+    success: {
+      main: mode === 'dark' ? "#56d364" : "#2e7d32",
+      light: mode === 'dark' ? "#79e381" : "#4caf50",
+      dark: mode === 'dark' ? "#46954a" : "#1b5e20",
+      contrastText: mode === 'dark' ? "#000000" : "#ffffff",
+    },
   },
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
@@ -55,8 +89,8 @@ export const appTheme = createTheme({
     h2: { fontWeight: 600 },
     h3: { fontWeight: 600 },
     button: { fontWeight: 600 },
-    subtitle1: { color: "#394B59" },
-    subtitle2: { color: "#52606D" },
+    subtitle1: { color: mode === 'dark' ? "#e0e0e0" : "#394B59" },
+    subtitle2: { color: mode === 'dark' ? "#b8b8b8" : "#52606D" },
   },
   shape: {
     borderRadius: 4,
@@ -65,7 +99,7 @@ export const appTheme = createTheme({
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          backgroundColor: neutralBackground,
+          backgroundColor: mode === 'dark' ? "#121212" : neutralBackground,
         },
       },
     },
@@ -73,6 +107,7 @@ export const appTheme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 6,
+          backgroundImage: 'none',
         },
       },
     },
@@ -81,20 +116,29 @@ export const appTheme = createTheme({
         root: {
           borderRadius: 4,
         },
+        outlined: {
+          '&:hover': {
+            backgroundColor: mode === 'dark' ? "rgba(255, 255, 255, 0.08)" : undefined,
+          },
+        },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
           borderRadius: 8,
-          boxShadow: "0 6px 18px rgba(45, 24, 88, 0.06)",
+          boxShadow: mode === 'dark' 
+            ? "0 6px 18px rgba(0, 0, 0, 0.3)"
+            : "0 6px 18px rgba(45, 24, 88, 0.06)",
         },
       },
     },
     MuiAppBar: {
       styleOverrides: {
         root: {
-          boxShadow: "0 6px 12px rgba(0, 0, 0, 0.08)",
+          boxShadow: mode === 'dark' 
+            ? "0 6px 12px rgba(0, 0, 0, 0.4)"
+            : "0 6px 12px rgba(0, 0, 0, 0.08)",
         },
       },
     },
@@ -121,9 +165,72 @@ export const appTheme = createTheme({
         },
       },
     },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: 4,
+          '&:hover': {
+            backgroundColor: mode === 'dark' ? "rgba(255, 255, 255, 0.08)" : undefined,
+          },
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          color: mode === 'dark' ? "#ffffff" : "rgba(0, 0, 0, 0.54)",
+          '&:hover': {
+            backgroundColor: mode === 'dark' ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.04)",
+          },
+        },
+      },
+    },
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          color: mode === 'dark' ? "#ffffff" : "rgba(0, 0, 0, 0.54)",
+          '&.Mui-selected': {
+            color: mode === 'dark' ? "#ffffff" : primaryNavy,
+          },
+          '&:hover': {
+            color: mode === 'dark' ? "#ffffff" : primaryNavy,
+          },
+        },
+      },
+    },
+    MuiMenu: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: mode === 'dark' ? "#1e1e1e" : "#ffffff",
+          border: mode === 'dark' ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(0, 0, 0, 0.08)",
+        },
+      },
+    },
+    MuiListItemButton: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: mode === 'dark' ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.04)",
+          },
+          '&.Mui-selected': {
+            backgroundColor: mode === 'dark' ? "rgba(255, 255, 255, 0.16)" : "rgba(0, 0, 0, 0.08)",
+            '&:hover': {
+              backgroundColor: mode === 'dark' ? "rgba(255, 255, 255, 0.24)" : "rgba(0, 0, 0, 0.12)",
+            },
+          },
+        },
+      },
+    },
   },
   custom: {
     inputHeight: 40,
     chipSize: 28,
+    selectionColor: mode === 'dark' ? "rgba(59, 224, 137, 0.2)" : "rgba(15, 39, 64, 0.1)",
   },
 });
+
+export const lightTheme = createAppTheme('light');
+export const darkTheme = createAppTheme('dark');
+
+// Default export for backward compatibility
+export const appTheme = lightTheme;

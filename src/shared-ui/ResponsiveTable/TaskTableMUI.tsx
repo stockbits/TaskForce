@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect, MutableRefObject, useRef, memo } from 'react';
-import { Box, useTheme, Paper, Typography, Skeleton, Fade, CircularProgress } from '@mui/material';
+import { Box, useTheme, Paper, Typography, Skeleton, Fade } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { useAppSnackbar } from '@/shared-ui/SnackbarProvider';
 import { GridColDef, useGridApiRef, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarDensitySelector } from '@mui/x-data-grid';
 import { DataGrid } from '@mui/x-data-grid';
@@ -7,6 +8,7 @@ import { DataGrid } from '@mui/x-data-grid';
 // framer-motion removed — using static elements
 // icon imports removed (unused)
 import TaskRowContextMenu from '@/shared-ui/TaskRowContextMenu';
+import { useTheme as useAppTheme } from '@/ThemeContext';
 
  type Props = {
   rows: Record<string, any>[];
@@ -54,6 +56,7 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
     return { type: 'include' as const, ids: new Set(ids) };
   }, [controlledSelectedRowIds, selection]);
   const theme = useTheme();
+  const { mode } = useAppTheme();
   const colStateRef = useRef<GridColDef[]>([]);
   
 
@@ -122,7 +125,6 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
           >
             {display}
           </Typography>
-          <style>{`.tf-cell-copy:hover .MuiTypography-root{ color: ${theme.palette.primary.main}; }`}</style>
         </Box>
       );
     };
@@ -205,41 +207,41 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
   }, [gridRows]);
 
   // handle right-click on rows to open context menu
-  const onRowContextMenu = (params: any, event: React.MouseEvent) => {
-    event.preventDefault();
-    const colElem = (event.target as HTMLElement).closest('[data-field]') as HTMLElement | null;
-    const colKey = colElem ? colElem.getAttribute('data-field') : null;
-    // ensure the clicked row becomes selected when right-clicking
-    try {
-      const id = params?.id;
-      if (id != null) {
-        if (controlledSelectedRowIds !== undefined) {
-          // For controlled components, notify parent of selection change
-          if (onSelectionChange) {
-            const selected = (gridRows || []).filter((r) => String(r.id) === String(id));
-            onSelectionChange(selected as Record<string, any>[]);
-          }
-        } else {
-          // For uncontrolled components, update internal state and notify parent
-          setSelection((prev) => (Array.isArray(prev) && prev.includes(String(id)) ? prev : [String(id)]));
-          if (onSelectionChange) {
-            const selected = (gridRows || []).filter((r) => String(r.id) === String(id));
-            onSelectionChange(selected as Record<string, any>[]);
-          }
-        }
-        // We select the right-clicked row; let DataGrid manage selection indices for shift/range.
-      }
-    } catch {}
-    setContextMenu({
-      visible: true,
-      x: event.clientX,
-      y: event.clientY,
-      clickedRow: params.row,
-      clickedColumnKey: colKey,
-      mouseScreenX: (event as any).screenX ?? 0,
-      mouseScreenY: (event as any).screenY ?? 0,
-    });
-  };
+  // const onRowContextMenu = (params: any, event: React.MouseEvent) => {
+  //   event.preventDefault();
+  //   const colElem = (event.target as HTMLElement).closest('[data-field]') as HTMLElement | null;
+  //   const colKey = colElem ? colElem.getAttribute('data-field') : null;
+  //   // ensure the clicked row becomes selected when right-clicking
+  //   try {
+  //     const id = params?.id;
+  //     if (id != null) {
+  //       if (controlledSelectedRowIds !== undefined) {
+  //         // For controlled components, notify parent of selection change
+  //         if (onSelectionChange) {
+  //           const selected = (gridRows || []).filter((r) => String(r.id) === String(id));
+  //           onSelectionChange(selected as Record<string, any>[]);
+  //         }
+  //       } else {
+  //         // For uncontrolled components, update internal state and notify parent
+  //         setSelection((prev) => (Array.isArray(prev) && prev.includes(String(id)) ? prev : [String(id)]));
+  //         if (onSelectionChange) {
+  //           const selected = (gridRows || []).filter((r) => String(r.id) === String(id));
+  //           onSelectionChange(selected as Record<string, any>[]);
+  //         }
+  //       }
+  //       // We select the right-clicked row; let DataGrid manage selection indices for shift/range.
+  //     }
+  //   } catch {}
+  //   setContextMenu({
+  //     visible: true,
+  //     x: event.clientX,
+  //     y: event.clientY,
+  //     clickedRow: params.row,
+  //     clickedColumnKey: colKey,
+  //     mouseScreenX: (event as any).screenX ?? 0,
+  //     mouseScreenY: (event as any).screenY ?? 0,
+  //   });
+  // };
 
   // column menu state (simple column selector)
   // const [columnVisibilityModel, setColumnVisibilityModel] = useState<Record<string, boolean>>(() => {
@@ -289,7 +291,7 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
   }, [scrollToTopTrigger]);
 
     // DataGrid typing is strict for some event props; use an any-cast for JSX usage below
-    const AnyDataGrid: any = DataGrid as any;
+    // const AnyDataGrid: any = DataGrid as any;
     const apiRef = useGridApiRef();
     const paperRef = useRef<HTMLDivElement | null>(null);
     const [pageSize, setPageSize] = useState<number>(50);
@@ -347,7 +349,7 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
     <Box sx={{ p: 2 }}>
       {/* Header skeleton */}
       <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-        {Object.keys(headerNames).map((key, index) => (
+        {Object.keys(headerNames).map((key, _index) => (
           <Skeleton key={key} variant="rectangular" width={120} height={40} />
         ))}
       </Box>
@@ -476,9 +478,20 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
               },
             },
             '& .selected-row': {
-              backgroundColor: theme.palette.primary.main + '20',
+              backgroundColor: theme.custom.selectionColor,
               '&:hover': {
-                backgroundColor: theme.palette.primary.main + '30',
+                backgroundColor: mode === 'dark' 
+                  ? "rgba(59, 224, 137, 0.3)" 
+                  : theme.palette.primary.main + '20',
+              },
+            },
+            '& .MuiCheckbox-root': {
+              color: theme.palette.mode === 'dark' ? theme.palette.grey[400] : theme.palette.text.secondary,
+              '&.Mui-checked': {
+                color: theme.palette.mode === 'dark' ? '#3BE089' : theme.palette.primary.main,
+              },
+              '&:hover': {
+                backgroundColor: alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.08 : 0.04),
               },
             },
           }}

@@ -53,7 +53,7 @@ const CombinedLocationField: React.FC<CombinedLocationFieldProps> = ({
           startAdornment: (
             <InputAdornment position="start">
               <IconButton size="small" onClick={handleIconClick} sx={{ p: 0.5 }}>
-                <LocationOnIcon sx={{ fontSize: 16, color: 'primary.main' }} />
+                <LocationOnIcon sx={{ fontSize: 16 }} />
               </IconButton>
             </InputAdornment>
           ),

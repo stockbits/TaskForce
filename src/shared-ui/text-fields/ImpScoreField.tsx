@@ -59,7 +59,7 @@ const ImpScoreField = React.forwardRef<HTMLInputElement, Props>(function ImpScor
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              <IconButton size="small" onClick={handleCycle} aria-label={LABEL[current]} sx={{ p: 0.5, color: 'primary.main' }}>
+              <IconButton size="small" onClick={handleCycle} aria-label={LABEL[current]} sx={{ p: 0.5 }}>
                 <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '16px' }}>{SYMBOL[current]}</Typography>
               </IconButton>
             </InputAdornment>

@@ -28,8 +28,9 @@ import { useLiveSelectEngine } from "@/hooks/useLiveSelectEngine";
 import GlobalSearchField from "@/shared-ui/text-fields/GlobalSearchField";
 
 import SlidersHorizontal from '@mui/icons-material/Tune';
-import Star from '@mui/icons-material/Star';
-import Info from '@mui/icons-material/Info';
+import Bookmark from '@mui/icons-material/Bookmark';
+import HelpOutline from '@mui/icons-material/HelpOutline';
+import VpnKey from '@mui/icons-material/VpnKey';
 import Clock from '@mui/icons-material/AccessTime';
 import Map from '@mui/icons-material/Map';
 import Users from '@mui/icons-material/People';
@@ -600,11 +601,11 @@ export default function ScheduleLivePage() {
         sx={{ height: theme.custom?.inputHeight ?? 40, '& .MuiInputBase-input': { fontSize: 13, lineHeight: `${theme.custom?.chipSize ?? 28}px` } }}
       />
 
-      {/* Search Tool + Clear All + quick icons (kept left for workflow) */}
+      {/* Search Tool + Clear All buttons on the left */}
       <AppButton
         ref={searchButtonRef}
         onClick={handleSearchToggle}
-        variant={searchButtonActive ? "contained" : "outlined"}
+        variant={searchButtonActive ? "contained" : "contained"}
         color="primary"
         size="small"
         startIcon={<SlidersHorizontal sx={{ fontSize: 16 }} />}
@@ -614,68 +615,53 @@ export default function ScheduleLivePage() {
         Search Tool
       </AppButton>
 
-      <AppButton variant="outlined" size="small" onClick={handleClearAll} sx={{ minWidth: 96, fontWeight: 500, mr: 1 }}>
+      <AppButton variant="contained" size="small" onClick={handleClearAll} sx={{ minWidth: 96, fontWeight: 500, mr: 1 }}>
         Clear All
       </AppButton>
 
+      <Box sx={{ flexGrow: 1 }} />
+
+      {/* Icon buttons on the right - matching dock icon size */}
       <IconButton
-        size="small"
+        size="medium"
         onClick={() => setFavActive((v) => !v)}
-        color={favActive ? "primary" : "default"}
         sx={{
-          width: 40,
-          height: 40,
-          borderRadius: 1,
-          border: `1px solid ${theme.palette.divider}`,
-          ...(favActive && {
-            bgcolor: theme.palette.primary.main,
-            color: theme.palette.primary.contrastText,
-            borderColor: theme.palette.primary.main,
-            '&:hover': { bgcolor: theme.palette.primary.dark },
-          }),
-          mr: 1,
+          mr: 0.5,
         }}
       >
-        <Star sx={{ fontSize: 16 }} />
+        <Bookmark sx={{ fontSize: 16 }} />
       </IconButton>
 
       <IconButton
         ref={legendButtonRef}
-        size="small"
+        size="medium"
         onClick={() => setLegendOpen((o) => !o)}
-        color={legendOpen ? "primary" : "default"}
         sx={{
-          width: 40,
-          height: 40,
-          borderRadius: 1,
-          border: `1px solid ${theme.palette.divider}`,
-          ...(legendOpen && {
-            bgcolor: theme.palette.primary.main,
-            color: theme.palette.primary.contrastText,
-            borderColor: theme.palette.primary.main,
-            '&:hover': { bgcolor: theme.palette.primary.dark },
-          }),
-          mr: 1,
+          mr: 0.5,
         }}
         title="Schedule Legend"
       >
-        <Info sx={{ fontSize: 16 }} />
+        <VpnKey sx={{ fontSize: 16 }} />
       </IconButton>
 
-      <Box sx={{ flexGrow: 1 }} />
+      <IconButton
+        size="medium"
+        sx={{
+          mr: 0.5,
+        }}
+        title="Help"
+      >
+        <HelpOutline sx={{ fontSize: 16 }} />
+      </IconButton>
 
       {collapsedPanels.length > 0 && (
-        <Stack direction="row" spacing={1} ml={2} alignItems="center">
+        <Stack direction="row" spacing={1} ml={1} alignItems="center">
           {collapsedPanels.map((key) => (
             <IconButton
               key={key}
-              size="small"
+              size="medium"
               onClick={() => togglePanel(key)}
               sx={{
-                width: 36,
-                height: 36,
-                borderRadius: 1,
-                border: `1px solid ${theme.palette.divider}`,
                 '&:hover': {
                   bgcolor: theme.palette.action.hover,
                 },
@@ -744,7 +730,7 @@ export default function ScheduleLivePage() {
                             key={item.id}
                             onClick={() => select(item.id)}
                             size="small"
-                            variant={isActive(item.id) ? "contained" : "outlined"}
+                            variant={isActive(item.id) ? "contained" : "contained"}
                             color="primary"
                             endIcon={isActive(item.id) ? <CheckIcon /> : undefined}
                             sx={{
@@ -778,7 +764,7 @@ export default function ScheduleLivePage() {
                             key={item.id}
                             onClick={() => select(item.id)}
                             size="small"
-                            variant={isActive(item.id) ? "contained" : "outlined"}
+                            variant={isActive(item.id) ? "contained" : "contained"}
                             color="primary"
                             endIcon={isActive(item.id) ? <CheckIcon /> : undefined}
                             sx={{

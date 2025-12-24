@@ -252,12 +252,12 @@ export const Sidebar = memo(function Sidebar({
                     px: 1,
                     borderRadius: 1,
                     '&:hover': {
-                      backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                      backgroundColor: alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.16 : 0.08),
                     },
                     '&.Mui-selected': {
-                      backgroundColor: alpha(theme.palette.primary.main, 0.12),
+                      backgroundColor: alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.24 : 0.12),
                       '&:hover': {
-                        backgroundColor: alpha(theme.palette.primary.main, 0.16),
+                        backgroundColor: alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.32 : 0.16),
                       },
                     },
                   },

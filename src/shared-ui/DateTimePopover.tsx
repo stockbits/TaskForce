@@ -1,5 +1,7 @@
 import React from 'react';
-import { Menu, Box, Stack, TextField } from '@mui/material';
+import { Menu, Box, Stack, TextField, InputAdornment } from '@mui/material';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import ScheduleIcon from '@mui/icons-material/Schedule';
 import AppButton from '@/shared-ui/button';
 
 interface Props {
@@ -43,7 +45,29 @@ export default function DateTimePopover({
             onChange={(e) => onChangeField('fromDate', e.target.value)}
             size="small"
             InputLabelProps={{ shrink: true }}
-            sx={{ maxWidth: { xs: '100%', sm: '15ch' }, minWidth: '15ch' }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <CalendarMonthIcon 
+                    sx={{ fontSize: 18, color: 'action.active', cursor: 'pointer' }} 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const input = e.currentTarget.closest('.MuiTextField-root')?.querySelector('input');
+                      input?.focus();
+                      input?.click();
+                    }}
+                  />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ 
+              maxWidth: { xs: '100%', sm: '15ch' }, 
+              minWidth: '15ch',
+              '& input[type="date"]::-webkit-calendar-picker-indicator': {
+                display: 'none',
+                WebkitAppearance: 'none',
+              },
+            }}
           />
           <TextField
             type="time"
@@ -51,7 +75,29 @@ export default function DateTimePopover({
             value={fromTime}
             onChange={(e) => onChangeField('fromTime', e.target.value)}
             size="small"
-            sx={{ maxWidth: { xs: '100%', sm: '10ch' }, minWidth: '10ch' }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <ScheduleIcon 
+                    sx={{ fontSize: 18, color: 'action.active', cursor: 'pointer' }} 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const input = e.currentTarget.closest('.MuiTextField-root')?.querySelector('input');
+                      input?.focus();
+                      input?.click();
+                    }}
+                  />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ 
+              maxWidth: { xs: '100%', sm: '10ch' }, 
+              minWidth: '10ch',
+              '& input[type="time"]::-webkit-calendar-picker-indicator': {
+                display: 'none',
+                WebkitAppearance: 'none',
+              },
+            }}
           />
         </Stack>
         <Stack direction="row" spacing={1} alignItems="center">
@@ -63,7 +109,29 @@ export default function DateTimePopover({
             onChange={(e) => onChangeField('toDate', e.target.value)}
             size="small"
             InputLabelProps={{ shrink: true }}
-            sx={{ maxWidth: { xs: '100%', sm: '15ch' }, minWidth: '15ch' }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <CalendarMonthIcon 
+                    sx={{ fontSize: 18, color: 'action.active', cursor: 'pointer' }} 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const input = e.currentTarget.closest('.MuiTextField-root')?.querySelector('input');
+                      input?.focus();
+                      input?.click();
+                    }}
+                  />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ 
+              maxWidth: { xs: '100%', sm: '15ch' }, 
+              minWidth: '15ch',
+              '& input[type="date"]::-webkit-calendar-picker-indicator': {
+                display: 'none',
+                WebkitAppearance: 'none',
+              },
+            }}
           />
           <TextField
             type="time"
@@ -71,11 +139,33 @@ export default function DateTimePopover({
             value={toTime}
             onChange={(e) => onChangeField('toTime', e.target.value)}
             size="small"
-            sx={{ maxWidth: { xs: '100%', sm: '10ch' }, minWidth: '10ch' }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <ScheduleIcon 
+                    sx={{ fontSize: 18, color: 'action.active', cursor: 'pointer' }} 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const input = e.currentTarget.closest('.MuiTextField-root')?.querySelector('input');
+                      input?.focus();
+                      input?.click();
+                    }}
+                  />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ 
+              maxWidth: { xs: '100%', sm: '10ch' }, 
+              minWidth: '10ch',
+              '& input[type="time"]::-webkit-calendar-picker-indicator': {
+                display: 'none',
+                WebkitAppearance: 'none',
+              },
+            }}
           />
         </Stack>
         <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-          <AppButton variant="text" size="small" onClick={() => { onClear && onClear(); }}>
+          <AppButton variant="contained" size="small" onClick={() => { onClear && onClear(); }}>
             Clear
           </AppButton>
           <AppButton variant="contained" size="small" onClick={onClose}>
