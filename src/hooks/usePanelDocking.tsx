@@ -3,7 +3,6 @@ import Close from '@mui/icons-material/Close';
 import OpenInFull from '@mui/icons-material/OpenInFull';
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
-import useFieldSizes from "../shared-ui/text-fields/useFieldSizes";
 
 /* ============================================================
    TYPES
@@ -18,6 +17,19 @@ export function usePanelDocking(
 ) {
   const [visiblePanels, setVisiblePanels] = useState<PanelKey[]>(initialPanels);
   const [maximizedPanel, setMaximizedPanel] = useState<PanelKey | null>(null);
+
+  // Individual panel sizes (as fractions of available space)
+  const [panelSizes, setPanelSizes] = useState<Record<PanelKey, number>>({
+    timeline: 0.5,   // Top-left panel width
+    map: 0.5,        // Top-right panel width
+    resources: 0.5,  // Bottom-left panel width
+    tasks: 0.5,      // Bottom-right panel width
+  });
+
+  const [rowSizes, setRowSizes] = useState({
+    top: 0.5,    // Top row height
+    bottom: 0.5, // Bottom row height
+  });
 
   /* ---- ACTIONS ---- */
 
@@ -38,6 +50,14 @@ export function usePanelDocking(
     setMaximizedPanel((prev) => (prev === key ? null : key));
   }, [visiblePanels.length]);
 
+  const updatePanelSize = useCallback((key: PanelKey, size: number) => {
+    setPanelSizes(prev => ({ ...prev, [key]: Math.max(0.1, Math.min(0.9, size)) }));
+  }, []);
+
+  const updateRowSize = useCallback((row: 'top' | 'bottom', size: number) => {
+    setRowSizes(prev => ({ ...prev, [row]: Math.max(0.1, Math.min(0.9, size)) }));
+  }, []);
+
   /* ---- DERIVED ---- */
 
   const collapsedPanels = useMemo(
@@ -52,11 +72,16 @@ export function usePanelDocking(
     maximizedPanel,
     collapsedPanels,
 
+    panelSizes,
+    rowSizes,
+
     isPanelMaximized,
 
     togglePanel,
     closePanel,
     maximizePanel,
+    updatePanelSize,
+    updateRowSize,
   };
 }
 
@@ -71,6 +96,8 @@ export function PanelContainer({
   onClose,
   children,
   visibleCount,
+  onMouseMove,
+  onMouseDown,
 }: {
   title: string;
   icon: React.ElementType;
@@ -80,9 +107,10 @@ export function PanelContainer({
   children: React.ReactNode;
   /** number of currently visible panels */
   visibleCount: number;
+  onMouseMove?: (event: React.MouseEvent) => void;
+  onMouseDown?: (event: React.MouseEvent) => void;
 }) {
   const theme = useTheme();
-  const { INPUT_HEIGHT } = useFieldSizes();
   const headerBg = alpha(theme.palette.primary.main, 0.05);
   const iconTone = alpha(theme.palette.text.primary, 0.6);
 
@@ -99,6 +127,8 @@ export function PanelContainer({
         position: "relative",
         zIndex: isMaximized ? 10 : 1,
       }}
+      onMouseMove={onMouseMove}
+      onMouseDown={onMouseDown}
     >
       <Stack
         direction="row"
@@ -108,7 +138,7 @@ export function PanelContainer({
           px: 2,
           py: 1,
           backgroundColor: headerBg,
-          minHeight: INPUT_HEIGHT,
+          minHeight: 36,
         }}
       >
         <Stack direction="row" spacing={1.5} alignItems="center">
@@ -130,10 +160,10 @@ export function PanelContainer({
               }}
               title={isMaximized ? "Restore" : "Maximize"}
               sx={{
-                borderRadius: 1.5,
+                borderRadius: '50%',
                 bgcolor: isMaximized
                   ? alpha(theme.palette.primary.main, 0.12)
-                  : theme.palette.background.paper,
+                  : theme.palette.mode === 'dark' ? theme.palette.background.paper : 'transparent',
                 '&:hover': {
                   bgcolor: alpha(theme.palette.primary.main, 0.18),
                 },
@@ -157,8 +187,8 @@ export function PanelContainer({
             }}
             title="Close"
             sx={{
-              borderRadius: 1.5,
-              bgcolor: theme.palette.background.paper,
+              borderRadius: '50%',
+              bgcolor: theme.palette.mode === 'dark' ? theme.palette.background.paper : 'transparent',
               '&:hover': {
                   bgcolor: alpha(theme.palette.primary.main, 0.18),
                 },

@@ -207,6 +207,7 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
                       borderLeft: `3px solid ${theme.palette.mode === 'dark' ? "#3BE089" : "#000000"}`,
                       borderRight: `3px solid ${theme.palette.mode === 'dark' ? "#3BE089" : "#000000"}`,
                       borderRadius: 0,
+                      boxSizing: "border-box",
                     }}
                   />
                   <Typography variant="caption" color="text.secondary">
@@ -218,8 +219,8 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
                     sx={{
                       width: 16,
                       height: 16,
-                      bgcolor: theme.palette.mode === 'dark' ? '#ffb74d' : '#ff9800',
-                      opacity: theme.palette.mode === 'dark' ? 1 : 0.8,
+                      bgcolor: theme.palette.mode === 'dark' ? "#ff8c00" : "#ff9800",
+                      opacity: 0.25,
                       borderRadius: 0,
                     }}
                   />

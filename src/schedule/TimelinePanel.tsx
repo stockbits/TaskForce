@@ -83,25 +83,15 @@ function formatHourLabel(d: Date, step: number, totalHours: number) {
 
   // For single day or short ranges, show hour intervals with "till" format
   const hour = d.getHours();
-  const ampm = hour >= 12 ? 'PM' : 'AM';
-  const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
 
-  // For step intervals > 1, show ranges like "6 till 12"
+  // For step intervals > 1, show ranges like "12:00 till 13:00"
   if (step > 1) {
     const endHour = hour + step;
-    const endDisplayHour = endHour === 0 ? 12 : endHour > 12 ? endHour - 12 : endHour;
-    const endAmpm = endHour >= 12 ? 'PM' : 'AM';
-
-    // If the range crosses AM/PM boundary, show both
-    if (ampm !== endAmpm) {
-      return `${displayHour} ${ampm} till ${endDisplayHour} ${endAmpm}`;
-    } else {
-      return `${displayHour} till ${endDisplayHour} ${ampm}`;
-    }
+    return `${hour.toString().padStart(2, '0')}:00 till ${(endHour % 24).toString().padStart(2, '0')}:00`;
   }
 
-  // For single hour intervals, just show the hour
-  return `${displayHour} ${ampm}`;
+  // For single hour intervals, just show the hour in 24-hour format
+  return `${hour.toString().padStart(2, '0')}:00`;
 }
 
 function formatLunchTooltip(lunchStart?: string, lunchEnd?: string): string {
@@ -389,7 +379,12 @@ export default function TimelinePanel({
       header.scrollLeft = fraction * headerScrollMax;
     }
     if (leftScrollRef.current) {
-      leftScrollRef.current.scrollTop = body.scrollTop;
+      // Use requestAnimationFrame to ensure synchronization happens after scroll event
+      requestAnimationFrame(() => {
+        if (leftScrollRef.current) {
+          leftScrollRef.current.scrollTop = body.scrollTop;
+        }
+      });
     }
   };
 
@@ -515,7 +510,7 @@ export default function TimelinePanel({
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
-          {categories.map((rid) => (
+          {categories.map((rid, rowIndex) => (
             <Box
               key={rid}
               sx={{
@@ -523,7 +518,11 @@ export default function TimelinePanel({
                 display: "flex",
                 alignItems: "center",
                 px: 1,
-                borderBottom: `1px solid ${theme.palette.divider}`,
+                borderBottom: "1px solid #cccccc",
+                backgroundColor: rowIndex % 2 === 0 ? 'rgba(0, 0, 0, 0.02)' : 'transparent',
+                '&:hover': {
+                  backgroundColor: rowIndex % 2 === 0 ? 'rgba(0, 0, 0, 0.04)' : 'rgba(0, 0, 0, 0.02)',
+                },
               }}
             >
               <PersonIcon
@@ -561,7 +560,11 @@ export default function TimelinePanel({
                 sx={{
                   position: "relative",
                   height: ROW_HEIGHT,
-                  borderBottom: "1px solid #f0f0f0",
+                  borderBottom: "1px solid #cccccc",
+                  backgroundColor: rowIndex % 2 === 0 ? 'rgba(0, 0, 0, 0.02)' : 'transparent',
+                  '&:hover': {
+                    backgroundColor: rowIndex % 2 === 0 ? 'rgba(0, 0, 0, 0.04)' : 'rgba(0, 0, 0, 0.02)',
+                  },
                 }}
               >
                 {/* shift bars */}

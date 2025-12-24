@@ -28,9 +28,9 @@ import { useLiveSelectEngine } from "@/hooks/useLiveSelectEngine";
 import GlobalSearchField from "@/shared-ui/text-fields/GlobalSearchField";
 
 import SlidersHorizontal from '@mui/icons-material/Tune';
-import Bookmark from '@mui/icons-material/Bookmark';
 import HelpOutline from '@mui/icons-material/HelpOutline';
-import VpnKey from '@mui/icons-material/VpnKey';
+import InfoIcon from '@mui/icons-material/Info';
+import Bookmark from '@mui/icons-material/Bookmark';
 import Clock from '@mui/icons-material/AccessTime';
 import Map from '@mui/icons-material/Map';
 import Users from '@mui/icons-material/People';
@@ -84,7 +84,6 @@ export default function ScheduleLivePage() {
   /* ---------------- DOMAIN + DIVISION ---------------- */
   const [domain, setDomain] = useState<string>("");
   const [division, setDivision] = useState<string>("");
-  const [favActive, setFavActive] = useState<boolean>(false);
 
   /* ---------------- LEGEND ---------------- */
   const [legendOpen, setLegendOpen] = useState(false);
@@ -263,6 +262,10 @@ export default function ScheduleLivePage() {
     togglePanel,
     closePanel,
     maximizePanel,
+    panelSizes,
+    rowSizes,
+    updatePanelSize,
+    updateRowSize,
   } = usePanelDocking();
 
   /* ==========================================================================
@@ -517,11 +520,6 @@ export default function ScheduleLivePage() {
   const bottomLeftVisible = visiblePanels.includes('resources');
   const bottomRightVisible = visiblePanels.includes('tasks');
 
-  const topHasBoth = topLeftVisible && topRightVisible;
-  const bottomHasBoth = bottomLeftVisible && bottomRightVisible;
-  const leftHasBoth = topLeftVisible && bottomLeftVisible;
-  const rightHasBoth = topRightVisible && bottomRightVisible;
-
   const topRowHas = Number(topLeftVisible || topRightVisible);
   const bottomRowHas = Number(bottomLeftVisible || bottomRightVisible);
   const rowsCount = topRowHas + bottomRowHas;
@@ -619,19 +617,7 @@ export default function ScheduleLivePage() {
         Clear All
       </AppButton>
 
-      <Box sx={{ flexGrow: 1 }} />
-
-      {/* Icon buttons on the right - matching dock icon size */}
-      <IconButton
-        size="medium"
-        onClick={() => setFavActive((v) => !v)}
-        sx={{
-          mr: 0.5,
-        }}
-      >
-        <Bookmark sx={{ fontSize: 16 }} />
-      </IconButton>
-
+      {/* Icon buttons on the left - matching dock icon size */}
       <IconButton
         ref={legendButtonRef}
         size="medium"
@@ -641,7 +627,7 @@ export default function ScheduleLivePage() {
         }}
         title="Schedule Legend"
       >
-        <VpnKey sx={{ fontSize: 16 }} />
+        <InfoIcon sx={{ fontSize: 18 }} />
       </IconButton>
 
       <IconButton
@@ -651,8 +637,20 @@ export default function ScheduleLivePage() {
         }}
         title="Help"
       >
-        <HelpOutline sx={{ fontSize: 16 }} />
+        <HelpOutline sx={{ fontSize: 18 }} />
       </IconButton>
+
+      <IconButton
+        size="medium"
+        sx={{
+          mr: 0.5,
+        }}
+        title="Favorites"
+      >
+        <Bookmark sx={{ fontSize: 18 }} />
+      </IconButton>
+
+      <Box sx={{ flexGrow: 1 }} />
 
       {collapsedPanels.length > 0 && (
         <Stack direction="row" spacing={1} ml={1} alignItems="center">
@@ -851,83 +849,143 @@ export default function ScheduleLivePage() {
   );
 
   /* ==========================================================================
-     RENDER
+     RESIZE HANDLES
   ============================================================================ */
-    // splitter constants and independent X/Y fractions
-    const SPLITTER_HEIGHT = 6; // px (horizontal splitter)
-    const SPLITTER_WIDTH = 6; // px (vertical splitter)
+  const [isResizing, setIsResizing] = useState<{ type: 'horizontal' | 'vertical'; key: string } | null>(null);
 
-    const [colFraction, setColFraction] = useState<number>(0.5);
-    const [rowFraction, setRowFraction] = useState<number>(0.5);
-    const draggingRowRef = useRef(false);
-    const draggingColRef = useRef(false);
+  const handleResizeStart = (type: 'horizontal' | 'vertical', key: string) => (event: React.MouseEvent) => {
+    event.preventDefault();
+    setIsResizing({ type, key });
 
-    const onHorizontalMouseDown = (event: React.MouseEvent) => {
-      // prevent starting a drag while the search popper is open
-      if (isSearchPopperOpen) return;
-      event.preventDefault();
-      draggingRowRef.current = true;
-      const startY = event.clientY;
-      const container = panelsContainerRef.current;
-      const rect = container?.getBoundingClientRect();
-      const startHeight = rect?.height ?? 0;
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const container = panelsContainerRef.current;
+    const containerRect = container?.getBoundingClientRect();
 
-      const onMove = (ev: MouseEvent) => {
-        if (!draggingRowRef.current || !container) return;
-        const delta = ev.clientY - startY;
-        const newTopPx = rowFraction * startHeight + delta;
-        const frac = Math.max(0.12, Math.min(0.88, newTopPx / startHeight));
-        setRowFraction(frac);
-      };
+    if (!container || !containerRect) return;
 
-      const onUp = () => {
-        draggingRowRef.current = false;
-        window.removeEventListener('mousemove', onMove);
-        window.removeEventListener('mouseup', onUp);
-      };
+    const onMove = (ev: MouseEvent) => {
+      if (!isResizing) return;
+      ev.preventDefault();
 
-      window.addEventListener('mousemove', onMove);
-      window.addEventListener('mouseup', onUp);
+      if (isResizing.type === 'horizontal') {
+        // Horizontal resizing between left/right panels in the same row
+        const deltaX = ev.clientX - startX;
+
+        if (isResizing.key === 'top') {
+          // Resizing between timeline and map
+          const timelineWidth = panelSizes.timeline;
+
+          const newTimelinePx = timelineWidth * containerRect.width + deltaX;
+          const newTimelineFraction = Math.max(0.1, Math.min(0.9, newTimelinePx / containerRect.width));
+          const newMapFraction = Math.max(0.1, Math.min(0.9, 1 - newTimelineFraction));
+
+          updatePanelSize('timeline', newTimelineFraction);
+          updatePanelSize('map', newMapFraction);
+        } else if (isResizing.key === 'bottom') {
+          // Resizing between resources and tasks
+          const resourcesWidth = panelSizes.resources;
+
+          const newResourcesPx = resourcesWidth * containerRect.width + deltaX;
+          const newResourcesFraction = Math.max(0.1, Math.min(0.9, newResourcesPx / containerRect.width));
+          const newTasksFraction = Math.max(0.1, Math.min(0.9, 1 - newResourcesFraction));
+
+          updatePanelSize('resources', newResourcesFraction);
+          updatePanelSize('tasks', newTasksFraction);
+        }
+      } else {
+        // Vertical resizing between top/bottom rows
+        const deltaY = ev.clientY - startY;
+        const currentHeightFraction = rowSizes[isResizing.key as 'top' | 'bottom'];
+        const newHeightPx = currentHeightFraction * containerRect.height + deltaY;
+        const newHeightFraction = Math.max(0.1, Math.min(0.9, newHeightPx / containerRect.height));
+        updateRowSize(isResizing.key as 'top' | 'bottom', newHeightFraction);
+      }
     };
 
-    const onVerticalMouseDown = (event: React.MouseEvent) => {
-      // prevent starting a drag while the search popper is open
-      if (isSearchPopperOpen) return;
-      event.preventDefault();
-      draggingColRef.current = true;
-      const startX = event.clientX;
-      const container = panelsContainerRef.current;
-      const rect = container?.getBoundingClientRect();
-      const startWidth = rect?.width ?? 0;
-
-      const onMove = (ev: MouseEvent) => {
-        if (!draggingColRef.current || !container) return;
-        const delta = ev.clientX - startX;
-        const newLeftPx = colFraction * startWidth + delta;
-        const frac = Math.max(0.12, Math.min(0.88, newLeftPx / startWidth));
-        setColFraction(frac);
-      };
-
-      const onUp = () => {
-        draggingColRef.current = false;
-        window.removeEventListener('mousemove', onMove);
-        window.removeEventListener('mouseup', onUp);
-      };
-
-      window.addEventListener('mousemove', onMove);
-      window.addEventListener('mouseup', onUp);
+    const onUp = () => {
+      setIsResizing(null);
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
     };
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
+
+  // Resize handle component
+  const ResizeHandle = ({ 
+    type, 
+    key, 
+    sx = {} 
+  }: { 
+    type: 'horizontal' | 'vertical'; 
+    key: string; 
+    sx?: any 
+  }) => (
+    <Box
+      sx={{
+        position: 'relative',
+        cursor: type === 'horizontal' ? 'ew-resize' : 'ns-resize',
+        userSelect: 'none',
+        '&:hover': {
+          '& .resize-indicator': {
+            opacity: 1,
+          },
+        },
+        ...sx,
+      }}
+      onMouseDown={handleResizeStart(type, key)}
+    >
+      <Box
+        className="resize-indicator"
+        sx={{
+          position: 'absolute',
+          opacity: 0,
+          transition: 'opacity 0.2s ease',
+          ...(type === 'horizontal' 
+            ? {
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: 4,
+                height: 24,
+                bgcolor: alpha(theme.palette.primary.main, 0.3),
+                borderRadius: 1,
+                '&:hover': {
+                  bgcolor: alpha(theme.palette.primary.main, 0.5),
+                },
+              }
+            : {
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: 24,
+                height: 4,
+                bgcolor: alpha(theme.palette.primary.main, 0.3),
+                borderRadius: 1,
+                '&:hover': {
+                  bgcolor: alpha(theme.palette.primary.main, 0.5),
+                },
+              }
+          ),
+        }}
+      />
+    </Box>
+  );
 
     return (
       <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", position: "relative" }}>
         {toolbar}
 
         <Suspense fallback={<div>Loading legend...</div>}>
-          <ScheduleLegend 
-            visible={legendOpen} 
-            onClose={() => setLegendOpen(false)}
-            anchorEl={legendButtonRef.current}
-          />
+          <ClickAwayListener onClickAway={() => setLegendOpen(false)}>
+            <ScheduleLegend 
+              visible={legendOpen} 
+              onClose={() => setLegendOpen(false)}
+              anchorEl={legendButtonRef.current}
+            />
+          </ClickAwayListener>
         </Suspense>
 
         {searchToolPopper}
@@ -957,13 +1015,24 @@ export default function ScheduleLivePage() {
                 display: 'grid',
                 gridTemplateRows: rowsCount === 1
                   ? '1fr'
-                  : `${Math.round(rowFraction * 100)}% ${SPLITTER_HEIGHT}px ${Math.round((1 - rowFraction) * 100)}%`,
-                gridTemplateColumns: colsCount === 1
-                  ? '1fr'
-                  : `${Math.round(colFraction * 100)}% ${SPLITTER_WIDTH}px ${Math.round((1 - colFraction) * 100)}%`,
+                  : `1fr ${rowsCount === 2 ? '6px' : ''} 1fr`.trim(),
+                gridTemplateColumns: (() => {
+                  if (colsCount === 1) return '1fr';
+
+                  const leftWidth = topLeftVisible ? panelSizes.timeline : panelSizes.resources;
+                  const rightWidth = topRightVisible ? panelSizes.map : panelSizes.tasks;
+                  const totalWidth = leftWidth + rightWidth;
+
+                  // Normalize to ensure they add up to 100%
+                  const leftPercent = Math.round((leftWidth / totalWidth) * 100);
+                  const rightPercent = 100 - leftPercent;
+
+                  return `${leftPercent}% 6px ${rightPercent}%`;
+                })(),
                 width: '100%',
                 height: '100%',
                 minHeight: 0,
+                gap: 0,
               }}
             >
               {/* Top-left */}
@@ -982,6 +1051,23 @@ export default function ScheduleLivePage() {
                 )}
               </Box>
 
+              {/* Horizontal resize handle (top row) */}
+              {colsCount === 2 && (
+                <ResizeHandle
+                  type="horizontal"
+                  key="top"
+                  sx={{
+                    gridRow: '1',
+                    gridColumn: '2',
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                />
+              )}
+
               {/* Top-right */}
               <Box sx={{ gridRow: '1', gridColumn: !topLeftVisible && topRightVisible ? '1 / span 3' : '3', display: 'flex', minHeight: 0, zIndex: 10 }}>
                 {visiblePanels.includes('map') && (
@@ -998,36 +1084,19 @@ export default function ScheduleLivePage() {
                 )}
               </Box>
 
-              {/* Vertical splitter */}
-              {colsCount === 2 && (topHasBoth || bottomHasBoth) && (
-                <Box
-                  gridRow={rowsCount === 2 ? '1 / span 3' : topHasBoth ? '1' : '3'}
-                  gridColumn="2"
-                  role="separator"
-                  onMouseDown={onVerticalMouseDown}
+              {/* Vertical resize handle */}
+              {rowsCount === 2 && (
+                <ResizeHandle
+                  type="vertical"
+                  key="top"
                   sx={{
-                    width: SPLITTER_WIDTH,
-                    bgcolor: alpha(theme.palette.primary.main, 0.06),
-                    cursor: isSearchPopperOpen ? 'default' : 'col-resize',
-                    pointerEvents: isSearchPopperOpen ? 'none' : 'auto',
-                    zIndex: 5,
-                  }}
-                />
-              )}
-
-              {/* Horizontal splitter */}
-              {rowsCount === 2 && (leftHasBoth || rightHasBoth) && (
-                <Box
-                  gridRow="2"
-                  gridColumn={colsCount === 2 ? '1 / span 3' : leftHasBoth ? '1' : '3'}
-                  role="separator"
-                  onMouseDown={onHorizontalMouseDown}
-                  sx={{
-                    height: SPLITTER_HEIGHT,
-                    bgcolor: alpha(theme.palette.primary.main, 0.06),
-                    cursor: isSearchPopperOpen ? 'default' : 'row-resize',
-                    pointerEvents: isSearchPopperOpen ? 'none' : 'auto',
-                    zIndex: 5,
+                    gridRow: '2',
+                    gridColumn: '1 / span 3',
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                 />
               )}
@@ -1047,6 +1116,23 @@ export default function ScheduleLivePage() {
                   </PanelContainer>
                 )}
               </Box>
+
+              {/* Horizontal resize handle (bottom row) */}
+              {colsCount === 2 && (
+                <ResizeHandle
+                  type="horizontal"
+                  key="bottom"
+                  sx={{
+                    gridRow: '3',
+                    gridColumn: '2',
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                />
+              )}
 
               {/* Bottom-right */}
               <Box sx={{ gridRow: '3', gridColumn: !bottomLeftVisible && bottomRightVisible ? '1 / span 3' : '3', display: 'flex', minHeight: 0, zIndex: 10 }}>

@@ -25,7 +25,6 @@ import StickyNote2 from '@mui/icons-material/StickyNote2';
 import WarningAmber from '@mui/icons-material/WarningAmber';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import BookmarkIcon from '@mui/icons-material/Bookmark';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import DateTimePopover from '@/shared-ui/DateTimePopover';
 import { MultiSelectField, FreeTypeSelectField, CombinedLocationField } from '@/shared-ui';
@@ -120,7 +119,6 @@ export default function TaskSearchCard({
 }: Props) {
   const theme = useTheme();
   const [filters, setFilters] = useState<Filters>(() => ({ ...INITIAL_FILTERS }));
-  const [isFavourite, setIsFavourite] = useState(false);
   const [activeTab, setActiveTab] = useState<"basic" | "advanced">("basic");
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [actionsAnchorEl, setActionsAnchorEl] = useState<null | HTMLElement>(null);
@@ -294,10 +292,6 @@ export default function TaskSearchCard({
             aria-label="date-filter"
           >
             <CalendarMonthIcon sx={{ fontSize: 20, color: (filters.fromDate || filters.toDate || filters.fromTime || filters.toTime) ? theme.palette.primary.main : 'inherit' }} />
-          </IconButton>
-
-          <IconButton onClick={() => setIsFavourite((p) => !p)} size="small" sx={{ ml: 1 }} aria-label="favourite">
-            <BookmarkIcon sx={{ fontSize: 20 }} />
           </IconButton>
         </Box>
       </Box>

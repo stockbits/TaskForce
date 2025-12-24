@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { IconButton, Tooltip } from "@mui/material";
-import ZoomInIcon from "@mui/icons-material/ZoomIn";
-import ZoomOutIcon from "@mui/icons-material/ZoomOut";
-import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
+import FitScreenIcon from "@mui/icons-material/FitScreen";
 
 interface TimelineZoomControlProps {
   onZoomChange: (zoomLevel: number) => void;
@@ -57,26 +55,16 @@ export default function TimelineZoomControl({ onZoomChange, currentZoom: _curren
       }
     >
       <IconButton
-        size="small"
+        size="medium"
         onClick={handleResetZoom}
         sx={{
-          opacity: isAtDefault ? 0.5 : 1,
-          transition: 'all 0.2s',
-          border: !isAtDefault ? '1px solid rgba(0, 0, 0, 0.23)' : 'none',
-          bgcolor: !isAtDefault ? 'rgba(25, 118, 210, 0.08)' : 'transparent',
+          color: isAtDefault ? 'text.primary' : 'action.active',
           '&:hover': {
-            bgcolor: !isAtDefault ? 'rgba(25, 118, 210, 0.12)' : 'action.hover',
-            border: !isAtDefault ? '1px solid rgba(25, 118, 210, 0.5)' : 'none',
+            color: isAtDefault ? 'action.active' : 'action.focus',
           },
         }}
       >
-        {isAtDefault ? (
-          <CenterFocusStrongIcon sx={{ fontSize: 16 }} />
-        ) : currentZoomLevel > 1 ? (
-          <ZoomInIcon sx={{ fontSize: 16 }} />
-        ) : (
-          <ZoomOutIcon sx={{ fontSize: 16 }} />
-        )}
+        <FitScreenIcon sx={{ fontSize: 18 }} />
       </IconButton>
     </Tooltip>
   );
