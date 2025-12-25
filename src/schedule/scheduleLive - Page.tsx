@@ -475,6 +475,7 @@ export default function ScheduleLivePage() {
               onStartDateChange={setTimelineStartDate}
               onEndDateChange={setTimelineEndDate}
               resources={resourceData}
+              tasks={taskData}
             />
           </Suspense>
         );

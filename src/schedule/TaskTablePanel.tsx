@@ -12,6 +12,7 @@ import type { TaskRecord } from "@/hooks/useLiveSelectEngine";
 const PRIORITY_KEYS = [
   "taskId",
   "taskStatus",
+  "employeeId",
   "resourceName",
   "commitmentType",
   "postCode",
@@ -184,7 +185,14 @@ export default function TaskTablePanel({
     }
     
     return [...pinnedItems, ...unpinnedItems];
-  }, [data, pinnedOrder, currentSortModel]);
+  }, [data, pinnedOrder, currentSortModel]).map(item => item).sort((a, b) => {
+    // Favor "Assigned (ACT)" by sorting it first
+    const statusA = a.taskStatus || '';
+    const statusB = b.taskStatus || '';
+    if (statusA === 'Assigned (ACT)' && statusB !== 'Assigned (ACT)') return -1;
+    if (statusB === 'Assigned (ACT)' && statusA !== 'Assigned (ACT)') return 1;
+    return 0; // Keep other orders as is
+  });
 
   /* ==========================================================================
      CONTROLLED SELECTION SET

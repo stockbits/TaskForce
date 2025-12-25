@@ -19,8 +19,8 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-
 import TimelineZoomControl from "./TimelineZoomControl";
+import TaskBlock from "./TaskBlock";
 
 type ResourceRow = {
   resourceId?: string;
@@ -98,6 +98,17 @@ function formatLunchTooltip(lunchStart?: string, lunchEnd?: string): string {
   return `Expected Lunch Time: ${lunchStart} - ${lunchEnd}`;
 }
 
+function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Radius of the Earth in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 export default function TimelinePanel({
   isMaximized = false,
   startDate: propStartDate,
@@ -105,6 +116,7 @@ export default function TimelinePanel({
   onStartDateChange,
   onEndDateChange,
   resources: resourceData = [],
+  tasks: taskData = [],
 }: {
   isMaximized?: boolean;
   startDate: Date;
@@ -112,6 +124,7 @@ export default function TimelinePanel({
   onStartDateChange: (date: Date) => void;
   onEndDateChange: (date: Date) => void;
   resources?: ResourceRow[];
+  tasks?: any[];
 }) {
   // Use props for date state instead of internal state
   const startDate = propStartDate;
@@ -253,7 +266,8 @@ export default function TimelinePanel({
   }, [zoomLevel, dateRange, PX_PER_HOUR, totalHours, containerWidth]);
 
   const categories = useMemo(() => {
-    return resources.map((r) => String(r.resourceId ?? r.id ?? "UNKNOWN"));
+    const cats = resources.map((r) => String(r.resourceId ?? r.id ?? "UNKNOWN"));
+    return cats;
   }, [resources]);
 
   const timelineIntervals = useMemo(() => {
@@ -368,6 +382,139 @@ export default function TimelinePanel({
 
     return rows;
   }, [resources, dateRange, PX_PER_HOUR]);
+
+  // Build task bars
+  const taskBarsByRow = useMemo(() => {
+    const rows: Array<Array<{ leftPx: number; widthPx: number; task: any; type: 'task' | 'travel' }>> = [];
+
+    // Group tasks by resourceId
+    const tasksByResource: Record<string, any[]> = {};
+    taskData.forEach(task => {
+      const rid = task.employeeId || task.resourceId;
+      if (rid) {
+        if (!tasksByResource[rid]) tasksByResource[rid] = [];
+        tasksByResource[rid].push(task);
+      }
+    });
+
+    for (let y = 0; y < resources.length; y++) {
+      const r = resources[y];
+      const rid = String(r.resourceId ?? r.id ?? "UNKNOWN");
+      const resourceTasks = tasksByResource[rid] || [];
+
+      // Sort tasks by start time
+      resourceTasks.sort((a, b) => {
+        const aStart = new Date(a.expectedStartDate || a.startDate).getTime();
+        const bStart = new Date(b.expectedStartDate || b.startDate).getTime();
+        return aStart - bStart;
+      });
+
+      const bars: Array<{ leftPx: number; widthPx: number; task: any; type: 'task' | 'travel' }> = [];
+      for (let i = 0; i < resourceTasks.length; i++) {
+        const task = resourceTasks[i];
+        const startStr = task.expectedStartDate || task.startDate;
+        const endStr = task.expectedFinishDate || task.startDate;
+        if (!startStr || !endStr) continue;
+
+        const start = new Date(startStr);
+        const end = new Date(endStr);
+        const startMs = start.getTime();
+        const endMs = end.getTime();
+
+        // Clip to visible range
+        const clippedStart = clamp(startMs, dateRange.start, dateRange.end);
+        const clippedEnd = clamp(endMs, dateRange.start, dateRange.end);
+
+        if (clippedEnd > clippedStart) {
+          const leftPx = ((clippedStart - dateRange.start) / MS_HOUR) * PX_PER_HOUR;
+          const widthPx = ((clippedEnd - clippedStart) / MS_HOUR) * PX_PER_HOUR;
+          bars.push({ leftPx, widthPx, task, type: 'task' });
+        }
+
+        // Add travel to next task
+        if (i < resourceTasks.length - 1) {
+          const nextTask = resourceTasks[i + 1];
+          const nextStartStr = nextTask.expectedStartDate || nextTask.startDate;
+          if (nextStartStr) {
+            const travelStart = new Date(endStr);
+            const travelEnd = new Date(nextStartStr);
+            const travelStartMs = travelStart.getTime();
+            const travelEndMs = travelEnd.getTime();
+
+            let travelDuration = travelEndMs - travelStartMs; // default to actual gap
+
+            // Calculate based on lat/lng if available
+            if (task.lat && task.lng && nextTask.lat && nextTask.lng) {
+              const distance = haversineDistance(task.lat, task.lng, nextTask.lat, nextTask.lng);
+              const speedKmh = 40; // assume 40 km/h
+              const travelTimeHours = distance / speedKmh;
+              const calculatedTravelMs = travelTimeHours * 60 * 60 * 1000;
+              // Use calculated, but cap between 5 min and 2 hours
+              travelDuration = Math.max(5 * 60 * 1000, Math.min(calculatedTravelMs, 2 * 60 * 60 * 1000));
+            } else {
+              // Fallback to min of actual gap or 30 min
+              travelDuration = Math.min(travelEndMs - travelStartMs, 30 * 60 * 1000);
+            }
+
+            const actualTravelEnd = travelStartMs + travelDuration;
+
+            const clippedTravelStart = clamp(travelStartMs, dateRange.start, dateRange.end);
+            const clippedTravelEnd = clamp(actualTravelEnd, dateRange.start, dateRange.end);
+
+            if (clippedTravelEnd > clippedTravelStart) {
+              const leftPx = ((clippedTravelStart - dateRange.start) / MS_HOUR) * PX_PER_HOUR;
+              const widthPx = ((clippedTravelEnd - clippedTravelStart) / MS_HOUR) * PX_PER_HOUR;
+              bars.push({ leftPx, widthPx, task: { taskId: 'Travel' }, type: 'travel' });
+            }
+          }
+        }
+      }
+
+      rows.push(bars);
+    }
+
+    return rows;
+  }, [resources, taskData, dateRange, PX_PER_HOUR]);
+
+  // Compute ECBT (Estimated Comeback Time) for each resource
+  const ecbtByRow = useMemo(() => {
+    const ecbts: number[] = [];
+
+    // Group tasks by resourceId
+    const tasksByResource: Record<string, any[]> = {};
+    taskData.forEach(task => {
+      const rid = task.employeeId || task.resourceId;
+      if (rid) {
+        if (!tasksByResource[rid]) tasksByResource[rid] = [];
+        tasksByResource[rid].push(task);
+      }
+    });
+
+    for (let y = 0; y < resources.length; y++) {
+      const r = resources[y];
+      const rid = String(r.resourceId ?? r.id ?? "UNKNOWN");
+      const resourceTasks = tasksByResource[rid] || [];
+
+      if (resourceTasks.length === 0) {
+        ecbts.push(0);
+        continue;
+      }
+
+      // Find the latest end time
+      let latestEnd = 0;
+      resourceTasks.forEach(task => {
+        const endStr = task.expectedFinishDate || task.startDate;
+        if (endStr) {
+          const endMs = new Date(endStr).getTime();
+          if (endMs > latestEnd) latestEnd = endMs;
+        }
+      });
+
+      ecbts.push(latestEnd);
+    }
+
+    return ecbts;
+  }, [resources, taskData]);
 
   const syncFromBody = () => {
     if (!headerScrollRef.current || !bodyScrollRef.current) return;
@@ -612,6 +759,42 @@ export default function TimelinePanel({
                     />
                   </Tooltip>
                 ))}
+
+                {/* task bars */}
+                {taskBarsByRow[rowIndex]?.map((b, i) => (
+                  <TaskBlock
+                    key={`${rid}-task-${i}`}
+                    leftPx={b.leftPx}
+                    widthPx={b.widthPx}
+                    task={b.task}
+                    type={b.type}
+                    rowHeight={ROW_HEIGHT}
+                  />
+                ))}
+
+                {/* ECBT line */}
+                {ecbtByRow[rowIndex] > 0 && (() => {
+                  const ecbtMs = ecbtByRow[rowIndex];
+                  if (ecbtMs >= dateRange.start && ecbtMs <= dateRange.end) {
+                    const leftPx = ((ecbtMs - dateRange.start) / MS_HOUR) * PX_PER_HOUR;
+                    return (
+                      <Tooltip key={`${rid}-ecbt`} title={`ECBT: ${new Date(ecbtMs).toLocaleString()}`} placement="top">
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 0,
+                            left: leftPx,
+                            width: 2,
+                            height: ROW_HEIGHT,
+                            bgcolor: theme.palette.error.main,
+                            boxSizing: "border-box",
+                          }}
+                        />
+                      </Tooltip>
+                    );
+                  }
+                  return null;
+                })()}
               </Box>
             ))}
           </Box>
