@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 
 type AppSettings = {
   autoLoadResources: boolean;
-  theme: 'light' | 'dark';
 };
 
 type SettingsContextType = {
@@ -29,7 +28,6 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
     const saved = localStorage.getItem('appSettings');
     return saved ? JSON.parse(saved) : {
       autoLoadResources: false,
-      theme: 'light'
     };
   });
 

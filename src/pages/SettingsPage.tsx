@@ -23,7 +23,7 @@ export default function SettingsPage() {
 
       <Grid container spacing={3}>
         {/* Schedule Settings */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -45,33 +45,6 @@ export default function SettingsPage() {
               <Typography variant="body2" color="text.secondary">
                 When enabled, resources will be loaded automatically when you select a division.
                 When disabled, resources will only load when you run a search.
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Theme Settings */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Appearance
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={settings.theme === 'dark'}
-                    onChange={(e) => updateSetting('theme', e.target.checked ? 'dark' : 'light')}
-                    size="small"
-                  />
-                }
-                label="Dark Mode"
-                sx={{ mb: 1 }}
-              />
-              <Typography variant="body2" color="text.secondary">
-                Toggle between light and dark themes for the application.
               </Typography>
             </CardContent>
           </Card>
