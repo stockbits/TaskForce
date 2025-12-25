@@ -106,7 +106,7 @@ export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane
         }}
       >
         <span style={{ fontSize: '10px', color: 'white', fontWeight: 'bold' }}>
-          {task?.taskId || ''}
+          {''}
         </span>
       </Box>
     </Tooltip>

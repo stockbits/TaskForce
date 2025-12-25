@@ -84,12 +84,9 @@ export default function TaskTablePanel({
 
   useEffect(() => {
     // Pin currently selected items to the top - replace pinned order with current selection
-    // Only pin when selected from map
-    if (selectionFromMap) {
-      const selectedIds = selectedTasks.map(t => String(t.taskId));
-      setPinnedOrder(selectedIds);
-    }
-  }, [selectedTasks, selectionFromMap]);
+    const selectedIds = selectedTasks.map(t => String(t.taskId));
+    setPinnedOrder(selectedIds);
+  }, [selectedTasks]);
 
   const displayData = useMemo(() => {
     if (!data || data.length === 0) return [];
