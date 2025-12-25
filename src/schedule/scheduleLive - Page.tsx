@@ -357,12 +357,6 @@ export default function ScheduleLivePage() {
     });
 
     setTaskData(results);
-
-    // Also set resourceData to resources assigned to the filtered tasks
-    const employeeIds = new Set(results.map(t => t.employeeId).filter(id => id));
-    const assignedResources = allResources.filter(r => employeeIds.has(r.resourceId));
-    setResourceData(assignedResources);
-
     // Removed handleCloseSearchPanel() to keep panel open with filters selected
   };
 
@@ -407,12 +401,6 @@ export default function ScheduleLivePage() {
     });
 
     setResourceData(results);
-
-    // Also set taskData to tasks assigned to the filtered resources
-    const resourceIds = new Set(results.map(r => r.resourceId));
-    const assignedTasks = (mockTasks as TaskRecord[]).filter(t => t.employeeId && resourceIds.has(t.employeeId));
-    setTaskData(assignedTasks);
-
     // Removed handleCloseSearchPanel() to keep panel open with filters selected
   };
 
