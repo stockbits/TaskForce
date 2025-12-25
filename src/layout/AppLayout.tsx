@@ -20,6 +20,7 @@ import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import mockTasks from "@/data/mockTasks.json";
 import ResourceMock from "@/data/ResourceMock.json";
 const ScheduleLivePage = lazy(() => import("@/schedule/scheduleLive - Page"));
+const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
 
 import {
   CalloutIncidentPanel,
@@ -801,6 +802,10 @@ export default function MainLayout() {
     if (item.name === "Schedule Live") {
       setActiveSubPage("ScheduleLive"); // ⭐ NEW PAGE ID
     }
+
+    if (item.name === "System Preferences") {
+      setActiveSubPage("Settings");
+    }
   }, []);
 
   const handleSearch = useCallback(
@@ -1276,6 +1281,13 @@ export default function MainLayout() {
           {activeSubPage === "ScheduleLive" && (
             <Suspense fallback={<div>Loading...</div>}>
               <ScheduleLivePage />
+            </Suspense>
+          )}
+
+          {/* NEW PAGE: SETTINGS */}
+          {activeSubPage === "Settings" && (
+            <Suspense fallback={<div>Loading...</div>}>
+              <SettingsPage />
             </Suspense>
           )}
 

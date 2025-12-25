@@ -6,10 +6,6 @@
 import React, { useState, useMemo, useRef, useCallback, useEffect, lazy, Suspense } from "react";
 import type { ScheduleLiveSearchFilters } from "@/shared-ui";
 
-type ScheduleSettings = {
-  autoLoadResources: boolean;
-};
-
 const ScheduleLegend = lazy(() => import("./UILegend"));
 const ScheduleLiveSearch = lazy(() => import("@/shared-ui").then(m => ({ default: m.ScheduleLiveSearch })));
 const TimelinePanel = lazy(() => import("./TimelinePanel"));
@@ -35,7 +31,6 @@ import SlidersHorizontal from '@mui/icons-material/Tune';
 import HelpOutline from '@mui/icons-material/HelpOutline';
 import InfoIcon from '@mui/icons-material/Info';
 import Bookmark from '@mui/icons-material/Bookmark';
-import Settings from '@mui/icons-material/Settings';
 import Clock from '@mui/icons-material/AccessTime';
 import Map from '@mui/icons-material/Map';
 import Users from '@mui/icons-material/People';
@@ -46,21 +41,15 @@ import type { TaskRecord, ResourceRecord } from "@/hooks/useLiveSelectEngine";
 import {
   Box,
   ClickAwayListener,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControlLabel,
   Grow,
   IconButton,
   Paper,
   Popper,
   Skeleton,
   Stack,
-  Switch,
-  Typography,
 } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
+import { useSettings } from '../contexts/SettingsContext';
 import AppButton from '@/shared-ui/button';
 
 /* ============================================================================
@@ -96,11 +85,7 @@ export default function ScheduleLivePage() {
   const [division, setDivision] = useState<string>("");
   
   /* ---------------- SETTINGS ---------------- */
-  const [settings, setSettings] = useState<ScheduleSettings>(() => {
-    const saved = localStorage.getItem('scheduleSettings');
-    return saved ? JSON.parse(saved) : { autoLoadResources: false };
-  });
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const { settings } = useSettings();
 
   const autoLoadResources = settings.autoLoadResources;
 
@@ -601,15 +586,6 @@ export default function ScheduleLivePage() {
         sx={{ maxWidth: '200px', flex: 1 }}
       />
 
-      <IconButton
-        onClick={() => setSettingsOpen(true)}
-        size="medium"
-        sx={{ mr: 0.5 }}
-        title="Schedule Settings"
-      >
-        <Settings sx={{ fontSize: 18 }} />
-      </IconButton>
-
       <GlobalSearchField
         value={searchAnywhere}
         onChange={(e) => setSearchAnywhere(e.target.value)}
@@ -696,35 +672,6 @@ export default function ScheduleLivePage() {
         </Stack>
       )}
     </Paper>
-  );
-
-  /* ==========================================================================
-     SETTINGS DIALOG
-  ============================================================================ */
-  const settingsDialog = (
-    <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)} maxWidth="sm" fullWidth>
-      <DialogTitle>Schedule Settings</DialogTitle>
-      <DialogContent>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={settings.autoLoadResources}
-              onChange={(e) => setSettings(prev => ({ ...prev, autoLoadResources: e.target.checked }))}
-              size="small"
-            />
-          }
-          label="Auto-load Resources"
-          sx={{ mt: 1 }}
-        />
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          When enabled, resources will be loaded automatically when you select a division. 
-          When disabled, resources will only load when you run a search.
-        </Typography>
-      </DialogContent>
-      <DialogActions>
-        <AppButton onClick={() => setSettingsOpen(false)}>Close</AppButton>
-      </DialogActions>
-    </Dialog>
   );
 
   /* ==========================================================================
@@ -1000,8 +947,6 @@ export default function ScheduleLivePage() {
         </Suspense>
 
         {searchToolPopper}
-
-        {settingsDialog}
 
         <Box ref={panelsContainerRef} sx={{ minHeight: 0, position: 'relative', height: '100%', overflow: 'hidden' }} data-visible-panels={visiblePanels.join(',')}>
           { (maximizedPanel || visiblePanels.length === 1) ? (
