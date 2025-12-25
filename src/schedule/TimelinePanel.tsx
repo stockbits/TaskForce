@@ -433,7 +433,7 @@ export default function TimelinePanel({
             borderRight: "1px solid #e0e0e0",
           }}
         >
-          <IconButton onClick={() => setDateModalOpen(true)} size="small">
+          <IconButton onClick={() => setDateModalOpen(true)} size="small" sx={{ p: 0.5 }}>
             <CalendarMonthIcon sx={{ fontSize: 16 }} />
           </IconButton>
           <TimelineZoomControl
