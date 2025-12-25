@@ -237,6 +237,7 @@ export default function ScheduleLivePage() {
       setDropdownData(buildFilteredDropdowns(rows));
       if (autoLoadResources) {
         runResourceSearch({} as ScheduleLiveSearchFilters);
+        runTaskSearch({} as ScheduleLiveSearchFilters);
       }
     } else {
       setDropdownData({
@@ -263,6 +264,7 @@ export default function ScheduleLivePage() {
 
     if (autoLoadResources && division) {
       runResourceSearch({} as ScheduleLiveSearchFilters);
+      runTaskSearch({} as ScheduleLiveSearchFilters);
     }
 
     setSearchAnywhere("");
@@ -457,6 +459,7 @@ export default function ScheduleLivePage() {
   useEffect(() => {
     if (autoLoadResources && division) {
       runResourceSearch({} as ScheduleLiveSearchFilters);
+      runTaskSearch({} as ScheduleLiveSearchFilters);
     }
   }, [autoLoadResources, division]);
 
