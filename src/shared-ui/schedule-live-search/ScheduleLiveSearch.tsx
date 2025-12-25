@@ -4,6 +4,7 @@ import {
   Tab,
   Tabs,
   Grid,
+  Fade,
 } from "@mui/material";
 import { MultiSelectField, FreeTypeSelectField, CombinedLocationField, ImpScoreField } from "@/shared-ui";
 
@@ -44,6 +45,7 @@ export interface ScheduleLiveSearchProps {
     jobType?: string[];
   };
   resetKey?: number;
+  clearKey?: number;
   hideActions?: boolean;
 }
 
@@ -87,6 +89,7 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
   onTabChange,
   dropdownData,
   resetKey,
+  clearKey,
   hideActions,
 }) => {
   const [activeTab, setActiveTab] = useState<"task" | "resource">(mode === 'resource' ? 'resource' : 'task');
@@ -135,22 +138,22 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
   );
 
   // local per-tab states
-  const [filtersTask, setFiltersTask] = useState<ScheduleLiveSearchFilters>(emptyFilters());
-  const [filtersResource, setFiltersResource] = useState<ScheduleLiveSearchFilters>(emptyFilters());
-
-  // Load filters from localStorage on mount
-  useEffect(() => {
-    const loadFilters = (key: string): ScheduleLiveSearchFilters => {
-      try {
-        const stored = localStorage.getItem(key);
-        return stored ? { ...emptyFilters(), ...JSON.parse(stored) } : emptyFilters();
-      } catch {
-        return emptyFilters();
-      }
-    };
-    setFiltersTask(loadFilters('scheduleLiveSearchFiltersTask'));
-    setFiltersResource(loadFilters('scheduleLiveSearchFiltersResource'));
-  }, []);
+  const [filtersTask, setFiltersTask] = useState<ScheduleLiveSearchFilters>(() => {
+    try {
+      const stored = localStorage.getItem('scheduleLiveSearchFiltersTask');
+      return stored ? { ...emptyFilters(), ...JSON.parse(stored) } : emptyFilters();
+    } catch {
+      return emptyFilters();
+    }
+  });
+  const [filtersResource, setFiltersResource] = useState<ScheduleLiveSearchFilters>(() => {
+    try {
+      const stored = localStorage.getItem('scheduleLiveSearchFiltersResource');
+      return stored ? { ...emptyFilters(), ...JSON.parse(stored) } : emptyFilters();
+    } catch {
+      return emptyFilters();
+    }
+  });
 
   // Save filters to localStorage whenever they change
   useEffect(() => {
@@ -162,10 +165,18 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
   }, [filtersResource]);
 
   useEffect(() => {
+    if (resetKey === 0) return; // Skip reset on initial mount to preserve loaded filters
     setFiltersTask(emptyFilters());
     setFiltersResource(emptyFilters());
     setActiveTab(mode === 'resource' ? 'resource' : 'task');
   }, [resetKey]);
+
+  useEffect(() => {
+    if (clearKey && clearKey > 0) {
+      setFiltersTask(emptyFilters());
+      setFiltersResource(emptyFilters());
+    }
+  }, [clearKey]);
 
   useEffect(() => setActiveTab(mode === 'resource' ? 'resource' : 'task'), [mode]);
 
@@ -267,7 +278,9 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
         </Tabs>
       </Box>
 
-      {renderFieldGrid(fields)}
+      <Fade in={true} key={activeTab} timeout={300}>
+        {renderFieldGrid(fields)}
+      </Fade>
     </Box>
   );
 };

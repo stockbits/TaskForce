@@ -122,6 +122,7 @@ export default function ScheduleLivePage() {
   });
 
   const [resetKey, setResetKey] = useState(0);
+  const [clearKey, setClearKey] = useState(0);
 
   /* ---------------- LEFT MENU ---------------- */
   const { selectedMode } = useSearchLeftMenu();
@@ -657,7 +658,7 @@ export default function ScheduleLivePage() {
     <Popper
       open={isSearchPopperOpen}
       anchorEl={anchorEl}
-      placement="bottom-start"
+      placement="bottom"
       transition
       modifiers={[{ name: "offset", options: { offset: [0, 10] } }]}
       sx={{ zIndex: 12000 }}
@@ -730,6 +731,7 @@ export default function ScheduleLivePage() {
                         ).sort(),
                       }}
                       resetKey={resetKey}
+                      clearKey={clearKey}
                       hideActions={true}
                     />
                     </Suspense>
@@ -742,11 +744,7 @@ export default function ScheduleLivePage() {
                     color="primary"
                     size="medium"
                     onClick={() => {
-                      if (searchTab === "task") {
-                        setTaskData([]);
-                      } else {
-                        setResourceData([]);
-                      }
+                      setClearKey((n) => n + 1);
                     }}
                     sx={{
                       px: 3.5,

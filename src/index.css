@@ -18,6 +18,16 @@ body,
   box-sizing: border-box;
 }
 
+/* Smooth theme transitions */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Smooth icon transitions for theme changes */
+.MuiSvgIcon-root {
+  transition: color 0.3s ease, fill 0.3s ease, stroke 0.3s ease;
+}
+
 /* =====================================
    0️⃣.A — Leaflet Z-Index Override Fix
 ===================================== */
