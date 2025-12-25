@@ -2,7 +2,6 @@ import React from 'react';
 import {
   Box,
   Typography,
-  Paper,
   FormControlLabel,
   Switch,
   Divider,

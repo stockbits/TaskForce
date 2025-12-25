@@ -20,7 +20,6 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
-import ResourceMock from "../data/ResourceMock.json";
 import TimelineZoomControl from "./TimelineZoomControl";
 
 type ResourceRow = {
@@ -105,12 +104,14 @@ export default function TimelinePanel({
   endDate: propEndDate,
   onStartDateChange,
   onEndDateChange,
+  resources: resourceData = [],
 }: {
   isMaximized?: boolean;
   startDate: Date;
   endDate: Date;
   onStartDateChange: (date: Date) => void;
   onEndDateChange: (date: Date) => void;
+  resources?: ResourceRow[];
 }) {
   // Use props for date state instead of internal state
   const startDate = propStartDate;
@@ -164,8 +165,8 @@ export default function TimelinePanel({
   const ROW_HEIGHT = 40;
 
   const resources: ResourceRow[] = useMemo(() => {
-    return Array.isArray(ResourceMock) ? (ResourceMock as ResourceRow[]) : [];
-  }, []);
+    return Array.isArray(resourceData) ? resourceData : [];
+  }, [resourceData]);
 
   const dateRange = useMemo(
     () => getDateRange(startDate, endDate),

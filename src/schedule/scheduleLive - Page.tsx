@@ -89,10 +89,6 @@ export default function ScheduleLivePage() {
 
   const autoLoadResources = settings.autoLoadResources;
 
-  useEffect(() => {
-    localStorage.setItem('scheduleSettings', JSON.stringify(settings));
-  }, [settings]);
-
   /* ---------------- LEGEND ---------------- */
   const [legendOpen, setLegendOpen] = useState(false);
   const legendButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -252,7 +248,7 @@ export default function ScheduleLivePage() {
     }
 
     setSearchAnywhere("");
-  }, []);
+  }, [autoLoadResources]);
 
   const handleDomainChange = useCallback((value: string) => {
     setDomain(value);
@@ -270,7 +266,7 @@ export default function ScheduleLivePage() {
     }
 
     setSearchAnywhere("");
-  }, [division]);
+  }, [division, autoLoadResources]);
 
   /* ==========================================================================
      DOCKING LOGIC
@@ -478,6 +474,7 @@ export default function ScheduleLivePage() {
               endDate={timelineEndDate}
               onStartDateChange={setTimelineStartDate}
               onEndDateChange={setTimelineEndDate}
+              resources={resourceData}
             />
           </Suspense>
         );
