@@ -12,7 +12,6 @@ import {
   MapContainer,
   TileLayer,
   Marker,
-  Tooltip,
   useMap,
   useMapEvents,
 } from "react-leaflet";
@@ -291,25 +290,7 @@ export default function MapPanel({
                     m.openTooltip?.();
                   },
                 }}
-              >
-                <Tooltip
-                  direction="top"
-                  offset={[0, -36]}
-                  permanent={false}
-                  sticky={false}
-                  opacity={1}
-                  className="leaflet-tooltip-surface"
-                >
-                  <Box sx={{ fontSize: 12, lineHeight: 1.4, color: theme.palette.text.primary }}>
-                    <Box component="span" sx={{ fontWeight: 700, display: "block" }}>
-                      {t.taskId}
-                    </Box>
-                    <Box component="span" sx={{ color: theme.palette.text.secondary }}>
-                      {t.customerAddress}
-                    </Box>
-                  </Box>
-                </Tooltip>
-              </Marker>
+              ></Marker>
             );
           })}
 
@@ -351,28 +332,7 @@ export default function MapPanel({
                     m.openTooltip?.();
                   },
                 }}
-              >
-                <Tooltip
-                  direction="top"
-                  offset={[0, -36]}
-                  permanent={false}
-                  sticky={false}
-                  opacity={1}
-                  className="leaflet-tooltip-surface"
-                >
-                  <Box sx={{ fontSize: 12, lineHeight: 1.4, color: theme.palette.text.primary }}>
-                    <Box component="span" sx={{ fontWeight: 700, display: "block" }}>
-                      {r.name}
-                    </Box>
-                    <Box component="span" sx={{ display: "block", color: theme.palette.text.secondary }}>
-                      {r.homePostCode}
-                    </Box>
-                    <Box component="span" sx={{ color: theme.palette.text.secondary }}>
-                      Status: {r.status}
-                    </Box>
-                  </Box>
-                </Tooltip>
-              </Marker>
+              ></Marker>
             );
           })}
         </MapContainer>
