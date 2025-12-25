@@ -121,6 +121,7 @@ export default function TimelinePanel({
   tasks: taskData = [],
   onTaskClick,
   onTaskDoubleClick,
+  onResourceClick,
 }: {
   isMaximized?: boolean;
   startDate: Date;
@@ -131,6 +132,7 @@ export default function TimelinePanel({
   tasks?: any[];
   onTaskClick?: (task: any) => void;
   onTaskDoubleClick?: (task: any) => void;
+  onResourceClick?: (resource: ResourceRow) => void;
 }) {
   // Use props for date state instead of internal state
   const startDate = propStartDate;
@@ -806,29 +808,34 @@ export default function TimelinePanel({
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
-          {categories.map((rid, rowIndex) => (
-            <Box
-              key={`${rid}-${rowIndex}`}
-              sx={{
-                height: ROW_HEIGHT,
-                display: "flex",
-                alignItems: "center",
-                px: 1,
-                borderBottom: "1px solid #cccccc",
-                backgroundColor: rowIndex % 2 === 0 ? 'rgba(0, 0, 0, 0.02)' : 'transparent',
-                '&:hover': {
-                  backgroundColor: rowIndex % 2 === 0 ? 'rgba(0, 0, 0, 0.04)' : 'rgba(0, 0, 0, 0.02)',
-                },
-              }}
-            >
-              <PersonIcon
-                sx={{ fontSize: 16, mr: 0.5, color: "action.active" }}
-              />
-              <Typography noWrap sx={{ fontWeight: 700, fontSize: 13 }}>
-                {rid}
-              </Typography>
-            </Box>
-          ))}
+          {resources.map((r, rowIndex) => {
+            const rid = String(r.resourceId ?? r.id ?? "UNKNOWN");
+            return (
+              <Box
+                key={`${rid}-${rowIndex}`}
+                onClick={() => onResourceClick?.(r)}
+                sx={{
+                  height: ROW_HEIGHT,
+                  display: "flex",
+                  alignItems: "center",
+                  px: 1,
+                  borderBottom: "1px solid #cccccc",
+                  backgroundColor: rowIndex % 2 === 0 ? 'rgba(0, 0, 0, 0.02)' : 'transparent',
+                  '&:hover': {
+                    backgroundColor: rowIndex % 2 === 0 ? 'rgba(0, 0, 0, 0.04)' : 'rgba(0, 0, 0, 0.02)',
+                  },
+                  cursor: 'pointer',
+                }}
+              >
+                <PersonIcon
+                  sx={{ fontSize: 16, mr: 0.5, color: "action.active" }}
+                />
+                <Typography noWrap sx={{ fontWeight: 700, fontSize: 13 }}>
+                  {rid}
+                </Typography>
+              </Box>
+            );
+          })}
         </Paper>
 
         {/* Right: Timeline rows */}
