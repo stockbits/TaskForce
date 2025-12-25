@@ -103,7 +103,7 @@ export default function ScheduleLivePage() {
   const [searchTab, setSearchTab] = useState<"task" | "resource">("task");
 
   /* ---------------- TABLE DATA ---------------- */
-  const [taskData, setTaskData] = useState<TaskRecord[]>(mockTasks as TaskRecord[]);
+  const [taskData, setTaskData] = useState<TaskRecord[]>([]);
   const [resourceData, setResourceData] = useState<ResourceRecord[]>([]);
 
   /* ---------------- TIMELINE DATE STATE ---------------- */
