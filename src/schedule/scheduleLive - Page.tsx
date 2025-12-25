@@ -42,16 +42,13 @@ import {
   Backdrop,
   Box,
   ClickAwayListener,
-  Divider,
   Grow,
   IconButton,
   Paper,
   Popper,
   Skeleton,
   Stack,
-  Typography,
 } from "@mui/material";
-import CheckIcon from "@mui/icons-material/Check";
 import { alpha, useTheme } from "@mui/material/styles";
 import AppButton from '@/shared-ui/button';
 
@@ -68,8 +65,10 @@ const PANEL_DEFS: Record<PanelKey, { label: string; icon: any }> = {
 /* ============================================================================
    SEARCH MODE MAPPER
 ============================================================================ */
-function mapSelectedMode(id: string): string {
-  return id === "resource-active" ? "resource-active" : "task-default";
+function mapSelectedMode(id: string): "task" | "resource" {
+  if (id === "resources") return "resource";
+  if (id === "tasks") return "task";
+  return "task"; // default
 }
 
 /* ============================================================================
@@ -96,6 +95,7 @@ export default function ScheduleLivePage() {
 
   const [searchAnywhere, setSearchAnywhere] = useState("");
   const currentFiltersRef = useRef<ScheduleLiveSearchFilters>({} as ScheduleLiveSearchFilters);
+  const [searchTab, setSearchTab] = useState<"task" | "resource">("task");
 
   /* ---------------- TABLE DATA ---------------- */
   const [taskData, setTaskData] = useState<TaskRecord[]>([]);
@@ -125,8 +125,11 @@ export default function ScheduleLivePage() {
   const [resetKey, setResetKey] = useState(0);
 
   /* ---------------- LEFT MENU ---------------- */
-  const { selectedMode, select, isActive, taskItems, resourceItems } =
-    useSearchLeftMenu();
+  const { selectedMode } = useSearchLeftMenu();
+
+  React.useEffect(() => {
+    setSearchTab(mapSelectedMode(selectedMode));
+  }, [selectedMode]);
 
   /* ==========================================================================
      SELECTION ENGINE
@@ -346,15 +349,11 @@ export default function ScheduleLivePage() {
      RESOURCE SEARCH
   ============================================================================ */
   const runResourceSearch = (filters: ScheduleLiveSearchFilters) => {
-    if (!division) {
-      setResourceData([]);
-      handleCloseSearchPanel();
-      return;
-    }
-
     let results = [...allResources];
 
-    results = results.filter((r) => r.division === division);
+    if (division) {
+      results = results.filter((r) => r.division === division);
+    }
 
     if (domain) {
       results = results.filter((r) => String(r.domain).toUpperCase() === domain);
@@ -656,25 +655,14 @@ export default function ScheduleLivePage() {
      SEARCH TOOL POPOVER
   ============================================================================ */
   const searchToolPopper = (
-    <>
-      <Backdrop
-        open={isSearchPopperOpen}
-        sx={{
-          zIndex: 11999,
-          backdropFilter: 'blur(2px)',
-          backgroundColor: 'rgba(0, 0, 0, 0.1)',
-        }}
-        onClick={handleCloseSearchPanel}
-        transitionDuration={300}
-      />
-      <Popper
-        open={isSearchPopperOpen}
-        anchorEl={anchorEl}
-        placement="bottom-start"
-        transition
-        modifiers={[{ name: "offset", options: { offset: [0, 10] } }]}
-        sx={{ zIndex: 12000 }}
-      >
+    <Popper
+      open={isSearchPopperOpen}
+      anchorEl={anchorEl}
+      placement="bottom-start"
+      transition
+      modifiers={[{ name: "offset", options: { offset: [0, 10] } }]}
+      sx={{ zIndex: 12000 }}
+    >
         {({ TransitionProps }) => (
           <Grow
             {...TransitionProps}
@@ -694,8 +682,8 @@ export default function ScheduleLivePage() {
                   sx={{
                     borderRadius: 3,
                     p: 2,
-                    width: 900,
-                    maxWidth: '90vw',
+                    width: 1100,
+                    maxWidth: '95vw',
                     mx: 'auto',
                     border: `1px solid ${borderColor}`,
                     boxShadow: surfaceShadow,
@@ -704,85 +692,7 @@ export default function ScheduleLivePage() {
                     overflow: 'hidden', // Prevent content overflow during animation
                   }}
                 >
-                <Stack direction={{ xs: "column", md: "row" }} spacing={3}>
-                  <Box
-                    sx={{
-                      width: 220,
-                      borderRadius: 2,
-                      p: 2.5,
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 3,
-                      bgcolor: alpha(theme.palette.primary.main, 0.04),
-                    }}
-                  >
-                    <Box>
-                      <Typography
-                        variant="overline"
-                        sx={{ fontWeight: 700, color: alpha(theme.palette.text.secondary, 0.9), mb: 0.5 }}
-                      >
-                        Task Search
-                      </Typography>
-                      <Stack spacing={1} mt={1}>
-                        {taskItems.map((item) => (
-                          <AppButton
-                            key={item.id}
-                            onClick={() => select(item.id)}
-                            size="small"
-                            variant={isActive(item.id) ? "contained" : "contained"}
-                            color="primary"
-                            endIcon={isActive(item.id) ? <CheckIcon /> : undefined}
-                            sx={{
-                              justifyContent: "flex-start",
-                              fontSize: 13,
-                              fontWeight: 600,
-                              whiteSpace: 'nowrap',
-                              minWidth: 120,
-                              px: 1.5,
-                              py: 0.5,
-                            }}
-                          >
-                            {item.label}
-                          </AppButton>
-                        ))}
-                      </Stack>
-                    </Box>
-
-                    <Divider flexItem sx={{ my: 0.5 }} />
-
-                    <Box>
-                      <Typography
-                        variant="overline"
-                        sx={{ fontWeight: 700, color: alpha(theme.palette.text.secondary, 0.9), mb: 0.5 }}
-                      >
-                        Resource Search
-                      </Typography>
-                      <Stack spacing={1} mt={1}>
-                        {resourceItems.map((item) => (
-                          <AppButton
-                            key={item.id}
-                            onClick={() => select(item.id)}
-                            size="small"
-                            variant={isActive(item.id) ? "contained" : "contained"}
-                            color="primary"
-                            endIcon={isActive(item.id) ? <CheckIcon /> : undefined}
-                            sx={{
-                              justifyContent: "flex-start",
-                              fontSize: 13,
-                              fontWeight: 600,
-                              whiteSpace: 'nowrap',
-                              minWidth: 120,
-                              px: 1.5,
-                              py: 0.5,
-                            }}
-                          >
-                            {item.label}
-                          </AppButton>
-                        ))}
-                      </Stack>
-                    </Box>
-                  </Box>
-
+                <Stack direction={{ xs: "column" }} spacing={0}>
                   <Box
                     sx={{
                       display: 'flex',
@@ -807,15 +717,11 @@ export default function ScheduleLivePage() {
                       </Box>
                     }>
                       <ScheduleLiveSearch
-                      mode={mapSelectedMode(selectedMode) === "resource-active" ? "resource" : "task"}
+                      mode={mapSelectedMode(selectedMode)}
                       onSearch={(filters: ScheduleLiveSearchFilters) => {
                         currentFiltersRef.current = filters;
                       }}
-                      onClear={() => {
-                        setTaskData([]);
-                        setResourceData([]);
-                        setResetKey((n) => n + 1);
-                      }}
+                      onTabChange={setSearchTab}
                       dropdownData={{
                         ...dropdownData,
                         division: divisionOptions,
@@ -831,14 +737,33 @@ export default function ScheduleLivePage() {
                   </Box>
                 </Stack>
 
-                <Stack direction="row" justifyContent="flex-end">
+                <Stack direction="row" justifyContent="flex-end" spacing={1}>
                   <AppButton
                     variant="contained"
+                    color="primary"
+                    size="medium"
+                    onClick={() => {
+                      if (searchTab === "task") {
+                        setTaskData([]);
+                      } else {
+                        setResourceData([]);
+                      }
+                    }}
+                    sx={{
+                      px: 3.5,
+                      fontWeight: 700,
+                      boxShadow: "0 18px 38px rgba(8,58,97,0.24)",
+                    }}
+                  >
+                    Clear
+                  </AppButton>
+                  <AppButton
+                    variant="contained"
+                    color="primary"
                     size="medium"
                     onClick={() => {
                       const filters = currentFiltersRef.current;
-                      const mode = mapSelectedMode(selectedMode);
-                      if (mode.startsWith("task")) {
+                      if (searchTab === "task") {
                         runTaskSearch(filters);
                       } else {
                         runResourceSearch(filters);
@@ -859,7 +784,6 @@ export default function ScheduleLivePage() {
         </Grow>
       )}
     </Popper>
-    </>
   );
 
   /* ==========================================================================

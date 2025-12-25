@@ -52,7 +52,7 @@ const BaseField = forwardRef<FieldRef, BaseFieldProps & {
   ...rest
 }, ref) => {
   const theme = useTheme();
-  const { MAX_WIDTH, MIN_WIDTH, FIELD_GAP } = useFieldSizes();
+  const { FIELD_GAP } = useFieldSizes();
 
   // Internal state
   const [internalValue, setInternalValue] = useState(value);
