@@ -500,12 +500,12 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
               },
             },
             '& .MuiCheckbox-root': {
-              color: theme.palette.mode === 'dark' ? theme.palette.grey[400] : theme.palette.text.secondary,
+              color: mode === 'dark' ? "rgba(255, 255, 255, 0.7)" : theme.palette.text.secondary,
               '&.Mui-checked': {
-                color: theme.palette.mode === 'dark' ? '#3BE089' : theme.palette.primary.main,
+                color: mode === 'dark' ? '#3BE089 !important' : theme.palette.primary.main,
               },
               '&:hover': {
-                backgroundColor: alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.08 : 0.04),
+                backgroundColor: mode === 'dark' ? "rgba(255, 255, 255, 0.08)" : alpha(theme.palette.primary.main, 0.04),
               },
             },
           }}

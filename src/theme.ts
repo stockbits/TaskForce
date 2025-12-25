@@ -182,6 +182,19 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
         },
       },
     },
+    MuiCheckbox: {
+      styleOverrides: {
+        root: {
+          color: mode === 'dark' ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.54)",
+          '&.Mui-checked': {
+            color: mode === 'dark' ? accentMint : primaryNavy,
+          },
+          '&:hover': {
+            backgroundColor: mode === 'dark' ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.04)",
+          },
+        },
+      },
+    },
     MuiTextField: {
       styleOverrides: {
         root: {
@@ -212,38 +225,6 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
               '& fieldset': {
                 borderColor: mode === 'dark' ? accentMint : primaryNavy + ' !important',
               },
-            },
-          },
-        },
-      },
-    },
-    MuiSelect: {
-      styleOverrides: {
-        root: {
-          color: mode === 'dark' ? "#ffffff" : "#0B2233",
-        },
-        select: {
-          color: mode === 'dark' ? "#ffffff" : "#0B2233",
-          '&:focus': {
-            backgroundColor: 'transparent',
-          },
-        },
-        icon: {
-          color: mode === 'dark' ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.54)",
-        },
-      },
-    },
-    MuiMenuItem: {
-      styleOverrides: {
-        root: {
-          color: mode === 'dark' ? "#ffffff" : "#0B2233",
-          '&:hover': {
-            backgroundColor: mode === 'dark' ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.04)",
-          },
-          '&.Mui-selected': {
-            backgroundColor: mode === 'dark' ? "rgba(59, 224, 137, 0.15)" : "rgba(15, 39, 64, 0.08)",
-            '&:hover': {
-              backgroundColor: mode === 'dark' ? "rgba(59, 224, 137, 0.25)" : "rgba(15, 39, 64, 0.12)",
             },
           },
         },
