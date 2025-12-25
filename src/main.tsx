@@ -8,12 +8,12 @@ import "./index.css";
 import { AppSnackbarProvider } from '@/shared-ui/SnackbarProvider';
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-	<AppThemeProvider>
-		<SettingsProvider>
+	<SettingsProvider>
+		<AppThemeProvider>
 			<CssBaseline />
 			<AppSnackbarProvider>
 				<App />
 			</AppSnackbarProvider>
-		</SettingsProvider>
-	</AppThemeProvider>
+		</AppThemeProvider>
+	</SettingsProvider>
 );

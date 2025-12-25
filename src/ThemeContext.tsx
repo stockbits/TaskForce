@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import { lightTheme, darkTheme } from './theme';
+import { useSettings } from './contexts/SettingsContext';
 
 type ThemeMode = 'light' | 'dark';
 
@@ -24,25 +25,16 @@ interface AppThemeProviderProps {
 }
 
 export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) => {
-  const [mode, setMode] = useState<ThemeMode>(() => {
-    // Get initial theme from localStorage or default to light
-    const savedMode = localStorage.getItem('themeMode');
-    return (savedMode === 'dark' || savedMode === 'light') ? savedMode : 'light';
-  });
+  const { settings, updateSetting } = useSettings();
 
   const toggleTheme = () => {
-    setMode(prevMode => prevMode === 'light' ? 'dark' : 'light');
+    updateSetting('themeMode', settings.themeMode === 'light' ? 'dark' : 'light');
   };
 
-  useEffect(() => {
-    // Save theme preference to localStorage
-    localStorage.setItem('themeMode', mode);
-  }, [mode]);
-
-  const theme = mode === 'light' ? lightTheme : darkTheme;
+  const theme = settings.themeMode === 'light' ? lightTheme : darkTheme;
 
   return (
-    <ThemeContext.Provider value={{ mode, toggleTheme }}>
+    <ThemeContext.Provider value={{ mode: settings.themeMode, toggleTheme }}>
       <ThemeProvider theme={theme}>
         {children}
       </ThemeProvider>
