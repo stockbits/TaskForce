@@ -106,6 +106,7 @@ export default function ScheduleLivePage() {
   const [taskData, setTaskData] = useState<TaskRecord[]>([]);
   const [taskTableData, setTaskTableData] = useState<TaskRecord[]>([]);
   const [resourceData, setResourceData] = useState<ResourceRecord[]>([]);
+  const [resourceTableData, setResourceTableData] = useState<ResourceRecord[]>([]);
 
   /* ---------------- TIMELINE DATE STATE ---------------- */
   const [timelineStartDate, setTimelineStartDate] = useState<Date>(() => {
@@ -234,12 +235,17 @@ export default function ScheduleLivePage() {
     setTaskData([]);
     setTaskTableData([]);
     setResourceData([]);
+    setResourceTableData([]);
     setResetKey((n) => n + 1);
 
     if (value) {
       const rows = (mockTasks as TaskRecord[]).filter((t) => t.division === value);
       setTaskData(rows);
       setDropdownData(buildFilteredDropdowns(rows));
+      if (autoLoadResources) {
+        const resourceRows = allResources.filter((r) => r.division === value);
+        setResourceTableData(resourceRows);
+      }
     } else {
       setDropdownData({
         statuses: [],
@@ -257,6 +263,7 @@ export default function ScheduleLivePage() {
     setTaskData([]);
     setTaskTableData([]);
     setResourceData([]);
+    setResourceTableData([]);
     setResetKey((n) => n + 1);
 
     let rows = [...(mockTasks as TaskRecord[])];
@@ -264,6 +271,11 @@ export default function ScheduleLivePage() {
     if (division) rows = rows.filter((t) => t.division === division);
     setTaskData(rows);
     setDropdownData(buildFilteredDropdowns(rows));
+
+    if (autoLoadResources && division) {
+      const resourceRows = allResources.filter((r) => r.division === division);
+      setResourceTableData(resourceRows);
+    }
 
     setSearchAnywhere("");
   }, [division, autoLoadResources]);
@@ -398,7 +410,7 @@ export default function ScheduleLivePage() {
       return aTime - bTime;
     });
 
-    setResourceData(results);
+    setResourceTableData(results);
     // Removed handleCloseSearchPanel() to keep panel open with filters selected
   };
 
@@ -459,10 +471,11 @@ export default function ScheduleLivePage() {
   ============================================================================ */
   const handleTaskBlockClick = (task: TaskRecord) => {
     handleTaskTableSelect([task]);
-    setTaskTableData(prev => {
-      if (prev.some(t => t.taskId === task.taskId)) return prev;
-      return [task, ...prev];
-    });
+    const resource = allResources.find(r => r.resourceId === task.employeeId || r.resourceId === task.resourceId);
+    if (resource) {
+      setResourceData([resource]);
+    }
+    setTaskTableData([task]);
   };
 
   const handleTaskBlockDoubleClick = (task: TaskRecord) => {
@@ -535,7 +548,7 @@ export default function ScheduleLivePage() {
         return (
           <Suspense fallback={<div>Loading resources...</div>}>
             <ResourceTablePanel
-              data={resourceData}
+              data={resourceTableData}
               selectedResources={selectedResources}
               onSelectionChange={handleResourceTableSelect}
               selectionFromMap={selectionFromMap}
