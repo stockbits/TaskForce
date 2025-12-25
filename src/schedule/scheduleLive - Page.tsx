@@ -104,6 +104,7 @@ export default function ScheduleLivePage() {
 
   /* ---------------- TABLE DATA ---------------- */
   const [taskData, setTaskData] = useState<TaskRecord[]>([]);
+  const [taskTableData, setTaskTableData] = useState<TaskRecord[]>([]);
   const [resourceData, setResourceData] = useState<ResourceRecord[]>([]);
 
   /* ---------------- TIMELINE DATE STATE ---------------- */
@@ -229,15 +230,16 @@ export default function ScheduleLivePage() {
   const handleDivisionChange = useCallback((value: string) => {
     setDivision(value);
     setTaskData([]);
+    setTaskTableData([]);
     setResourceData([]);
     setResetKey((n) => n + 1);
 
     if (value) {
       const rows = (mockTasks as TaskRecord[]).filter((t) => t.division === value);
+      setTaskData(rows);
       setDropdownData(buildFilteredDropdowns(rows));
       if (autoLoadResources) {
         runResourceSearch({} as ScheduleLiveSearchFilters);
-        runTaskSearch({} as ScheduleLiveSearchFilters);
       }
     } else {
       setDropdownData({
@@ -254,17 +256,18 @@ export default function ScheduleLivePage() {
   const handleDomainChange = useCallback((value: string) => {
     setDomain(value);
     setTaskData([]);
+    setTaskTableData([]);
     setResourceData([]);
     setResetKey((n) => n + 1);
 
     let rows = [...(mockTasks as TaskRecord[])];
     if (value) rows = rows.filter((t) => String(t.domain).toUpperCase() === value);
     if (division) rows = rows.filter((t) => t.division === division);
+    setTaskData(rows);
     setDropdownData(buildFilteredDropdowns(rows));
 
     if (autoLoadResources && division) {
       runResourceSearch({} as ScheduleLiveSearchFilters);
-      runTaskSearch({} as ScheduleLiveSearchFilters);
     }
 
     setSearchAnywhere("");
@@ -356,7 +359,7 @@ export default function ScheduleLivePage() {
       return aDate - bDate;
     });
 
-    setTaskData(results);
+    setTaskTableData(results);
     // Removed handleCloseSearchPanel() to keep panel open with filters selected
   };
 
@@ -459,7 +462,6 @@ export default function ScheduleLivePage() {
   useEffect(() => {
     if (autoLoadResources && division) {
       runResourceSearch({} as ScheduleLiveSearchFilters);
-      runTaskSearch({} as ScheduleLiveSearchFilters);
     }
   }, [autoLoadResources, division]);
 
@@ -520,7 +522,7 @@ export default function ScheduleLivePage() {
         return (
           <Suspense fallback={<div>Loading tasks...</div>}>
             <TaskTablePanel
-              data={taskData}
+              data={taskTableData}
               selectedTasks={selectedTasks}
               onSelectionChange={handleTaskTableSelect}
               selectionFromMap={selectionFromMap}
