@@ -401,6 +401,15 @@ const ProgressNotesList = ({ notes }: { notes: ProgressNoteEntry[] }) => {
   );
 };
 
+const formatDuration = (mins: number | undefined) => {
+  if (!Number.isFinite(Number(mins)) || (mins || 0) <= 0) return '0m';
+  const m = Number(mins);
+  if (m < 60) return `${Math.round(m)}m`;
+  const h = Math.floor(m / 60);
+  const rm = Math.round(m % 60);
+  return rm === 0 ? `${h}h` : `${h}h ${rm}m`;
+};
+
 interface InfoGridProps {
   items: Array<{ label: string; value: React.ReactNode }>;
 }
@@ -497,7 +506,7 @@ export default function TaskDetailsModal({
           items={[
             { label: "Employee ID", value: task.employeeId || "—" },
             { label: "Resource Name", value: task.resourceName || "—" },
-            { label: "Estimated Duration", value: task.estimatedDuration || "—" },
+            { label: "Estimated Duration", value: task.estimatedDuration ? formatDuration(Number(task.estimatedDuration)) : '—' },
             { label: "Domain", value: task.domain || "—" },
           ]}
         />
@@ -536,6 +545,7 @@ export default function TaskDetailsModal({
         <InfoGrid
           items={[
             { label: "Last Progression", value: task.lastProgression || "—" },
+            { label: "Expected Start", value: task.expectedStartDate || "—" },
             { label: "Expected Finish", value: task.expectedFinishDate || "—" },
           ]}
         />

@@ -98,6 +98,14 @@ export default function ResourceTaskSimulator() {
     setTravelStats(calculateTravelStats(assignments));
   }, [assignments]);
 
+  const formatDuration = (mins: number) => {
+    if (!Number.isFinite(mins) || mins <= 0) return '0m';
+    if (mins < 60) return `${Math.round(mins)}m`;
+    const h = Math.floor(mins / 60);
+    const m = Math.round(mins % 60);
+    return m === 0 ? `${h}h` : `${h}h ${m}m`;
+  };
+
   // Shuffle tasks between resources
   const shuffleAssignments = () => {
     const allTasks = assignments.flatMap(resource =>
@@ -231,7 +239,14 @@ export default function ResourceTaskSimulator() {
                                 <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
                                   <AccessTimeIcon sx={{ fontSize: 14, mr: 0.5, color: 'action.active' }} />
                                   <Typography variant="caption">
-                                    {task.expectedStartDate} - {task.expectedFinishDate}
+                                    {(() => {
+                                      const start = task.expectedStartDate || '';
+                                      const end = task.expectedFinishDate || '';
+                                      const onsiteMins = task.estimatedDuration != null
+                                        ? Number(task.estimatedDuration)
+                                        : (start && end ? (new Date(end).getTime() - new Date(start).getTime()) / 60000 : 0);
+                                      return `${formatDuration(onsiteMins)} • ${start} - ${end}`;
+                                    })()}
                                   </Typography>
                                 </Box>
                               </Box>

@@ -103,8 +103,8 @@ export default function ScheduleLivePage() {
   const [searchTab, setSearchTab] = useState<"task" | "resource">("task");
 
   /* ---------------- TABLE DATA ---------------- */
-  const [taskData, setTaskData] = useState<TaskRecord[]>([]);
-  const [resourceData, setResourceData] = useState<ResourceRecord[]>([]);
+  const [taskData, setTaskData] = useState<TaskRecord[]>(mockTasks as TaskRecord[]);
+  const [resourceData, setResourceData] = useState<ResourceRecord[]>(ResourceMock as ResourceRecord[]);
 
   /* ---------------- TIMELINE DATE STATE ---------------- */
   const [timelineStartDate, setTimelineStartDate] = useState<Date>(() => {
@@ -872,11 +872,11 @@ export default function ScheduleLivePage() {
   // Resize handle component
   const ResizeHandle = ({ 
     type, 
-    key, 
+    handleKey, 
     sx = {} 
   }: { 
     type: 'horizontal' | 'vertical'; 
-    key: string; 
+    handleKey: string; 
     sx?: any 
   }) => (
     <Box
@@ -891,7 +891,7 @@ export default function ScheduleLivePage() {
         },
         ...sx,
       }}
-      onMouseDown={handleResizeStart(type, key)}
+      onMouseDown={handleResizeStart(type, handleKey)}
     >
       <Box
         className="resize-indicator"
@@ -1011,7 +1011,7 @@ export default function ScheduleLivePage() {
               {colsCount === 2 && (
                 <ResizeHandle
                   type="horizontal"
-                  key="top"
+                  handleKey="top"
                   sx={{
                     gridRow: '1',
                     gridColumn: '2',
@@ -1044,7 +1044,7 @@ export default function ScheduleLivePage() {
               {rowsCount === 2 && (
                 <ResizeHandle
                   type="vertical"
-                  key="top"
+                  handleKey="top"
                   sx={{
                     gridRow: '2',
                     gridColumn: '1 / span 3',
@@ -1077,7 +1077,7 @@ export default function ScheduleLivePage() {
               {colsCount === 2 && (
                 <ResizeHandle
                   type="horizontal"
-                  key="bottom"
+                  handleKey="bottom"
                   sx={{
                     gridRow: '3',
                     gridColumn: '2',

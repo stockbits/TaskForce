@@ -29,6 +29,8 @@ type ResourceRow = {
   shiftEnd?: string; // e.g. "2:00 PM"
   lunchStart?: string; // e.g. "12:00 PM"
   lunchEnd?: string; // e.g. "12:30 PM"
+  homeLat?: number;
+  homeLng?: number;
 };
 
 const MS_HOUR = 60 * 60 * 1000;
@@ -387,22 +389,23 @@ export default function TimelinePanel({
   const taskBarsByRow = useMemo(() => {
     const rows: Array<Array<{ leftPx: number; widthPx: number; task: any; type: 'task' | 'travel' }>> = [];
 
-    // Group tasks by resourceId
+    // Group assigned tasks by employeeId
     const tasksByResource: Record<string, any[]> = {};
-    taskData.forEach(task => {
-      const rid = task.employeeId || task.resourceId;
+    taskData.filter(task => task.taskStatus === "Assigned (ACT)").forEach(task => {
+      const rid = task.employeeId;
       if (rid) {
         if (!tasksByResource[rid]) tasksByResource[rid] = [];
         tasksByResource[rid].push(task);
       }
     });
 
+    // Use the same resources order as the UI (categories) so rows align
     for (let y = 0; y < resources.length; y++) {
       const r = resources[y];
       const rid = String(r.resourceId ?? r.id ?? "UNKNOWN");
       const resourceTasks = tasksByResource[rid] || [];
 
-      // Sort tasks by start time
+      // Sort tasks by expected start date
       resourceTasks.sort((a, b) => {
         const aStart = new Date(a.expectedStartDate || a.startDate).getTime();
         const bStart = new Date(b.expectedStartDate || b.startDate).getTime();
@@ -410,64 +413,175 @@ export default function TimelinePanel({
       });
 
       const bars: Array<{ leftPx: number; widthPx: number; task: any; type: 'task' | 'travel' }> = [];
+
+      // Get shift times for today
+      const today = new Date();
+      const shiftStart = parseShiftTime(r.shiftStart);
+      const shiftEnd = parseShiftTime(r.shiftEnd);
+      if (!shiftStart || !shiftEnd) {
+        rows.push(bars);
+        continue;
+      }
+      const shiftStartMs = new Date(today).setHours(shiftStart.h, shiftStart.m, 0, 0);
+      const shiftEndMs = new Date(today).setHours(shiftEnd.h, shiftEnd.m, 0, 0);
+
+      // Determine the first task that will actually render (on selected date and within shift)
+      let firstRenderableIndex: number | null = null;
+      for (let fi = 0; fi < resourceTasks.length; fi++) {
+        const ft = resourceTasks[fi];
+        const fs = ft.expectedStartDate || ft.startDate;
+        if (!fs) continue;
+        const fExpected = new Date(fs);
+        if (fExpected.toDateString() !== today.toDateString()) continue;
+
+        const fStartMs = fExpected.getTime();
+        const fDurationMs = (ft.estimatedDuration || 60) * 60 * 1000;
+        const fEndMs = fStartMs + fDurationMs;
+        const fClippedStart = clamp(fStartMs, shiftStartMs, shiftEndMs);
+        const fClippedEnd = clamp(fEndMs, shiftStartMs, shiftEndMs);
+        if (fClippedEnd > fClippedStart) {
+          firstRenderableIndex = fi;
+          break;
+        }
+      }
+
+      // Precompute travel segments between consecutive tasks and from home
+      const travelSegments: Record<number, { travelStartMs: number; travelEndMs: number; type?: string }> = {};
+      let travelEndMs = shiftStartMs;
+      let travelRendered = false;
+      let travelStartMs = shiftStartMs;
+
+      // Travel from home to the first task (compute regardless of whether first task is on this day)
+      if (resourceTasks.length > 0) {
+        const firstTask = resourceTasks[0];
+        if (r.homeLat && r.homeLng && firstTask.lat && firstTask.lng) {
+          const distance = haversineDistance(r.homeLat, r.homeLng, firstTask.lat, firstTask.lng);
+          const speedKmh = 40; // assume 40 km/h
+          const travelTimeHours = distance / speedKmh;
+          const travelDuration = Math.max(travelTimeHours * MS_HOUR, 10 * 60 * 1000); // min 10 min
+
+          const firstExpectedStr = firstTask.expectedStartDate || firstTask.startDate;
+          const isAppointment = String(firstTask.commitmentType || '').toLowerCase() === 'appointment';
+          if (isAppointment && firstExpectedStr) {
+            const expectedMs = new Date(firstExpectedStr).getTime();
+            travelEndMs = expectedMs;
+            travelStartMs = expectedMs - travelDuration;
+          } else {
+            travelStartMs = shiftStartMs;
+            travelEndMs = shiftStartMs + travelDuration;
+          }
+
+          // store as segment keyed to first task index (0)
+          travelSegments[0] = { travelStartMs, travelEndMs, type: 'home' };
+
+          // Only mark as rendered for forcing if the FIRST task is renderable today and non-appointment
+          travelRendered = (firstRenderableIndex !== null) && !isAppointment;
+        }
+      }
+
+      // Inter-task travel segments (between consecutive tasks)
+      for (let j = 1; j < resourceTasks.length; j++) {
+        const prev = resourceTasks[j - 1];
+        const next = resourceTasks[j];
+        const prevEndStr = prev.expectedFinishDate || prev.endDate || prev.expectedStartDate || prev.startDate;
+        const nextStartStr = next.expectedStartDate || next.startDate;
+        if (!prevEndStr || !nextStartStr) continue;
+        if (prev.lat == null || prev.lng == null || next.lat == null || next.lng == null) continue;
+
+        const prevEndMs = new Date(prevEndStr).getTime();
+        const nextStartMs = new Date(nextStartStr).getTime();
+
+        const distance = haversineDistance(prev.lat, prev.lng, next.lat, next.lng);
+        const speedKmh = 40;
+        const travelDurationMs = Math.max((distance / speedKmh) * MS_HOUR, 5 * 60 * 1000); // min 5 min
+
+        const isAppointment = String(next.commitmentType || '').toLowerCase() === 'appointment';
+        let tStart = prevEndMs;
+        let tEnd = prevEndMs + travelDurationMs;
+        if (isAppointment && nextStartStr) {
+          tEnd = nextStartMs;
+          tStart = nextStartMs - travelDurationMs;
+        }
+
+        travelSegments[j] = { travelStartMs: tStart, travelEndMs: tEnd };
+      }
+
+      // Attach travel metadata to tasks so tooltips can show travel info
+      for (let k = 0; k < resourceTasks.length; k++) {
+        const t = resourceTasks[k];
+        const arriveSeg = travelSegments[k];
+        const nextSeg = travelSegments[k + 1];
+        const arriveDuration = arriveSeg ? (arriveSeg.travelEndMs - arriveSeg.travelStartMs) : null;
+        const toNextDuration = nextSeg ? (nextSeg.travelEndMs - nextSeg.travelStartMs) : null;
+        t.debug = { ...(t.debug || {}), travelArriveMs: arriveSeg?.travelEndMs ?? null, travelArriveDurationMs: arriveDuration, travelToNextDurationMs: toNextDuration };
+      }
+
+      // Track previous rendered task end (ms) for inter-task travel
+      let prevRenderedEndMs: number | null = null;
+
       for (let i = 0; i < resourceTasks.length; i++) {
         const task = resourceTasks[i];
         const startStr = task.expectedStartDate || task.startDate;
-        const endStr = task.expectedFinishDate || task.startDate;
-        if (!startStr || !endStr) continue;
+        if (!startStr) continue;
 
-        const start = new Date(startStr);
-        const end = new Date(endStr);
-        const startMs = start.getTime();
-        const endMs = end.getTime();
+        const expectedDate = new Date(startStr);
 
-        // Clip to visible range
-        const clippedStart = clamp(startMs, dateRange.start, dateRange.end);
-        const clippedEnd = clamp(endMs, dateRange.start, dateRange.end);
+        // Only show tasks for the selected date
+        if (expectedDate.toDateString() !== today.toDateString()) continue;
 
-        if (clippedEnd > clippedStart) {
-          const leftPx = ((clippedStart - dateRange.start) / MS_HOUR) * PX_PER_HOUR;
-          const widthPx = ((clippedEnd - clippedStart) / MS_HOUR) * PX_PER_HOUR;
-          bars.push({ leftPx, widthPx, task, type: 'task' });
+        // Determine start: if this is the first renderable task and travel-from-home was rendered, force it to start at travel arrival
+        let startMs = expectedDate.getTime();
+        if (firstRenderableIndex !== null && i === firstRenderableIndex) {
+          if (travelRendered) {
+            const originalExpected = startMs;
+            startMs = travelEndMs;
+            task.debug = { ...(task.debug || {}), forcedStartMs: startMs, originalExpectedMs: originalExpected };
+          } else {
+            startMs = Math.max(startMs, travelEndMs);
+          }
         }
 
-        // Add travel to next task
-        if (i < resourceTasks.length - 1) {
-          const nextTask = resourceTasks[i + 1];
-          const nextStartStr = nextTask.expectedStartDate || nextTask.startDate;
-          if (nextStartStr) {
-            const travelStart = new Date(endStr);
-            const travelEnd = new Date(nextStartStr);
-            const travelStartMs = travelStart.getTime();
-            const travelEndMs = travelEnd.getTime();
+        // Render any precomputed travel segment for this task (from previous or from home)
+        const seg = travelSegments[i];
+        const isAppointment = String(task.commitmentType || '').toLowerCase() === 'appointment';
+        if (seg) {
+          // Prevent travel from visually overlapping the previously rendered task
+          const segStartMs = Math.max(seg.travelStartMs, prevRenderedEndMs ?? seg.travelStartMs);
+          const clippedStart = clamp(segStartMs, shiftStartMs, shiftEndMs);
+          const clippedEnd = clamp(seg.travelEndMs, shiftStartMs, shiftEndMs);
 
-            let travelDuration = travelEndMs - travelStartMs; // default to actual gap
+          if (clippedEnd > clippedStart) {
+            const leftPx = ((clippedStart - dateRange.start) / MS_HOUR) * PX_PER_HOUR;
+            const widthPx = ((clippedEnd - clippedStart) / MS_HOUR) * PX_PER_HOUR;
+            bars.push({ leftPx, widthPx, task: { taskId: 'Travel', debug: { travelStartMs: seg.travelStartMs, travelEndMs: seg.travelEndMs } }, type: 'travel' });
 
-            // Calculate based on lat/lng if available
-            if (task.lat && task.lng && nextTask.lat && nextTask.lng) {
-              const distance = haversineDistance(task.lat, task.lng, nextTask.lat, nextTask.lng);
-              const speedKmh = 40; // assume 40 km/h
-              const travelTimeHours = distance / speedKmh;
-              const calculatedTravelMs = travelTimeHours * 60 * 60 * 1000;
-              // Use calculated, but cap between 5 min and 2 hours
-              travelDuration = Math.max(5 * 60 * 1000, Math.min(calculatedTravelMs, 2 * 60 * 60 * 1000));
-            } else {
-              // Fallback to min of actual gap or 30 min
-              travelDuration = Math.min(travelEndMs - travelStartMs, 30 * 60 * 1000);
-            }
-
-            const actualTravelEnd = travelStartMs + travelDuration;
-
-            const clippedTravelStart = clamp(travelStartMs, dateRange.start, dateRange.end);
-            const clippedTravelEnd = clamp(actualTravelEnd, dateRange.start, dateRange.end);
-
-            if (clippedTravelEnd > clippedTravelStart) {
-              const leftPx = ((clippedTravelStart - dateRange.start) / MS_HOUR) * PX_PER_HOUR;
-              const widthPx = ((clippedTravelEnd - clippedTravelStart) / MS_HOUR) * PX_PER_HOUR;
-              bars.push({ leftPx, widthPx, task: { taskId: 'Travel' }, type: 'travel' });
+            if (!isAppointment && expectedDate.toDateString() === today.toDateString()) {
+              const originalExpected = startMs;
+              // Ensure the forced start occurs after any previous rendered task end
+              startMs = Math.max(seg.travelEndMs, prevRenderedEndMs ?? seg.travelEndMs);
+              task.debug = { ...(task.debug || {}), forcedStartMs: startMs, originalExpectedMs: originalExpected };
             }
           }
         }
+
+        const durationMs = (task.estimatedDuration || 60) * 60 * 1000; // minutes to ms
+        const endMs = startMs + durationMs;
+
+        // Clip to shift
+        const clippedStart = clamp(startMs, shiftStartMs, shiftEndMs);
+        const clippedEnd = clamp(endMs, shiftStartMs, shiftEndMs);
+
+          if (clippedEnd > clippedStart) {
+            const leftPx = ((clippedStart - dateRange.start) / MS_HOUR) * PX_PER_HOUR;
+            const widthPx = ((clippedEnd - clippedStart) / MS_HOUR) * PX_PER_HOUR;
+            // Small visual gap between adjacent task bars to avoid touching/overlap
+            const GAP_PX = 2; // total gap in pixels between bars
+            const adjLeftPx = leftPx + GAP_PX / 2;
+            const adjWidthPx = Math.max(1, widthPx - GAP_PX);
+            bars.push({ leftPx: adjLeftPx, widthPx: adjWidthPx, task, type: 'task' });
+            // update prevRendered end marker for the next iteration
+            prevRenderedEndMs = clippedEnd;
+          }
       }
 
       rows.push(bars);
@@ -476,8 +590,10 @@ export default function TimelinePanel({
     return rows;
   }, [resources, taskData, dateRange, PX_PER_HOUR]);
 
-  // Compute ECBT (Estimated Comeback Time) for each resource
+  // Compute ECBT (Estimated Comeback Time) for each resource.
+  // ECBT = latest scheduled end time for that resource (exclude travel-home).
   const ecbtByRow = useMemo(() => {
+    const today = new Date();
     const ecbts: number[] = [];
 
     // Group tasks by resourceId
@@ -495,18 +611,34 @@ export default function TimelinePanel({
       const rid = String(r.resourceId ?? r.id ?? "UNKNOWN");
       const resourceTasks = tasksByResource[rid] || [];
 
-      if (resourceTasks.length === 0) {
-        ecbts.push(0);
+      // Filter to current date and assigned
+      const relevantTasks = resourceTasks.filter(task => {
+        if (task.taskStatus !== "Assigned (ACT)") return false;
+        const start = new Date(task.expectedStartDate || task.startDate);
+        return start.toDateString() === today.toDateString();
+      });
+
+      if (relevantTasks.length === 0) {
+        // No work scheduled, set ECBT to shift start
+        const shiftStart = parseShiftTime(r.shiftStart);
+        if (shiftStart) {
+          const shiftStartMs = new Date(today).setHours(shiftStart.h, shiftStart.m, 0, 0);
+          ecbts.push(shiftStartMs);
+        } else {
+          ecbts.push(0);
+        }
         continue;
       }
 
       // Find the latest end time
       let latestEnd = 0;
-      resourceTasks.forEach(task => {
+      relevantTasks.forEach(task => {
         const endStr = task.expectedFinishDate || task.startDate;
         if (endStr) {
           const endMs = new Date(endStr).getTime();
-          if (endMs > latestEnd) latestEnd = endMs;
+          if (endMs > latestEnd) {
+            latestEnd = endMs;
+          }
         }
       });
 
@@ -649,18 +781,30 @@ export default function TimelinePanel({
         <Paper
           ref={leftScrollRef}
           elevation={0}
+          onWheel={(e: React.WheelEvent<HTMLDivElement>) => {
+            // Prevent the left column from scrolling independently.
+            // Instead, forward vertical wheel delta to the main timeline body so
+            // vertical scrolling is always controlled by the right Gantt.
+            const body = bodyScrollRef.current;
+            if (!body) return;
+            e.preventDefault();
+            e.stopPropagation();
+            // Use scrollBy for smooth native-like behavior
+            body.scrollBy({ top: e.deltaY, left: 0, behavior: 'auto' });
+          }}
           sx={{
             width: LABEL_COL_WIDTH,
             flexShrink: 0,
             borderRight: `1px solid ${theme.palette.divider}`,
             bgcolor: "transparent",
             overflow: "auto",
+            overscrollBehavior: 'contain',
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
           {categories.map((rid, rowIndex) => (
             <Box
-              key={rid}
+              key={`${rid}-${rowIndex}`}
               sx={{
                 height: ROW_HEIGHT,
                 display: "flex",
@@ -704,7 +848,7 @@ export default function TimelinePanel({
           >
             {categories.map((rid, rowIndex) => (
               <Box
-                key={rid}
+                key={`${rid}-${rowIndex}`}
                 sx={{
                   position: "relative",
                   height: ROW_HEIGHT,
@@ -719,7 +863,6 @@ export default function TimelinePanel({
                 {shiftBarsByRow[rowIndex]?.map((b, i) => (
                   <Box
                     key={`${rid}-shift-${i}`}
-                    title="Working Time"
                     sx={{
                       position: "absolute",
                       top: 0,
@@ -772,22 +915,55 @@ export default function TimelinePanel({
                   />
                 ))}
 
+                {/* debug: show travel/first-task timestamps if available */}
+                {(() => {
+                  const travelBar = taskBarsByRow[rowIndex]?.find(x => x.type === 'travel' && x.task?.taskId === 'Travel from Home');
+                  const firstTaskBar = taskBarsByRow[rowIndex]?.find(x => x.type === 'task');
+                    if (travelBar && travelBar.task?.debug) {
+                      const tStart = travelBar.task.debug.travelStartMs;
+                      const tEnd = travelBar.task.debug.travelEndMs;
+                      const travelMinutes = Math.round((tEnd - tStart) / 60000);
+                      const fStart = firstTaskBar ? ((firstTaskBar.leftPx / PX_PER_HOUR) * MS_HOUR + dateRange.start) : null;
+                      return (
+                        <Box sx={{ position: 'absolute', left: travelBar.leftPx, top: 2, zIndex: 40 }}>
+                          <Typography variant="caption" sx={{ color: 'error.main', fontSize: 10 }}>
+                            {`T: ${travelMinutes}m (${new Date(tStart).toLocaleTimeString()}→${new Date(tEnd).toLocaleTimeString()})`}
+                          </Typography>
+                          {fStart && (
+                            <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: 10 }}>
+                              {`F:${new Date(fStart).toLocaleTimeString()}`}
+                            </Typography>
+                          )}
+                        </Box>
+                      );
+                    }
+                  return null;
+                })()}
+
                 {/* ECBT line */}
                 {ecbtByRow[rowIndex] > 0 && (() => {
                   const ecbtMs = ecbtByRow[rowIndex];
                   if (ecbtMs >= dateRange.start && ecbtMs <= dateRange.end) {
                     const leftPx = ((ecbtMs - dateRange.start) / MS_HOUR) * PX_PER_HOUR;
+                    const size = 12; // diamond size
+                    const diamondTop = (ROW_HEIGHT - size) / 2;
+                    const diamondLeft = leftPx - size / 2;
+
                     return (
-                      <Tooltip key={`${rid}-ecbt`} title={`ECBT: ${new Date(ecbtMs).toLocaleString()}`} placement="top">
+                      <Tooltip key={`${rid}-ecbt`} title={new Date(ecbtMs).toLocaleString()} placement="top">
                         <Box
                           sx={{
                             position: "absolute",
-                            top: 0,
-                            left: leftPx,
-                            width: 2,
-                            height: ROW_HEIGHT,
+                            top: diamondTop,
+                            left: diamondLeft,
+                            width: size,
+                            height: size,
                             bgcolor: theme.palette.error.main,
-                            boxSizing: "border-box",
+                            transform: 'rotate(45deg)',
+                            border: `2px solid ${theme.palette.background.paper}`,
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                            boxSizing: 'border-box',
+                            zIndex: 30,
                           }}
                         />
                       </Tooltip>
