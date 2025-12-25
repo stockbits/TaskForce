@@ -5,7 +5,6 @@ import {
   Tabs,
   Grid,
 } from "@mui/material";
-import AppButton from '@/shared-ui/button';
 import { MultiSelectField, FreeTypeSelectField, CombinedLocationField, ImpScoreField } from "@/shared-ui";
 
 export interface ScheduleLiveSearchFilters {
@@ -138,6 +137,29 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
   // local per-tab states
   const [filtersTask, setFiltersTask] = useState<ScheduleLiveSearchFilters>(emptyFilters());
   const [filtersResource, setFiltersResource] = useState<ScheduleLiveSearchFilters>(emptyFilters());
+
+  // Load filters from localStorage on mount
+  useEffect(() => {
+    const loadFilters = (key: string): ScheduleLiveSearchFilters => {
+      try {
+        const stored = localStorage.getItem(key);
+        return stored ? { ...emptyFilters(), ...JSON.parse(stored) } : emptyFilters();
+      } catch {
+        return emptyFilters();
+      }
+    };
+    setFiltersTask(loadFilters('scheduleLiveSearchFiltersTask'));
+    setFiltersResource(loadFilters('scheduleLiveSearchFiltersResource'));
+  }, []);
+
+  // Save filters to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('scheduleLiveSearchFiltersTask', JSON.stringify(filtersTask));
+  }, [filtersTask]);
+
+  useEffect(() => {
+    localStorage.setItem('scheduleLiveSearchFiltersResource', JSON.stringify(filtersResource));
+  }, [filtersResource]);
 
   useEffect(() => {
     setFiltersTask(emptyFilters());

@@ -39,7 +39,6 @@ import ClipboardList from '@mui/icons-material/ListAlt';
 import type { TaskRecord, ResourceRecord } from "@/hooks/useLiveSelectEngine";
 
 import {
-  Backdrop,
   Box,
   ClickAwayListener,
   Grow,
