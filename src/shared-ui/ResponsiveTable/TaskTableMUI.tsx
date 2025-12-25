@@ -450,20 +450,25 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
               py: density === 'compact' ? 0.5 : 1, 
               whiteSpace: 'nowrap', 
               overflow: 'hidden', 
-              textOverflow: 'ellipsis' 
+              textOverflow: 'ellipsis',
+              color: mode === 'dark' ? "#ffffff" : "#0B2233",
+              borderBottom: mode === 'dark' ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(0, 0, 0, 0.12)",
             }, 
             '& .MuiDataGrid-columnHeaders': { 
-              backgroundColor: theme.palette.action.hover 
+              backgroundColor: mode === 'dark' ? "#2a2a2a" : theme.palette.action.hover,
+              borderBottom: mode === 'dark' ? "1px solid rgba(255, 255, 255, 0.2)" : "1px solid rgba(0, 0, 0, 0.12)",
             }, 
             '& .MuiDataGrid-columnHeaderTitle': { 
               whiteSpace: 'nowrap', 
               overflow: 'hidden', 
-              textOverflow: 'ellipsis' 
+              textOverflow: 'ellipsis',
+              color: mode === 'dark' ? "#ffffff" : "#0B2233",
+              fontWeight: 600,
             },
             '& .MuiDataGrid-row': {
               cursor: controlledSelectedRowIds ? 'pointer' : 'default',
               '&:hover': {
-                backgroundColor: controlledSelectedRowIds ? theme.palette.action.hover : 'transparent',
+                backgroundColor: controlledSelectedRowIds ? (mode === 'dark' ? "rgba(255, 255, 255, 0.04)" : theme.palette.action.hover) : 'transparent',
               },
             },
             '& .selected-row': {
@@ -472,6 +477,26 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
                 backgroundColor: mode === 'dark' 
                   ? "rgba(59, 224, 137, 0.3)" 
                   : theme.palette.primary.main + '20',
+              },
+            },
+            '& .MuiDataGrid-footerContainer': {
+              backgroundColor: mode === 'dark' ? "#2a2a2a" : "#f5f5f5",
+              borderTop: mode === 'dark' ? "1px solid rgba(255, 255, 255, 0.2)" : "1px solid rgba(0, 0, 0, 0.12)",
+              color: mode === 'dark' ? "#ffffff" : "#0B2233",
+            },
+            '& .MuiTablePagination-root': {
+              color: mode === 'dark' ? "#ffffff" : "#0B2233",
+            },
+            '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+              color: mode === 'dark' ? "#b0b0b0" : "#475569",
+            },
+            '& .MuiTablePagination-select': {
+              color: mode === 'dark' ? "#ffffff" : "#0B2233",
+            },
+            '& .MuiTablePagination-actions .MuiIconButton-root': {
+              color: mode === 'dark' ? "#b0b0b0" : "#475569",
+              '&:hover': {
+                backgroundColor: mode === 'dark' ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.04)",
               },
             },
             '& .MuiCheckbox-root': {

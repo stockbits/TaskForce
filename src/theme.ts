@@ -155,13 +155,33 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
         },
       },
     },
-    MuiOutlinedInput: {
+    MuiTextField: {
       styleOverrides: {
-        notchedOutline: {
-          // keep default outline styling
-        },
         root: {
-          minHeight: 40,
+          '& .MuiInputBase-input': {
+            color: mode === 'dark' ? "#ffffff" : "#0B2233",
+            '&::placeholder': {
+              color: mode === 'dark' ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.6)",
+              opacity: 1,
+            },
+          },
+          '& .MuiInputLabel-root': {
+            color: mode === 'dark' ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.6)",
+            '&.Mui-focused': {
+              color: mode === 'dark' ? accentMint : primaryNavy,
+            },
+          },
+          '& .MuiOutlinedInput-root': {
+            '& fieldset': {
+              borderColor: mode === 'dark' ? "rgba(255, 255, 255, 0.23)" : "rgba(0, 0, 0, 0.23)",
+            },
+            '&:hover fieldset': {
+              borderColor: mode === 'dark' ? "rgba(255, 255, 255, 0.4)" : undefined,
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: mode === 'dark' ? accentMint : primaryNavy,
+            },
+          },
         },
       },
     },
