@@ -487,9 +487,14 @@ export default function ScheduleLivePage() {
   };
 
   const handleResourceClick = (resource: any) => {
+    const today = new Date();
+    const todayStart = new Date(today);
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date(today);
+    todayEnd.setHours(23, 59, 59, 999);
     const resourceTasks = taskData.filter(t => {
       const taskDate = new Date(t.appointmentStartDate || t.startDate || t.expectedStartDate);
-      return taskDate >= timelineStartDate && taskDate <= timelineEndDate && (t.employeeId === resource.resourceId || t.resourceId === resource.resourceId);
+      return taskDate >= todayStart && taskDate <= todayEnd && (t.employeeId === resource.resourceId || t.resourceId === resource.resourceId);
     });
     setTaskTableData(resourceTasks);
   };
