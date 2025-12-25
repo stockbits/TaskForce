@@ -470,6 +470,10 @@ export default function ScheduleLivePage() {
   ============================================================================ */
   const handleTaskBlockClick = (task: TaskRecord) => {
     handleTaskTableSelect([task]);
+    setTaskTableData(prev => {
+      if (prev.some(t => t.taskId === task.taskId)) return prev;
+      return [task, ...prev];
+    });
   };
 
   const handleTaskBlockDoubleClick = (task: TaskRecord) => {
