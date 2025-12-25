@@ -120,6 +120,8 @@ export default function ScheduleLivePage() {
   });
   const allResources = ResourceMock as ResourceRecord[];
 
+  const timelineResources = useMemo(() => allResources.filter(r => r.division === division), [division, allResources]);
+
   /* ---------------- DROPDOWN DATA ---------------- */
   const [dropdownData, setDropdownData] = useState({
     statuses: [] as string[],
@@ -238,9 +240,6 @@ export default function ScheduleLivePage() {
       const rows = (mockTasks as TaskRecord[]).filter((t) => t.division === value);
       setTaskData(rows);
       setDropdownData(buildFilteredDropdowns(rows));
-      if (autoLoadResources) {
-        runResourceSearch({} as ScheduleLiveSearchFilters);
-      }
     } else {
       setDropdownData({
         statuses: [],
@@ -265,10 +264,6 @@ export default function ScheduleLivePage() {
     if (division) rows = rows.filter((t) => t.division === division);
     setTaskData(rows);
     setDropdownData(buildFilteredDropdowns(rows));
-
-    if (autoLoadResources && division) {
-      runResourceSearch({} as ScheduleLiveSearchFilters);
-    }
 
     setSearchAnywhere("");
   }, [division, autoLoadResources]);
@@ -459,12 +454,6 @@ export default function ScheduleLivePage() {
     handleCloseSearchPanel();
   }, [clearAll, division, handleCloseSearchPanel]);
 
-  useEffect(() => {
-    if (autoLoadResources && division) {
-      runResourceSearch({} as ScheduleLiveSearchFilters);
-    }
-  }, [autoLoadResources, division]);
-
   /* ==========================================================================
      TIMELINE TASK INTERACTIONS
   ============================================================================ */
@@ -513,7 +502,7 @@ export default function ScheduleLivePage() {
               endDate={timelineEndDate}
               onStartDateChange={setTimelineStartDate}
               onEndDateChange={setTimelineEndDate}
-              resources={resourceData}
+              resources={timelineResources}
               tasks={taskData}
               onTaskClick={handleTaskBlockClick}
               onTaskDoubleClick={handleTaskBlockDoubleClick}
