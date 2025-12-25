@@ -119,6 +119,8 @@ export default function TimelinePanel({
   onEndDateChange,
   resources: resourceData = [],
   tasks: taskData = [],
+  onTaskClick,
+  onTaskDoubleClick,
 }: {
   isMaximized?: boolean;
   startDate: Date;
@@ -127,6 +129,8 @@ export default function TimelinePanel({
   onEndDateChange: (date: Date) => void;
   resources?: ResourceRow[];
   tasks?: any[];
+  onTaskClick?: (task: any) => void;
+  onTaskDoubleClick?: (task: any) => void;
 }) {
   // Use props for date state instead of internal state
   const startDate = propStartDate;
@@ -912,6 +916,8 @@ export default function TimelinePanel({
                     task={b.task}
                     type={b.type}
                     rowHeight={ROW_HEIGHT}
+                    onClick={onTaskClick}
+                    onDoubleClick={onTaskDoubleClick}
                   />
                 ))}
 

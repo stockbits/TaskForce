@@ -10,9 +10,11 @@ interface TaskBlockProps {
   rowHeight: number;
   lane?: number;
   totalLanes?: number;
+  onClick?: (task: any) => void;
+  onDoubleClick?: (task: any) => void;
 }
 
-export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane = -1, totalLanes = 1 }: TaskBlockProps) {
+export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane = -1, totalLanes = 1, onClick, onDoubleClick }: TaskBlockProps) {
   const theme = useTheme();
 
   const formatDuration = (mins: number) => {
@@ -76,6 +78,8 @@ export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane
   return (
     <Tooltip title={buildTooltip()} placement="top" disableInteractive>
       <Box
+        onClick={() => onClick?.(task)}
+        onDoubleClick={() => onDoubleClick?.(task)}
         sx={{
           position: "absolute",
           top: (() => {
@@ -101,7 +105,9 @@ export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane
           px: 0.5,
         }}
       >
-        {/* Intentionally keep block content empty — all details are in the tooltip */}
+        <span style={{ fontSize: '10px', color: 'white', fontWeight: 'bold' }}>
+          {task?.taskId || ''}
+        </span>
       </Box>
     </Tooltip>
   );

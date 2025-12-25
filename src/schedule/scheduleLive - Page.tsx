@@ -466,6 +466,23 @@ export default function ScheduleLivePage() {
   }, [autoLoadResources, division]);
 
   /* ==========================================================================
+     TIMELINE TASK INTERACTIONS
+  ============================================================================ */
+  const handleTaskBlockClick = (task: TaskRecord) => {
+    handleTaskTableSelect([task]);
+  };
+
+  const handleTaskBlockDoubleClick = (task: TaskRecord) => {
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const todaysTasks = taskData.filter(t => {
+      const taskDate = new Date(t.appointmentStartDate || t.startDate || t.expectedStartDate).toISOString().split('T')[0];
+      return taskDate === todayStr;
+    });
+    setTaskTableData(todaysTasks);
+  };
+
+  /* ==========================================================================
      PANEL RENDERER
   ============================================================================ */
   const renderPanelBody = (key: PanelKey) => {
@@ -481,6 +498,8 @@ export default function ScheduleLivePage() {
               onEndDateChange={setTimelineEndDate}
               resources={resourceData}
               tasks={taskData}
+              onTaskClick={handleTaskBlockClick}
+              onTaskDoubleClick={handleTaskBlockDoubleClick}
             />
           </Suspense>
         );
