@@ -101,6 +101,17 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
         body: {
           backgroundColor: mode === 'dark' ? "#121212" : neutralBackground,
         },
+        // Remove default MUI focus rings that might show blue
+        '.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+          borderColor: mode === 'dark' ? accentMint : primaryNavy + ' !important',
+        },
+        // Ensure no blue focus rings appear
+        '*': {
+          '&:focus-visible': {
+            outline: mode === 'dark' ? `2px solid ${accentMint}` : `2px solid ${primaryNavy}`,
+            outlineOffset: '1px',
+          },
+        },
       },
     },
     MuiPaper: {
@@ -155,6 +166,22 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
         },
       },
     },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          minHeight: 40,
+          '&:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: mode === 'dark' ? "rgba(255, 255, 255, 0.4)" : undefined,
+          },
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: mode === 'dark' ? accentMint : primaryNavy,
+          },
+        },
+        notchedOutline: {
+          borderColor: mode === 'dark' ? "rgba(255, 255, 255, 0.23)" : "rgba(0, 0, 0, 0.23)",
+        },
+      },
+    },
     MuiTextField: {
       styleOverrides: {
         root: {
@@ -179,7 +206,44 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
               borderColor: mode === 'dark' ? "rgba(255, 255, 255, 0.4)" : undefined,
             },
             '&.Mui-focused fieldset': {
-              borderColor: mode === 'dark' ? accentMint : primaryNavy,
+              borderColor: mode === 'dark' ? accentMint : primaryNavy + ' !important',
+            },
+            '&.Mui-focused': {
+              '& fieldset': {
+                borderColor: mode === 'dark' ? accentMint : primaryNavy + ' !important',
+              },
+            },
+          },
+        },
+      },
+    },
+    MuiSelect: {
+      styleOverrides: {
+        root: {
+          color: mode === 'dark' ? "#ffffff" : "#0B2233",
+        },
+        select: {
+          color: mode === 'dark' ? "#ffffff" : "#0B2233",
+          '&:focus': {
+            backgroundColor: 'transparent',
+          },
+        },
+        icon: {
+          color: mode === 'dark' ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.54)",
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          color: mode === 'dark' ? "#ffffff" : "#0B2233",
+          '&:hover': {
+            backgroundColor: mode === 'dark' ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.04)",
+          },
+          '&.Mui-selected': {
+            backgroundColor: mode === 'dark' ? "rgba(59, 224, 137, 0.15)" : "rgba(15, 39, 64, 0.08)",
+            '&:hover': {
+              backgroundColor: mode === 'dark' ? "rgba(59, 224, 137, 0.25)" : "rgba(15, 39, 64, 0.12)",
             },
           },
         },
