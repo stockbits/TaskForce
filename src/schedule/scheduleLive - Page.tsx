@@ -104,7 +104,7 @@ export default function ScheduleLivePage() {
 
   /* ---------------- TABLE DATA ---------------- */
   const [taskData, setTaskData] = useState<TaskRecord[]>(mockTasks as TaskRecord[]);
-  const [resourceData, setResourceData] = useState<ResourceRecord[]>(ResourceMock as ResourceRecord[]);
+  const [resourceData, setResourceData] = useState<ResourceRecord[]>([]);
 
   /* ---------------- TIMELINE DATE STATE ---------------- */
   const [timelineStartDate, setTimelineStartDate] = useState<Date>(() => {
