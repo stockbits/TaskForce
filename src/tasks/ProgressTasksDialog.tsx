@@ -1,10 +1,10 @@
 import React from "react";
-import { Dialog, DialogTitle, DialogContent, Box, Stack, Typography, IconButton, Paper, FormControl, InputLabel, Select, MenuItem, Divider, Alert, TextField } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, Box, Stack, Typography, IconButton, Paper, FormControl, InputLabel, Select, MenuItem, Divider, Alert } from "@mui/material";
 import AppButton from '@/shared-ui/button';
 import Close from '@mui/icons-material/Close';
 import ListAlt from '@mui/icons-material/ListAlt';
 import { alpha, useTheme } from "@mui/material/styles";
-import useFieldSizes from "../shared-ui/text-fields/useFieldSizes";
+import { TextInputField, useFieldSizes } from '@/shared-ui';
 
 export type ProgressPreview = {
   id: string | null | undefined;
@@ -103,7 +103,7 @@ export default function ProgressTasksDialog({
 
         <Stack spacing={1.5} sx={{ gridColumn: "1 / -1" }}>
           <Typography variant="overline" sx={{ letterSpacing: 1, color: "text.secondary" }}>Quick Note</Typography>
-          <TextField multiline minRows={4} value={progressNote} onChange={(e) => setProgressNote(e.target.value)} placeholder="Share the next steps, blockers, or field updates for these tasks…" />
+          <TextInputField multiline minRows={4} value={progressNote} onChange={setProgressNote} placeholder="Share the next steps, blockers, or field updates for these tasks…" />
         </Stack>
 
         {(progressError || progressSuccess) && (

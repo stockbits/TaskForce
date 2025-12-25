@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { Autocomplete, Box, ListItem, ListItemText, TextField, Typography } from "@mui/material";
-import useFieldSizes from './useFieldSizes';
+import useFieldSizes from '../utils/useFieldSizes';
 
 type OptionItem = string | { label: string; value: string };
 

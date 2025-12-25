@@ -27,9 +27,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import DateTimePopover from '@/shared-ui/DateTimePopover';
-import { MultiSelectField, FreeTypeSelectField, CombinedLocationField } from '@/shared-ui';
-import ImpScoreField from '@/shared-ui/text-fields/ImpScoreField';
-import GlobalSearchField from '@/shared-ui/text-fields/GlobalSearchField';
+import { MultiSelectField, FreeTypeSelectField, CombinedLocationField, ImpScoreField, GlobalSearchField } from '@/shared-ui';
 import AppButton from '@/shared-ui/button';
 import Visibility from '@mui/icons-material/Visibility';
 
@@ -312,57 +310,57 @@ export default function TaskSearchCard({
           {activeTab === "basic" && (
             <Box mt={1}>
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 0.25 }} />
-                <Grid container spacing={1.5} alignItems="center">
-                    <Grid item xs={12} sm="auto" md="auto">
+                <Grid container spacing={2} sx={{ width: '100%', px: 1 }}>
+                    <Grid item xs={12} sm={6} md={4} lg={2} xl={2}>
                         <MultiSelectField
-                          label="Division *"
+                          label="Division"
                           options={divisionOptions}
                           value={filters.division}
                           onChange={(value: string[]) => handleMultiChange("division", value)}
-                          showSelectAllIcon
+                          showSelectAll
                           required
                         />
                     </Grid>
 
-                  <Grid item xs={12} sm="auto" md="auto">
+                  <Grid item xs={12} sm={6} md={4} lg={2} xl={2}>
                       <MultiSelectField
-                        label="Domain ID *"
+                        label="Domain ID"
                         options={domainOptions}
                         value={filters.domainId}
                         onChange={(value: string[]) => handleMultiChange("domainId", value)}
-                        showSelectAllIcon
+                        showSelectAll
                         required
                       />
                   </Grid>
 
-                  <Grid item xs={12} sm="auto" md="auto">
+                  <Grid item xs={12} sm={6} md={4} lg={2} xl={2}>
                       <MultiSelectField
-                        label="Task Status *"
+                        label="Task Status"
                         options={statusOptions}
                         value={filters.taskStatuses}
                         onChange={(value: string[]) => handleMultiChange("taskStatuses", value)}
-                        showSelectAllIcon
+                        showSelectAll
                         required
                       />
                   </Grid>
 
-                  <Grid item xs={12} sm="auto" md="auto">
+                  <Grid item xs={12} sm={6} md={4} lg={2} xl={2}>
                       <MultiSelectField
                         label="PWA Selector"
                         options={pwaOptions}
                         value={filters.pwa}
                         onChange={(value: string[]) => handleMultiChange("pwa", value)}
-                        showSelectAllIcon
+                        showSelectAll
                       />
                   </Grid>
 
-                  <Grid item xs={12} sm="auto" md="auto">
+                  <Grid item xs={12} sm={6} md={4} lg={2} xl={2}>
                       <MultiSelectField
                         label="Capabilities"
                         options={capabilityOptions}
                         value={filters.capabilities}
                         onChange={(value: string[]) => handleMultiChange("capabilities", value)}
-                        showSelectAllIcon
+                        showSelectAll
                       />
                   </Grid>
                 </Grid>
@@ -371,27 +369,27 @@ export default function TaskSearchCard({
 
           {activeTab === "advanced" && (
             <Box mt={1}>
-                <Grid container spacing={1.5} alignItems="center">
-                <Grid item xs={12} sm="auto" md="auto">
+                <Grid container spacing={1} sx={{ width: '100%', px: 1 }}>
+                <Grid item xs={12} sm={6} md={4} lg={2} xl={2}>
                     <MultiSelectField
                       label="Commit Type"
                       options={commitOptions}
                       value={filters.commitType}
                       onChange={(value: string[]) => handleMultiChange("commitType", value)}
-                      showSelectAllIcon
+                      showSelectAll
                     />
                 </Grid>
 
-                <Grid item xs={12} sm="auto" md="auto">
+                <Grid item xs={12} sm={6} md={4} lg={2} xl={2}>
                     <MultiSelectField
                       label="Response Code"
                       options={responseOptions}
                       value={filters.responseCode}
                       onChange={(value: string[]) => handleMultiChange("responseCode", value)}
-                      showSelectAllIcon
+                      showSelectAll
                     />
                 </Grid>
-                <Grid item xs={12} sm="auto" md="auto">
+                <Grid item xs={12} sm={6} md={4} lg={2} xl={2}>
                     <FreeTypeSelectField
                       label="Requester"
                       options={requesterOptions}
@@ -400,7 +398,7 @@ export default function TaskSearchCard({
                     />
                 </Grid>
 
-                <Grid item xs={12} sm="auto" md="auto">
+                <Grid item xs={12} sm={6} md={4} lg={2} xl={2}>
                     <FreeTypeSelectField
                       label="Job Type"
                       options={jobTypeOptions}
@@ -409,22 +407,25 @@ export default function TaskSearchCard({
                     />
                 </Grid>
 
-                <Grid item xs={12} sm="auto" md="auto">
+                <Grid item xs={12} sm={6} md={4} lg={2} xl={2}>
                     <CombinedLocationField
+                      label="Location"
                       locationType={filters.locationType}
                       locationValue={filters.locationValue}
                       onTypeChange={(val) => setFilters((prev) => ({ ...prev, locationType: val }))}
                       onValueChange={(val) => setFilters((prev) => ({ ...prev, locationValue: val }))}
+                      sx={{ maxWidth: 'none' }}
                     />
                 </Grid>
 
-                <Grid item xs={12} sm="auto" md="auto">
+                <Grid item xs={12} sm={6} md={4} lg={2} xl={2}>
                     <ImpScoreField
                       label="IMP Score"
                       condition={(filters.scoreCondition as any) || ''}
                       value={filters.scoreValue}
                       onConditionChange={(next) => setFilters((prev) => ({ ...prev, scoreCondition: next }))}
                       onValueChange={(next) => setFilters((prev) => ({ ...prev, scoreValue: next }))}
+                      sx={{ maxWidth: 'none' }}
                     />
                 </Grid>
               </Grid>

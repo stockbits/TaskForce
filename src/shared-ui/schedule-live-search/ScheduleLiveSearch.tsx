@@ -1,12 +1,11 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import {
   Box,
   Tab,
   Tabs,
   Grid,
 } from "@mui/material";
-import { MultiSelectField, FreeTypeSelectField, CombinedLocationField } from "@/shared-ui";
-import ImpScoreField from '@/shared-ui/text-fields/ImpScoreField';
+import { MultiSelectField, FreeTypeSelectField, CombinedLocationField, ImpScoreField } from "@/shared-ui";
 
 export interface ScheduleLiveSearchFilters {
   taskSearch: string;
@@ -157,10 +156,22 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
     });
   }, [mode]);
 
+  const debounceRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (hideActions) {
-      onSearch(filters);
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+      debounceRef.current = setTimeout(() => {
+        onSearch(filters);
+      }, 300); // 300ms debounce
     }
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
   }, [filters, hideActions, onSearch]);
 
   const safe = (arr: string[] | undefined) => arr ?? [];
@@ -196,10 +207,12 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
   }), [dropdownData, query]);
 
   const renderFieldGrid = (fields: React.ReactNode[]) => (
-    <Grid container spacing={3}>
+    <Grid container spacing={3} sx={{ width: '100%', px: 1 }}>
       {fields.map((field, index) => (
-        <Grid item xs={12} md={fields.length === 1 ? 12 : 6} key={index}>
-          {field}
+        <Grid item xs={12} sm={6} key={index} sx={{ minWidth: 0, mb: 2 }}>
+          <Box sx={{ width: '100%' }}>
+            {field}
+          </Box>
         </Grid>
       ))}
     </Grid>
@@ -212,7 +225,7 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
       options={mode === "resource" ? filtered.resourceStatuses : filtered.taskStatuses}
       value={filters.taskStatuses}
       onChange={(next: string[]) => setFilters((prev) => ({ ...prev, taskStatuses: next }))}
-      showSelectAllIcon
+      showSelectAll
     />,
     ...(mode === "resource" ? [
       <MultiSelectField
@@ -221,7 +234,7 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
         options={filtered.pwa}
         value={filters.pwa}
         onChange={(next: string[]) => setFilters((prev) => ({ ...prev, pwa: next }))}
-        showSelectAllIcon
+        showSelectAll
       />
     ] : [
       <MultiSelectField
@@ -230,7 +243,7 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
         options={filtered.commitType}
         value={filters.commitType}
         onChange={(next: string[]) => setFilters((prev) => ({ ...prev, commitType: next }))}
-        showSelectAllIcon
+        showSelectAll
       />,
       <MultiSelectField
         key="responseCode"
@@ -238,7 +251,7 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
         options={filtered.responseCode}
         value={filters.responseCode}
         onChange={(next: string[]) => setFilters((prev) => ({ ...prev, responseCode: next }))}
-        showSelectAllIcon
+        showSelectAll
       />,
       <MultiSelectField
         key="pwa"
@@ -246,7 +259,7 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
         options={filtered.pwa}
         value={filters.pwa}
         onChange={(next: string[]) => setFilters((prev) => ({ ...prev, pwa: next }))}
-        showSelectAllIcon
+        showSelectAll
       />,
       <MultiSelectField
         key="capabilities"
@@ -254,7 +267,7 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
         options={filtered.capabilities}
         value={filters.capabilities}
         onChange={(next: string[]) => setFilters((prev) => ({ ...prev, capabilities: next }))}
-        showSelectAllIcon
+        showSelectAll
       />
     ])
   ];
@@ -262,6 +275,7 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
   let advancedFields = [
     <CombinedLocationField
       key="location"
+      label="Location"
       locationType={filters.locationType}
       locationValue={filters.locationValue}
       onTypeChange={(val) => setFilters((prev) => ({ ...prev, locationType: val }))}
@@ -304,7 +318,13 @@ const ScheduleLiveSearch: React.FC<ScheduleLiveSearchProps> = ({
   }
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 2.5, md: 3 }, minWidth: 0, m: 0 }}>
+    <Box sx={{ 
+      p: { xs: 1, sm: 1.5, md: 2 }, 
+      minWidth: 0, 
+      m: 0,
+      width: '100%',
+      height: '100%',
+    }}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
           <Tabs 
             value={activeTab} 

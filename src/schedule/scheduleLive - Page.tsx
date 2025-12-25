@@ -25,7 +25,7 @@ import { useSearchLeftMenu } from "@/hooks/useSearchLeftMenu";
 
 import { useLiveSelectEngine } from "@/hooks/useLiveSelectEngine";
 
-import GlobalSearchField from "@/shared-ui/text-fields/GlobalSearchField";
+import { GlobalSearchField, SelectField } from "@/shared-ui";
 
 import SlidersHorizontal from '@mui/icons-material/Tune';
 import HelpOutline from '@mui/icons-material/HelpOutline';
@@ -39,16 +39,16 @@ import ClipboardList from '@mui/icons-material/ListAlt';
 import type { TaskRecord, ResourceRecord } from "@/hooks/useLiveSelectEngine";
 
 import {
+  Backdrop,
   Box,
   ClickAwayListener,
   Divider,
-  Fade,
+  Grow,
   IconButton,
-  MenuItem,
   Paper,
   Popper,
+  Skeleton,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
@@ -548,45 +548,21 @@ export default function ScheduleLivePage() {
         borderRadius: 0,
       }}
     >
-      <TextField
-        select
-        size="small"
+      <SelectField
         value={division}
-        onChange={(e) => handleDivisionChange(e.target.value)}
-        sx={{ 
-          minWidth: { xs: theme.spacing(14), sm: theme.spacing(18) },
-          height: theme.custom?.inputHeight ?? 40,
-          '& .MuiInputBase-input': { fontSize: 13, lineHeight: `${theme.custom?.chipSize ?? 28}px` }
-        }}
-        SelectProps={{ displayEmpty: true, renderValue: (selected) => (selected ? String(selected) : 'Division') }}
-      >
-        <MenuItem value="">All</MenuItem>
-        {divisionOptions.map((d) => (
-          <MenuItem key={d} value={d}>
-            {d}
-          </MenuItem>
-        ))}
-      </TextField>
+        onChange={handleDivisionChange}
+        options={divisionOptions}
+        placeholder="Division"
+        sx={{ maxWidth: '200px', flex: 1 }}
+      />
 
-      <TextField
-        select
-        size="small"
+      <SelectField
         value={domain}
-        onChange={(e) => handleDomainChange(e.target.value)}
-        sx={{ 
-          minWidth: { xs: theme.spacing(14), sm: theme.spacing(18) },
-          height: theme.custom?.inputHeight ?? 40,
-          '& .MuiInputBase-input': { fontSize: 13, lineHeight: `${theme.custom?.chipSize ?? 28}px` }
-        }}
-        SelectProps={{ displayEmpty: true, renderValue: (selected) => (selected ? String(selected) : 'Domain') }}
-      >
-        <MenuItem value="">All</MenuItem>
-        {domainOptions.map((d) => (
-          <MenuItem key={d} value={d}>
-            {d}
-          </MenuItem>
-        ))}
-      </TextField>
+        onChange={handleDomainChange}
+        options={domainOptions}
+        placeholder="Domain"
+        sx={{ maxWidth: '200px', flex: 1 }}
+      />
 
       <GlobalSearchField
         value={searchAnywhere}
@@ -680,30 +656,54 @@ export default function ScheduleLivePage() {
      SEARCH TOOL POPOVER
   ============================================================================ */
   const searchToolPopper = (
-    <Popper
-      open={isSearchPopperOpen}
-      anchorEl={anchorEl}
-      placement="bottom-start"
-      transition
-      modifiers={[{ name: "offset", options: { offset: [0, 10] } }]}
-      sx={{ zIndex: 12000 }}
-    >
-      {({ TransitionProps }) => (
-        <Fade {...TransitionProps} timeout={160}>
-          <Box>
-            <ClickAwayListener onClickAway={handleSearchClickAway}>
-              <Box
-                sx={{
-                  borderRadius: 3,
-                  p: 2,
-                  minWidth: 550,
-                  maxWidth: 900,
-                  mx: 'auto',
-                  border: `1px solid ${borderColor}`,
-                  boxShadow: surfaceShadow,
-                  backgroundColor: theme.palette.background.paper,
-                }}
-              >
+    <>
+      <Backdrop
+        open={isSearchPopperOpen}
+        sx={{
+          zIndex: 11999,
+          backdropFilter: 'blur(2px)',
+          backgroundColor: 'rgba(0, 0, 0, 0.1)',
+        }}
+        onClick={handleCloseSearchPanel}
+        transitionDuration={300}
+      />
+      <Popper
+        open={isSearchPopperOpen}
+        anchorEl={anchorEl}
+        placement="bottom-start"
+        transition
+        modifiers={[{ name: "offset", options: { offset: [0, 10] } }]}
+        sx={{ zIndex: 12000 }}
+      >
+        {({ TransitionProps }) => (
+          <Grow
+            {...TransitionProps}
+            timeout={400}
+            style={{ 
+              transformOrigin: 'top left',
+              willChange: 'transform',
+            }}
+            easing={{
+              enter: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+              exit: 'cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
+          >
+            <Box>
+              <ClickAwayListener onClickAway={handleSearchClickAway}>
+                <Box
+                  sx={{
+                    borderRadius: 3,
+                    p: 2,
+                    width: 900,
+                    maxWidth: '90vw',
+                    mx: 'auto',
+                    border: `1px solid ${borderColor}`,
+                    boxShadow: surfaceShadow,
+                    backgroundColor: theme.palette.background.paper,
+                    transform: 'translateZ(0)', // Force hardware acceleration
+                    overflow: 'hidden', // Prevent content overflow during animation
+                  }}
+                >
                 <Stack direction={{ xs: "column", md: "row" }} spacing={3}>
                   <Box
                     sx={{
@@ -713,6 +713,7 @@ export default function ScheduleLivePage() {
                       display: "flex",
                       flexDirection: "column",
                       gap: 3,
+                      bgcolor: alpha(theme.palette.primary.main, 0.04),
                     }}
                   >
                     <Box>
@@ -792,7 +793,19 @@ export default function ScheduleLivePage() {
                       minHeight: 0,
                     }}
                   >
-                    <Suspense fallback={<div>Loading search...</div>}>
+                    <Suspense fallback={
+                      <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <Skeleton variant="rectangular" height={40} sx={{ borderRadius: 1 }} />
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                          <Skeleton variant="rectangular" width={200} height={300} sx={{ borderRadius: 2 }} />
+                          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <Skeleton variant="rectangular" height={50} sx={{ borderRadius: 1 }} />
+                            <Skeleton variant="rectangular" height={50} sx={{ borderRadius: 1 }} />
+                            <Skeleton variant="rectangular" height={50} sx={{ borderRadius: 1 }} />
+                          </Box>
+                        </Box>
+                      </Box>
+                    }>
                       <ScheduleLiveSearch
                       mode={mapSelectedMode(selectedMode) === "resource-active" ? "resource" : "task"}
                       onSearch={(filters: ScheduleLiveSearchFilters) => {
@@ -843,9 +856,10 @@ export default function ScheduleLivePage() {
               </Box>
             </ClickAwayListener>
           </Box>
-        </Fade>
+        </Grow>
       )}
     </Popper>
+    </>
   );
 
   /* ==========================================================================

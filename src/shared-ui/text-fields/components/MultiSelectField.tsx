@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useCallback } from "react";
+import React, { useState, useMemo, useRef, useCallback, forwardRef } from 'react';
 import {
   Autocomplete,
   Box,
@@ -9,40 +9,37 @@ import {
   ListItemText,
   TextField,
   Tooltip,
-  Typography,
   IconButton as MuiIconButton,
-} from "@mui/material";
+} from '@mui/material';
 import type {
   AutocompleteChangeDetails,
   AutocompleteChangeReason,
-} from "@mui/material/Autocomplete";
-import DoneAllIcon from "@mui/icons-material/DoneAll";
-import useFieldSizes from './useFieldSizes';
+} from '@mui/material/Autocomplete';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
+import BaseField from '../base/BaseField';
+import { MultiSelectableFieldProps } from '../types';
 
-const SELECT_ALL_VALUE = "__SELECT_ALL__";
+const SELECT_ALL_VALUE = '__SELECT_ALL__';
 
-interface MultiSelectFieldProps {
-  label: string;
-  options: string[];
+interface MultiSelectFieldProps extends MultiSelectableFieldProps {
+  /** Selected values */
   value: string[];
+  /** Change handler */
   onChange: (value: string[]) => void;
-  required?: boolean;
-  showSelectAllIcon?: boolean;
-  wrapperSx?: any;
-  // allow any extra props to pass through to Autocomplete for dynamic/NUI compatibility
-  [key: string]: any;
+  /** Show select all icon */
+  showSelectAll?: boolean;
 }
 
-const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
-  label,
-  options,
+const MultiSelectField = forwardRef<HTMLInputElement, MultiSelectFieldProps>(({
   value,
   onChange,
-  required = false,
-  showSelectAllIcon = true,
-  wrapperSx,
-  ...rest
-}) => {
+  options,
+  showSelectAll = true,
+  maxSelections: _maxSelections,
+  size, // Extract size to map it
+  renderOption: _renderOption, // Extract renderOption to avoid conflicts
+  ...baseProps
+}, ref) => {
   const [inputValue, setInputValue] = useState("");
   const [open, setOpen] = useState(false);
   const normalizedQuery = inputValue.trim().toLowerCase();
@@ -103,65 +100,51 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
   }, [filteredOptions, allFilteredSelected, value, onChange]);
 
 
-  const { INPUT_HEIGHT, CHIP_SIZE, MAX_WIDTH, MIN_WIDTH } = useFieldSizes();
+  // Map field size to autocomplete-compatible size
+  const autocompleteSize = size === 'large' ? 'medium' : size;
+
   const END_ADORNMENT_WIDTH = 80; // px reserved for DoneAll + chevron icons
   const COMPACT_DELTA = 6;
-  const COMPACT_CHIP_HEIGHT = Math.max(16, CHIP_SIZE - COMPACT_DELTA);
+  const COMPACT_CHIP_HEIGHT = Math.max(16, 28 - COMPACT_DELTA); // Use default chip size
   const endAdornmentRef = useRef<HTMLDivElement | null>(null);
-  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _wrapperRef = useRef<HTMLDivElement | null>(null);
   const [endWidth] = useState<number>(END_ADORNMENT_WIDTH);
 
-  const FIELD_WIDTH = MAX_WIDTH;
-
-  const DEFAULT_WRAPPER_SX = {
-    maxWidth: FIELD_WIDTH,
-    minWidth: MIN_WIDTH,
-    // allow wrapper to grow to fill available row width (don't force max)
-    px: 1,
-    display: "flex",
-    alignItems: "center",
-    minHeight: INPUT_HEIGHT,
-    flex: "0 0 auto",
-    '& .MuiInputBase-root': { minHeight: INPUT_HEIGHT, overflow: 'visible' },
-    '& .MuiSelect-select': { display: 'flex', alignItems: 'center', minHeight: INPUT_HEIGHT },
-    '& .MuiAutocomplete-inputRoot': { paddingTop: 0, paddingBottom: 0 },
-  } as const;
-
   return (
-    <Box ref={wrapperRef} sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'flex-start', width: '100%', ...(wrapperSx ?? DEFAULT_WRAPPER_SX) }}>
-      <Typography variant="body2" sx={{ fontSize: 12, color: 'text.secondary' }}>{label}</Typography>
+    <BaseField {...baseProps}>
       <Autocomplete
-      disableClearable
-      multiple
-      disableCloseOnSelect
+        ref={ref}
+        disableClearable
+        multiple
+        disableCloseOnSelect
+        size={autocompleteSize}
       open={open}
       onOpen={() => setOpen(true)}
       onClose={() => setOpen(false)}
       componentsProps={{ popper: { style: { zIndex: 13000 } } }}
       sx={{
-        width: '100%',
           '& .MuiAutocomplete-inputRoot': {
-          minHeight: INPUT_HEIGHT,
-          maxHeight: INPUT_HEIGHT,
-          overflow: 'visible',
-          alignItems: 'center',
-          transition: 'all 120ms ease',
-          position: 'relative',
-          // reserve space on the right for the select-all icon + chevron (dynamic)
-          '& .MuiInputBase-input': { paddingRight: `${endWidth}px`, fontSize: 13, lineHeight: `${CHIP_SIZE}px`, paddingTop: 0, paddingBottom: 0 },
-        },
-        '& .MuiAutocomplete-tag': {
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: CHIP_SIZE,
-
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-        },
-        '& .MuiInputBase-root': { minHeight: INPUT_HEIGHT, transition: 'all 120ms ease', overflow: 'visible' },
-      }}
+            minHeight: 40,
+            maxHeight: 40,
+            overflow: 'visible',
+            alignItems: 'center',
+            transition: 'all 120ms ease',
+            position: 'relative',
+            // reserve space on the right for the select-all icon + chevron (dynamic)
+            '& .MuiInputBase-input': { paddingRight: `${endWidth}px`, fontSize: 13, lineHeight: `28px`, paddingTop: 0, paddingBottom: 0 },
+          },
+          '& .MuiAutocomplete-tag': {
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: 28,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          },
+          '& .MuiInputBase-root': { minHeight: 40, transition: 'all 120ms ease', overflow: 'visible' },
+        }}
       options={[SELECT_ALL_VALUE, ...options]}
       value={value}
       inputValue={inputValue}
@@ -177,7 +160,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
       getOptionLabel={(option) =>
         option === SELECT_ALL_VALUE ? "Select Filtered" : option
       }
-      renderOption={(props, option) => {
+      renderOption={(props, option, _state, _ownerState) => {
         // props may include a `key` which must not be spread into the JSX element
         // (React warns when `key` is passed via spread). Remove it before spreading.
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -216,6 +199,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
           </ListItem>
         );
       }}
+      {...baseProps}
       renderTags={(tagValue, getTagProps) => {
         if (!tagValue || tagValue.length === 0) return null;
         const total = tagValue.length;
@@ -260,7 +244,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
       renderInput={(params) => {
         const endAdornment = (
           <Box ref={endAdornmentRef} sx={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', zIndex: 40, gap: 2, pointerEvents: 'none' }}>
-            {showSelectAllIcon && (
+            {showSelectAll && (
               <Tooltip title={allFilteredSelected ? "Clear filtered" : "Select filtered"} arrow>
                 <MuiIconButton
                   size="small"
@@ -287,12 +271,11 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
             {...params}
             placeholder=""
             size="small"
-            required={required}
-            aria-label={label}
+            aria-label={baseProps.label}
             InputProps={{
               ...params.InputProps,
               endAdornment,
-              sx: { height: INPUT_HEIGHT, '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, paddingRight: `${endWidth}px`, fontSize: 13, lineHeight: `${CHIP_SIZE}px` } },
+              sx: { height: 40, '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, paddingRight: `${endWidth}px`, fontSize: 13, lineHeight: `28px` } },
             }}
           />
         );
@@ -300,11 +283,13 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
       ListboxProps={{
         sx: { maxHeight: 320, zIndex: 2000 },
       }}
-      {...rest}
+      {...baseProps}
     />
-    </Box>
+    </BaseField>
   );
-};
+});
+
+MultiSelectField.displayName = 'MultiSelectField';
 
 export default MultiSelectField;
 export { SELECT_ALL_VALUE };

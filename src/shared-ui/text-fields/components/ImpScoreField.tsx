@@ -1,17 +1,16 @@
 import React from 'react';
-import { Box, TextField, InputAdornment, IconButton, Typography } from '@mui/material';
-import type { SxProps } from '@mui/material';
-import useFieldSizes from './useFieldSizes';
+import { TextField, InputAdornment, IconButton, Typography } from '@mui/material';
+import BaseField from '../base/BaseField';
+import { BaseFieldProps } from '../types';
+import useFieldSizes from '../utils/useFieldSizes';
 
 type Condition = 'greater' | 'less' | 'equal' | '';
 
-interface Props {
+interface ImpScoreFieldProps extends BaseFieldProps {
   condition: Condition;
   value: string;
   onConditionChange?: (next: Condition) => void;
   onValueChange?: (next: string) => void;
-  sx?: SxProps;
-  label?: string;
 }
 
 const ORDER: Condition[] = ['greater', 'less', 'equal'];
@@ -30,8 +29,16 @@ const LABEL: Record<Condition, string> = {
   '': 'Greater Than'
 };
 
-const ImpScoreField = React.forwardRef<HTMLInputElement, Props>(function ImpScoreField({ condition, value, onConditionChange, onValueChange, sx, label }, ref) {
-  const { INPUT_HEIGHT, CHIP_SIZE, MAX_WIDTH, MIN_WIDTH, FIELD_GAP } = useFieldSizes();
+const ImpScoreField = React.forwardRef<HTMLInputElement, ImpScoreFieldProps>(function ImpScoreField({
+  condition,
+  value,
+  onConditionChange,
+  onValueChange,
+  label,
+  sx,
+  ...baseFieldProps
+}, ref) {
+  const { INPUT_HEIGHT, CHIP_SIZE, MAX_WIDTH, MIN_WIDTH } = useFieldSizes();
 
   const current: Condition = (condition as Condition) || 'greater';
 
@@ -42,8 +49,7 @@ const ImpScoreField = React.forwardRef<HTMLInputElement, Props>(function ImpScor
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: FIELD_GAP, alignItems: 'flex-start', ...((sx as any) || {}) }}>
-      {label && <Typography variant="body2" sx={{ fontSize: 12, color: 'text.secondary' }}>{label}</Typography>}
+    <BaseField label={label} sx={sx} {...baseFieldProps}>
       <TextField
         size="small"
         placeholder=""
@@ -69,7 +75,7 @@ const ImpScoreField = React.forwardRef<HTMLInputElement, Props>(function ImpScor
         sx={{ '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, fontSize: 13, lineHeight: `${CHIP_SIZE}px` }, height: INPUT_HEIGHT, maxWidth: MAX_WIDTH, minWidth: MIN_WIDTH }}
         inputRef={ref}
       />
-    </Box>
+    </BaseField>
   );
 });
 

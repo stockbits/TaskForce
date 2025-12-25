@@ -114,5 +114,8 @@ This document tracks the optimization and refactoring tasks for the TaskForce pr
 - Bundle size: 537KB main (147KB gzipped) - target: reduce by 20-30%
 - Largest components: AppLayout.tsx (1444 lines), scheduleLive-Page.tsx (1048 lines)
 - 99 ESLint warnings to resolve
-- React 19 with modern patterns already in use</content>
+- React 19 with modern patterns already in use
+
+## Related Plans
+- **[Input Field System Reorganization](./input-field-system-plan.md)**: Comprehensive plan for centralizing and standardizing all input field components</content>
 <parameter name="filePath">/workspaces/TaskForce/docs/optimization-todo.md

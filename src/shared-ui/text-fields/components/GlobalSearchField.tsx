@@ -1,44 +1,46 @@
 import React from 'react';
-import { Box, TextField, InputAdornment, IconButton, Tooltip } from '@mui/material';
-import type { TextFieldProps } from '@mui/material/TextField';
-import { SxProps, Theme } from '@mui/material/styles';
+import { TextField, InputAdornment, IconButton, Tooltip } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import useFieldSizes from './useFieldSizes';
+import BaseField from '../base/BaseField';
+import { BaseFieldProps } from '../types';
+import useFieldSizes from '../utils/useFieldSizes';
 import mockTasks from '@/data/mockTasks.json';
 import ResourceMock from '@/data/ResourceMock.json';
 
-type Props = {
+interface GlobalSearchFieldProps extends BaseFieldProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onSearch?: () => void;
-  size?: 'small' | 'medium';
-  sx?: SxProps<Theme>;
-  name?: string;
+  placeholder?: string;
   showSearchButton?: boolean;
   validateExact?: (value: string) => boolean;
   enableValidation?: boolean;
   searchTooltip?: string;
-} & Partial<TextFieldProps>;
+}
 
-const GlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function GlobalSearchField(props, ref) {
+const GlobalSearchField = React.forwardRef<HTMLInputElement, GlobalSearchFieldProps>(function GlobalSearchField(props, ref) {
   const {
     value,
     onChange,
     onKeyPress,
     onSearch,
-    size = 'small',
-    sx = {},
-    name = 'taskSearch',
+    placeholder = "Search tasks...",
     showSearchButton = false,
     validateExact,
     enableValidation = true,
     searchTooltip,
-    ...rest
+    label,
+    sx,
+    error: externalError,
+    ...baseFieldProps
   } = props;
 
   const { INPUT_HEIGHT, CHIP_SIZE } = useFieldSizes();
-  const [error, setError] = React.useState<boolean>(false);
+  const [internalError, setInternalError] = React.useState<boolean>(false);
+
+  // Combine internal and external error states
+  const hasError = internalError || externalError;
 
   // Default validation function for exact matches
   const defaultValidateExact = (v: string) => {
@@ -68,7 +70,7 @@ const GlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function Glo
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && onSearch) {
       if (validationFunction && !validationFunction(value)) {
-        setError(true);
+        setInternalError(true);
         return;
       }
       onSearch();
@@ -84,7 +86,7 @@ const GlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function Glo
             size="small"
             onClick={() => {
               if (validationFunction && !validationFunction(value)) {
-                setError(true);
+                setInternalError(true);
                 return;
               }
               onSearch?.();
@@ -100,24 +102,27 @@ const GlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function Glo
   );
 
   return (
-    <Box
+    <BaseField
+      label={label}
       sx={{
         minWidth: '28ch',
         width: 'fit-content',
         maxWidth: { xs: '100%', sm: '90ch' },
         ...sx
       }}
+      error={hasError}
+      {...baseFieldProps}
     >
       <TextField
-        name={name}
+        name="taskSearch"
         value={value}
         onChange={(e) => {
           onChange(e);
-          if (error) setError(false);
+          if (internalError) setInternalError(false);
         }}
         onKeyPress={handleKeyPress}
-        placeholder="Search tasks..."
-        size={size}
+        placeholder={placeholder}
+        size="small"
         sx={{
           minWidth: '28ch',
           width: 'fit-content',
@@ -131,7 +136,7 @@ const GlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function Glo
           height: INPUT_HEIGHT,
           maxWidth: { xs: '100%', sm: '90ch' }
         }}
-        error={error}
+        error={hasError}
         InputProps={{
           // Avoid duplicate icons when an explicit search button exists
           startAdornment: showSearchButton ? undefined : (
@@ -143,9 +148,8 @@ const GlobalSearchField = React.forwardRef<HTMLInputElement, Props>(function Glo
           style: { height: INPUT_HEIGHT }
         }}
         inputRef={ref}
-        {...rest}
       />
-    </Box>
+    </BaseField>
   );
 });
 

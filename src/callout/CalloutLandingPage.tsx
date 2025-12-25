@@ -6,7 +6,7 @@ import { alpha, useTheme } from "@mui/material/styles";
 import Users from '@mui/icons-material/People';
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import { ResourceRecord } from "./CalloutIncidentPanel";
-import SingleSelectField from '@/shared-ui/text-fields/SingleSelectField';
+import { SingleSelectField } from '@/shared-ui';
 
 // use Box and Paper directly
 
