@@ -582,11 +582,11 @@ export default function TimelinePanel({
           const clippedEnd = clamp(seg.travelEndMs, shiftStartMs, shiftEndMs);
 
           if (clippedEnd > clippedStart) {
-            // Travel blocks are not rendered visually but calculations affect task scheduling
-            // const leftPx = ((clippedStart - dateRange.start) / MS_HOUR) * PX_PER_HOUR;
-            // const widthPx = ((clippedEnd - clippedStart) / MS_HOUR) * PX_PER_HOUR;
-            // const travelTaskId = seg.type === 'home' ? 'Travel from Home' : 'Travel';
-            // bars.push({ leftPx, widthPx, task: { taskId: travelTaskId, debug: { travelStartMs: seg.travelStartMs, travelEndMs: seg.travelEndMs } }, type: 'travel' });
+            // Travel blocks are rendered visually to show travel time
+            const leftPx = ((clippedStart - dateRange.start) / MS_HOUR) * PX_PER_HOUR;
+            const widthPx = ((clippedEnd - clippedStart) / MS_HOUR) * PX_PER_HOUR;
+            const travelTaskId = seg.type === 'home' ? 'Travel from Home' : 'Travel';
+            bars.push({ leftPx, widthPx, task: { taskId: travelTaskId, debug: { travelStartMs: seg.travelStartMs, travelEndMs: seg.travelEndMs } }, type: 'travel' });
           }
         }
 
