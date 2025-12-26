@@ -44,7 +44,7 @@ export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane
       (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
   }, []);
 
-  const buildTooltip = React.useCallback(() => {
+  const tooltipContent = React.useMemo(() => {
     if (type === 'travel') {
       const tStart = task?.debug?.travelStartMs;
       const tEnd = task?.debug?.travelEndMs;
@@ -72,7 +72,7 @@ export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane
     if (end) parts.push(`Finish: ${new Date(end).toLocaleString()}`);
 
     return parts.join(' • ') + travelToNextStr;
-  }, [type, task, formatDuration]);
+  }, [type, task?.taskId, task?.taskType, task?.estimatedDuration, task?.expectedStartDate, task?.startDate, task?.expectedFinishDate, task?.endDate, task?.debug?.travelStartMs, task?.debug?.travelEndMs, task?.debug?.travelToNextDurationMs, formatDuration]);
 
   // Travel blocks should not show their own tooltip — travel info appears on the related task's tooltip.
   if (type === 'travel') {
@@ -95,7 +95,28 @@ export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane
   }
 
   return (
-    <Tooltip title={buildTooltip()} placement="top" disableInteractive>
+    <Tooltip
+      title={tooltipContent}
+      placement="top-start"
+      disableInteractive
+      enterDelay={300}
+      enterNextDelay={300}
+      componentsProps={{
+        tooltip: {
+          sx: {
+            fontSize: '12px',
+            maxWidth: 300,
+            whiteSpace: 'pre-line',
+            marginBottom: '8px !important',
+          }
+        },
+        popper: {
+          sx: {
+            zIndex: 1500,
+          }
+        }
+      }}
+    >
       <Box
         onClick={() => onClick?.(task)}
         onDoubleClick={() => onDoubleClick?.(task)}
