@@ -979,6 +979,67 @@ export default function TimelinePanel({
                   });
                 })()}
 
+                {/* connecting lines for travel segments */}
+                {(() => {
+                  const travelBars = taskBarsByRow[rowIndex]?.filter(b => b.type === 'travel') || [];
+                  return travelBars.map((travelBar, i) => {
+                    // For home travel: connect from shift start to travel start
+                    if (travelBar.task?.taskId === 'Travel from Home') {
+                      const shiftStartPx = 0; // Shift starts at the beginning of the timeline
+                      const travelStartPx = travelBar.leftPx;
+                      const lineLengthPx = travelStartPx - shiftStartPx;
+
+                      if (lineLengthPx > 0) {
+                        return (
+                          <Box
+                            key={`${rid}-travel-line-home-${i}`}
+                            sx={{
+                              position: 'absolute',
+                              left: shiftStartPx,
+                              top: ROW_HEIGHT / 2 - 1, // center vertically in the row
+                              width: lineLengthPx,
+                              height: 2,
+                              bgcolor: '#3BE089', // Travel color
+                              opacity: 0.6,
+                            }}
+                          />
+                        );
+                      }
+                    }
+                    // For inter-task travel: connect from previous task end to travel start
+                    else {
+                      const allBars = taskBarsByRow[rowIndex] || [];
+                      const travelIndex = allBars.findIndex(b => b === travelBar);
+                      if (travelIndex > 0) {
+                        const prevBar = allBars[travelIndex - 1];
+                        if (prevBar && prevBar.type === 'task') {
+                          const prevEndPx = prevBar.leftPx + prevBar.widthPx;
+                          const travelStartPx = travelBar.leftPx;
+                          const lineLengthPx = travelStartPx - prevEndPx;
+
+                          if (lineLengthPx > 0) {
+                            return (
+                              <Box
+                                key={`${rid}-travel-line-${i}`}
+                                sx={{
+                                  position: 'absolute',
+                                  left: prevEndPx,
+                                  top: ROW_HEIGHT / 2 - 1, // center vertically in the row
+                                  width: lineLengthPx,
+                                  height: 2,
+                                  bgcolor: '#3BE089', // Travel color
+                                  opacity: 0.6,
+                                }}
+                              />
+                            );
+                          }
+                        }
+                      }
+                    }
+                    return null;
+                  });
+                })()}
+
                 {/* debug: show travel/first-task timestamps if available */}
                 {(() => {
                   const travelBar = taskBarsByRow[rowIndex]?.find(x => x.type === 'travel' && x.task?.taskId === 'Travel from Home');
