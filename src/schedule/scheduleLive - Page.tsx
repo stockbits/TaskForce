@@ -247,6 +247,7 @@ export default function ScheduleLivePage() {
       if (autoLoadResources) {
         const resourceRows = allResources.filter((r) => r.division === value);
         setResourceTableData(resourceRows);
+        setResourceData(resourceRows);
       }
     } else {
       setDropdownData({
@@ -278,6 +279,7 @@ export default function ScheduleLivePage() {
     if (autoLoadResources && division) {
       const resourceRows = allResources.filter((r) => r.division === division);
       setResourceTableData(resourceRows);
+      setResourceData(resourceRows);
     }
 
     setSearchAnywhere("");
