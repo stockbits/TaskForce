@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Tooltip } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import { COMMIT_COLORS } from "../shared-config/pins";
 
 interface TaskBlockProps {
   leftPx: number;
@@ -23,6 +24,24 @@ export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane
     const h = Math.floor(mins / 60);
     const m = Math.round(mins % 60);
     return m === 0 ? `${h}h` : `${h}h ${m}m`;
+  };
+
+  // Get the commit type color for task blocks
+  const getTaskColor = (task: any) => {
+    const commitType = task.commitmentType || 'Future'; // Default to Future if no commitment type
+    return COMMIT_COLORS[commitType] || COMMIT_COLORS.Future;
+  };
+
+  // Darken the color for borders
+  const darkenHex = (hex: string, percent: number) => {
+    const num = parseInt(hex.replace("#", ""), 16);
+    const amt = Math.round(2.55 * percent * 100);
+    const R = (num >> 16) + amt;
+    const G = (num >> 8 & 0x00FF) + amt;
+    const B = (num & 0x0000FF) + amt;
+    return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+      (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+      (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
   };
 
   const buildTooltip = () => {
@@ -61,12 +80,12 @@ export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane
       <Box
         sx={{
           position: "absolute",
-          top: (rowHeight - 12) / 2,
+          top: (rowHeight - 4) / 2,
           left: leftPx,
           width: Math.max(widthPx, 10),
-          height: 12,
+          height: 4,
           borderRadius: 0,
-          bgcolor: theme.palette.warning.main,
+          bgcolor: theme.palette.warning.dark,
           border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.08)'}`,
           boxSizing: "border-box",
           cursor: "pointer",
@@ -96,8 +115,8 @@ export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane
             return lane >= 0 ? Math.max(laneH - 4, 12) : innerHeight;
           })(),
           borderRadius: 0,
-          bgcolor: theme.palette.secondary.main,
-          border: `1px solid ${theme.palette.secondary.dark}`,
+          bgcolor: getTaskColor(task),
+          border: `1px solid ${darkenHex(getTaskColor(task), 0.35)}`,
           boxSizing: "border-box",
           cursor: "pointer",
           display: "flex",

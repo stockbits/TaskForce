@@ -551,6 +551,8 @@ export default function TimelinePanel({
       // Track previous rendered task end (ms) for inter-task travel
       let prevRenderedEndMs: number | null = null;
 
+      // Simplified: no travel calculation, just position tasks at expected times
+
       for (let i = 0; i < resourceTasks.length; i++) {
         const task = resourceTasks[i];
         const startStr = task.expectedStartDate || task.startDate;
@@ -558,10 +560,7 @@ export default function TimelinePanel({
 
         const expectedDate = parseTaskDate(startStr) || new Date();
 
-        // Only show tasks for the selected date
-        // if (expectedDate.toDateString() !== today.toDateString()) continue;
-
-        // Determine start: if this is the first renderable task and travel-from-home was rendered, force it to start at travel arrival
+        // Position tasks at their expected times
         let startMs = expectedDate.getTime();
         if (firstRenderableIndex !== null && i === firstRenderableIndex) {
           if (travelRendered) {
@@ -595,6 +594,7 @@ export default function TimelinePanel({
             }
           }
         }
+        task.expectedDate = expectedDate; // store for line drawing
 
         const durationMs = (task.estimatedDuration || 60) * 60 * 1000; // minutes to ms
         const endMs = startMs + durationMs;
@@ -603,17 +603,17 @@ export default function TimelinePanel({
         const clippedStart = clamp(startMs, shiftStartMs, shiftEndMs);
         const clippedEnd = clamp(endMs, shiftStartMs, shiftEndMs);
 
-          if (clippedEnd > clippedStart) {
-            const leftPx = ((clippedStart - dateRange.start) / MS_HOUR) * PX_PER_HOUR;
-            const widthPx = ((clippedEnd - clippedStart) / MS_HOUR) * PX_PER_HOUR;
-            // Small visual gap between adjacent task bars to avoid touching/overlap
-            const GAP_PX = 2; // total gap in pixels between bars
-            const adjLeftPx = leftPx + GAP_PX / 2;
-            const adjWidthPx = Math.max(1, widthPx - GAP_PX);
-            bars.push({ leftPx: adjLeftPx, widthPx: adjWidthPx, task, type: 'task' });
-            // update prevRendered end marker for the next iteration
-            prevRenderedEndMs = clippedEnd;
-          }
+        if (clippedEnd > clippedStart) {
+          const leftPx = ((clippedStart - dateRange.start) / MS_HOUR) * PX_PER_HOUR;
+          const widthPx = ((clippedEnd - clippedStart) / MS_HOUR) * PX_PER_HOUR;
+          // Small visual gap between adjacent task bars to avoid touching/overlap
+          const GAP_PX = 2; // total gap in pixels between bars
+          const adjLeftPx = leftPx + GAP_PX / 2;
+          const adjWidthPx = Math.max(1, widthPx - GAP_PX);
+          bars.push({ leftPx: adjLeftPx, widthPx: adjWidthPx, task, type: 'task' });
+          // update prevRendered end marker for the next iteration
+          prevRenderedEndMs = clippedEnd;
+        }
       }
 
       rows.push(bars);
@@ -953,6 +953,37 @@ export default function TimelinePanel({
                     onDoubleClick={onTaskDoubleClick}
                   />
                 ))}
+
+                {/* connecting lines between consecutive tasks */}
+                {(() => {
+                  const taskBars = taskBarsByRow[rowIndex]?.filter(b => b.type === 'task') || [];
+                  return taskBars.slice(1).map((currentBar, i) => {
+                    const prevBar = taskBars[i];
+                    const prevEndPx = prevBar.leftPx + prevBar.widthPx;
+                    const currentStartPx = currentBar.leftPx;
+                    const lineStartPx = prevEndPx;
+                    const lineEndPx = currentStartPx;
+                    const lineLengthPx = lineEndPx - lineStartPx;
+
+                    if (lineLengthPx > 0) {
+                      return (
+                        <Box
+                          key={`${rid}-line-${i}`}
+                          sx={{
+                            position: 'absolute',
+                            left: lineStartPx,
+                            top: ROW_HEIGHT / 2 - 1, // center vertically in the row
+                            width: lineLengthPx,
+                            height: 2,
+                            bgcolor: theme.palette.primary.main,
+                            opacity: 0.6,
+                          }}
+                        />
+                      );
+                    }
+                    return null;
+                  });
+                })()}
 
                 {/* debug: show travel/first-task timestamps if available */}
                 {(() => {

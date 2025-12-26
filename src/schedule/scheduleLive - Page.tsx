@@ -500,13 +500,31 @@ export default function ScheduleLivePage() {
      TIMELINE TASK INTERACTIONS
   ============================================================================ */
   const handleTaskBlockClick = (task: TaskRecord) => {
+    // Append task to task table and map instead of replacing
+    setTaskTableData(prevTasks => {
+      // Check if task is already in the list
+      const taskExists = prevTasks.some(t => t.taskId === task.taskId);
+      if (taskExists) {
+        // Remove the task if it's already selected (toggle behavior)
+        return prevTasks.filter(t => t.taskId !== task.taskId);
+      } else {
+        // Add the task to the list
+        return [...prevTasks, task];
+      }
+    });
+
+    // Also update map task data for icons
+    setMapTaskData(prevTasks => {
+      const taskExists = prevTasks.some(t => t.taskId === task.taskId);
+      if (taskExists) {
+        return prevTasks.filter(t => t.taskId !== task.taskId);
+      } else {
+        return [...prevTasks, task];
+      }
+    });
+
+    // Update task selection for highlighting
     handleTaskTableSelect([task]);
-    const resource = allResources.find(r => r.resourceId === task.employeeId || r.resourceId === task.resourceId);
-    if (resource) {
-      setResourceData([resource]);
-    }
-    setTaskTableData([task]);
-    setMapTaskData([task]);
   };
 
   const handleTaskBlockDoubleClick = (task: TaskRecord) => {
