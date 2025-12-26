@@ -31,6 +31,7 @@ type ResourceRow = {
   lunchEnd?: string; // e.g. "12:30 PM"
   homeLat?: number;
   homeLng?: number;
+  ecbt?: number; // Estimated Come Back Time in milliseconds
 };
 
 const MS_HOUR = 60 * 60 * 1000;
@@ -619,9 +620,10 @@ export default function TimelinePanel({
 
   // Compute ECBT (Estimated Comeback Time) for each resource.
   // ECBT = latest scheduled end time for that resource (exclude travel-home).
-  const ecbtByRow = useMemo(() => {
+  const { ecbtByRow, resourcesWithEcBT } = useMemo(() => {
     const today = new Date();
     const ecbts: number[] = [];
+    const enhancedResources = resources.map(r => ({ ...r })); // Clone resources
 
     // Group tasks by resourceId
     const tasksByResource: Record<string, any[]> = {};
@@ -645,34 +647,32 @@ export default function TimelinePanel({
         return start.toDateString() === today.toDateString();
       });
 
+      let ecbtMs = 0;
       if (relevantTasks.length === 0) {
         // No work scheduled, set ECBT to shift start
         const shiftStart = parseShiftTime(r.shiftStart);
         if (shiftStart) {
-          const shiftStartMs = new Date(today).setHours(shiftStart.h, shiftStart.m, 0, 0);
-          ecbts.push(shiftStartMs);
-        } else {
-          ecbts.push(0);
+          ecbtMs = new Date(today).setHours(shiftStart.h, shiftStart.m, 0, 0);
         }
-        continue;
+      } else {
+        // Find the latest end time
+        relevantTasks.forEach(task => {
+          const endStr = task.expectedFinishDate || task.startDate;
+          if (endStr) {
+            const endMs = new Date(endStr).getTime();
+            if (endMs > ecbtMs) {
+              ecbtMs = endMs;
+            }
+          }
+        });
       }
 
-      // Find the latest end time
-      let latestEnd = 0;
-      relevantTasks.forEach(task => {
-        const endStr = task.expectedFinishDate || task.startDate;
-        if (endStr) {
-          const endMs = new Date(endStr).getTime();
-          if (endMs > latestEnd) {
-            latestEnd = endMs;
-          }
-        }
-      });
-
-      ecbts.push(latestEnd);
+      ecbts.push(ecbtMs);
+      // Add ECBT to the enhanced resource
+      enhancedResources[y].ecbt = ecbtMs;
     }
 
-    return ecbts;
+    return { ecbtByRow: ecbts, resourcesWithEcBT: enhancedResources };
   }, [resources, taskData]);
 
   const syncFromBody = () => {
@@ -1015,7 +1015,7 @@ export default function TimelinePanel({
                     const diamondLeft = leftPx - size / 2;
 
                     return (
-                      <Tooltip key={`${rid}-ecbt`} title={new Date(ecbtMs).toLocaleString()} placement="top">
+                      <Tooltip key={`${rid}-ecbt`} title={`ECBT ${new Date(ecbtMs).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`} placement="top">
                         <Box
                           sx={{
                             position: "absolute",
