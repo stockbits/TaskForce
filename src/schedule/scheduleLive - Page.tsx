@@ -107,6 +107,7 @@ export default function ScheduleLivePage() {
   const [taskTableData, setTaskTableData] = useState<TaskRecord[]>([]);
   const [resourceData, setResourceData] = useState<ResourceRecord[]>([]);
   const [resourceTableData, setResourceTableData] = useState<ResourceRecord[]>([]);
+  const [mapTaskData, setMapTaskData] = useState<TaskRecord[]>([]);
 
   /* ---------------- TIMELINE DATE STATE ---------------- */
   const [timelineStartDate, setTimelineStartDate] = useState<Date>(() => {
@@ -236,6 +237,7 @@ export default function ScheduleLivePage() {
     setTaskTableData([]);
     setResourceData([]);
     setResourceTableData([]);
+    setMapTaskData([]);
     setResetKey((n) => n + 1);
 
     if (value) {
@@ -264,6 +266,7 @@ export default function ScheduleLivePage() {
     setTaskTableData([]);
     setResourceData([]);
     setResourceTableData([]);
+    setMapTaskData([]);
     setResetKey((n) => n + 1);
 
     let rows = [...(mockTasks as TaskRecord[])];
@@ -367,6 +370,7 @@ export default function ScheduleLivePage() {
     });
 
     setTaskTableData(results);
+    setMapTaskData(results);
     // Removed handleCloseSearchPanel() to keep panel open with filters selected
   };
 
@@ -476,6 +480,7 @@ export default function ScheduleLivePage() {
       setResourceData([resource]);
     }
     setTaskTableData([task]);
+    setMapTaskData([task]);
   };
 
   const handleTaskBlockDoubleClick = (task: TaskRecord) => {
@@ -528,7 +533,7 @@ export default function ScheduleLivePage() {
         return (
           <Suspense fallback={<div>Loading map...</div>}>
             <MapPanel
-              tasks={taskData}
+              tasks={mapTaskData}
               resources={resourceData}
               selectedTask={selectedTask}
               selectedTasks={selectedTasks}
