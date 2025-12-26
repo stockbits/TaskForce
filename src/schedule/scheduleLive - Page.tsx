@@ -122,7 +122,7 @@ export default function ScheduleLivePage() {
   });
   const allResources = ResourceMock as ResourceRecord[];
 
-  const timelineResources = useMemo(() => allResources.filter(r => r.division === division), [division, allResources]);
+  const timelineResources = resourceData;
 
   /* ---------------- DROPDOWN DATA ---------------- */
   const [dropdownData, setDropdownData] = useState({
@@ -242,20 +242,17 @@ export default function ScheduleLivePage() {
 
     if (value) {
       const rows = (mockTasks as TaskRecord[]).filter((t) => t.division === value);
-      setTaskData(rows);
-      setDropdownData(buildFilteredDropdowns(rows));
       if (autoLoadResources) {
+        setTaskData(rows);
+        setDropdownData(buildFilteredDropdowns(rows));
         const resourceRows = allResources.filter((r) => r.division === value);
         setResourceTableData(resourceRows);
         setResourceData(resourceRows);
+      } else {
+        setDropdownData(buildFilteredDropdowns(rows));
       }
     } else {
-      setDropdownData({
-        statuses: [],
-        pwa: [],
-        capabilities: [],
-        commitmentTypes: [],
-      });
+      setDropdownData(buildFilteredDropdowns(mockTasks as TaskRecord[]));
     }
 
     setSearchAnywhere("");
@@ -417,6 +414,16 @@ export default function ScheduleLivePage() {
     });
 
     setResourceTableData(results);
+    setResourceData(results);
+
+    // Also populate timeline with tasks for these resources
+    const resourceIds = results.map(r => r.resourceId);
+    let taskResults = [...(mockTasks as TaskRecord[])];
+    if (division) {
+      taskResults = taskResults.filter((t) => t.division === division);
+    }
+    taskResults = taskResults.filter((t) => resourceIds.includes(t.employeeId) || resourceIds.includes(t.resourceId));
+    setTaskData(taskResults);
     // Removed handleCloseSearchPanel() to keep panel open with filters selected
   };
 
