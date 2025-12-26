@@ -950,23 +950,24 @@ export default function TimelinePanel({
 
                 {/* connecting lines for travel segments */}
                 {(() => {
-                  const travelBars = taskBarsByRow[rowIndex]?.filter(b => b.type === 'travel') || [];
+                  const travelBars = taskBarsByRow[rowIndex]?.filter(b => b.type === 'travel' && b.widthPx > 0) || [];
                   return travelBars.map((travelBar, i) => {
-                    // For home travel: connect from shift start to travel start
+                    // For home travel: connect from shift start to travel start (only if within timeline bounds)
                     if (travelBar.task?.taskId === 'Travel from Home') {
-                      const shiftStartPx = 0; // Shift starts at the beginning of the timeline
+                      const shiftStartPx = Math.max(0, ((new Date(resources[rowIndex]?.shiftStart || '08:00').getTime() - dateRange.start) / MS_HOUR) * PX_PER_HOUR);
                       const travelStartPx = travelBar.leftPx;
                       const lineLengthPx = travelStartPx - shiftStartPx;
 
-                      if (lineLengthPx > 0) {
+                      // Only draw if the line is within timeline bounds and has positive length
+                      if (lineLengthPx > 0 && travelStartPx >= 0 && travelStartPx <= contentWidth) {
                         return (
                           <Box
                             key={`${rid}-travel-line-home-${i}`}
                             sx={{
                               position: 'absolute',
-                              left: shiftStartPx,
+                              left: Math.max(0, shiftStartPx), // Don't go before timeline start
                               top: ROW_HEIGHT / 2 - 1, // center vertically in the row
-                              width: lineLengthPx,
+                              width: Math.min(lineLengthPx, contentWidth - Math.max(0, shiftStartPx)), // Don't extend past timeline end
                               height: 2,
                               bgcolor: '#3BE089', // Travel color
                               opacity: 0.6,
@@ -986,7 +987,8 @@ export default function TimelinePanel({
                           const travelStartPx = travelBar.leftPx;
                           const lineLengthPx = travelStartPx - prevEndPx;
 
-                          if (lineLengthPx > 0) {
+                          // Only draw if within timeline bounds and has positive length
+                          if (lineLengthPx > 0 && travelStartPx >= 0 && travelStartPx <= contentWidth) {
                             return (
                               <Box
                                 key={`${rid}-travel-line-${i}`}
@@ -994,7 +996,7 @@ export default function TimelinePanel({
                                   position: 'absolute',
                                   left: prevEndPx,
                                   top: ROW_HEIGHT / 2 - 1, // center vertically in the row
-                                  width: lineLengthPx,
+                                  width: Math.min(lineLengthPx, contentWidth - prevEndPx), // Don't extend past timeline end
                                   height: 2,
                                   bgcolor: '#3BE089', // Travel color
                                   opacity: 0.6,
@@ -1011,6 +1013,8 @@ export default function TimelinePanel({
 
                 {/* debug: show travel/first-task timestamps if available */}
                 {(() => {
+                  // Debug information hidden - uncomment for debugging travel calculations
+                  /*
                   const travelBar = taskBarsByRow[rowIndex]?.find(x => x.type === 'travel' && x.task?.taskId === 'Travel from Home');
                   const firstTaskBar = taskBarsByRow[rowIndex]?.find(x => x.type === 'task');
                     if (travelBar && travelBar.task?.debug) {
@@ -1031,6 +1035,7 @@ export default function TimelinePanel({
                         </Box>
                       );
                     }
+                  */
                   return null;
                 })()}
 
