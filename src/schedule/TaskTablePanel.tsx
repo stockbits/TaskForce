@@ -45,7 +45,7 @@ export default function TaskTablePanel({
   data,
   selectedTasks,
   onSelectionChange,
-  selectionFromMap,
+  selectionFromMap: _selectionFromMap,
   onClearSelection,
 }: TaskTablePanelProps) {
   const [currentSortModel, setCurrentSortModel] = useState<any[]>([]);

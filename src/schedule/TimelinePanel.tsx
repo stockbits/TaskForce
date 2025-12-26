@@ -147,17 +147,6 @@ function formatLunchTooltip(lunchStart?: string, lunchEnd?: string): string {
   return `Expected Lunch Time: ${lunchStart} - ${lunchEnd}`;
 }
 
-function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371; // Radius of the Earth in km
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-
 export default function TimelinePanel({
   isMaximized = false,
   startDate: propStartDate,
@@ -478,26 +467,6 @@ export default function TimelinePanel({
       const shiftStartMs = new Date(today).setHours(shiftStart.h, shiftStart.m, 0, 0);
       const shiftEndMs = new Date(today).setHours(shiftEnd.h, shiftEnd.m, 0, 0);
 
-      // Determine the first task that will actually render (on selected date and within shift)
-      let firstRenderableIndex: number | null = null;
-      for (let fi = 0; fi < resourceTasks.length; fi++) {
-        const ft = resourceTasks[fi];
-        const fs = ft.expectedStartDate || ft.startDate;
-        if (!fs) continue;
-        const fExpected = new Date(fs);
-        if (fExpected.toDateString() !== today.toDateString()) continue;
-
-        const fStartMs = fExpected.getTime();
-        const fDurationMs = (ft.estimatedDuration || 60) * 60 * 1000;
-        const fEndMs = fStartMs + fDurationMs;
-        const fClippedStart = clamp(fStartMs, shiftStartMs, shiftEndMs);
-        const fClippedEnd = clamp(fEndMs, shiftStartMs, shiftEndMs);
-        if (fClippedEnd > fClippedStart) {
-          firstRenderableIndex = fi;
-          break;
-        }
-      }
-
       // Calculate travel segments using distance-based logic
       const travelSegments: Record<number, { travelStartMs: number; travelEndMs: number; type?: string }> = {};
 
@@ -620,7 +589,7 @@ export default function TimelinePanel({
 
   // Compute ECBT (Estimated Comeback Time) for each resource.
   // ECBT = latest scheduled end time for that resource (exclude travel-home).
-  const { ecbtByRow, resourcesWithEcBT } = useMemo(() => {
+  const { ecbtByRow } = useMemo(() => {
     const today = new Date();
     const ecbts: number[] = [];
     const enhancedResources = resources.map(r => ({ ...r })); // Clone resources
@@ -672,7 +641,7 @@ export default function TimelinePanel({
       enhancedResources[y].ecbt = ecbtMs;
     }
 
-    return { ecbtByRow: ecbts, resourcesWithEcBT: enhancedResources };
+    return { ecbtByRow: ecbts };
   }, [resources, taskData]);
 
   const syncFromBody = () => {

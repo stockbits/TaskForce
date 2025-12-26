@@ -3,7 +3,7 @@
 // Fully wired to useLiveSelectEngine.ts (central selection engine)
 // ============================================================================
 
-import React, { useState, useMemo, useRef, useCallback, useEffect, lazy, Suspense } from "react";
+import React, { useState, useMemo, useRef, useCallback, lazy, Suspense } from "react";
 import type { ScheduleLiveSearchFilters } from "@/shared-ui";
 
 const ScheduleLegend = lazy(() => import("./UILegend"));
@@ -526,7 +526,7 @@ export default function ScheduleLivePage() {
     handleTaskTableSelect([task]);
   };
 
-  const handleTaskBlockDoubleClick = (task: TaskRecord) => {
+  const handleTaskBlockDoubleClick = (_task: TaskRecord) => {
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
     const todaysTasks = taskData.filter(t => {

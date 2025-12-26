@@ -7,7 +7,6 @@
 
 import React, { useMemo, useEffect } from "react";
 import { Box } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import {
   MapContainer,
   TileLayer,
@@ -189,8 +188,6 @@ export default function MapPanel({
   notifyMapDragEnd: () => void;
   showMarkers?: boolean;
 }) {
-  const theme = useTheme();
-
   const markerTasks = useMemo(
     () => tasks.filter((t) => t.lat && t.lng),
     [tasks]
