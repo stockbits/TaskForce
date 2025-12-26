@@ -8,7 +8,6 @@ import {
   ListItemIcon,
   ListItemText,
   TextField,
-  Tooltip,
   IconButton as MuiIconButton,
 } from '@mui/material';
 import type {
@@ -18,6 +17,7 @@ import type {
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import BaseField from '../base/BaseField';
 import { MultiSelectableFieldProps } from '../types';
+import { SimpleTooltip } from '@/shared-ui';
 
 const SELECT_ALL_VALUE = '__SELECT_ALL__';
 
@@ -237,14 +237,14 @@ const MultiSelectField = forwardRef<HTMLInputElement, MultiSelectFieldProps>(({
               );
             })}
             {overflowCount > 0 && (
-              <Tooltip title={overflowCount > 1 ? `+${overflowCount} more` : 'Show selection'} arrow>
+              <SimpleTooltip title={overflowCount > 1 ? `+${overflowCount} more` : 'Show selection'}>
                 <Chip
                   label={`+${overflowCount}`}
                   size="small"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={(e) => { e.stopPropagation(); setOpen(true); }}
                 />
-              </Tooltip>
+              </SimpleTooltip>
             )}
           </Box>
         );
@@ -253,7 +253,7 @@ const MultiSelectField = forwardRef<HTMLInputElement, MultiSelectFieldProps>(({
         const endAdornment = (
           <Box ref={endAdornmentRef} sx={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', zIndex: 40, gap: 2, pointerEvents: 'none' }}>
             {showSelectAll && (
-              <Tooltip title={allFilteredSelected ? "Clear filtered" : "Select filtered"} arrow>
+              <SimpleTooltip title={allFilteredSelected ? "Clear filtered" : "Select filtered"}>
                 <MuiIconButton
                   size="small"
                   onClick={toggleSelectAll}
@@ -267,7 +267,7 @@ const MultiSelectField = forwardRef<HTMLInputElement, MultiSelectFieldProps>(({
                     }}
                   />
                 </MuiIconButton>
-              </Tooltip>
+              </SimpleTooltip>
             )}
             {/* ensure the popup/chevron remains clickable */}
             <Box sx={{ display: 'flex', alignItems: 'center', pointerEvents: 'auto', ml: 1 }}>{params.InputProps.endAdornment}</Box>

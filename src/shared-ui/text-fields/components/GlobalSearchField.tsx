@@ -1,11 +1,12 @@
 import React from 'react';
-import { TextField, InputAdornment, IconButton, Tooltip } from '@mui/material';
+import { TextField, InputAdornment, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import BaseField from '../base/BaseField';
 import { BaseFieldProps } from '../types';
 import useFieldSizes from '../utils/useFieldSizes';
 import mockTasks from '@/data/mockTasks.json';
 import ResourceMock from '@/data/ResourceMock.json';
+import { SimpleTooltip } from '@/shared-ui';
 
 interface GlobalSearchFieldProps extends BaseFieldProps {
   value: string;
@@ -81,7 +82,7 @@ const GlobalSearchField = React.forwardRef<HTMLInputElement, GlobalSearchFieldPr
   const endAdornment = (
     <InputAdornment position="end">
       {showSearchButton && onSearch && (
-        <Tooltip title={searchTooltip} arrow>
+        <SimpleTooltip title={searchTooltip}>
           <IconButton
             size="small"
             onClick={() => {
@@ -96,7 +97,7 @@ const GlobalSearchField = React.forwardRef<HTMLInputElement, GlobalSearchFieldPr
           >
             <SearchIcon style={{ fontSize: 16 }} />
           </IconButton>
-        </Tooltip>
+        </SimpleTooltip>
       )}
     </InputAdornment>
   );

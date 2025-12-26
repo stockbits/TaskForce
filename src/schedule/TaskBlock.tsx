@@ -1,7 +1,8 @@
 import React from "react";
-import { Box, Tooltip } from "@mui/material";
+import { Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { COMMIT_COLORS } from "../shared-config/pins";
+import { TaskTooltip } from "@/shared-ui";
 
 interface TaskBlockProps {
   leftPx: number;
@@ -95,28 +96,7 @@ export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane
   }
 
   return (
-    <Tooltip
-      title={tooltipContent}
-      placement="top-start"
-      disableInteractive
-      enterDelay={300}
-      enterNextDelay={300}
-      componentsProps={{
-        tooltip: {
-          sx: {
-            fontSize: '12px',
-            maxWidth: 300,
-            whiteSpace: 'pre-line',
-            marginBottom: '8px !important',
-          }
-        },
-        popper: {
-          sx: {
-            zIndex: 1500,
-          }
-        }
-      }}
-    >
+    <TaskTooltip title={tooltipContent}>
       <Box
         onClick={() => onClick?.(task)}
         onDoubleClick={() => onDoubleClick?.(task)}
@@ -149,6 +129,6 @@ export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane
           {''}
         </span>
       </Box>
-    </Tooltip>
+    </TaskTooltip>
   );
 }

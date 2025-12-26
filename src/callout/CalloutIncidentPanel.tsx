@@ -20,7 +20,6 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import AppButton from '@/shared-ui/button';
@@ -34,6 +33,7 @@ import RotateLeft from '@mui/icons-material/RotateLeft';
 import Person from '@mui/icons-material/Person';
 import { alpha, useTheme } from "@mui/material/styles";
 import { type CalloutHistoryEntry } from "@/hooks/useCalloutHistory";
+import { SimpleTooltip } from '@/shared-ui';
 
 /* -------------------------------------------------------
    CALLOUT OUTCOME MODEL
@@ -1027,7 +1027,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                     <Typography variant="subtitle2" fontWeight={600} color="text.primary">
                                       {resource.resourceId}
                                     </Typography>
-                                    <Tooltip title="Copy ID">
+                                    <SimpleTooltip title="Copy ID">
                                       <IconButton
                                         size="small"
                                         onClick={(event) => {
@@ -1037,7 +1037,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                       >
                                         <ContentCopy style={{ fontSize: 14 }} />
                                       </IconButton>
-                                    </Tooltip>
+                                    </SimpleTooltip>
                                   </Box>
                                 </TableCell>
 
@@ -1115,21 +1115,21 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                     </AppButton>
 
                                     <Stack direction="row" spacing={1} alignItems="center" justifyContent="center">
-                                      <Tooltip title="Resource details">
+                                      <SimpleTooltip title="Resource details">
                                         <IconButton
                                           size="small"
                                           onClick={() => handleOpenResourceDetails(resource.resourceId)}
                                         >
                                           <Person sx={{ fontSize: 14 }} />
                                         </IconButton>
-                                      </Tooltip>
+                                      </SimpleTooltip>
 
                                       {task && onOpenTaskPopout && (
-                                        <Tooltip title="Open task">
+                                        <SimpleTooltip title="Open task">
                                           <IconButton size="small" onClick={onOpenTaskPopout}>
                                             <OpenInNew sx={{ fontSize: 14 }} />
                                           </IconButton>
-                                        </Tooltip>
+                                        </SimpleTooltip>
                                       )}
                                     </Stack>
                                   </Stack>

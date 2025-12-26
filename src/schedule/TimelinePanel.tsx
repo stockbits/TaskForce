@@ -11,7 +11,6 @@ import {
   Button,
   Chip,
   Stack,
-  Tooltip,
   useTheme,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
@@ -21,6 +20,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import TimelineZoomControl from "./TimelineZoomControl";
 import TaskBlock from "./TaskBlock";
+import { TimeTooltip, SimpleTooltip } from "@/shared-ui";
 
 type ResourceRow = {
   resourceId?: string;
@@ -913,10 +913,9 @@ export default function TimelinePanel({
 
                 {/* lunch break bars */}
                 {lunchBarsByRow[rowIndex]?.map((b, i) => (
-                  <Tooltip
+                  <SimpleTooltip
                     key={`${rid}-lunch-${i}`}
                     title={formatLunchTooltip(resources[rowIndex]?.lunchStart, resources[rowIndex]?.lunchEnd)}
-                    placement="top"
                   >
                     <Box
                       sx={{
@@ -932,7 +931,7 @@ export default function TimelinePanel({
                         cursor: "pointer",
                       }}
                     />
-                  </Tooltip>
+                  </SimpleTooltip>
                 ))}
 
                 {/* task bars */}
@@ -1015,7 +1014,7 @@ export default function TimelinePanel({
                     const diamondLeft = leftPx - size / 2;
 
                     return (
-                      <Tooltip key={`${rid}-ecbt`} title={`ECBT ${new Date(ecbtMs).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`} placement="top">
+                      <TimeTooltip key={`${rid}-ecbt`} title={`ECBT ${new Date(ecbtMs).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}>
                         <Box
                           sx={{
                             position: "absolute",
@@ -1031,7 +1030,7 @@ export default function TimelinePanel({
                             zIndex: 30,
                           }}
                         />
-                      </Tooltip>
+                      </TimeTooltip>
                     );
                   }
                   return null;

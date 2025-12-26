@@ -487,26 +487,38 @@ export default function ScheduleLivePage() {
      TIMELINE TASK INTERACTIONS
   ============================================================================ */
   const handleTaskBlockClick = (task: TaskRecord) => {
-    // Append task to task table and map instead of replacing
+    // Append task to top of task table if not already at top, otherwise do nothing
     setTaskTableData(prevTasks => {
       // Check if task is already in the list
-      const taskExists = prevTasks.some(t => t.taskId === task.taskId);
-      if (taskExists) {
-        // Remove the task if it's already selected (toggle behavior)
-        return prevTasks.filter(t => t.taskId !== task.taskId);
+      const taskIndex = prevTasks.findIndex(t => t.taskId === task.taskId);
+      if (taskIndex === 0) {
+        // Task is already at the top, do nothing
+        return prevTasks;
+      } else if (taskIndex > 0) {
+        // Task exists but not at top, move it to the top
+        const taskToMove = prevTasks[taskIndex];
+        const remainingTasks = prevTasks.filter(t => t.taskId !== task.taskId);
+        return [taskToMove, ...remainingTasks];
       } else {
-        // Add the task to the list
-        return [...prevTasks, task];
+        // Task doesn't exist, add it to the top
+        return [task, ...prevTasks];
       }
     });
 
     // Also update map task data for icons
     setMapTaskData(prevTasks => {
-      const taskExists = prevTasks.some(t => t.taskId === task.taskId);
-      if (taskExists) {
-        return prevTasks.filter(t => t.taskId !== task.taskId);
+      const taskIndex = prevTasks.findIndex(t => t.taskId === task.taskId);
+      if (taskIndex === 0) {
+        // Task is already at the top, do nothing
+        return prevTasks;
+      } else if (taskIndex > 0) {
+        // Task exists but not at top, move it to the top
+        const taskToMove = prevTasks[taskIndex];
+        const remainingTasks = prevTasks.filter(t => t.taskId !== task.taskId);
+        return [taskToMove, ...remainingTasks];
       } else {
-        return [...prevTasks, task];
+        // Task doesn't exist, add it to the top
+        return [task, ...prevTasks];
       }
     });
 

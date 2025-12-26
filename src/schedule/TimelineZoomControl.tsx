@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { IconButton, Tooltip } from "@mui/material";
+import { IconButton } from "@mui/material";
 import FitScreenIcon from "@mui/icons-material/FitScreen";
+import { SimpleTooltip } from "@/shared-ui";
 
 interface TimelineZoomControlProps {
   onZoomChange: (zoomLevel: number) => void;
@@ -45,7 +46,7 @@ export default function TimelineZoomControl({ onZoomChange, currentZoom: _curren
   const isAtDefault = zoomIndex === DEFAULT_ZOOM_INDEX;
 
   return (
-    <Tooltip
+    <SimpleTooltip
       title={
         isCtrlPressed
           ? `Zoom: ${currentZoomLevel}x - Use mouse wheel to zoom at cursor position`
@@ -66,6 +67,6 @@ export default function TimelineZoomControl({ onZoomChange, currentZoom: _curren
       >
         <FitScreenIcon sx={{ fontSize: 18 }} />
       </IconButton>
-    </Tooltip>
+    </SimpleTooltip>
   );
 }

@@ -18,7 +18,6 @@ import {
   Tabs,
   Tab,
   Stack,
-  Tooltip,
 } from '@mui/material';
 import ListAlt from '@mui/icons-material/ListAlt';
 import StickyNote2 from '@mui/icons-material/StickyNote2';
@@ -27,7 +26,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import DateTimePopover from '@/shared-ui/DateTimePopover';
-import { MultiSelectField, FreeTypeSelectField, CombinedLocationField, ImpScoreField, GlobalSearchField } from '@/shared-ui';
+import { MultiSelectField, FreeTypeSelectField, CombinedLocationField, ImpScoreField, GlobalSearchField, SimpleTooltip } from '@/shared-ui';
 import AppButton from '@/shared-ui/button';
 import Visibility from '@mui/icons-material/Visibility';
 
@@ -587,7 +586,7 @@ export default function TaskSearchCard({
           >
             Clear
           </AppButton>
-          <Tooltip title={!canSearch ? "Select Division, Domain ID, and Task Status, or type in the global search." : ""} arrow>
+          <SimpleTooltip title={!canSearch ? "Select Division, Domain ID, and Task Status, or type in the global search." : ""}>
             <span>
               <AppButton
                 variant="contained"
@@ -601,7 +600,7 @@ export default function TaskSearchCard({
                 Search
               </AppButton>
             </span>
-          </Tooltip>
+          </SimpleTooltip>
         </Stack>
       </CardActions>
     </Card>
