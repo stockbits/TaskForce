@@ -72,9 +72,9 @@ function groupBadgeStyles(theme: Theme, group: string) {
   switch (key) {
     case "A":
       return {
-        color: alpha(theme.palette.primary.main, 0.95),
-        bgcolor: alpha(theme.palette.primary.main, 0.12),
-        borderColor: alpha(theme.palette.primary.main, 0.35),
+        color: theme.palette.mode === 'dark' ? theme.palette.common.white : alpha(theme.palette.primary.main, 0.95),
+        bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.grey[100], 0.12) : alpha(theme.palette.primary.main, 0.12),
+        borderColor: theme.palette.mode === 'dark' ? alpha(theme.palette.grey[100], 0.35) : alpha(theme.palette.primary.main, 0.35),
       };
     case "B":
       return {
@@ -177,7 +177,9 @@ export default function ResourcePopoutPanel({
         display: "flex",
         height: '100%',
         width: '100%',
-        bgcolor: alpha(theme.palette.primary.main, 0.06),
+        bgcolor: theme.palette.mode === 'dark' 
+          ? alpha(theme.palette.primary.main, 0.12) 
+          : alpha(theme.palette.primary.main, 0.06),
         color: "text.primary",
         overflow: "hidden",
       }}
@@ -233,16 +235,17 @@ export default function ResourcePopoutPanel({
               Edit
             </AppButton>
               <IconButton
-              size="small"
-              onClick={onClose}
-              sx={{
-                color: alpha(theme.palette.text.primary, 0.6),
-                '&:hover': { color: theme.palette.primary.main },
-              }}
-              aria-label="Close resource panel"
-            >
-              <X style={{ fontSize: 16 }} />
-            </IconButton>
+                size="small"
+                onClick={onClose}
+                sx={{
+                  color: theme.palette.mode === 'dark' ? theme.palette.common.white : alpha(theme.palette.text.primary, 0.9),
+                  bgcolor: 'transparent',
+                  '&:hover': { bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.06) : alpha(theme.palette.text.primary, 0.06) },
+                }}
+                aria-label="Close resource panel"
+              >
+                <X style={{ fontSize: 16 }} />
+              </IconButton>
           </Stack>
         </Box>
 
@@ -251,7 +254,9 @@ export default function ResourcePopoutPanel({
             px: { xs: 3, md: 6 },
             py: 2,
             borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-            bgcolor: alpha(theme.palette.primary.main, 0.04),
+            bgcolor: theme.palette.mode === 'dark' 
+              ? alpha(theme.palette.primary.main, 0.08) 
+              : alpha(theme.palette.primary.main, 0.04),
           }}
         >
           <Stack direction="row" spacing={1.5} flexWrap="wrap" alignItems="center">
@@ -262,7 +267,9 @@ export default function ResourcePopoutPanel({
                 fontWeight: 700,
                 letterSpacing: 0.6,
                 textTransform: "uppercase",
-                color: theme.palette.primary.main,
+                color: theme.palette.mode === 'dark' 
+                  ? theme.palette.common.white 
+                  : theme.palette.primary.main,
                 borderColor: alpha(theme.palette.primary.main, 0.4),
                 bgcolor: alpha(theme.palette.primary.main, 0.16),
               }}
@@ -289,7 +296,9 @@ export default function ResourcePopoutPanel({
             flex: 1,
             px: { xs: 2.5, md: 6 },
             py: { xs: 3, md: 5 },
-            bgcolor: alpha(theme.palette.primary.main, 0.02),
+            bgcolor: theme.palette.mode === 'dark' 
+              ? alpha(theme.palette.grey[100], 0.04) 
+              : alpha(theme.palette.primary.main, 0.02),
             overflowY: "auto",
           }}
         >
@@ -426,7 +435,7 @@ export default function ResourcePopoutPanel({
                             borderColor: alpha(theme.palette.primary.main, 0.12),
                           }}
                         >
-                          <Clock style={{ fontSize: 18, color: theme.palette.primary.main }} />
+                          <Clock style={{ fontSize: 18, color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.primary.main }} />
                           <Box>
                             <Typography
                               variant="overline"

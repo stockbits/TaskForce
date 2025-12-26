@@ -104,7 +104,7 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
         onClick={(event) => event.stopPropagation()}
         sx={{
           width: '100%',
-          maxWidth: { xs: '100%', md: theme.spacing(120) }, // 960px at md+
+          maxWidth: { xs: '100%', md: theme.spacing(160) }, // 1280px at md+
           mx: 2,
           borderRadius: 4,
           px: { xs: 3, md: 6 },
@@ -125,7 +125,9 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                bgcolor: theme.palette.primary.main,
+                bgcolor: theme.palette.mode === 'dark' 
+                  ? theme.palette.primary.light 
+                  : theme.palette.primary.main,
                 color: theme.palette.primary.contrastText,
                 boxShadow: "0 12px 28px rgba(10,74,122,0.35)",
               }}
@@ -197,33 +199,8 @@ export const CalloutLandingPage: React.FC<CalloutLandingPageProps> = ({
           </Stack>
 
           {/* Resource count preview */}
-          <Box sx={{ minHeight: 64 }}>
-            {selectedGroup ? (
-              <Paper
-                key={selectedGroup}
-                elevation={0}
-                sx={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 1,
-                  px: 3,
-                  py: 2,
-                  borderRadius: 2,
-                  border: `1px solid ${alpha(theme.palette.primary.main, 0.25)}`,
-                  bgcolor: alpha(theme.palette.primary.main, 0.08),
-                  color: theme.palette.primary.main,
-                  fontSize: "0.95rem",
-                  fontWeight: 600,
-                }}
-              >
-                <Typography variant="body2" color="inherit">
-                  <Box component="span" sx={{ fontWeight: 700 }}>
-                    {resourcesForGroup.length}
-                  </Box>{" "}
-                  {resourcesForGroup.length === 1 ? "resource" : "resources"} in this callout group.
-                </Typography>
-              </Paper>
-            ) : null}
+          <Box sx={{ minHeight: 0 }}>
+            {selectedGroup ? null : null}
           </Box>
 
           {/* Continue Button */}

@@ -202,10 +202,10 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
                     sx={{
                       width: 16,
                       height: 16,
-                      bgcolor: theme.palette.mode === 'dark' ? "rgba(59, 224, 137, 0.3)" : "primary.main",
+                      bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.3) : "primary.main",
                       opacity: theme.palette.mode === 'dark' ? 1 : 0.15,
-                      borderLeft: `3px solid ${theme.palette.mode === 'dark' ? "#3BE089" : "#000000"}`,
-                      borderRight: `3px solid ${theme.palette.mode === 'dark' ? "#3BE089" : "#000000"}`,
+                      borderLeft: `3px solid ${theme.palette.mode === 'dark' ? theme.palette.common.white : "#000000"}`,
+                      borderRight: `3px solid ${theme.palette.mode === 'dark' ? theme.palette.common.white : "#000000"}`,
                       borderRadius: 0,
                       boxSizing: "border-box",
                     }}

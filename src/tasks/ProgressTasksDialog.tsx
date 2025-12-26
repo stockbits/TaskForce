@@ -64,7 +64,9 @@ export default function ProgressTasksDialog({
             <Typography variant="body2" color="text.secondary">{tasksCount} task{tasksCount === 1 ? "" : "s"} selected</Typography>
           </div>
         </Stack>
-        <IconButton onClick={onClose}><Close style={{ fontSize: 20 }} /></IconButton>
+        <IconButton onClick={onClose} sx={{ color: theme.palette.mode === 'dark' ? theme.palette.common.white : alpha(theme.palette.text.primary, 0.9), bgcolor: 'transparent', '&:hover': { bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.06) : alpha(theme.palette.text.primary, 0.06) } }}>
+          <Close style={{ fontSize: 20 }} />
+        </IconButton>
       </DialogTitle>
 
       <DialogContent dividers sx={{ display: "grid", gap: 3, gridTemplateColumns: { lg: "1.6fr 1fr", xs: "1fr" } }}>

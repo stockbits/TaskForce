@@ -475,7 +475,7 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
               backgroundColor: theme.custom.selectionColor,
               '&:hover': {
                 backgroundColor: mode === 'dark' 
-                  ? "rgba(59, 224, 137, 0.3)" 
+                  ? alpha(theme.palette.common.white, 0.3) 
                   : theme.palette.primary.main + '20',
               },
             },

@@ -11,6 +11,7 @@ import {
   CircularProgress,
   FormControl,
   IconButton,
+  InputAdornment,
   Paper,
   Select,
   Stack,
@@ -24,9 +25,9 @@ import {
 } from "@mui/material";
 import AppButton from '@/shared-ui/button';
 import Close from '@mui/icons-material/Close';
+import CalendarToday from '@mui/icons-material/CalendarToday';
 import WarningAmber from '@mui/icons-material/WarningAmber';
 import ListAlt from '@mui/icons-material/ListAlt';
-import AccessTime from '@mui/icons-material/AccessTime';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import OpenInNew from '@mui/icons-material/OpenInNew';
 import RotateLeft from '@mui/icons-material/RotateLeft';
@@ -34,7 +35,6 @@ import Person from '@mui/icons-material/Person';
 import { alpha, useTheme } from "@mui/material/styles";
 import { type CalloutHistoryEntry } from "@/hooks/useCalloutHistory";
 import { SimpleTooltip } from '@/shared-ui';
-
 /* -------------------------------------------------------
    CALLOUT OUTCOME MODEL
 ------------------------------------------------------- */
@@ -211,9 +211,6 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
   // Which rows have been saved (row locking + green highlight)
   const [rowSaved, setRowSaved] = useState<Record<string, boolean>>({});
 
-  // Toast
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
-
   const [historyFilter, setHistoryFilter] = useState<string>("ALL");
   const handleResetHistoryFilter = useCallback(() => {
     setHistoryFilter("ALL");
@@ -381,27 +378,15 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
   }, [open, onRefreshHistory]);
 
   /* ------------------------------------------------------------------
-     TOAST HANDLER
-  ------------------------------------------------------------------ */
-
-  useEffect(() => {
-    if (!toastMsg) return;
-    const t = setTimeout(() => setToastMsg(null), 2200);
-    return () => clearTimeout(t);
-  }, [toastMsg]);
-
-  const showToast = (m: string) => setToastMsg(m);
-
-  /* ------------------------------------------------------------------
      HANDLERS
   ------------------------------------------------------------------ */
 
   const handleCopyId = async (resourceId: string) => {
     try {
       await navigator.clipboard.writeText(resourceId);
-      showToast(`Copied ${resourceId}`);
+      // showToast(`Copied ${resourceId}`);
     } catch {
-      showToast("Unable to copy");
+      // showToast("Unable to copy");
     }
   };
 
@@ -427,7 +412,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
     const outcomeValue = (draft?.outcome || "") as CalloutOutcome | "";
 
     if (!outcomeValue) {
-      showToast("Select an outcome first");
+      // showToast("Select an outcome first");
       return;
     }
 
@@ -435,7 +420,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
       outcomeValue === "Unavailable" &&
       (!draft?.availableAgainAt || draft.availableAgainAt.trim() === "")
     ) {
-      showToast("Set return time");
+      // showToast("Set return time");
       return;
     }
 
@@ -496,7 +481,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
 
       setRowSaved((prev) => ({ ...prev, [resourceId]: true }));
       const label = CalloutOutcomeConfig[payload.outcome].label;
-      showToast(`Saved ${label}`);
+      // showToast(`Saved ${label}`);
 
       if (onRefreshHistory) {
         Promise.resolve(onRefreshHistory()).catch(() => {
@@ -505,7 +490,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
       }
     } catch (err) {
       console.error("save error", err);
-      showToast("Error saving");
+      // showToast("Error saving");
     } finally {
       // Remove spinner
       setRowDrafts((prev) => ({
@@ -709,7 +694,9 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            bgcolor: "rgba(10, 30, 60, 0.55)",
+            bgcolor: theme.palette.mode === 'dark' 
+              ? "rgba(0, 0, 0, 0.7)" 
+              : "rgba(10, 30, 60, 0.55)",
             backdropFilter: "blur(6px)",
           }}
           onMouseDown={handleOverlayMouseDown}
@@ -720,16 +707,17 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
             elevation={18}
             sx={{
               position: 'relative',
-              width: { xs: 'calc(100% - 32px)', md: 'calc(100% - 40px)' },
-              maxWidth: { xs: '98vw', md: theme.spacing(190) }, // 1520px at md+
-              maxHeight: '96vh',
-              borderRadius: 4,
+              width: { xs: '100%', md: '100%' },
+              maxWidth: { xs: '100vw', md: '100vw' },
+              height: '96vh',
+              borderRadius: 0,
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden',
-              borderColor: alpha(theme.palette.primary.main, 0.16),
-              boxShadow: '0 24px 64px rgba(8,58,97,0.25)',
-              backgroundImage: 'none',
+              borderColor: 'transparent',
+              boxShadow: 'none',
+              backgroundColor: 'transparent',
+              mx: 2, // slight horizontal margin
             }}
           
           >
@@ -743,7 +731,9 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                 justifyContent: "space-between",
                 px: { xs: 3, md: 5 },
                 py: 3,
-                borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
+                borderBottom: theme.palette.mode === 'dark'
+                  ? `1px solid ${alpha(theme.palette.common.white, 0.06)}`
+                  : `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
                 backgroundColor: alpha(theme.palette.background.paper, 0.92),
                 backdropFilter: "blur(8px)",
               }}
@@ -754,12 +744,14 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                     height: theme.spacing(4.5), // 36px
                     width: theme.spacing(4.5),
                     borderRadius: "50%",
-                    bgcolor: theme.palette.primary.main,
-                    color: theme.palette.primary.contrastText,
+                    bgcolor: theme.palette.mode === 'dark' 
+                      ? theme.palette.common.white 
+                      : theme.palette.primary.main,
+                    color: theme.palette.mode === 'dark' ? theme.palette.common.black : theme.palette.primary.contrastText,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    boxShadow: "0 10px 24px rgba(8,58,97,0.25)",
+                    boxShadow: theme.palette.mode === 'dark' ? 'none' : "0 10px 24px rgba(8,58,97,0.25)",
                   }}
                 >
                   <WarningAmber sx={{ fontSize: 18 }} />
@@ -768,9 +760,6 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                 <Stack spacing={0.5}>
                   <Typography variant="h6" fontWeight={600} color="text.primary">
                     {taskId ? `Callout Workflow — ${taskId}` : "Callout Workflow"}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Set outcomes. After saving a row, it locks and stays in position until panel is closed.
                   </Typography>
                 </Stack>
               </Stack>
@@ -785,7 +774,9 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                     ) as any}
                     sx={{
                       fontWeight: 600,
-                      color: theme.palette.primary.main,
+                      color: theme.palette.mode === 'dark' 
+                        ? theme.palette.common.white 
+                        : theme.palette.primary.main,
                       '& .MuiSelect-select': { py: 1 },
                     }}
                   >
@@ -795,40 +786,26 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                   </Select>
                 </FormControl>
 
-                <IconButton onClick={onClose} sx={{ color: "text.secondary" }}>
+                <IconButton 
+                  onClick={onClose} 
+                  sx={{ 
+                    width: theme.spacing(4.5),
+                    height: theme.spacing(4.5),
+                    p: 0,
+                    borderRadius: '50%',
+                    color: theme.palette.mode === 'dark' ? theme.palette.common.white : alpha(theme.palette.text.primary, 0.9),
+                    bgcolor: 'transparent',
+                    '&:hover': {
+                      bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.06) : alpha(theme.palette.text.primary, 0.06),
+                    },
+                    boxShadow: 'none',
+                  }}
+                >
                   <Close sx={{ fontSize: 18 }} />
                 </IconButton>
               </Stack>
 
-              {/* TOAST (centre top) */}
-              {toastMsg && (
-                <Box
-                  sx={{
-                    pointerEvents: "none",
-                    position: "absolute",
-                    top: 12,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    zIndex: 10100,
-                  }}
-                >
-                  <Paper
-                    elevation={8}
-                    sx={{
-                      px: 2.5,
-                      py: 1.25,
-                      borderRadius: 2,
-                      bgcolor: "rgba(17,24,39,0.92)",
-                      color: "common.white",
-                      maxWidth: 280,
-                    }}
-                  >
-                    <Typography variant="caption" sx={{ display: "block" }}>
-                      {toastMsg}
-                    </Typography>
-                  </Paper>
-                </Box>
-              )}
+
             </Box>
 
             {/* BODY */}
@@ -836,88 +813,85 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
               sx={{
                 flex: 1,
                 px: { xs: 3, md: 7 },
-                pt: 4,
+                  pt: 3,
                 pb: 6,
                 display: "flex",
                 flexDirection: "column",
                 gap: 2,
-                overflow: { xs: "auto", xl: "hidden" },
+                overflow: 'hidden',
                 minHeight: 0,
+                bgcolor: theme.palette.background.paper,
               }}
             >
-              {/* INFO BOX */}
-                  <Alert
-                icon={<ListAlt sx={{ fontSize: 16 }} />}
-                severity="info"
-                variant="outlined"
-                sx={{
-                  borderRadius: 2,
-                  borderColor: alpha(theme.palette.primary.main, 0.2),
-                  bgcolor: alpha(theme.palette.primary.main, 0.06),
-                  color: theme.palette.primary.main,
-                  '& .MuiAlert-icon': {
-                    color: theme.palette.primary.main,
-                    mt: 0.25,
-                  },
-                  typography: "caption",
-                }}
-              >
-                Choose an <b>Outcome</b> for each tech. If selecting <b>Unavailable</b>, set a return time. Press <b>Save</b> to
-                lock the row. Ordering is frozen until the panel closes.
-              </Alert>
-
-              <Stack
-                direction={{ xs: "column", xl: "row" }}
-                spacing={4}
-                sx={{ minHeight: 0 }}
-              >
-                {/* RESOURCE TABLE */}
-                <Paper
+              <Box sx={{ px: { xs: 2, md: 0 }, mb: 2 }}>
+                <Alert
+                  icon={<ListAlt sx={{ fontSize: 16 }} />}
+                  severity="info"
                   variant="outlined"
                   sx={{
-                    flex: 1,
-                    minWidth: 0,
-                    minHeight: 0,
-                    display: "flex",
-                    flexDirection: "column",
-                    borderRadius: 3,
-                    borderColor: alpha(theme.palette.primary.main, 0.14),
-                    boxShadow: "0 18px 40px rgba(8,58,97,0.16)",
-                    bgcolor: alpha(theme.palette.background.paper, 0.98),
+                    borderRadius: 2,
+                    borderColor: alpha(theme.palette.primary.main, 0.12),
+                    bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.02) : alpha(theme.palette.primary.main, 0.04),
+                    color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.primary.main,
+                    '& .MuiAlert-icon': {
+                      color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.primary.main,
+                      mt: 0.25,
+                    },
+                    typography: "caption",
                   }}
                 >
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    justifyContent="space-between"
-                    sx={{
-                      px: 3,
-                      py: 2,
-                      borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.15)}`,
-                    }}
-                  >
-                    <Typography variant="subtitle2" fontWeight={600} color="text.primary">
-                      Callout Resource List — {listScopeLabel}
-                    </Typography>
+                  Choose an <b>Outcome</b> for each tech. If selecting <b>Unavailable</b>, set a return time. Press <b>Save</b> to
+                  lock the row. Ordering is frozen until the panel closes.
+                </Alert>
+              </Box>
+              <Stack
+                direction={{ xs: "column", md: "row" }}
+                spacing={4}
+                sx={{ minHeight: 0, height: '100%' }}
+              >
+                {/* RESOURCE TABLE */}
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flex: 1.4,
+                    minWidth: 0,
+                    height: '100%',
+                      minHeight: 0,
+                    flexDirection: "column",
+                    px: { xs: 2, md: 0 },
+                  }}
+                >
+                  <Box sx={{ px: { xs: 2, md: 3 }, py: { xs: 2, md: 2.5 } }}>
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      sx={{
+                        mb: 2,
+                      }}
+                    >
+                      <Typography variant="subtitle2" fontWeight={600} color="text.primary">
+                        Callout Resource List — {listScopeLabel}
+                      </Typography>
                       <Box component="span" sx={{ fontSize: "0.75rem", color: alpha(theme.palette.text.primary, 0.65) }}>
                         {panelResourceCount} {panelResourceLabel}
                       </Box>
-                  </Stack>
+                    </Stack>
+
+                  </Box>
 
                   <Box
                     sx={{
                       flex: 1,
-                      overflow: "auto",
-                      px: 2,
-                      py: 2.5,
-                      maxHeight: panelContentMaxHeight,
-                      minHeight: 260,
+                      overflowX: 'hidden',
+                      overflowY: 'auto',
                     }}
                   >
                     <Table
                       size="small"
                       sx={{
-                        minWidth: 720,
+                        tableLayout: 'fixed',
+                        minWidth: { xs: 600, md: 720 },
                         '& thead th': {
                           fontSize: "0.75rem",
                           fontWeight: 600,
@@ -927,18 +901,20 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                         },
                         '& tbody td': {
                           fontSize: "0.78rem",
-                          borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.08)}`,
+                          borderBottom: theme.palette.mode === 'dark'
+                            ? `1px solid ${alpha(theme.palette.common.white, 0.04)}`
+                            : `1px solid ${alpha(theme.palette.primary.main, 0.08)}`,
                           verticalAlign: "top",
                         },
                       }}
                     >
                       <TableHead>
                         <TableRow>
-                          <TableCell sx={{ minWidth: 140 }}>Tech ID</TableCell>
-                          <TableCell sx={{ minWidth: 210 }}>Outcome</TableCell>
-                          <TableCell sx={{ minWidth: 210 }}>Unavailable Until</TableCell>
-                          <TableCell sx={{ minWidth: 190 }}>Last Outcome</TableCell>
-                          <TableCell sx={{ minWidth: 220 }} align="right">
+                          <TableCell sx={{ width: '10%', px: 1 }}>TECH ID</TableCell>
+                          <TableCell sx={{ minWidth: 160 }}>Outcome</TableCell>
+                          <TableCell sx={{ minWidth: 160 }}>Unavailable Until</TableCell>
+                          <TableCell sx={{ minWidth: 150 }}>Last Outcome</TableCell>
+                          <TableCell sx={{ minWidth: 180 }} align="right">
                             Actions
                           </TableCell>
                         </TableRow>
@@ -968,7 +944,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
 
                             const saving = !!draft.saving;
                             const hasSaved = !!rowSaved[id];
-                            const rowLocked = hasSaved;
+                            const rowLocked = false; // Allow re-saving
                             const isHistorySelected = historyFilter === resource.resourceId;
 
                             const requiresUnavailable = draft.outcome === "Unavailable";
@@ -981,50 +957,32 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                             return (
                               <TableRow
                                 key={id}
+                                onClick={() => handleSelectHistoryResource(resource.resourceId)}
                                 sx={{
+                                  cursor: 'pointer',
                                   backgroundColor: rowLocked
                                     ? alpha(theme.palette.success.light, 0.25)
                                     : isHistorySelected
-                                    ? alpha(theme.palette.primary.main, 0.1)
+                                    ? alpha(theme.palette.mode === 'dark' 
+                                      ? theme.palette.common.white 
+                                      : theme.palette.primary.main, 0.1)
                                     : "transparent",
                                   transition: "background-color 160ms ease",
                                   '&:last-of-type td': { borderBottom: 0 },
                                 }}
                               >
-                                <TableCell>
+                                <TableCell sx={{ width: '10%', px: 1, display: 'flex', alignItems: 'center' }}>
                                   <Box
-                                    role="button"
-                                    tabIndex={0}
-                                    onClick={() => handleSelectHistoryResource(resource.resourceId)}
-                                    onKeyDown={(event) => {
-                                      if (event.key === "Enter" || event.key === " ") {
-                                        event.preventDefault();
-                                        handleSelectHistoryResource(resource.resourceId);
-                                      }
-                                    }}
                                     sx={{
                                       display: "flex",
                                       alignItems: "center",
-                                      justifyContent: "space-between",
-                                      cursor: "pointer",
-                                      userSelect: "none",
-                                      borderRadius: 1,
-                                      px: 1,
-                                      py: 0.5,
-                                      transition: "background-color 120ms ease",
-                                      bgcolor: isHistorySelected
-                                        ? alpha(theme.palette.primary.main, 0.18)
-                                        : undefined,
-                                      '&:hover': {
-                                        bgcolor: alpha(theme.palette.primary.main, 0.12),
-                                      },
-                                      '&:focus-visible': {
-                                        outline: `2px solid ${theme.palette.primary.main}`,
-                                        outlineOffset: 2,
-                                      },
+                                      gap: 0.5,
+                                      px: 0.5,
+                                      py: 0,
+                                      height: '100%'
                                     }}
                                   >
-                                    <Typography variant="subtitle2" fontWeight={600} color="text.primary">
+                                    <Typography variant="subtitle2" fontWeight={600} color="text.primary" sx={{ fontSize: '0.8rem', lineHeight: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                       {resource.resourceId}
                                     </Typography>
                                     <SimpleTooltip title="Copy ID">
@@ -1034,14 +992,15 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                           event.stopPropagation();
                                           handleCopyId(resource.resourceId);
                                         }}
+                                        sx={{ p: 0.25, mt: 0 }}
                                       >
-                                        <ContentCopy style={{ fontSize: 14 }} />
+                                        <ContentCopy style={{ fontSize: 10, verticalAlign: 'middle' }} />
                                       </IconButton>
                                     </SimpleTooltip>
                                   </Box>
                                 </TableCell>
 
-                                <TableCell>
+                                <TableCell sx={{ width: '20%' }}>
                                     <FormControl fullWidth size="small" disabled={rowLocked}>
                                     <Select
                                       native
@@ -1062,10 +1021,9 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                   </FormControl>
                                 </TableCell>
 
-                                <TableCell>
+                                <TableCell sx={{ width: '40%' }}>
                                   <Stack spacing={1} alignItems="flex-start">
                                     <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: "100%" }}>
-                                      <AccessTime style={{ fontSize: 14, color: requiresUnavailable && !rowLocked ? theme.palette.primary.main : undefined }} />
                                       <TextField
                                         type="datetime-local"
                                         size="small"
@@ -1078,19 +1036,21 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                           })
                                         }
                                         inputProps={{ step: 300 }}
+                                        InputProps={{
+                                          endAdornment: (
+                                            <InputAdornment position="end">
+                                              <CalendarToday sx={{ fontSize: 18, color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.primary.main }} />
+                                            </InputAdornment>
+                                          ),
+                                        }}
                                       />
                                     </Stack>
-                                    {requiresUnavailable && (!draft.availableAgainAt || draft.availableAgainAt.trim() === "") && !rowLocked && (
-                                      <Typography variant="caption" color="error">
-                                        Set return time when unavailable.
-                                      </Typography>
-                                    )}
                                   </Stack>
                                 </TableCell>
 
-                                <TableCell>{renderLastOutcomeCell(resource)}</TableCell>
+                                <TableCell sx={{ width: '15%' }}>{renderLastOutcomeCell(resource)}</TableCell>
 
-                                <TableCell align="right">
+                                <TableCell sx={{ width: '20%' }} align="right">
                                   <Stack
                                     direction={{ xs: "column", sm: "row" }}
                                     spacing={1.5}
@@ -1109,7 +1069,10 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                                           <CircularProgress size={16} thickness={5} color="inherit" />
                                         ) : undefined
                                       }
-                                      sx={{ fontWeight: 600 }}
+                                      sx={{
+                                        fontWeight: 600,
+                                        color: theme.palette.mode === 'dark' && !rowLocked ? theme.palette.common.white : undefined,
+                                      }}
                                     >
                                       {rowLocked ? "Saved" : "Save"}
                                     </AppButton>
@@ -1141,113 +1104,32 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                       </TableBody>
                     </Table>
                   </Box>
-                </Paper>
+                </Box>
 
                 {/* HISTORY SIDEBAR */}
-                <Paper
-                  variant="outlined"
+                <Box
                   sx={{
-                    width: { xs: "100%", xl: 340 },
-                    borderRadius: 3,
+                    width: { xs: "100%", md: 320 },
+                    height: '100%',
                     display: "flex",
                     flexDirection: "column",
-                    borderColor: alpha(theme.palette.primary.main, 0.2),
-                    boxShadow: "0 12px 32px rgba(8,58,97,0.12)",
-                    bgcolor: alpha(theme.palette.background.paper, 0.98),
-                    height: panelContentMaxHeight,
                     minHeight: 260,
                   }}
                 >
                   <Stack
                     direction="row"
                     alignItems="center"
-                    justifyContent="space-between"
                     sx={{
                       px: 3,
                       py: 2.25,
                       borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.15)}`,
                     }}
                   >
-                    <Stack direction="row" spacing={1.5} alignItems="center">
-                      <AccessTime style={{ fontSize: 16, color: theme.palette.primary.main }} />
-                      <Typography variant="subtitle2" color="text.primary" fontWeight={600}>
-                        Recent History
-                      </Typography>
-                    </Stack>
-                    <AppButton
-                      size="small"
-                      variant="text"
-                      onClick={() => {
-                        if (!onRefreshHistory) return;
-                        Promise.resolve(onRefreshHistory()).catch(() => {
-                          /* ignore */
-                        });
-                      }}
-                      disabled={historyLoading}
-                      startIcon={
-                        historyLoading ? (
-                          <CircularProgress size={16} thickness={5} color="inherit" />
-                        ) : (
-                          <RotateLeft sx={{ fontSize: 14 }} />
-                        )
-                      }
-                      sx={{
-                        fontWeight: 600,
-                        color: theme.palette.primary.main,
-                        gap: 0.75,
-                        '&:hover': { color: alpha(theme.palette.primary.main, 0.85) },
-                      }}
-                    >
-                      {historyLoading ? "Loading" : "Refresh"}
-                    </AppButton>
-                  </Stack>
-
-                  <Box
-                    sx={{
-                      px: 3,
-                      py: 2,
-                      borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.15)}`,
-                    }}
-                  >
-                    <Stack direction="row" alignItems="center" justifyContent="space-between">
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          textTransform: "uppercase",
-                          letterSpacing: 0.8,
-                          color: "text.secondary",
-                          fontWeight: 600,
-                        }}
-                      >
-                        Filter
-                      </Typography>
-                      <AppButton
-                        size="small"
-                        variant="text"
-                        onClick={handleResetHistoryFilter}
-                        sx={{
-                          fontWeight: 600,
-                          color:
-                            historyFilter === "ALL"
-                              ? theme.palette.primary.main
-                              : alpha(theme.palette.primary.main, 0.7),
-                          '&:hover': {
-                            color: theme.palette.primary.main,
-                            backgroundColor: "transparent",
-                          },
-                        }}
-                      >
-                        Show all
-                      </AppButton>
-                    </Stack>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ display: "block", mt: 1.5, lineHeight: 1.6 }}
-                    >
-                      Click a tech row on the left to focus their recent history.
+                    <Typography variant="subtitle2" color="text.primary" fontWeight={600}>
+                      Recent History
                     </Typography>
-                  </Box>
+                  </Stack>
+                  {/* Simplified header: removed filter block to reduce visual clutter */}
 
                   <Box
                     sx={{
@@ -1269,13 +1151,12 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                     )}
 
                     {!historyLoading && filteredHistory.length === 0 && (
-                      <Paper
-                        variant="outlined"
+                        <Box
                         sx={{
-                          borderRadius: 2,
-                          borderStyle: "dashed",
-                          borderColor: alpha(theme.palette.primary.main, 0.25),
-                          bgcolor: alpha(theme.palette.primary.main, 0.05),
+                          borderRadius: 0,
+                          borderStyle: "none",
+                          borderColor: 'transparent',
+                          bgcolor: 'transparent',
                           px: 2.5,
                           py: 3,
                           textAlign: "center",
@@ -1284,7 +1165,7 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                         <Typography variant="caption" color="text.secondary">
                           No history for this selection yet.
                         </Typography>
-                      </Paper>
+                      </Box>
                     )}
 
                     {filteredHistory.map((entry) => {
@@ -1292,121 +1173,52 @@ export const CalloutIncidentPanel: React.FC<CalloutIncidentPanelProps> = ({
                         resourceNameLookup.get(entry.resourceId) || null;
 
                       return (
-                        <Paper
+                        <Box
                           key={entry.id}
-                          variant="outlined"
                           sx={{
-                            borderRadius: 2,
-                            borderColor: alpha(theme.palette.primary.main, 0.15),
-                            px: 2.5,
-                            py: 2.25,
-                            boxShadow: "0 10px 24px rgba(8,58,97,0.08)",
-                            bgcolor: theme.palette.background.paper,
+                            borderRadius: 0,
+                            borderColor: 'transparent',
+                            px: 1.5,
+                            py: 1,
+                            boxShadow: 'none',
+                            bgcolor: 'transparent',
                           }}
                         >
-                          <Stack
-                            direction="row"
-                            alignItems="center"
-                            justifyContent="space-between"
-                          >
-                            <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
-                              {resourceName || "Technician"}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {formatUkDateTime(entry.timestamp)}
-                            </Typography>
+                          <Stack direction="row" alignItems="center" justifyContent="space-between">
+                            <Stack>
+                              <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
+                                {resourceName || "Technician"}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {formatHistoryOutcomeLabel(entry.outcome)}
+                              </Typography>
+                            </Stack>
+
+                            <Stack alignItems="flex-end" spacing={0.5}>
+                              <Typography variant="caption" color="text.secondary">
+                                {formatUkDateTime(entry.timestamp)}
+                              </Typography>
+                              <IconButton size="small" onClick={() => handleViewProgress(entry)} sx={{ color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.primary.main }}>
+                                <OpenInNew sx={{ fontSize: 16 }} />
+                              </IconButton>
+                            </Stack>
                           </Stack>
 
-                          <Typography
-                            variant="subtitle2"
-                            sx={{ mt: 0.75, fontWeight: 600, color: "text.primary" }}
-                          >
-                            {formatHistoryOutcomeLabel(entry.outcome)}
-                          </Typography>
-
-                          {entry.note && (
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                              sx={{ mt: 1, lineHeight: 1.6, display: "block" }}
-                            >
+                          {(entry.note || entry.availableAgainAt) && (
+                            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.75, display: 'block' }}>
                               {entry.note}
+                              {entry.note && entry.availableAgainAt ? ' — ' : ''}
+                              {entry.availableAgainAt ? `Return ${formatUkDateTime(entry.availableAgainAt)}` : ''}
                             </Typography>
                           )}
-
-                          {entry.availableAgainAt && (
-                            <Typography variant="caption" color="text.secondary" sx={{ mt: 1.25, display: "block" }}>
-                              Return {formatUkDateTime(entry.availableAgainAt)}
-                            </Typography>
-                          )}
-
-                          <Stack
-                            direction="row"
-                            alignItems="center"
-                            justifyContent="space-between"
-                            sx={{ mt: 1.75 }}
-                          >
-                            <Typography
-                              variant="overline"
-                              sx={{
-                                letterSpacing: 1,
-                                color: "text.disabled",
-                                textTransform: "uppercase",
-                              }}
-                            >
-                              {entry.status ?? ""}
-                            </Typography>
-                            <AppButton
-                              size="small"
-                              variant="text"
-                              onClick={() => handleViewProgress(entry)}
-                              startIcon={<OpenInNew sx={{ fontSize: 14 }} />}
-                              sx={{
-                                fontWeight: 600,
-                                color: theme.palette.primary.main,
-                                '&:hover': { color: alpha(theme.palette.primary.main, 0.85) },
-                              }}
-                            >
-                              View progress
-                            </AppButton>
-                          </Stack>
-                        </Paper>
+                        </Box>
                       );
                     })}
                   </Box>
-                </Paper>
+                </Box>
               </Stack>
             </Box>
-            {/* FOOTER */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "flex-end",
-                px: { xs: 3, md: 7 },
-                py: 3,
-                borderTop: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-                bgcolor: alpha(theme.palette.primary.main, 0.05),
-              }}
-            >
-              <AppButton
-                onClick={onClose}
-                variant="outlined"
-                color="primary"
-                size="small"
-                sx={{
-                  fontWeight: 600,
-                  borderColor: alpha(theme.palette.primary.main, 0.3),
-                  color: theme.palette.primary.main,
-                  '&:hover': {
-                    borderColor: theme.palette.primary.main,
-                    bgcolor: alpha(theme.palette.primary.main, 0.1),
-                  },
-                }}
-              >
-                Close
-              </AppButton>
-            </Box>
+            {/* Footer removed — panel closes on overlay click or top X */}
           </Paper>
         </Box>
   );

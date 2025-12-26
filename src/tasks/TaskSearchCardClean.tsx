@@ -260,7 +260,7 @@ export default function TaskSearchCard({
             sx={{ 
               minHeight: 36,
               '& .MuiTabs-indicator': (theme) => ({
-                backgroundColor: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.primary.main,
+                backgroundColor: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.primary.main,
               }),
             }}
           >

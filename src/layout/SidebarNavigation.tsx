@@ -327,7 +327,7 @@ export const Sidebar = memo(function Sidebar({
                       ...(isActive
                         ? {
                             backgroundColor: theme.palette.mode === 'dark' 
-                              ? alpha(theme.palette.primary.main, 0.2) 
+                              ? alpha(theme.palette.grey[100], 0.2) 
                               : alpha(theme.palette.primary.main, 0.12),
                             color: theme.palette.mode === 'dark' 
                               ? '#ffffff' 
