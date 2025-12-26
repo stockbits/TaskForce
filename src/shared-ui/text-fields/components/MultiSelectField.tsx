@@ -46,16 +46,18 @@ const MultiSelectField = forwardRef<HTMLInputElement, MultiSelectFieldProps>(({
 
   const filteredOptions = useMemo(() => {
     if (!normalizedQuery) return options;
-    return options.filter((option) =>
-      option.toLowerCase().includes(normalizedQuery)
-    );
+    return options.filter((option) => {
+      const label = typeof option === 'string' ? option : option.label;
+      return label.toLowerCase().includes(normalizedQuery);
+    });
   }, [normalizedQuery, options]);
 
   // Use only the provided label as the placeholder header.
 
-  const filteredSelectionCount = filteredOptions.filter((option) =>
-    value.includes(option)
-  ).length;
+  const filteredSelectionCount = filteredOptions.filter((option) => {
+    const optionValue = typeof option === 'string' ? option : option.value;
+    return value.includes(optionValue);
+  }).length;
   const allFilteredSelected =
     filteredOptions.length > 0 &&
     filteredSelectionCount === filteredOptions.length;
@@ -65,24 +67,27 @@ const MultiSelectField = forwardRef<HTMLInputElement, MultiSelectFieldProps>(({
 
   const handleChange = useCallback((
     _event: React.SyntheticEvent,
-    newValue: string[],
+    newValue: (string | { label: string; value: string })[],
     _reason: AutocompleteChangeReason,
-    details?: AutocompleteChangeDetails<string>
+    details?: AutocompleteChangeDetails<string | { label: string; value: string }>
   ) => {
     if (details?.option === SELECT_ALL_VALUE) {
       if (!filteredOptions.length) {
         return;
       }
 
+      const filteredValues = filteredOptions.map(opt => typeof opt === 'string' ? opt : opt.value);
       const next = allFilteredSelected
-        ? value.filter((option) => !filteredOptions.includes(option))
-        : Array.from(new Set([...value, ...filteredOptions]));
+        ? value.filter((val) => !filteredValues.includes(val))
+        : Array.from(new Set([...value, ...filteredValues]));
 
       onChange(next);
       return;
     }
 
-    const cleaned = newValue.filter((option) => option !== SELECT_ALL_VALUE);
+    const cleaned = newValue
+      .filter((option) => option !== SELECT_ALL_VALUE)
+      .map(option => typeof option === 'string' ? option : option.value);
     onChange(cleaned);
   }, [filteredOptions, allFilteredSelected, value, onChange]);
 
@@ -90,11 +95,12 @@ const MultiSelectField = forwardRef<HTMLInputElement, MultiSelectFieldProps>(({
     event.stopPropagation();
     if (!filteredOptions.length) return;
 
+    const filteredValues = filteredOptions.map(opt => typeof opt === 'string' ? opt : opt.value);
     if (allFilteredSelected) {
-      const next = value.filter((option) => !filteredOptions.includes(option));
+      const next: string[] = value.filter((val) => !filteredValues.includes(val));
       onChange(next);
     } else {
-      const next = Array.from(new Set([...value, ...filteredOptions]));
+      const next: string[] = Array.from(new Set([...value, ...filteredValues]));
       onChange(next);
     }
   }, [filteredOptions, allFilteredSelected, value, onChange]);
@@ -153,12 +159,12 @@ const MultiSelectField = forwardRef<HTMLInputElement, MultiSelectFieldProps>(({
         opts.filter(
           (option) =>
             option === SELECT_ALL_VALUE ||
-            option.toLowerCase().includes(normalizedQuery)
+            (typeof option === 'string' ? option : option.label).toLowerCase().includes(normalizedQuery)
         )
       }
       onChange={handleChange}
       getOptionLabel={(option) =>
-        option === SELECT_ALL_VALUE ? "Select Filtered" : option
+        option === SELECT_ALL_VALUE ? "Select Filtered" : (typeof option === 'string' ? option : option.label)
       }
       renderOption={(props, option, _state, _ownerState) => {
         // props may include a `key` which must not be spread into the JSX element
@@ -191,11 +197,11 @@ const MultiSelectField = forwardRef<HTMLInputElement, MultiSelectFieldProps>(({
             <ListItemIcon sx={{ minWidth: 32 }}>
               <Checkbox
                 edge="start"
-                checked={value.includes(option)}
+                checked={value.includes(typeof option === 'string' ? option : option.value)}
                 size="small"
               />
             </ListItemIcon>
-            <ListItemText primary={option} />
+            <ListItemText primary={typeof option === 'string' ? option : option.label} />
           </ListItem>
         );
       }}
@@ -210,10 +216,12 @@ const MultiSelectField = forwardRef<HTMLInputElement, MultiSelectFieldProps>(({
           <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, maxWidth: '100%', overflow: 'visible', whiteSpace: 'nowrap' }}>
             {tagValue.slice(0, visible).map((tag, index) => {
               const { key, ...tagProps } = getTagProps({ index });
+              const option = options.find(opt => (typeof opt === 'string' ? opt === tag : opt.value === tag));
+              const label = option ? (typeof option === 'string' ? option : option.label) : tag;
               return (
                 <Chip
                   key={key}
-                  label={tag}
+                  label={label as string}
                   size="small"
                   {...tagProps}
                   sx={{

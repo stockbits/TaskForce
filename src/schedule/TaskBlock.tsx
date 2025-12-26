@@ -18,22 +18,22 @@ interface TaskBlockProps {
 export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane = -1, totalLanes = 1, onClick, onDoubleClick }: TaskBlockProps) {
   const theme = useTheme();
 
-  const formatDuration = (mins: number) => {
+  const formatDuration = React.useCallback((mins: number) => {
     if (!Number.isFinite(mins) || mins <= 0) return '0m';
     if (mins < 60) return `${Math.round(mins)}m`;
     const h = Math.floor(mins / 60);
     const m = Math.round(mins % 60);
     return m === 0 ? `${h}h` : `${h}h ${m}m`;
-  };
+  }, []);
 
   // Get the commit type color for task blocks
-  const getTaskColor = (task: any) => {
+  const getTaskColor = React.useCallback((task: any) => {
     const commitType = task.commitmentType || 'Future'; // Default to Future if no commitment type
     return COMMIT_COLORS[commitType] || COMMIT_COLORS.Future;
-  };
+  }, []);
 
   // Darken the color for borders
-  const darkenHex = (hex: string, percent: number) => {
+  const darkenHex = React.useCallback((hex: string, percent: number) => {
     const num = parseInt(hex.replace("#", ""), 16);
     const amt = Math.round(2.55 * percent * 100);
     const R = (num >> 16) + amt;
@@ -42,9 +42,9 @@ export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane
     return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
       (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
       (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
-  };
+  }, []);
 
-  const buildTooltip = () => {
+  const buildTooltip = React.useCallback(() => {
     if (type === 'travel') {
       const tStart = task?.debug?.travelStartMs;
       const tEnd = task?.debug?.travelEndMs;
@@ -72,7 +72,7 @@ export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane
     if (end) parts.push(`Finish: ${new Date(end).toLocaleString()}`);
 
     return parts.join(' • ') + travelToNextStr;
-  };
+  }, [type, task, formatDuration]);
 
   // Travel blocks should not show their own tooltip — travel info appears on the related task's tooltip.
   if (type === 'travel') {
@@ -85,7 +85,7 @@ export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane
           width: Math.max(widthPx, 10),
           height: 4,
           borderRadius: 0,
-          bgcolor: theme.palette.warning.dark,
+          bgcolor: '#D97706', // Dark amber/yellow color
           border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.08)'}`,
           boxSizing: "border-box",
           cursor: "pointer",

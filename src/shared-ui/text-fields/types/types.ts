@@ -44,7 +44,7 @@ export interface BaseFieldProps {
 
 export interface SelectableFieldProps extends BaseFieldProps {
   /** Available options */
-  options: string[];
+  options: (string | { label: string; value: string })[];
   /** Placeholder text */
   placeholder?: string;
   /** Allow clearing selection */

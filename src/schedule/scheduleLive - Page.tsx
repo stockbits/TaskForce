@@ -192,6 +192,13 @@ export default function ScheduleLivePage() {
   const divisionOptions = useMemo(() => {
     const s = new Set<string>();
     (mockTasks as TaskRecord[]).forEach((t) => t.division && s.add(t.division));
+    const options = Array.from(s).sort();
+    return options.map(division => ({ value: division, label: division }));
+  }, []);
+
+  const divisionStrings = useMemo(() => {
+    const s = new Set<string>();
+    (mockTasks as TaskRecord[]).forEach((t) => t.division && s.add(t.division));
     return Array.from(s).sort();
   }, []);
 
@@ -240,40 +247,20 @@ export default function ScheduleLivePage() {
     setMapTaskData([]);
     setResetKey((n) => n + 1);
 
-    // Reset timeline to today
-    const today = new Date();
-    setTimelineStartDate(new Date(today.getFullYear(), today.getMonth(), today.getDate(), 5, 0, 0, 0));
-    setTimelineEndDate(new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999));
+    let rows = [...(mockTasks as TaskRecord[])];
+    if (domain) rows = rows.filter((t) => String(t.domain).toUpperCase() === domain);
+    if (value) rows = rows.filter((t) => t.division === value);
+    setTaskData(rows);
+    setDropdownData(buildFilteredDropdowns(rows));
 
-    if (value) {
-      const rows = (mockTasks as TaskRecord[]).filter((t) => t.division === value);
-      if (autoLoadResources) {
-        setTaskData(rows);
-        setDropdownData(buildFilteredDropdowns(rows));
-
-        // Set timeline to cover the task dates
-        if (rows.length > 0) {
-          const dates = rows.map(t => new Date(t.expectedStartDate || t.startDate || t.appointmentStartDate)).filter(d => !isNaN(d.getTime()));
-          if (dates.length > 0) {
-            const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
-            const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
-            setTimelineStartDate(new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate(), 5, 0, 0, 0));
-            setTimelineEndDate(new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate(), 23, 59, 59, 999));
-          }
-        }
-
-        const resourceRows = allResources.filter((r) => r.division === value);
-        setResourceTableData(resourceRows);
-        setResourceData(resourceRows);
-      } else {
-        setDropdownData(buildFilteredDropdowns(rows));
-      }
-    } else {
-      setDropdownData(buildFilteredDropdowns(mockTasks as TaskRecord[]));
+    if (autoLoadResources && value) {
+      const resourceRows = allResources.filter((r) => r.division === value);
+      setResourceTableData(resourceRows);
+      setResourceData(resourceRows);
     }
 
     setSearchAnywhere("");
-  }, [autoLoadResources]);
+  }, [domain, autoLoadResources]);
 
   const handleDomainChange = useCallback((value: string) => {
     setDomain(value);
@@ -661,6 +648,7 @@ export default function ScheduleLivePage() {
         borderRadius: 0,
       }}
     >
+      {/* Division selector */}
       <SelectField
         value={division}
         onChange={handleDivisionChange}
@@ -838,7 +826,7 @@ export default function ScheduleLivePage() {
                       onTabChange={setSearchTab}
                       dropdownData={{
                         ...dropdownData,
-                        division: divisionOptions,
+                        division: divisionStrings,
                         domainId: domainOptions,
                         resourceStatuses: Array.from(
                           new Set(allResources.map((r) => r.status))

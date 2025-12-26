@@ -3,11 +3,13 @@ import { Autocomplete, ListItem, ListItemText, TextField } from '@mui/material';
 import BaseField from '../base/BaseField';
 import { SelectableFieldProps } from '../types';
 
-interface FreeTypeSelectFieldProps extends SelectableFieldProps {
+interface FreeTypeSelectFieldProps extends Omit<SelectableFieldProps, 'options'> {
   /** Selected value */
   value: string;
   /** Change handler */
   onChange: (value: string) => void;
+  /** Available options */
+  options: (string | { label: string; value: string })[];
   /** Placeholder text */
   placeholder?: string;
 }
@@ -25,7 +27,10 @@ const FreeTypeSelectField = forwardRef<HTMLInputElement, FreeTypeSelectFieldProp
 
   const filteredOptions = useMemo(() => {
     if (!normalizedQuery) return options;
-    return options.filter((opt) => opt.toLowerCase().includes(normalizedQuery));
+    return options.filter((opt) => {
+      const label = typeof opt === 'string' ? opt : opt.label;
+      return label.toLowerCase().includes(normalizedQuery);
+    });
   }, [normalizedQuery, options]);
 
   return (
@@ -40,10 +45,10 @@ const FreeTypeSelectField = forwardRef<HTMLInputElement, FreeTypeSelectFieldProp
         inputValue={inputValue}
         onInputChange={(_e, newInput) => setInputValue(newInput)}
         onChange={(_e, newValue) => onChange(String(newValue ?? ''))}
-        getOptionLabel={(option) => (typeof option === 'string' ? option : String(option))}
+        getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
         renderOption={(props, option) => (
           <ListItem {...props} dense>
-            <ListItemText primary={option} />
+            <ListItemText primary={typeof option === 'string' ? option : option.label} />
           </ListItem>
         )}
         renderInput={(params) => {

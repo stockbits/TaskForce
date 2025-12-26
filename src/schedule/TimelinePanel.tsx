@@ -477,79 +477,38 @@ export default function TimelinePanel({
         }
       }
 
-      // Precompute travel segments between consecutive tasks and from home
+      // Simplified travel calculation - only calculate travel between consecutive tasks on the same day
       const travelSegments: Record<number, { travelStartMs: number; travelEndMs: number; type?: string }> = {};
-      let travelEndMs = shiftStartMs;
-      let travelRendered = false;
-      let travelStartMs = shiftStartMs;
 
-      // Travel from home to the first task (compute regardless of whether first task is on this day)
-      if (resourceTasks.length > 0) {
-        const firstTask = resourceTasks[0];
-        if (r.homeLat && r.homeLng && firstTask.lat && firstTask.lng) {
-          const distance = haversineDistance(r.homeLat, r.homeLng, firstTask.lat, firstTask.lng);
-          const speedKmh = 40; // assume 40 km/h
-          const travelTimeHours = distance / speedKmh;
-          const travelDuration = Math.max(travelTimeHours * MS_HOUR, 10 * 60 * 1000); // min 10 min
-
-          const firstExpectedStr = firstTask.expectedStartDate || firstTask.startDate;
-          const isAppointment = String(firstTask.commitmentType || '').toLowerCase() === 'appointment';
-          if (isAppointment && firstExpectedStr) {
-            const expectedMs = new Date(firstExpectedStr).getTime();
-            travelEndMs = expectedMs;
-            travelStartMs = expectedMs - travelDuration;
-          } else {
-            travelStartMs = shiftStartMs;
-            travelEndMs = shiftStartMs + travelDuration;
-          }
-
-          // store as segment keyed to first task index (0)
-          travelSegments[0] = { travelStartMs, travelEndMs, type: 'home' };
-
-          // Only mark as rendered for forcing if the FIRST task is renderable today and non-appointment
-          travelRendered = (firstRenderableIndex !== null) && !isAppointment;
-        }
-      }
-
-      // Inter-task travel segments (between consecutive tasks)
+      // Only calculate inter-task travel for tasks on the same day
       for (let j = 1; j < resourceTasks.length; j++) {
         const prev = resourceTasks[j - 1];
         const next = resourceTasks[j];
+
+        // Only calculate travel if both tasks are on the same day
+        const prevDate = new Date(prev.expectedStartDate || prev.startDate);
+        const nextDate = new Date(next.expectedStartDate || next.startDate);
+
+        if (prevDate.toDateString() !== nextDate.toDateString()) continue;
+
         const prevEndStr = prev.expectedFinishDate || prev.endDate || prev.expectedStartDate || prev.startDate;
         const nextStartStr = next.expectedStartDate || next.startDate;
+
         if (!prevEndStr || !nextStartStr) continue;
-        if (prev.lat == null || prev.lng == null || next.lat == null || next.lng == null) continue;
 
         const prevEndMs = new Date(prevEndStr).getTime();
         const nextStartMs = new Date(nextStartStr).getTime();
 
-        const distance = haversineDistance(prev.lat, prev.lng, next.lat, next.lng);
-        const speedKmh = 40;
-        const travelDurationMs = Math.max((distance / speedKmh) * MS_HOUR, 5 * 60 * 1000); // min 5 min
+        // Simple time-based travel calculation (no distance calculation)
+        const timeGapMs = nextStartMs - prevEndMs;
+        if (timeGapMs > 0 && timeGapMs < 2 * 60 * 60 * 1000) { // Only if gap is positive and less than 2 hours
+          const travelDurationMs = Math.min(timeGapMs * 0.5, 30 * 60 * 1000); // Max 30 min travel
+          const tStart = prevEndMs;
+          const tEnd = prevEndMs + travelDurationMs;
 
-        const isAppointment = String(next.commitmentType || '').toLowerCase() === 'appointment';
-        let tStart = prevEndMs;
-        let tEnd = prevEndMs + travelDurationMs;
-        if (isAppointment && nextStartStr) {
-          tEnd = nextStartMs;
-          tStart = nextStartMs - travelDurationMs;
+          travelSegments[j] = { travelStartMs: tStart, travelEndMs: tEnd };
         }
-
-        travelSegments[j] = { travelStartMs: tStart, travelEndMs: tEnd };
       }
-
-      // Attach travel metadata to tasks so tooltips can show travel info
-      for (let k = 0; k < resourceTasks.length; k++) {
-        const t = resourceTasks[k];
-        const arriveSeg = travelSegments[k];
-        const nextSeg = travelSegments[k + 1];
-        const arriveDuration = arriveSeg ? (arriveSeg.travelEndMs - arriveSeg.travelStartMs) : null;
-        const toNextDuration = nextSeg ? (nextSeg.travelEndMs - nextSeg.travelStartMs) : null;
-        t.debug = { ...(t.debug || {}), travelArriveMs: arriveSeg?.travelEndMs ?? null, travelArriveDurationMs: arriveDuration, travelToNextDurationMs: toNextDuration };
-      }
-
-      // Track previous rendered task end (ms) for inter-task travel
-      let prevRenderedEndMs: number | null = null;
 
       // Simplified: no travel calculation, just position tasks at expected times
 
@@ -562,6 +521,7 @@ export default function TimelinePanel({
 
         // Position tasks at their expected times
         let startMs = expectedDate.getTime();
+        /*
         if (firstRenderableIndex !== null && i === firstRenderableIndex) {
           if (travelRendered) {
             const originalExpected = startMs;
@@ -571,29 +531,21 @@ export default function TimelinePanel({
             startMs = Math.max(startMs, travelEndMs);
           }
         }
+        */
 
-        // Render any precomputed travel segment for this task (from previous or from home)
+        // Render any precomputed travel segment for this task (from previous)
         const seg = travelSegments[i];
-        const isAppointment = String(task.commitmentType || '').toLowerCase() === 'appointment';
         if (seg) {
-          // Prevent travel from visually overlapping the previously rendered task
-          const segStartMs = Math.max(seg.travelStartMs, prevRenderedEndMs ?? seg.travelStartMs);
-          const clippedStart = clamp(segStartMs, shiftStartMs, shiftEndMs);
+          const clippedStart = clamp(seg.travelStartMs, shiftStartMs, shiftEndMs);
           const clippedEnd = clamp(seg.travelEndMs, shiftStartMs, shiftEndMs);
 
           if (clippedEnd > clippedStart) {
             const leftPx = ((clippedStart - dateRange.start) / MS_HOUR) * PX_PER_HOUR;
             const widthPx = ((clippedEnd - clippedStart) / MS_HOUR) * PX_PER_HOUR;
             bars.push({ leftPx, widthPx, task: { taskId: 'Travel', debug: { travelStartMs: seg.travelStartMs, travelEndMs: seg.travelEndMs } }, type: 'travel' });
-
-            if (!isAppointment && expectedDate.toDateString() === today.toDateString()) {
-              const originalExpected = startMs;
-              // Ensure the forced start occurs after any previous rendered task end
-              startMs = Math.max(seg.travelEndMs, prevRenderedEndMs ?? seg.travelEndMs);
-              task.debug = { ...(task.debug || {}), forcedStartMs: startMs, originalExpectedMs: originalExpected };
-            }
           }
         }
+
         task.expectedDate = expectedDate; // store for line drawing
 
         const durationMs = (task.estimatedDuration || 60) * 60 * 1000; // minutes to ms
@@ -612,7 +564,7 @@ export default function TimelinePanel({
           const adjWidthPx = Math.max(1, widthPx - GAP_PX);
           bars.push({ leftPx: adjLeftPx, widthPx: adjWidthPx, task, type: 'task' });
           // update prevRendered end marker for the next iteration
-          prevRenderedEndMs = clippedEnd;
+          // prevRenderedEndMs = clippedEnd;
         }
       }
 
