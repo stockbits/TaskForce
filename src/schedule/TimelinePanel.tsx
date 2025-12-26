@@ -64,6 +64,32 @@ function parseShiftTime(timeStr: unknown): { h: number; m: number } | null {
   return { h, m: min };
 }
 
+function parseTaskDate(dateStr: string): Date | null {
+  if (!dateStr) return null;
+  // Format: "Fri 28 Nov, 12:10 PM"
+  const m = dateStr.match(/(\w+)\s+(\d+)\s+(\w+),\s*(\d+):(\d+)\s*(AM|PM)/i);
+  if (!m) return null;
+
+  const day = parseInt(m[2], 10);
+  const monthName = m[3];
+  const hour = parseInt(m[4], 10);
+  const minute = parseInt(m[5], 10);
+  const ap = m[6].toUpperCase();
+
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const month = monthNames.indexOf(monthName);
+  if (month === -1) return null;
+
+  let h = hour;
+  if (ap === "PM" && h !== 12) h += 12;
+  if (ap === "AM" && h === 12) h = 0;
+
+  const now = new Date();
+  const year = now.getFullYear(); // Assume current year
+
+  return new Date(year, month, day, h, minute);
+}
+
 function formatHourLabel(d: Date, step: number, totalHours: number) {
   const totalDays = Math.ceil(totalHours / 24);
 
@@ -530,10 +556,10 @@ export default function TimelinePanel({
         const startStr = task.expectedStartDate || task.startDate;
         if (!startStr) continue;
 
-        const expectedDate = new Date(startStr);
+        const expectedDate = parseTaskDate(startStr) || new Date();
 
         // Only show tasks for the selected date
-        if (expectedDate.toDateString() !== today.toDateString()) continue;
+        // if (expectedDate.toDateString() !== today.toDateString()) continue;
 
         // Determine start: if this is the first renderable task and travel-from-home was rendered, force it to start at travel arrival
         let startMs = expectedDate.getTime();
