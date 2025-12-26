@@ -90,6 +90,26 @@ function parseTaskDate(dateStr: string): Date | null {
   return new Date(year, month, day, h, minute);
 }
 
+// Calculate distance between two lat/lng points using Haversine formula
+function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng/2) * Math.sin(dLng/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c; // Distance in kilometers
+}
+
+// Calculate travel time based on distance (40 km/h average speed)
+function calculateTravelTime(distanceKm: number, minTravelMinutes: number = 5): number {
+  const speedKmh = 40; // 40 km/h average speed
+  const travelHours = distanceKm / speedKmh;
+  const travelMinutes = travelHours * 60;
+  return Math.max(travelMinutes, minTravelMinutes); // Minimum travel time
+}
+
 function formatHourLabel(d: Date, step: number, totalHours: number) {
   const totalDays = Math.ceil(totalHours / 24);
 
@@ -477,10 +497,27 @@ export default function TimelinePanel({
         }
       }
 
-      // Simplified travel calculation - only calculate travel between consecutive tasks on the same day
+      // Calculate travel segments using distance-based logic
       const travelSegments: Record<number, { travelStartMs: number; travelEndMs: number; type?: string }> = {};
 
-      // Only calculate inter-task travel for tasks on the same day
+      // Calculate travel from home to first task
+      if (resourceTasks.length > 0 && r.homeLat != null && r.homeLng != null) {
+        const firstTask = resourceTasks[0];
+        if (firstTask.lat != null && firstTask.lng != null) {
+          const distance = calculateDistance(r.homeLat, r.homeLng, firstTask.lat, firstTask.lng);
+          const travelMinutes = calculateTravelTime(distance, 10); // Minimum 10 minutes for home travel
+          const travelDurationMs = travelMinutes * 60 * 1000;
+
+          const travelStartMs = shiftStartMs;
+          const travelEndMs = shiftStartMs + travelDurationMs;
+
+          if (travelEndMs > travelStartMs) {
+            travelSegments[0] = { travelStartMs, travelEndMs, type: 'home' };
+          }
+        }
+      }
+
+      // Calculate travel between consecutive tasks
       for (let j = 1; j < resourceTasks.length; j++) {
         const prev = resourceTasks[j - 1];
         const next = resourceTasks[j];
@@ -491,26 +528,26 @@ export default function TimelinePanel({
 
         if (prevDate.toDateString() !== nextDate.toDateString()) continue;
 
-        const prevEndStr = prev.expectedFinishDate || prev.endDate || prev.expectedStartDate || prev.startDate;
-        const nextStartStr = next.expectedStartDate || next.startDate;
+        // Check if both tasks have coordinates
+        if (prev.lat != null && prev.lng != null && next.lat != null && next.lng != null) {
+          const distance = calculateDistance(prev.lat, prev.lng, next.lat, next.lng);
+          const travelMinutes = calculateTravelTime(distance, 5); // Minimum 5 minutes between tasks
+          const travelDurationMs = travelMinutes * 60 * 1000;
 
-        if (!prevEndStr || !nextStartStr) continue;
+          const prevEndStr = prev.expectedFinishDate || prev.endDate || prev.expectedStartDate || prev.startDate;
+          if (prevEndStr) {
+            const prevEndMs = new Date(prevEndStr).getTime();
+            const travelStartMs = prevEndMs;
+            const travelEndMs = prevEndMs + travelDurationMs;
 
-        const prevEndMs = new Date(prevEndStr).getTime();
-        const nextStartMs = new Date(nextStartStr).getTime();
-
-        // Simple time-based travel calculation (no distance calculation)
-        const timeGapMs = nextStartMs - prevEndMs;
-        if (timeGapMs > 0 && timeGapMs < 2 * 60 * 60 * 1000) { // Only if gap is positive and less than 2 hours
-          const travelDurationMs = Math.min(timeGapMs * 0.5, 30 * 60 * 1000); // Max 30 min travel
-          const tStart = prevEndMs;
-          const tEnd = prevEndMs + travelDurationMs;
-
-          travelSegments[j] = { travelStartMs: tStart, travelEndMs: tEnd };
+            if (travelEndMs > travelStartMs) {
+              travelSegments[j] = { travelStartMs, travelEndMs, type: 'inter-task' };
+            }
+          }
         }
       }
 
-      // Simplified: no travel calculation, just position tasks at expected times
+      // Position tasks with proper travel scheduling
 
       for (let i = 0; i < resourceTasks.length; i++) {
         const task = resourceTasks[i];
@@ -519,19 +556,22 @@ export default function TimelinePanel({
 
         const expectedDate = parseTaskDate(startStr) || new Date();
 
-        // Position tasks at their expected times
+        // Position tasks at their expected times, but force start after travel if applicable
         let startMs = expectedDate.getTime();
-        /*
-        if (firstRenderableIndex !== null && i === firstRenderableIndex) {
-          if (travelRendered) {
-            const originalExpected = startMs;
-            startMs = travelEndMs;
-            task.debug = { ...(task.debug || {}), forcedStartMs: startMs, originalExpectedMs: originalExpected };
-          } else {
-            startMs = Math.max(startMs, travelEndMs);
+
+        // Check if there's travel before this task that should force the start time
+        const travelBefore = travelSegments[i];
+        if (travelBefore) {
+          // Force task to start directly after travel ends
+          const forcedStartMs = travelBefore.travelEndMs;
+          const originalExpectedMs = startMs;
+
+          // Only force if travel end is later than expected start (to avoid moving tasks backwards)
+          if (forcedStartMs > startMs) {
+            startMs = forcedStartMs;
+            task.debug = { ...(task.debug || {}), forcedStartMs, originalExpectedMs };
           }
         }
-        */
 
         // Render any precomputed travel segment for this task (from previous)
         const seg = travelSegments[i];
@@ -542,7 +582,8 @@ export default function TimelinePanel({
           if (clippedEnd > clippedStart) {
             const leftPx = ((clippedStart - dateRange.start) / MS_HOUR) * PX_PER_HOUR;
             const widthPx = ((clippedEnd - clippedStart) / MS_HOUR) * PX_PER_HOUR;
-            bars.push({ leftPx, widthPx, task: { taskId: 'Travel', debug: { travelStartMs: seg.travelStartMs, travelEndMs: seg.travelEndMs } }, type: 'travel' });
+            const travelTaskId = seg.type === 'home' ? 'Travel from Home' : 'Travel';
+            bars.push({ leftPx, widthPx, task: { taskId: travelTaskId, debug: { travelStartMs: seg.travelStartMs, travelEndMs: seg.travelEndMs } }, type: 'travel' });
           }
         }
 
