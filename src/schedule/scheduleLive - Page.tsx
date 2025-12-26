@@ -240,11 +240,28 @@ export default function ScheduleLivePage() {
     setMapTaskData([]);
     setResetKey((n) => n + 1);
 
+    // Reset timeline to today
+    const today = new Date();
+    setTimelineStartDate(new Date(today.getFullYear(), today.getMonth(), today.getDate(), 5, 0, 0, 0));
+    setTimelineEndDate(new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999));
+
     if (value) {
       const rows = (mockTasks as TaskRecord[]).filter((t) => t.division === value);
       if (autoLoadResources) {
         setTaskData(rows);
         setDropdownData(buildFilteredDropdowns(rows));
+
+        // Set timeline to cover the task dates
+        if (rows.length > 0) {
+          const dates = rows.map(t => new Date(t.expectedStartDate || t.startDate || t.appointmentStartDate)).filter(d => !isNaN(d.getTime()));
+          if (dates.length > 0) {
+            const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
+            const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
+            setTimelineStartDate(new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate(), 5, 0, 0, 0));
+            setTimelineEndDate(new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate(), 23, 59, 59, 999));
+          }
+        }
+
         const resourceRows = allResources.filter((r) => r.division === value);
         setResourceTableData(resourceRows);
         setResourceData(resourceRows);
