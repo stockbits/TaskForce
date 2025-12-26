@@ -574,16 +574,18 @@ export default function TimelinePanel({
         }
 
         // Render any precomputed travel segment for this task (from previous)
+        // Note: Travel calculations are kept for task scheduling logic but not rendered visually
         const seg = travelSegments[i];
         if (seg) {
           const clippedStart = clamp(seg.travelStartMs, shiftStartMs, shiftEndMs);
           const clippedEnd = clamp(seg.travelEndMs, shiftStartMs, shiftEndMs);
 
           if (clippedEnd > clippedStart) {
-            const leftPx = ((clippedStart - dateRange.start) / MS_HOUR) * PX_PER_HOUR;
-            const widthPx = ((clippedEnd - clippedStart) / MS_HOUR) * PX_PER_HOUR;
-            const travelTaskId = seg.type === 'home' ? 'Travel from Home' : 'Travel';
-            bars.push({ leftPx, widthPx, task: { taskId: travelTaskId, debug: { travelStartMs: seg.travelStartMs, travelEndMs: seg.travelEndMs } }, type: 'travel' });
+            // Travel blocks are not rendered visually but calculations affect task scheduling
+            // const leftPx = ((clippedStart - dateRange.start) / MS_HOUR) * PX_PER_HOUR;
+            // const widthPx = ((clippedEnd - clippedStart) / MS_HOUR) * PX_PER_HOUR;
+            // const travelTaskId = seg.type === 'home' ? 'Travel from Home' : 'Travel';
+            // bars.push({ leftPx, widthPx, task: { taskId: travelTaskId, debug: { travelStartMs: seg.travelStartMs, travelEndMs: seg.travelEndMs } }, type: 'travel' });
           }
         }
 
