@@ -1453,9 +1453,11 @@ export default function MainLayout() {
           <DialogActions sx={{ px: { xs: 2, md: 4 }, py: 2, justifyContent: 'space-between' }}>
             <AppButton
               onClick={() => {
+                // Close overview and reopen the landing page to reselect group
                 setCalloutOverviewOpen(false);
-                // TODO: Navigate to Step 1 (Callout Landing Page)
-                // Add code to show the callout landing page here
+                setCalloutLandingOpen(true);
+                setSelectedGroup(activeCalloutGroup || "");
+                setQuery(activeCalloutGroup || "");
               }}
               variant="contained"
               disabled={hasUnsavedCalloutChanges}
