@@ -521,7 +521,12 @@ export default function TimelinePanel({
 
       for (let i = 0; i < resourceTasks.length; i++) {
         const task = resourceTasks[i];
-        const startStr = task.expectedStartDate || task.startDate;
+
+        // Use appointmentStartDate for appointment tasks, otherwise use expectedStartDate or startDate
+        const startStr = task.commitmentType === "Appointment"
+          ? task.appointmentStartDate || task.expectedStartDate || task.startDate
+          : task.expectedStartDate || task.startDate;
+
         if (!startStr) continue;
 
         const expectedDate = parseTaskDate(startStr) || new Date();
