@@ -1449,10 +1449,25 @@ export default function MainLayout() {
             />
           </DialogContent>
 
-          <DialogActions sx={{ px: { xs: 2, md: 4 }, py: 2, justifyContent: 'flex-end' }}>
+          <DialogActions sx={{ px: { xs: 2, md: 4 }, py: 2, justifyContent: 'space-between' }}>
             <AppButton
-              onClick={() => setCalloutOverviewOpen(false)}
+              onClick={() => {
+                setCalloutOverviewOpen(false);
+                // TODO: Navigate to Step 1 (Callout Landing Page)
+                // Add code to show the callout landing page here
+              }}
               variant="contained"
+              sx={{ minWidth: 120 }}
+            >
+              Back
+            </AppButton>
+            <AppButton
+              onClick={() => {
+                // Placeholder for finish callout action
+                setCalloutOverviewOpen(false);
+              }}
+              variant="contained"
+              color="primary"
               sx={{ minWidth: 120 }}
             >
               Finish Callout

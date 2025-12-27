@@ -18,8 +18,8 @@ import {
 } from "@mui/material";
 import { AppButton } from "../shared-components";
 import Engineering from '@mui/icons-material/Engineering';
-import AccessTime from '@mui/icons-material/AccessTime';
 import Person from '@mui/icons-material/Person';
+import Assignment from '@mui/icons-material/Assignment';
 import { alpha, useTheme } from "@mui/material/styles";
 import { sharedStyles } from '@/Reusable helper/Shared styles - component';
 import { CalloutOutcome, CalloutOutcomeConfig, ResourceRecord } from "@/types";
@@ -61,6 +61,11 @@ export const Step2: React.FC<Step2Props> = ({
     if (!selectedGroup) return [];
     return resources.filter((r) => r.calloutGroup === selectedGroup);
   }, [resources, selectedGroup]);
+
+  // Determine displayed resources based on scope
+  const displayedResources = useMemo(() => {
+    return groupResources;
+  }, [groupResources]);
 
   // Draft state for outcomes
   const [rowDrafts, setRowDrafts] = useState<
@@ -265,7 +270,7 @@ export const Step2: React.FC<Step2Props> = ({
       </Box>
 
       {/* Resource Preview Table */}
-      {!isStarting && groupResources.length > 0 && (
+      {!isStarting && displayedResources.length > 0 && (
         <Paper
           variant="outlined"
           sx={{
@@ -276,10 +281,7 @@ export const Step2: React.FC<Step2Props> = ({
         >
           <Box sx={{ p: 2, borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.12)}` }}>
             <Typography variant="subtitle2" fontWeight={600} color="text.primary">
-              Configure Callout Outcomes — {groupResources.length} technicians
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Set outcomes for each technician before starting the callout
+              Configure Callout Outcomes — {selectedGroup} ({displayedResources.length} engineers) - Task {taskId}
             </Typography>
           </Box>
 
@@ -287,16 +289,15 @@ export const Step2: React.FC<Step2Props> = ({
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Tech ID</TableCell>
-                  <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Name</TableCell>
-                  <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Outcome</TableCell>
-                  <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Return Time</TableCell>
-                  <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Last Outcome</TableCell>
-                  <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }} align="right">Actions</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }} align="center">Tech ID</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }} align="center">Outcome</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }} align="center">Return Time</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }} align="center">Last Outcome</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }} align="center">Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {groupResources.slice(0, 15).map((resource) => {
+                {displayedResources.slice(0, 10).map((resource) => {
                   const draft = rowDrafts[resource.resourceId] || { outcome: "", availableAgainAt: "" };
                   const saving = !!draft.saving;
                   const hasSaved = !!rowSaved[resource.resourceId];
@@ -313,17 +314,12 @@ export const Step2: React.FC<Step2Props> = ({
                         '&:last-of-type td': { borderBottom: 0 },
                       }}
                     >
-                      <TableCell>
+                      <TableCell align="center">
                         <Typography variant="body2" fontWeight={600}>
                           {resource.resourceId}
                         </Typography>
                       </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          {resource.name || 'Unknown'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
+                      <TableCell align="center">
                         <FormControl fullWidth size="small" disabled={rowLocked}>
                           <Select
                             native
@@ -341,44 +337,27 @@ export const Step2: React.FC<Step2Props> = ({
                           </Select>
                         </FormControl>
                       </TableCell>
-                      <TableCell>
-                        <Stack spacing={1} alignItems="flex-start">
-                          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: "100%" }}>
-                            <AccessTime style={{ fontSize: 14, color: requiresUnavailable && !rowLocked ? theme.palette.primary.main : undefined }} />
-                            <TextField
-                              type="datetime-local"
-                              size="small"
-                              fullWidth
-                              disabled={!requiresUnavailable || rowLocked}
-                              value={draft.availableAgainAt || ""}
-                              onChange={(event) => handleDraftChange(resource.resourceId, {
-                                availableAgainAt: event.target.value,
-                              })}
-                              inputProps={{ step: 300 }}
-                            />
-                          </Stack>
-                          {requiresUnavailable && (!draft.availableAgainAt || draft.availableAgainAt.trim() === "") && !rowLocked && (
-                            <Typography variant="caption" color="error">
-                              Set return time when unavailable.
-                            </Typography>
-                          )}
-                        </Stack>
+                      <TableCell align="center">
+                        <TextField
+                          type="datetime-local"
+                          size="small"
+                          fullWidth
+                          disabled={!requiresUnavailable || rowLocked}
+                          value={draft.availableAgainAt || ""}
+                          onChange={(event) => handleDraftChange(resource.resourceId, {
+                            availableAgainAt: event.target.value,
+                          })}
+                          inputProps={{ step: 300 }}
+                        />
                       </TableCell>
-                      <TableCell>
+                      <TableCell align="center">
                         {renderLastOutcomeCell(resource)}
                       </TableCell>
-                      <TableCell align="right">
-                        <Stack direction="row" spacing={1} alignItems="center" justifyContent="flex-end">
-                          <IconButton
-                            size="small"
-                            onClick={() => onResourceSelect?.(resource.resourceId)}
-                            sx={{ color: theme.palette.primary.main }}
-                          >
-                            <Person sx={{ fontSize: 16 }} />
-                          </IconButton>
+                      <TableCell align="center">
+                        <Stack direction="row" spacing={2} alignItems="center" justifyContent="center">
                           <Box sx={{ minWidth: 80 }}>
                             <AppButton
-                              variant={rowLocked ? "contained" : "outlined"}
+                              variant="contained"
                               color={rowLocked ? "success" : "primary"}
                               size="small"
                               onClick={() => handleRowSave(resource.resourceId)}
@@ -394,6 +373,23 @@ export const Step2: React.FC<Step2Props> = ({
                               )}
                             </AppButton>
                           </Box>
+                          <IconButton
+                            size="small"
+                            onClick={() => onResourceSelect?.(resource.resourceId)}
+                            sx={{ color: 'black' }}
+                          >
+                            <Person sx={{ fontSize: 16 }} />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                              // Placeholder for task action - implement onTaskSelect if needed
+                              console.log('Task action for', resource.resourceId);
+                            }}
+                            sx={{ color: 'black' }}
+                          >
+                            <Assignment sx={{ fontSize: 16 }} />
+                          </IconButton>
                         </Stack>
                       </TableCell>
                     </TableRow>
@@ -403,10 +399,10 @@ export const Step2: React.FC<Step2Props> = ({
             </Table>
           </Box>
 
-          {groupResources.length > 10 && (
+          {displayedResources.length > 10 && (
             <Box sx={{ p: 2, borderTop: `1px solid ${alpha(theme.palette.primary.main, 0.12)}` }}>
               <Typography variant="caption" color="text.secondary">
-                Showing first 10 of {groupResources.length} technicians
+                Showing first 10 of {displayedResources.length} engineers
               </Typography>
             </Box>
           )}
