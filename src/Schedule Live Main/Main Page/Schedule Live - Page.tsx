@@ -6,12 +6,12 @@
 import React, { useState, useMemo, useRef, useCallback, lazy, Suspense } from "react";
 import type { ScheduleLiveSearchFilters } from "@/shared-ui";
 
-const ScheduleLegend = lazy(() => import("./UILegend"));
+const ScheduleLegend = lazy(() => import("../UI Components/Schedule Legend - Component"));
 const ScheduleLiveSearch = lazy(() => import("@/shared-ui").then(m => ({ default: m.ScheduleLiveSearch })));
-const TimelinePanel = lazy(() => import("./TimelinePanel"));
-const MapPanel = lazy(() => import("./MapPanel"));
-const TaskTablePanel = lazy(() => import("./TaskTablePanel"));
-const ResourceTablePanel = lazy(() => import("./ResourceTablePanel"));
+const TimelinePanel = lazy(() => import("../Timeline Components/Timeline View - Component"));
+const MapPanel = lazy(() => import("../Map Components/Map Display - Component"));
+const TaskTablePanel = lazy(() => import("../Table Components/Task Table - Component"));
+const ResourceTablePanel = lazy(() => import("../Table Components/Resource Table - Component"));
 
 import mockTasks from "@/Database Models/Task - Model.json";
 import ResourceMock from "@/Database Models/Resource - Model.json";
@@ -49,7 +49,7 @@ import {
   Stack,
 } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
-import { useSettings } from '../System Settings/Settings Manager - Component';
+import { useSettings } from '@/System Settings/Settings Manager - Component';
 import AppButton from '@/shared-ui/button';
 
 /* ============================================================================

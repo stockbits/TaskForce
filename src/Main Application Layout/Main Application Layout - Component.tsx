@@ -22,7 +22,7 @@ import {
 import { alpha } from "@mui/material/styles";
 import mockTasks from "@/Database Models/Task - Model.json";
 import ResourceMock from "@/Database Models/Resource - Model.json";
-const ScheduleLivePage = lazy(() => import("@/schedule/scheduleLive - Page"));
+const ScheduleLivePage = lazy(() => import("@/Schedule Live Main/Main Page/Schedule Live - Page"));
 const SettingsPage = lazy(() => import("@/System Settings/Application Settings - Page"));
 
 import {
