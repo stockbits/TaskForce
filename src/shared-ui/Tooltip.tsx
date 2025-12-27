@@ -27,7 +27,7 @@ export function createTooltipConfig(overrides: Partial<TooltipConfig> = {}): Too
   return { ...DEFAULT_CONFIG, ...overrides };
 }
 
-interface AppTooltipProps extends Omit<TooltipProps, 'componentsProps'> {
+interface AppTooltipProps extends Omit<TooltipProps, 'componentsProps' | 'slotProps'> {
   config?: Partial<TooltipConfig>;
 }
 
@@ -53,7 +53,8 @@ export const AppTooltip: React.FC<AppTooltipProps> = ({
         popper: {
           sx: {
             zIndex: finalConfig.zIndex,
-          }
+          },
+          container: document.body,
         }
       }}
       enterDelay={finalConfig.enterDelay}

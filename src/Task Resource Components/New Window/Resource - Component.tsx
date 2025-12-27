@@ -26,9 +26,9 @@ import Clock from '@mui/icons-material/AccessTime';
 import Search from '@mui/icons-material/Search';
 import Copy from '@mui/icons-material/ContentCopy';
 import X from '@mui/icons-material/Close';
-import type { ResourceRecord } from "./CalloutIncidentPanel";
-import { CalloutOutcomeConfig } from "./CalloutIncidentPanel";
-import type { CalloutHistoryEntry } from "@/hooks/useCalloutHistory";
+import type { ResourceRecord } from '@/types';
+import { CalloutOutcomeConfig } from '@/types';
+import type { CalloutHistoryEntry } from "@/Callout Component/useCalloutHistory";
 import ExpandableSectionCard from "@/shared-ui/ExpandableSectionCard";
 
 interface ResourcePopoutPanelProps {

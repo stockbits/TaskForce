@@ -8,7 +8,7 @@ import { DataGrid } from '@mui/x-data-grid';
 // framer-motion removed — using static elements
 // icon imports removed (unused)
 import TaskRowContextMenu from '@/shared-ui/TaskRowContextMenu';
-import { useTheme as useAppTheme } from '@/ThemeContext';
+import { useTheme as useAppTheme } from '@/System Settings/Dark Mode Handler - Component';
 
  type Props = {
   rows: Record<string, any>[];
@@ -356,8 +356,8 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
   );
 
   const paperSx: any = (typeof tableHeight === 'string' && tableHeight.trim().endsWith('%'))
-    ? { width: '100%', zIndex: 0, display: 'flex', flex: 1, minHeight: 0, flexDirection: 'column', height: '100%', overflow: 'hidden' }
-    : { height: tableHeight, width: '100%', zIndex: 0, overflow: 'hidden' };
+    ? { width: '100%', zIndex: 0, display: 'flex', flex: 1, minHeight: 0, flexDirection: 'column', height: '100%', overflow: 'auto' }
+    : { height: tableHeight, width: '100%', zIndex: 0, overflow: 'auto' };
 
   return (
     <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, position: 'relative' }}>
@@ -457,6 +457,9 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
             '& .MuiDataGrid-columnHeaders': { 
               backgroundColor: mode === 'dark' ? "#2a2a2a" : theme.palette.action.hover,
               borderBottom: mode === 'dark' ? "1px solid rgba(255, 255, 255, 0.2)" : "1px solid rgba(0, 0, 0, 0.12)",
+              position: 'sticky',
+              top: 0,
+              zIndex: 1,
             }, 
             '& .MuiDataGrid-columnHeaderTitle': { 
               whiteSpace: 'nowrap', 

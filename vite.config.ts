@@ -35,7 +35,7 @@ export default defineConfig({
     outDir: "dist",
     sourcemap: false,
     emptyOutDir: true,
-    chunkSizeWarningLimit: 768,
+    chunkSizeWarningLimit: 1500,
 
     // ⭐ IMPORTANT: Tell Vite to build BOTH index.html and popup.html
     rollupOptions: {
@@ -45,7 +45,10 @@ export default defineConfig({
         // (OR: "public/popup.html" if you placed it in /public)
       },
       output: {
-        // no manual vendor chunks — let Vite auto-split
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          mui: ['@mui/material', '@mui/icons-material', '@mui/x-data-grid', '@emotion/react', '@emotion/styled'],
+        },
       },
     },
   },

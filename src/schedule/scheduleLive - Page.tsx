@@ -49,7 +49,7 @@ import {
   Stack,
 } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
-import { useSettings } from '../contexts/SettingsContext';
+import { useSettings } from '../System Settings/Settings Manager - Component';
 import AppButton from '@/shared-ui/button';
 
 /* ============================================================================

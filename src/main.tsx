@@ -2,8 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { CssBaseline } from "@mui/material";
 import App from "./App";
-import { AppThemeProvider } from "./ThemeContext";
-import { SettingsProvider } from "./contexts/SettingsContext";
+import { AppThemeProvider } from "./System Settings/Dark Mode Handler - Component";
+import { SettingsProvider } from "./System Settings/Settings Manager - Component";
 import "./index.css";
 import { AppSnackbarProvider } from '@/shared-ui/SnackbarProvider';
 

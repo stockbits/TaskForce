@@ -90,6 +90,10 @@ export interface ResourceRecord {
   contactNumber?: string;
   notes?: string;
   history?: ResourceHistoryEntry[];
+  division?: string;
+  primarySkill?: string;
+  secondarySkill?: string;
+  updatedAt?: string;
 }
 
 /* Schedule/Panel Types */

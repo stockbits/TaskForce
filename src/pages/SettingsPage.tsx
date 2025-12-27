@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import Brightness2Icon from '@mui/icons-material/Brightness2';
 import WbSunnyIcon from '@mui/icons-material/WbSunny';
-import { useSettings } from '../contexts/SettingsContext';
+import { useSettings } from '../System Settings/Settings Manager - Component';
 
 export default function SettingsPage() {
   const { settings, updateSetting } = useSettings();

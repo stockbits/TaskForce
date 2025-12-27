@@ -1,5 +1,5 @@
 // ===============================================================
-// TaskPopoutPanel.tsx — Dynamic Compare Layout (Card-centred)
+// Task Popout Panel - Component.tsx — Dynamic Compare Layout (Card-centred)
 // - Single-task: 720px centre card
 // - Multi-task: 520px cards, gap-4, px-6 outer padding
 // - 3 tasks: one row, centred, no wrap
@@ -12,7 +12,7 @@ import AppButton from '@/shared-ui/button';
 import { alpha } from "@mui/material/styles";
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import TaskDetailsModal from "./TaskDetailsModal";
+import TaskDetailsModal from "@/Task Resource Components/Inline Window/Task Information Card - Component";
 import PillGroup, { /* for types */ } from "@/shared-ui/PillGroup";
 import type { TaskDetails } from "@/types";
 

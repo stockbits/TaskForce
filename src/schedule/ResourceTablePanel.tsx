@@ -206,7 +206,7 @@ export default function ResourceTablePanel({
      MAIN RENDER — controlled selection only
   ------------------------------------------------------------------------ */
   return (
-    <Box sx={{ flex: 1, display: "flex", flexDirection: "column", height: '100%', minHeight: 0, overflow: 'auto' }}>
+    <Box sx={{ flex: 1, display: "flex", flexDirection: "column", height: '100%', minHeight: 0 }}>
       <TaskTableAdvanced
         rows={displayData}
         headerNames={headerNames}

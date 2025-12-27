@@ -8,8 +8,8 @@
 
 import { useState, useRef, useCallback } from "react";
 import { TaskDetails } from "@/types";
-import type { ResourceRecord } from "@/callout/CalloutIncidentPanel";
-import type { CalloutHistoryEntry } from "./useCalloutHistory";
+import type { ResourceRecord } from '@/types';
+import type { CalloutHistoryEntry } from "../Callout Component/useCalloutHistory";
 
 type PopupMode = "tasks" | "resource";
 

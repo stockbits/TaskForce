@@ -4,11 +4,11 @@
 
 import React, { useState, useCallback, useEffect } from "react";
 import ReactDOM from "react-dom/client";
-import TaskPopoutPanel from "@/tasks/TaskPopoutPanel";
-import ResourcePopoutPanel from "@/callout/ResourcePopoutPanel";
+import TaskPopoutPanel from "@/Task Resource Components/New Window/Task Popout Panel - Component";
+import ResourcePopoutPanel from "@/Task Resource Components/New Window/Resource - Component";
 import { TaskDetails } from "@/types";
-import type { ResourceRecord } from "@/callout/CalloutIncidentPanel";
-import type { CalloutHistoryEntry } from "@/hooks/useCalloutHistory";
+import type { ResourceRecord } from '@/types';
+import type { CalloutHistoryEntry } from "@/Callout Component/useCalloutHistory";
 
 declare global {
   interface Window {

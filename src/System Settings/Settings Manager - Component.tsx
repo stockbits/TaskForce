@@ -1,3 +1,7 @@
+// ===============================================
+// Settings Manager - Component.tsx — System Settings Context
+// ===============================================
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 type AppSettings = {

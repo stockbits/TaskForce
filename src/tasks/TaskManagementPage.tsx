@@ -3,7 +3,7 @@ import { useAppSnackbar } from '@/shared-ui/SnackbarProvider';
 import rawMockTasks from "@/data/mockTasks.json";
 import TaskSearchCard from "@/tasks/TaskSearchCardClean";
 import TaskTableMUI from "@/shared-ui/ResponsiveTable/TaskTableMUI";
-import ProgressTasksDialog, { ProgressPreview } from "@/tasks/ProgressTasksDialog";
+import ProgressTasksDialog, { ProgressPreview } from "@/Task Resource Components/New Window/Progress Task - Component";
 import { useExternalWindow } from "@/hooks/useExternalWindow";
 import { Box, Paper, Typography } from "@mui/material";
 

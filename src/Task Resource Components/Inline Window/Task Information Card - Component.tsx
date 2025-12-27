@@ -1,20 +1,17 @@
 // ===============================================
-// TaskDetailsModal.tsx — CARD VERSION (RESTORED)
+// Task Information Card - Component.tsx — CARD VERSION (RESTORED)
 // ===============================================
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Alert,
   Box,
   Chip,
   Grid,
   Paper,
   Stack,
-  TextField,
   Typography,
   useTheme,
 } from "@mui/material";
-import AppButton from '@/shared-ui/button';
 import { alpha } from "@mui/material/styles";
 import type { Theme } from "@mui/material/styles";
 import Person from '@mui/icons-material/Person';
@@ -25,6 +22,7 @@ import Build from '@mui/icons-material/Build';
 import Check from '@mui/icons-material/Check';
 import type { TaskDetails, ProgressNoteEntry } from "@/types";
 import ExpandableSectionCard from "@/shared-ui/ExpandableSectionCard";
+import { ProgressNoteAdd } from "./Progress Note Add - Component";
 
 export interface TaskDetailsModalProps {
   task: TaskDetails;
@@ -35,7 +33,6 @@ export interface TaskDetailsModalProps {
 const isBrowser = typeof window !== "undefined";
 
 const storageKeyForNotes = (taskId: string) => `task:${taskId}:progressNotes`;
-const draftKeyForNotes = (taskId: string) => `taskProgressNotes:${taskId}:draft`;
 
 const normalizeProgressNotes = (value: unknown): ProgressNoteEntry[] => {
   if (Array.isArray(value)) {
@@ -106,150 +103,7 @@ const persistLocalNotes = (taskId: string, notes: ProgressNoteEntry[]) => {
   }
 };
 
-interface ProgressNotesEditorProps {
-  taskId: string;
-  taskStatus?: string;
-  onAdd: (entry: ProgressNoteEntry) => void;
-}
 
-function ProgressNotesEditor({ taskId, taskStatus, onAdd }: ProgressNotesEditorProps) {
-  const theme = useTheme();
-  const draftKey = draftKeyForNotes(taskId);
-  const [text, setText] = useState<string>(() => {
-    if (!isBrowser) return "";
-    try {
-      return window.localStorage.getItem(draftKey) || "";
-    } catch {
-      return "";
-    }
-  });
-  const [saving, setSaving] = useState(false);
-  const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [serverReachable, setServerReachable] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    if (!isBrowser) return;
-    let mounted = true;
-    fetch("http://localhost:5179/health")
-      .then(() => mounted && setServerReachable(true))
-      .catch(() => mounted && setServerReachable(false));
-    return () => {
-      mounted = false;
-    };
-  }, [taskId]);
-
-  useEffect(() => {
-    if (!isBrowser || !statusMessage) return;
-    const timeout = window.setTimeout(() => setStatusMessage(null), 3000);
-    return () => window.clearTimeout(timeout);
-  }, [statusMessage]);
-
-  const handleSave = async () => {
-    const trimmed = text.trim();
-    if (!trimmed) return;
-
-    const entry: ProgressNoteEntry = {
-      ts: new Date().toISOString(),
-      status: taskStatus || "",
-      text: trimmed,
-      source: "Agent",
-    };
-
-    setSaving(true);
-    setError(null);
-    onAdd(entry);
-
-    try {
-      const resp = await fetch("http://localhost:5179/progress-notes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ taskId, text: trimmed, taskStatus }),
-      });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      setStatusMessage("Saved & synced");
-    } catch (err: any) {
-      console.warn("Progress notes sync failed", err);
-      setStatusMessage("Saved locally (offline)");
-      setError(serverReachable === false ? null : err?.message || "Sync failed");
-    } finally {
-      setSaving(false);
-      setText("");
-      if (isBrowser) {
-        try {
-          window.localStorage.removeItem(draftKey);
-        } catch {
-          /* ignore */
-        }
-      }
-    }
-  };
-
-  const handleChange = (value: string) => {
-    setText(value);
-    if (!isBrowser) return;
-    try {
-      if (value.trim()) {
-        window.localStorage.setItem(draftKey, value);
-      } else {
-        window.localStorage.removeItem(draftKey);
-      }
-    } catch {
-      /* ignore */
-    }
-  };
-
-  return (
-    <Stack spacing={1.5}>
-      <Typography
-        variant="overline"
-        sx={{ color: theme.palette.text.secondary, letterSpacing: 0.6 }}
-      >
-        Add Progress Note
-      </Typography>
-      <TextField
-        value={text}
-        onChange={(event) => handleChange(event.target.value)}
-        placeholder="Summarise field actions, blockers, or next steps…"
-        multiline
-        minRows={4}
-        size="small"
-        sx={{
-          '& .MuiOutlinedInput-root': {
-            alignItems: "flex-start",
-          },
-        }}
-      />
-      <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
-        <AppButton
-          type="button"
-          onClick={handleSave}
-          disabled={!text.trim() || saving}
-          variant="contained"
-        >
-          {saving ? "Saving…" : "Save Note"}
-        </AppButton>
-        <Stack spacing={1} direction="row" flexWrap="wrap" useFlexGap>
-          {statusMessage && (
-            <Alert severity="success" variant="outlined" sx={{ py: 0.5 }}>
-              {statusMessage}
-            </Alert>
-          )}
-          {error && !statusMessage && (
-            <Alert severity="error" variant="outlined" sx={{ py: 0.5 }}>
-              {error}
-            </Alert>
-          )}
-          {serverReachable === false && (
-            <Typography variant="caption" color="text.secondary">
-              Offline mode
-            </Typography>
-          )}
-        </Stack>
-      </Stack>
-    </Stack>
-  );
-}
 
 const FieldNotesView = ({ text }: { text?: string }) => {
   if (!text || !text.trim()) {
@@ -530,7 +384,7 @@ export default function TaskDetailsModal({
         <Stack spacing={2.5}>
           {/* Resource pin input removed — pins are shown at the top of the callout UI */}
           {/* Quick progress action removed — use Progress Notes or batch actions instead */}
-          <ProgressNotesEditor
+          <ProgressNoteAdd
             taskId={task.taskId}
             taskStatus={task.taskStatus}
             onAdd={handleAddNote}
