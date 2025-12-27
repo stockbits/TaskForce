@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Stack, Typography } from "@mui/material";
 import Engineering from '@mui/icons-material/Engineering';
 import { useTheme } from "@mui/material/styles";
-import { sharedStyles } from './sharedStyles';
+import { sharedStyles } from '@/Reusable helper/Shared styles - component';
 
 interface Step2Props {
   selectedGroup: string;

@@ -6,7 +6,7 @@ import Engineering from '@mui/icons-material/Engineering';
 import { alpha, useTheme } from "@mui/material/styles";
 import { ResourceRecord } from '@/types';
 import { SingleSelectField } from '@/shared-ui';
-import { sharedStyles } from './sharedStyles';
+import { sharedStyles } from '@/Reusable helper/Shared styles - component';
 
 interface Step1Props {
   task: Record<string, any> | null | undefined;

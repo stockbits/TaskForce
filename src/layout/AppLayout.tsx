@@ -20,8 +20,8 @@ import {
   useTheme,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import mockTasks from "@/data/mockTasks.json";
-import ResourceMock from "@/data/ResourceMock.json";
+import mockTasks from "@/Database Models/Task - Model.json";
+import ResourceMock from "@/Database Models/Resource - Model.json";
 const ScheduleLivePage = lazy(() => import("@/schedule/scheduleLive - Page"));
 const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
 
@@ -32,7 +32,7 @@ import {
 } from '@/types';
 import { Step1 } from "@/Callout Component/Step 1 - Select Group";
 import { Step2 } from "@/Callout Component/Step 2 - Save outcome";
-import { sharedStyles } from "@/Callout Component/sharedStyles";
+import { sharedStyles } from "@/Reusable helper/Shared styles - component";
 
 import Menu from '@mui/icons-material/Menu';
 import Folder from '@mui/icons-material/Folder';
@@ -48,7 +48,7 @@ import Calendar from '@mui/icons-material/CalendarMonth';
 import Cog from '@mui/icons-material/Build';
 import Engineering from '@mui/icons-material/Engineering';
 import TaskPopoutPanel from "@/Task Resource Components/New Window/Task Popout Panel - Component";
-import ProgressTasksDialog from '@/Task Resource Components/New Window/Progress Task - Component';
+import ProgressTasksDialog from '@/Task Resource Components/Inline Window/Multi Task Progress - Component';
 import TaskSearchCard from '@/tasks/TaskSearchCardClean';
 import TaskTableAdvanced from '@/tasks/TaskTableAdvanced';
 import { useAppSnackbar } from '@/shared-ui/SnackbarProvider';
@@ -56,9 +56,9 @@ import AppButton from '@/shared-ui/button';
 import { Sidebar as SidebarNavigation } from '@/layout/SidebarNavigation';
 import { cardMap } from "@/layout/menuRegistry";
 import { TaskDetails, ProgressNoteEntry } from "@/types";
-import { useExternalWindow } from "@/hooks/useExternalWindow";
+import { useExternalWindow } from "@/Custom React - Hooks/Popup window - component";
 import { useCalloutHistory } from "@/Callout Component/useCalloutHistory";
-import { filterTasks } from "@/hooks/useTaskFilters";
+import { filterTasks } from "@/Reusable helper/Task filtering - component";
 import type { CalloutHistoryEntry } from "@/Callout Component/useCalloutHistory";
 
 /* ========================================================= */

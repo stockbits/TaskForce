@@ -7,7 +7,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { Box, Stack, Typography } from "@mui/material";
 import TaskTableAdvanced from "@/tasks/TaskTableAdvanced";
-import type { TaskRecord } from "@/hooks/useLiveSelectEngine";
+import type { TaskRecord } from "@/Custom React - Hooks/Table selection - component";
 
 const PRIORITY_KEYS = [
   "taskId",

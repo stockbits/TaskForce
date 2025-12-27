@@ -4,8 +4,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import BaseField from '../base/BaseField';
 import { BaseFieldProps } from '../types';
 import useFieldSizes from '../utils/useFieldSizes';
-import mockTasks from '@/data/mockTasks.json';
-import ResourceMock from '@/data/ResourceMock.json';
+import mockTasks from '@/Database Models/Task - Model.json';
+import ResourceMock from '@/Database Models/Resource - Model.json';
 import { SimpleTooltip } from '@/shared-ui';
 
 interface GlobalSearchFieldProps extends BaseFieldProps {

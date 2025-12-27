@@ -21,9 +21,9 @@ import {
   createTaskSVG,
   createResourceSVG,
   COMMIT_COLORS,
-} from "@/shared-config/pins";
+} from "@/Reusable helper/Map pin - component";
 
-import type { TaskRecord, ResourceRecord } from "@/hooks/useLiveSelectEngine";
+import type { TaskRecord, ResourceRecord } from "@/Custom React - Hooks/Table selection - component";
 
 /* ============================================================================
    MAP RESIZE AUTO-FIX

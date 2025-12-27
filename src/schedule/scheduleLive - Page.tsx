@@ -13,17 +13,17 @@ const MapPanel = lazy(() => import("./MapPanel"));
 const TaskTablePanel = lazy(() => import("./TaskTablePanel"));
 const ResourceTablePanel = lazy(() => import("./ResourceTablePanel"));
 
-import mockTasks from "@/data/mockTasks.json";
-import ResourceMock from "@/data/ResourceMock.json";
+import mockTasks from "@/Database Models/Task - Model.json";
+import ResourceMock from "@/Database Models/Resource - Model.json";
 
 // replaced react-resizable-panels with internal flex splitter
 
-import { usePanelDocking, PanelContainer } from "@/hooks/usePanelDocking";
+import { usePanelDocking, PanelContainer } from "@/Custom React - Hooks/Dock Panel - component";
 import { PanelKey } from "@/types";
 
-import { useSearchLeftMenu } from "@/hooks/useSearchLeftMenu";
+import { useSearchLeftMenu } from "@/Custom React - Hooks/search Tool Tab - component";
 
-import { useLiveSelectEngine } from "@/hooks/useLiveSelectEngine";
+import { useLiveSelectEngine } from "@/Custom React - Hooks/Table selection - component";
 
 import { GlobalSearchField, SelectField } from "@/shared-ui";
 
@@ -36,7 +36,7 @@ import Map from '@mui/icons-material/Map';
 import Users from '@mui/icons-material/People';
 import ClipboardList from '@mui/icons-material/ListAlt';
 
-import type { TaskRecord, ResourceRecord } from "@/hooks/useLiveSelectEngine";
+import type { TaskRecord, ResourceRecord } from "@/Custom React - Hooks/Table selection - component";
 
 import {
   Box,

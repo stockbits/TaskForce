@@ -10,7 +10,7 @@ import {
   STATUS_COLORS,
   createTaskSVG,
   createResourceSVG,
-} from "@/shared-config/pins";
+} from "@/Reusable helper/Map pin - component";
 
 interface ScheduleLegendProps {
   visible: boolean;

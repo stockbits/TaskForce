@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from "react";
 // framer-motion removed — render static Card components
 import { useAppSnackbar } from '@/shared-ui/SnackbarProvider';
-import mockTasks from "@/data/mockTasks.json";
+import mockTasks from "@/Database Models/Task - Model.json";
 import {
   Box,
   useTheme,

@@ -1,11 +1,11 @@
 // =====================================================================
-// popup-main.tsx — React entry point for popup.html with full logic
+// Popup Entry Point - Component.tsx — React entry point for popup.html with full logic
 // =====================================================================
 
 import React, { useState, useCallback, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import TaskPopoutPanel from "@/Task Resource Components/New Window/Task Popout Panel - Component";
-import ResourcePopoutPanel from "@/Task Resource Components/New Window/Resource - Component";
+import ResourcePopoutPanel from "@/Task Resource Components/New Window/Resource Popout Panel - Component";
 import { TaskDetails } from "@/types";
 import type { ResourceRecord } from '@/types';
 import type { CalloutHistoryEntry } from "@/Callout Component/useCalloutHistory";
