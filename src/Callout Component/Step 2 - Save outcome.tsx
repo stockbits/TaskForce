@@ -239,13 +239,19 @@ export const Step2: React.FC<Step2Props> = ({
         },
       }));
 
+      // Clear the draft after successful save
+      setRowDrafts((prev) => ({
+        ...prev,
+        [resourceId]: { outcome: "", availableAgainAt: "", saving: false },
+      }));
+
       const label = CalloutOutcomeConfig[outcomeValue].label;
       showToast(`Saved ${label}`);
     } catch (err) {
       console.error("save error", err);
       showToast("Error saving");
     } finally {
-      // Remove spinner
+      // Remove spinner (only if not already cleared above)
       setRowDrafts((prev) => ({
         ...prev,
         [resourceId]: { ...prev[resourceId], saving: false },

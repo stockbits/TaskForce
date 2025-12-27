@@ -1456,6 +1456,7 @@ export default function MainLayout() {
                 // Add code to show the callout landing page here
               }}
               variant="contained"
+              disabled={hasUnsavedCalloutChanges}
               sx={{ minWidth: 120 }}
             >
               Back
