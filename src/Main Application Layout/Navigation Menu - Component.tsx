@@ -38,7 +38,7 @@ import LogOut from '@mui/icons-material/Logout';
 import Folder from '@mui/icons-material/Folder';
 import Search from '@mui/icons-material/Search';
 import Clear from '@mui/icons-material/Clear';
-import { cardMap } from "./menuRegistry";
+import { cardMap } from "./Navigation Menu Registry";
 
 const userMenus = [
   { label: "Operation Toolkit", icon: ClipboardList, children: cardMap["Operation Toolkit"] || [] },
