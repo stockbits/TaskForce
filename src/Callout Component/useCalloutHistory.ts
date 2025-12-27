@@ -12,6 +12,7 @@ export interface CalloutHistoryEntry {
   availableAgainAt: string | null;
   note: string | null;
   timestamp: string;
+  taskIcon?: string | null;
 }
 
 interface UseCalloutHistoryResult {
@@ -42,6 +43,7 @@ function normalizeEntry(raw: any): CalloutHistoryEntry | null {
     availableAgainAt: raw.availableAgainAt ?? null,
     note: raw.note ?? null,
     timestamp,
+    taskIcon: raw.taskIcon ?? null,
   };
 }
 

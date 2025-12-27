@@ -1399,6 +1399,8 @@ export default function MainLayout() {
               backgroundImage: 'none',
               minHeight: '80vh',
               maxHeight: '90vh',
+              display: 'flex',
+              flexDirection: 'column',
             }
           }}
         >
@@ -1430,7 +1432,7 @@ export default function MainLayout() {
             </Stack>
           </DialogTitle>
 
-          <DialogContent dividers sx={{ px: { xs: 2, md: 4 }, py: { xs: 2, md: 3 } }}>
+          <DialogContent dividers sx={{ px: { xs: 2, md: 4 }, py: { xs: 2, md: 3 }, display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
             <Step2
               task={incidentTask}
               selectedGroup={activeCalloutGroup}

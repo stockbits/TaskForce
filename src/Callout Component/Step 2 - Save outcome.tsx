@@ -14,7 +14,6 @@ import {
   TextField,
   IconButton,
   CircularProgress,
-  Alert,
   List,
   ListItem,
   ListItemText,
@@ -26,9 +25,9 @@ import {
 } from "@mui/material";
 import { AppButton } from "../shared-components";
 import Person from '@mui/icons-material/Person';
-import Assignment from '@mui/icons-material/Assignment';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import History from '@mui/icons-material/History';
-import Task from '@mui/icons-material/Task';
+// removed unused Task icon import
 import Users from '@mui/icons-material/People';
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import { alpha, useTheme } from "@mui/material/styles";
@@ -81,7 +80,7 @@ export const Step2: React.FC<Step2Props> = ({
   }, [resources, selectedGroup]);
 
   // Resource list type selection
-  const [selectedListType, setSelectedListType] = useState<ResourceListType>('all');
+  const [selectedListType, setSelectedListType] = useState<ResourceListType>('main');
 
   // Determine displayed resources based on scope
   const displayedResources = useMemo(() => {
@@ -111,11 +110,13 @@ export const Step2: React.FC<Step2Props> = ({
     Record<string, { outcome: CalloutOutcome | ""; availableAgainAt: string; saving?: boolean }>
   >({});
 
-  // Toast message state
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  // toast notifications removed: UI uses button state and cleared inputs as feedback
 
   // History panel state
   const [selectedHistoryResourceId, setSelectedHistoryResourceId] = useState<string | null>(null);
+
+  // Local history map to keep most recent N entries per resource for immediate UI updates
+  const [localHistoryMap, setLocalHistoryMap] = useState<Record<string, CalloutHistoryEntry[]>>({});
 
   // Track recently saved outcomes for immediate display in Last Outcome column
   const [recentlySavedOutcomes, setRecentlySavedOutcomes] = useState<
@@ -138,12 +139,22 @@ export const Step2: React.FC<Step2Props> = ({
     }
   }, [groupResources, rowDrafts]);
 
-  // Toast handler
+  // Initialize local history map from prop, keep most recent 5 per resource
   useEffect(() => {
-    if (!toastMsg) return;
-    const t = setTimeout(() => setToastMsg(null), 2200);
-    return () => clearTimeout(t);
-  }, [toastMsg]);
+    const map: Record<string, CalloutHistoryEntry[]> = {};
+    calloutHistory.forEach((entry) => {
+      if (!map[entry.resourceId]) map[entry.resourceId] = [];
+      map[entry.resourceId].push(entry);
+    });
+    Object.keys(map).forEach((rid) => {
+      map[rid] = map[rid]
+        .sort((a, b) => (new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()))
+        .slice(0, 5);
+    });
+    setLocalHistoryMap(map);
+  }, [calloutHistory]);
+
+  // toast handler removed
 
   // Check for unsaved changes
   useEffect(() => {
@@ -156,7 +167,7 @@ export const Step2: React.FC<Step2Props> = ({
     onUnsavedChanges(hasUnsaved);
   }, [rowDrafts, onUnsavedChanges]);
 
-  const showToast = (m: string) => setToastMsg(m);
+  // showToast removed
 
   // History panel handlers
   const toggleHistoryPanel = (resourceId: string) => {
@@ -189,12 +200,10 @@ export const Step2: React.FC<Step2Props> = ({
     const outcomeValue = (draft?.outcome || "") as CalloutOutcome | "";
 
     if (!outcomeValue) {
-      showToast("Select an outcome first");
       return;
     }
 
     if (outcomeValue === "Unavailable" && (!draft?.availableAgainAt || draft.availableAgainAt.trim() === "")) {
-      showToast("Set return time");
       return;
     }
 
@@ -218,7 +227,7 @@ export const Step2: React.FC<Step2Props> = ({
       if (onHistoryUpdate) {
         onHistoryUpdate({
           id: `OUTCOME-${resourceId}-${Date.now()}`,
-          taskId: taskId || null,
+          taskId: taskId || task?.taskId || task?.TaskID || null,
           workId: null,
           resourceId,
           outcome: outcomeValue as CalloutOutcome,
@@ -226,8 +235,28 @@ export const Step2: React.FC<Step2Props> = ({
           availableAgainAt: outcomeValue === "Unavailable" ? draft?.availableAgainAt || null : null,
           note: `Outcome set to ${CalloutOutcomeConfig[outcomeValue].label}`,
           timestamp: new Date().toISOString(),
+          taskIcon: 'Assignment',
         });
       }
+
+      // Also update local history map immediately so UI shows top 5 (newest first)
+      const newEntry: CalloutHistoryEntry = {
+        id: `OUTCOME-${resourceId}-${Date.now()}`,
+        taskId: taskId || task?.taskId || task?.TaskID || null,
+        workId: null,
+        resourceId,
+        outcome: outcomeValue as CalloutOutcome,
+        status: null,
+        availableAgainAt: outcomeValue === "Unavailable" ? draft?.availableAgainAt || null : null,
+        note: `Outcome set to ${CalloutOutcomeConfig[outcomeValue].label}`,
+        timestamp: new Date().toISOString(),
+        taskIcon: 'Assignment',
+      };
+
+      setLocalHistoryMap((prev) => {
+        const list = prev[resourceId] ? [newEntry, ...prev[resourceId]] : [newEntry];
+        return { ...prev, [resourceId]: list.slice(0, 5) };
+      });
 
       // Immediately update the Last Outcome display
       setRecentlySavedOutcomes((prev) => ({
@@ -246,10 +275,8 @@ export const Step2: React.FC<Step2Props> = ({
       }));
 
       const label = CalloutOutcomeConfig[outcomeValue].label;
-      showToast(`Saved ${label}`);
     } catch (err) {
       console.error("save error", err);
-      showToast("Error saving");
     } finally {
       // Remove spinner (only if not already cleared above)
       setRowDrafts((prev) => ({
@@ -354,67 +381,84 @@ export const Step2: React.FC<Step2Props> = ({
     );
   };
 
+  const getDisplayedHistoryFor = (resourceId: string) => {
+    const local = localHistoryMap[resourceId];
+    if (local && local.length > 0) return local;
+    const filtered = calloutHistory.filter((e) => e.resourceId === resourceId);
+    return filtered
+      .sort((a, b) => (new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()))
+      .slice(0, 5);
+  };
+
+  const renderIconFor = (iconName?: string | null) => {
+    switch (iconName) {
+      case 'Assignment':
+        return <AssignmentIcon sx={{ fontSize: 14 }} />;
+      default:
+        return <AssignmentIcon sx={{ fontSize: 14 }} />;
+    }
+  };
+
   return (
     <>
-      <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
+      <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start', height: 'calc(100vh - 80px)', overflow: 'hidden' }}>
       {/* Main Content */}
-      <Box sx={{ flex: selectedHistoryResourceId ? 1 : 'auto', minWidth: 0 }}>
-        <Stack spacing={3}>
+      <Box sx={{ flex: selectedHistoryResourceId ? 1 : 'auto', minWidth: 0, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <Stack spacing={3} sx={{ flex: 1, minHeight: 0, height: '100%' }}>
           {/* Progress Information */}
-          {task && (
-            <Paper variant="outlined" sx={styles.taskDetailsPaper}>
-              <Stack spacing={2}>
-                <Typography variant="overline" sx={styles.sectionTitle}>
-                  Progress
-                </Typography>
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <Typography variant="body2" color="text.secondary">
-                    Progress:
-                  </Typography>
-                  <Chip
-                    label={task.taskId || task.TaskID || task.id || 'Unknown'}
-                    size="small"
-                    color="primary"
-                    variant="outlined"
-                  />
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+            {/* Progress Information */}
+            {task && (
+              <Paper variant="outlined" sx={{ ...styles.taskDetailsPaper, flex: 1 }}>
+                <Stack spacing={2}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <Stack spacing={2} sx={{ flex: 1 }}>
+                      <Typography variant="overline" sx={styles.sectionTitle}>
+                        Progress
+                      </Typography>
+                      <Stack direction="row" spacing={2} alignItems="center">
+                        <Chip
+                          label={task.taskId || task.TaskID || task.id || 'Unknown'}
+                          size="small"
+                          color="primary"
+                          variant="outlined"
+                        />
 
-                  <ChevronRight sx={{ color: 'text.secondary', fontSize: 18 }} />
+                        <ChevronRight sx={{ color: 'text.secondary', fontSize: 18 }} />
 
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Users sx={{ fontSize: 18, color: 'success.main' }} />
-                    <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                      Selected: {selectedGroup}
-                    </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Users sx={{ fontSize: 18, color: 'success.main' }} />
+                          <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                            Selected: {selectedGroup}
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </Stack>
+
+                    {/* Resource List Selection */}
+                    {!isStarting && groupResources.length > 0 && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                          Resource List:
+                        </Typography>
+                        <FormControl size="small" sx={{ minWidth: 160 }}>
+                          <Select
+                            value={selectedListType}
+                            onChange={(event) => setSelectedListType(event.target.value as ResourceListType)}
+                            displayEmpty
+                          >
+                            <MenuItem value="main">Main List</MenuItem>
+                            <MenuItem value="backup">Backup</MenuItem>
+                            <MenuItem value="all">Show All</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Box>
+                    )}
                   </Box>
                 </Stack>
-              </Stack>
-            </Paper>
-          )}
-
-          {/* List Type Selection */}
-          {!isStarting && groupResources.length > 0 && (
-            <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-              <Stack spacing={2}>
-                <Typography variant="overline" sx={styles.sectionTitle}>
-                  Resource List
-                </Typography>
-                <FormControl size="small" sx={{ minWidth: 200 }}>
-                  <Select
-                    value={selectedListType}
-                    onChange={(event) => setSelectedListType(event.target.value as ResourceListType)}
-                    displayEmpty
-                  >
-                    <MenuItem value="all">All Engineers</MenuItem>
-                    <MenuItem value="main">Main List</MenuItem>
-                    <MenuItem value="backup">Backup List</MenuItem>
-                  </Select>
-                </FormControl>
-                <Typography variant="caption" color="text.secondary">
-                  Showing {displayedResources.length} of {groupResources.length} engineers
-                </Typography>
-              </Stack>
-            </Paper>
-          )}
+              </Paper>
+            )}
+          </Box>
 
           {/* Resource Preview Table */}
           {!isStarting && displayedResources.length > 0 && (
@@ -424,12 +468,16 @@ export const Step2: React.FC<Step2Props> = ({
                 borderRadius: 2,
                 borderColor: alpha(theme.palette.primary.main, 0.14),
                 overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                maxHeight: 'calc(100vh - 220px)',
               }}
             >
-              <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+              <Box sx={{ maxHeight: 'calc(100vh - 220px)', overflow: 'auto' }}>
             <Table size="small">
               <TableHead>
                 <TableRow>
+                  <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }} align="center">Tech ID</TableCell>
                   <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }} align="center">Outcome</TableCell>
                   <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }} align="center">Return Time</TableCell>
                   <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }} align="center">Last Outcome</TableCell>
@@ -453,6 +501,11 @@ export const Step2: React.FC<Step2Props> = ({
                       }}
                     >
                       <TableCell align="center">
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {resource.resourceId}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
                         <FormControl fullWidth size="small">
                           <Select
                             native
@@ -474,7 +527,7 @@ export const Step2: React.FC<Step2Props> = ({
                         <TextField
                           type="datetime-local"
                           size="small"
-                          fullWidth
+                          sx={{ maxWidth: 180 }}
                           disabled={!requiresUnavailable}
                           value={draft.availableAgainAt || ""}
                           onChange={(event) => handleDraftChange(resource.resourceId, {
@@ -519,7 +572,7 @@ export const Step2: React.FC<Step2Props> = ({
                             }}
                             sx={{ color: 'black' }}
                           >
-                            <Assignment sx={{ fontSize: 16 }} />
+                            <AssignmentIcon sx={{ fontSize: 16 }} />
                           </IconButton>
                           <IconButton
                             size="small"
@@ -538,11 +591,9 @@ export const Step2: React.FC<Step2Props> = ({
           </Box>
 
           <Box sx={{ p: 2, borderTop: `1px solid ${alpha(theme.palette.primary.main, 0.12)}` }}>
-            {displayedResources.length > 10 && (
-              <Typography variant="caption" color="text.secondary">
-                Showing first 10 of {displayedResources.length} engineers
-              </Typography>
-            )}
+            <Typography variant="caption" color="text.secondary">
+              {displayedResources.length} engineers
+            </Typography>
           </Box>
         </Paper>
       )}
@@ -550,29 +601,13 @@ export const Step2: React.FC<Step2Props> = ({
         </Stack>
       </Box>
 
-      {/* Toast Message */}
-      {toastMsg && (
-        <Alert
-          severity="success"
-          variant="filled"
-          sx={{
-            position: 'fixed',
-            top: 24,
-            right: 24,
-            zIndex: 9999,
-            minWidth: 300,
-            boxShadow: theme.shadows[8],
-          }}
-        >
-          {toastMsg}
-        </Alert>
-      )}
+      {/* Toast removed - button state and cleared inputs act as feedback */}
 
       {/* History Panel */}
       {selectedHistoryResourceId && (
-        <Box sx={{ width: 400, flexShrink: 0 }}>
-          <Card variant="outlined" sx={{ borderRadius: 2 }}>
-            <CardContent sx={{ p: 2 }}>
+        <Box sx={{ width: 400, flexShrink: 0, maxHeight: 'calc(100vh - 200px)', overflow: 'hidden' }}>
+          <Card variant="outlined" sx={{ borderRadius: 2, height: '100%' }}>
+            <CardContent sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
               <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
                 <Typography variant="subtitle2" fontWeight={600}>
                   Callout History - {selectedHistoryResourceId}
@@ -581,10 +616,8 @@ export const Step2: React.FC<Step2Props> = ({
                   <Typography variant="caption" sx={{ fontSize: 12 }}>✕</Typography>
                 </IconButton>
               </Stack>
-              <List dense sx={{ maxHeight: 500, overflow: 'auto' }}>
-                {calloutHistory
-                  .filter(entry => entry.resourceId === selectedHistoryResourceId)
-                  .map((entry, index) => (
+              <List dense sx={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+                {getDisplayedHistoryFor(selectedHistoryResourceId || "").map((entry, index) => (
                     <React.Fragment key={entry.id}>
                       <ListItem sx={{ px: 0, alignItems: 'flex-start' }}>
                         <ListItemText
@@ -594,9 +627,18 @@ export const Step2: React.FC<Step2Props> = ({
                                 {CalloutOutcomeConfig[entry.outcome as CalloutOutcome]?.label || entry.outcome}
                               </Typography>
                               {entry.taskId && (
-                                <IconButton size="small" sx={{ p: 0.5 }}>
-                                  <Task sx={{ fontSize: 14 }} />
-                                </IconButton>
+                                <Stack direction="row" alignItems="center" spacing={0.5} sx={{ ml: 1 }}>
+                                  <IconButton
+                                    size="small"
+                                    sx={{ p: 0.5, color: 'black' }}
+                                    onClick={() => console.log('task clicked', entry.taskId)}
+                                  >
+                                    {renderIconFor(entry.taskIcon)}
+                                  </IconButton>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {entry.taskId}
+                                  </Typography>
+                                </Stack>
                               )}
                             </Stack>
                           }
