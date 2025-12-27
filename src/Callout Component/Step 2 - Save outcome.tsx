@@ -117,6 +117,11 @@ export const Step2: React.FC<Step2Props> = ({
   // History panel state
   const [selectedHistoryResourceId, setSelectedHistoryResourceId] = useState<string | null>(null);
 
+  // Track recently saved outcomes for immediate display in Last Outcome column
+  const [recentlySavedOutcomes, setRecentlySavedOutcomes] = useState<
+    Record<string, { outcome: CalloutOutcome; availableAgainAt?: string; timestamp: string }>
+  >({});
+
   // Initialize drafts when resources change
   useEffect(() => {
     const newDrafts: Record<string, { outcome: CalloutOutcome | ""; availableAgainAt: string }> = {};
@@ -224,6 +229,16 @@ export const Step2: React.FC<Step2Props> = ({
         });
       }
 
+      // Immediately update the Last Outcome display
+      setRecentlySavedOutcomes((prev) => ({
+        ...prev,
+        [resourceId]: {
+          outcome: outcomeValue as CalloutOutcome,
+          availableAgainAt: outcomeValue === "Unavailable" ? draft?.availableAgainAt : undefined,
+          timestamp: new Date().toISOString(),
+        },
+      }));
+
       const label = CalloutOutcomeConfig[outcomeValue].label;
       showToast(`Saved ${label}`);
     } catch (err) {
@@ -251,6 +266,31 @@ export const Step2: React.FC<Step2Props> = ({
   };
 
   const renderLastOutcomeCell = (resource: ResourceRecord) => {
+    const resourceId = resource.resourceId;
+
+    // Check for recently saved outcome first
+    const recentlySaved = recentlySavedOutcomes[resourceId];
+    if (recentlySaved) {
+      const label = CalloutOutcomeConfig[recentlySaved.outcome]?.label ?? String(recentlySaved.outcome);
+      const timestamp = recentlySaved.availableAgainAt && recentlySaved.outcome === "Unavailable" 
+        ? recentlySaved.availableAgainAt 
+        : recentlySaved.timestamp;
+      const isReturnTime = recentlySaved.availableAgainAt && recentlySaved.outcome === "Unavailable";
+
+      return (
+        <Stack spacing={0.25} sx={{ lineHeight: 1.4 }}>
+          <Typography variant="caption" color="text.primary" sx={{ fontWeight: 600 }}>
+            {label}
+          </Typography>
+          {timestamp && (
+            <Typography variant="caption" color="text.secondary">
+              {isReturnTime ? "Return:" : "Updated:"} {formatUkDateTime(timestamp)}
+            </Typography>
+          )}
+        </Stack>
+      );
+    }
+
     // Get callout history entries for this resource
     const resourceCalloutHistory = calloutHistory.filter(entry => entry.resourceId === resource.resourceId);
 
