@@ -29,7 +29,7 @@ import {
   ResourceRecord,
   CalloutOutcome,
   CalloutOutcomeConfig,
-} from '@/types';
+} from '@/shared-types';
 import { CalloutHistoryEntry } from '@/Callout Component/useCalloutHistory';
 import { Step1 } from "@/Callout Component/Step 1 - Select Group";
 import { Step2 } from "@/Callout Component/Step 2 - Save outcome";
@@ -55,7 +55,7 @@ import { useAppSnackbar } from '@/shared-components';
 import { AppButton } from '@/shared-components';
 import { Sidebar as SidebarNavigation } from '@/Main Application Layout/Navigation Menu - Component';
 import { cardMap } from "@/Main Application Layout/Navigation Menu Registry";
-import { TaskDetails, ProgressNoteEntry } from "@/types";
+import { TaskDetails, ProgressNoteEntry } from "@/shared-types";
 import { useExternalWindow } from "@/Custom React - Hooks/Popup window - component";
 import { useCalloutHistory } from "@/Callout Component/useCalloutHistory";
 import { filterTasks } from "@/Reusable helper/Task filtering - component";

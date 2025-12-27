@@ -19,7 +19,7 @@ import ResourceMock from "@/Database Models/Resource - Model.json";
 // replaced react-resizable-panels with internal flex splitter
 
 import { usePanelDocking, PanelContainer } from "@/Custom React - Hooks/Dock Panel - component";
-import { PanelKey } from "@/types";
+import { PanelKey } from "@/shared-types";
 
 import { useSearchLeftMenu } from "@/Custom React - Hooks/search Tool Tab - component";
 

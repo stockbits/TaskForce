@@ -2,7 +2,7 @@
    Shared configuration registry for menu cards and navigation
 ============================================================================ */
 
-import { MenuCard } from "@/types";
+import { MenuCard } from "@/shared-types";
 
 /**
  * The master registry for all menu groups and their cards.

@@ -14,7 +14,7 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import TaskDetailsModal from "@/Task Resource Components/Inline Window/Task Information Card - Component";
 import { PillGroup } from '@/shared-components';
-import type { TaskDetails } from "@/types";
+import type { TaskDetails } from "@/shared-types";
 
 interface TaskPopoutPanelProps {
   open: boolean;

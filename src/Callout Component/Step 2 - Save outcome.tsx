@@ -32,7 +32,7 @@ import Users from '@mui/icons-material/People';
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import { alpha, useTheme } from "@mui/material/styles";
 import { sharedStyles } from '@/Reusable helper/Shared styles - component';
-import { CalloutOutcome, CalloutOutcomeConfig, ResourceRecord } from "@/types";
+import { CalloutOutcome, CalloutOutcomeConfig, ResourceRecord } from "@/shared-types";
 import { CalloutHistoryEntry } from "@/Callout Component/useCalloutHistory";
 
 interface Step2Props {

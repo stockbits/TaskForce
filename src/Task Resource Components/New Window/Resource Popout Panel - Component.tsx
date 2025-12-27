@@ -26,8 +26,8 @@ import Clock from '@mui/icons-material/AccessTime';
 import Search from '@mui/icons-material/Search';
 import Copy from '@mui/icons-material/ContentCopy';
 import X from '@mui/icons-material/Close';
-import type { ResourceRecord } from '@/types';
-import { CalloutOutcomeConfig } from '@/types';
+import type { ResourceRecord } from '@/shared-types';
+import { CalloutOutcomeConfig } from '@/shared-types';
 import type { CalloutHistoryEntry } from "@/Callout Component/useCalloutHistory";
 import { ExpandableSectionCard } from '@/shared-components';
 

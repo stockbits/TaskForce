@@ -6,8 +6,8 @@ import React, { useState, useCallback, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import TaskPopoutPanel from "@/Task Resource Components/New Window/Task Popout Panel - Component";
 import ResourcePopoutPanel from "@/Task Resource Components/New Window/Resource Popout Panel - Component";
-import { TaskDetails } from "@/types";
-import type { ResourceRecord } from '@/types';
+import { TaskDetails } from "@/shared-types";
+import type { ResourceRecord } from '@/shared-types';
 import type { CalloutHistoryEntry } from "@/Callout Component/useCalloutHistory";
 
 declare global {

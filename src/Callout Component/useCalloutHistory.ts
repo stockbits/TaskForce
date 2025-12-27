@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import seedHistory from "@/Database Models/Call Out - Model.json";
-import type { CalloutOutcome } from "@/types";
+import type { CalloutOutcome } from "@/shared-types";
 
 export interface CalloutHistoryEntry {
   id: string;

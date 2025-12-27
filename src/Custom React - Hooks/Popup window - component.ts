@@ -7,8 +7,8 @@
 // =====================================================================
 
 import { useState, useRef, useCallback } from "react";
-import { TaskDetails } from "@/types";
-import type { ResourceRecord } from '@/types';
+import { TaskDetails } from "@/shared-types";
+import type { ResourceRecord } from '@/shared-types';
 import type { CalloutHistoryEntry } from "../Callout Component/useCalloutHistory";
 
 type PopupMode = "tasks" | "resource";
