@@ -26,13 +26,13 @@ const ScheduleLivePage = lazy(() => import("@/A - Schedule Live Main/Main Page/S
 const SettingsPage = lazy(() => import("@/System Settings/Application Settings - Page"));
 
 import {
+  ResourceRecord,
   CalloutOutcome,
   CalloutOutcomeConfig,
-  ResourceRecord,
 } from '@/types';
-import { Step1 } from "@/Callout Component/Callout Component/Callout Component/Step 1 - Select Group";
-import { Step2 } from "@/Callout Component/Callout Component/Callout Component/Step 2 - Save outcome";
-import { sharedStyles } from "@/Reusable helper/Shared styles - component";
+import { CalloutHistoryEntry } from '@/Callout Component/useCalloutHistory';
+import { Step1 } from "@/Callout Component/Step 1 - Select Group";
+import { Step2 } from "@/Callout Component/Step 2 - Save outcome";
 
 import Menu from '@mui/icons-material/Menu';
 import Folder from '@mui/icons-material/Folder';
@@ -51,15 +51,14 @@ import TaskPopoutPanel from "@/Task Resource Components/New Window/Task Popout P
 import ProgressTasksDialog from '@/Task Resource Components/Inline Window/Multi Task Progress - Component';
 import TaskSearchCard from '@/A - Task Management Main/Search Component/Task Search Card - Component';
 import TaskTableAdvanced from '@/A - Task Management Main/MUI Table Component/Task Table Advanced - Component';
-import { useAppSnackbar } from '@/shared-ui/SnackbarProvider';
-import AppButton from '@/shared-ui/button';
+import { useAppSnackbar } from '@/shared-components';
+import { AppButton } from '@/shared-components';
 import { Sidebar as SidebarNavigation } from '@/Main Application Layout/Navigation Menu - Component';
 import { cardMap } from "@/Main Application Layout/Navigation Menu Registry";
 import { TaskDetails, ProgressNoteEntry } from "@/types";
 import { useExternalWindow } from "@/Custom React - Hooks/Popup window - component";
-import { useCalloutHistory } from "@/Callout Component/Callout Component/Callout Component/useCalloutHistory";
+import { useCalloutHistory } from "@/Callout Component/useCalloutHistory";
 import { filterTasks } from "@/Reusable helper/Task filtering - component";
-import type { CalloutHistoryEntry } from "@/Callout Component/Callout Component/Callout Component/useCalloutHistory";
 
 /* ========================================================= */
 const iconMap: Record<string, any> = {
@@ -410,12 +409,10 @@ export default function MainLayout() {
     externalTasks,
     externalExpandedSections,
     openExternalWindow,
-    openResourceWindow,
     closeExternalWindow,
     setExternalExpandedSections,
   } = useExternalWindow();
 
-  const [incidentOpen, setIncidentOpen] = useState(false);
   const [incidentTask, setIncidentTask] = useState<Record<string, any> | null>(
     null
   );
@@ -641,17 +638,12 @@ export default function MainLayout() {
 
   // CALLOUT LANDING (NEW)
   const [calloutLandingOpen, setCalloutLandingOpen] = useState(false);
-  const [selectedCalloutResources, setSelectedCalloutResources] = useState<
-    ResourceRecord[]
-  >([]);
-  const [selectedCalloutGroup, setSelectedCalloutGroup] = useState<string | null>(
-    null
-  );
-  // States for callout landing steps
+  // States for callout landing
   const [selectedGroup, setSelectedGroup] = useState<string>("");
+  const [activeCalloutGroup, setActiveCalloutGroup] = useState<string>("");
   const [query, setQuery] = useState<string>("");
   const [isStarting, setIsStarting] = useState(false);
-  const [currentStep, setCurrentStep] = useState<1 | 2>(1);
+  const [calloutOverviewOpen, setCalloutOverviewOpen] = useState(false);
 
   const resourceCountByGroup = useMemo(() => {
     const countMap = new Map<string, number>();
@@ -669,22 +661,23 @@ export default function MainLayout() {
 
     setSelectedGroup(next);
     setQuery(next);
-    setCurrentStep(2); // Move to confirmation step
   }, []);
 
   const handleBack = useCallback(() => {
-    if (currentStep === 2) {
-      setCurrentStep(1);
+    if (calloutOverviewOpen) {
+      setCalloutOverviewOpen(false);
     } else {
       setCalloutLandingOpen(false);
-      setSelectedCalloutResources([]);
-      setSelectedCalloutGroup(null);
       setSelectedGroup("");
       setQuery("");
       setIsStarting(false);
-      setCurrentStep(1);
     }
-  }, [currentStep]);
+  }, [calloutOverviewOpen]);
+
+  const {
+    history: calloutHistory,
+    appendLocal: appendCalloutHistory,
+  } = useCalloutHistory();
 
   const handleStartCallout = useCallback(async () => {
     if (!selectedGroup) return;
@@ -693,33 +686,35 @@ export default function MainLayout() {
 
     // Brief delay to show starting feedback before proceeding
     setTimeout(() => {
-      // auto-load all resources belonging to that group
-      const list = resources.filter((r) => r.calloutGroup === selectedGroup);
-      const mainList = list.slice(0, 6);
+      // Record the callout start in history
+      const timestamp = new Date().toISOString();
+      const calloutId = `CALLOUT-${selectedGroup}-${Date.now()}`;
+      appendCalloutHistory({
+        id: calloutId,
+        taskId: null, // No specific task for group callout
+        workId: null,
+        resourceId: "", // Group callout
+        outcome: 'CalloutStarted' as any,
+        status: null,
+        availableAgainAt: null,
+        note: `Callout started for group: ${selectedGroup}`,
+        timestamp,
+      });
 
-      setSelectedCalloutResources(mainList);
-      setSelectedCalloutGroup(selectedGroup);
       setCalloutLandingOpen(false);
-      setIncidentOpen(true);
+      setCalloutOverviewOpen(true);
+      setActiveCalloutGroup(selectedGroup);
       // Reset states
       setSelectedGroup("");
       setQuery("");
       setIsStarting(false);
-      setCurrentStep(1);
     }, 800);
-  }, [selectedGroup, resources]);
-
-  const {
-    history: calloutHistory,
-    refresh: refreshCalloutHistory,
-    appendLocal: appendCalloutHistory,
-  } = useCalloutHistory();
+  }, [selectedGroup, resources, appendCalloutHistory]);
 
   const handleOpenCalloutIncident = useCallback((task: Record<string, any>) => {
     // First show the landing page to select callout configuration
     setIncidentTask(task);
     setCalloutLandingOpen(true);
-    setIncidentOpen(false);
   }, []);
 
   /* ---------------------- Effects ---------------------- */
@@ -834,6 +829,10 @@ export default function MainLayout() {
       setActiveSubPage("ScheduleLive"); // ⭐ NEW PAGE ID
     }
 
+    if (item.name === "Callout Overview") {
+      setActiveSubPage("CalloutOverview");
+    }
+
     if (item.name === "System Preferences") {
       setActiveSubPage("Settings");
     }
@@ -905,75 +904,60 @@ export default function MainLayout() {
     [openExternalWindow]
   );
 
-  const handleOpenResourcePopout = useCallback(
-    (resource: ResourceRecord, resourceHistory: CalloutHistoryEntry[]) => {
-      if (!resource) return;
-
-      const mergedHistory = resourceHistory.length
-        ? resourceHistory
-        : calloutHistory.filter(
-            (entry) => entry.resourceId === resource.resourceId
-          );
-
-      openResourceWindow(resource, mergedHistory);
-    },
-    [calloutHistory, openResourceWindow]
-  );
-
-  const handleOpenIncidentTaskPopout = useCallback(() => {
-    if (!incidentTask) return;
-
-    const coordsX = window.innerWidth / 2;
-    const coordsY = window.innerHeight / 2;
-    openExternalWindow([incidentTask as TaskDetails], coordsX, coordsY);
-  }, [incidentTask, openExternalWindow]);
-
-  // Outcome → task status mapping
-  const mapOutcomeToTaskStatus = (
-    current: string,
-    outcome: CalloutOutcome
-  ): string => {
+  // Helper functions for callout outcome mapping
+  const mapOutcomeToResourceStatus = (currentStatus: string | null, outcome: CalloutOutcome): string | null => {
     switch (outcome) {
       case "AssignDispatchedAWI":
       case "CalloutDispatchedAWI":
-        return "Dispatched (AWI)";
+        return "Dispatched";
       case "PendingACT":
-        return "Assigned (ACT)";
-      case "Disturbance":
-      case "NoReply":
-        return "Callout Failed";
-      case "Refusal":
-        return "Refused";
-      case "Unavailable":
-        return "Awaiting Resource";
-      default:
-        return current;
-    }
-  };
-
-  // Outcome → resource status mapping
-  const mapOutcomeToResourceStatus = (
-    current: string | null | undefined,
-    outcome: CalloutOutcome
-  ): string => {
-    switch (outcome) {
-      case "AssignDispatchedAWI":
-      case "CalloutDispatchedAWI":
-        return "Busy";
-      case "PendingACT":
-        return "Pending";
-      case "Disturbance":
-        return "Flagged";
-      case "NoReply":
-        return "No Reply";
-      case "Refusal":
-        return "Refused";
+        return "Assigned";
       case "Unavailable":
         return "Unavailable";
+      case "NoReply":
+      case "Refusal":
+      case "Disturbance":
+        return "Available";
       default:
-        return current || "Available";
+        return currentStatus;
     }
   };
+
+  const mapOutcomeToTaskStatus = (currentStatus: string | null, outcome: CalloutOutcome): string | null => {
+    switch (outcome) {
+      case "AssignDispatchedAWI":
+      case "CalloutDispatchedAWI":
+        return "In Progress";
+      case "PendingACT":
+        return "Assigned";
+      case "Unavailable":
+        return "On Hold";
+      case "NoReply":
+      case "Refusal":
+      case "Disturbance":
+        return "Pending";
+      default:
+        return currentStatus;
+    }
+  };
+
+  // External panel expand handlers
+  const handleExternalToggleSection = useCallback(
+    (section: string) => {
+      setExternalExpandedSections((prev: string[]) =>
+        prev.includes(section) ? prev.filter((s) => s !== section) : [...prev, section]
+      );
+    },
+    [setExternalExpandedSections]
+  );
+
+  const handleExternalExpandAll = useCallback(() => {
+    setExternalExpandedSections(ALL_TASK_SECTIONS);
+  }, [setExternalExpandedSections]);
+
+  const handleExternalCollapseAll = useCallback(() => {
+    setExternalExpandedSections([]);
+  }, [setExternalExpandedSections]);
 
   // MANUAL save from CalloutIncidentPanel (per row)
   const handleCalloutRowSave = useCallback(
@@ -1045,7 +1029,7 @@ export default function MainLayout() {
 
           return {
             ...r,
-            status: mapOutcomeToResourceStatus(r.status, outcome),
+            status: mapOutcomeToResourceStatus(r.status ?? null, outcome),
             lastOutcome: outcome,
             availableAgainAt:
               outcome === "Unavailable" ? availableAgainAt ?? null : null,
@@ -1159,24 +1143,6 @@ export default function MainLayout() {
     },
     [appendCalloutHistory]
   );
-
-  // External panel expand handlers
-  const handleExternalToggleSection = useCallback(
-    (section: string) => {
-      setExternalExpandedSections((prev: string[]) =>
-        prev.includes(section) ? prev.filter((s) => s !== section) : [...prev, section]
-      );
-    },
-    [setExternalExpandedSections]
-  );
-
-  const handleExternalExpandAll = useCallback(() => {
-    setExternalExpandedSections(ALL_TASK_SECTIONS);
-  }, [setExternalExpandedSections]);
-
-  const handleExternalCollapseAll = useCallback(() => {
-    setExternalExpandedSections([]);
-  }, [setExternalExpandedSections]);
 
   /* =========================================================
      RENDER
@@ -1370,34 +1336,26 @@ export default function MainLayout() {
 
               <Stack spacing={0.5}>
                 <Typography variant="h6" fontWeight={600} color="text.primary">
-                  {currentStep === 1 ? 'Select Callout Group' : 'Confirm Callout Start'}
+                  Select Callout Group
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Step {currentStep} of 2: {currentStep === 1 ? 'Choose the callout group to begin the resource allocation workflow.' : 'Review your selection and start the callout process.'}
+                  Choose the callout group to begin the resource allocation workflow.
                 </Typography>
               </Stack>
             </Stack>
           </DialogTitle>
 
           <DialogContent dividers sx={{ px: { xs: 2, md: 4 }, py: { xs: 2, md: 3 } }}>
-            {currentStep === 1 ? (
-              <Step1
-                task={incidentTask}
-                calloutGroups={calloutGroups}
-                resourceCountByGroup={resourceCountByGroup}
-                selectedGroup={selectedGroup}
-                query={query}
-                isStarting={isStarting}
-                onQueryChange={setQuery}
-                onGroupSelect={handleGroupSelect}
-              />
-            ) : (
-              <Step2
-                selectedGroup={selectedGroup}
-                resourceCountByGroup={resourceCountByGroup}
-                isStarting={isStarting}
-              />
-            )}
+            <Step1
+              task={incidentTask}
+              calloutGroups={calloutGroups}
+              resourceCountByGroup={resourceCountByGroup}
+              selectedGroup={selectedGroup}
+              query={query}
+              isStarting={isStarting}
+              onQueryChange={setQuery}
+              onGroupSelect={handleGroupSelect}
+            />
           </DialogContent>
 
           <DialogActions sx={{ px: { xs: 2, md: 4 }, py: 2, justifyContent: 'space-between' }}>
@@ -1407,28 +1365,98 @@ export default function MainLayout() {
               disabled={isStarting}
               sx={{ minWidth: 100 }}
             >
-              {currentStep === 1 ? 'Cancel' : 'Back'}
+              Cancel
             </AppButton>
 
-            {currentStep === 1 ? (
-              <AppButton
-                onClick={() => setCurrentStep(2)}
-                variant="contained"
-                disabled={!selectedGroup}
-                sx={{ minWidth: 140 }}
+            <AppButton
+              onClick={handleStartCallout}
+              variant="contained"
+              disabled={!selectedGroup}
+              sx={{ minWidth: 140 }}
+            >
+              Start Callout
+            </AppButton>
+          </DialogActions>
+        </Dialog>
+      )}
+
+      {/* CALLOUT OVERVIEW OVERLAY PANEL */}
+      {calloutOverviewOpen && (
+        <Dialog
+          open
+          fullWidth
+          maxWidth="xl"
+          onClose={() => setCalloutOverviewOpen(false)}
+          PaperProps={{
+            sx: {
+              width: '100%',
+              maxWidth: { xs: '95%', sm: '95%', md: '95%', lg: '90%', xl: '85%' },
+              mx: 2,
+              borderRadius: 3,
+              p: { xs: 2, md: 3 },
+              border: `1px solid ${alpha(theme.palette.primary.main, 0.08)}`,
+              boxShadow: 'none',
+              backgroundImage: 'none',
+              minHeight: '80vh',
+              maxHeight: '90vh',
+            }
+          }}
+        >
+          <DialogTitle sx={{ px: { xs: 2, md: 4 }, py: 2 }}>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Box
+                sx={{
+                  height: theme.spacing(4.5),
+                  width: theme.spacing(4.5),
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  bgcolor: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.primary.main,
+                  color: theme.palette.mode === 'dark' ? theme.palette.common.black : theme.palette.primary.contrastText,
+                }}
               >
-                Next
-              </AppButton>
-            ) : (
-              <AppButton
-                onClick={handleStartCallout}
-                variant="contained"
-                disabled={!selectedGroup || isStarting}
-                sx={{ minWidth: 140 }}
-              >
-                {isStarting ? 'Starting...' : 'Start Callout'}
-              </AppButton>
-            )}
+                <Engineering sx={{ fontSize: 18 }} />
+              </Box>
+
+              <Stack spacing={0.5}>
+                <Typography variant="h6" fontWeight={600} color="text.primary">
+                  Active Callout: {activeCalloutGroup}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Callout started successfully. Monitor responses below.
+                </Typography>
+              </Stack>
+            </Stack>
+          </DialogTitle>
+
+          <DialogContent dividers sx={{ px: { xs: 2, md: 4 }, py: { xs: 2, md: 3 } }}>
+            <Step2
+              selectedGroup={activeCalloutGroup}
+              resourceCountByGroup={new Map(
+                Array.from(new Set(resources.map(r => r.calloutGroup).filter((group): group is string => Boolean(group))))
+                  .map(group => [group, resources.filter(r => r.calloutGroup === group).length])
+              )}
+              isStarting={false}
+              resources={resources}
+              calloutHistory={calloutHistory}
+              onResourceSelect={(resourceId) => {
+                // Could open resource details or focus on specific resource
+                console.log('Selected resource:', resourceId);
+              }}
+              taskId={null}
+              onSaveOutcome={handleCalloutRowSave}
+            />
+          </DialogContent>
+
+          <DialogActions sx={{ px: { xs: 2, md: 4 }, py: 2, justifyContent: 'flex-end' }}>
+            <AppButton
+              onClick={() => setCalloutOverviewOpen(false)}
+              variant="contained"
+              sx={{ minWidth: 120 }}
+            >
+              Finish Callout
+            </AppButton>
           </DialogActions>
         </Dialog>
       )}

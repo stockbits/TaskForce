@@ -2,7 +2,7 @@ import React from "react";
 import { Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { COMMIT_COLORS } from "@/Reusable helper/Map pin - component";
-import { TaskTooltip } from "@/shared-ui";
+import { TaskTooltip } from "@/shared-components";
 
 interface TaskBlockProps {
   leftPx: number;

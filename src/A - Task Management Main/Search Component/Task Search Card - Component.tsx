@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from "react";
 // framer-motion removed — render static Card components
-import { useAppSnackbar } from '@/shared-ui/SnackbarProvider';
+import { useAppSnackbar } from '@/shared-components';
 import mockTasks from "@/Database Models/Task - Model.json";
 import {
   Box,
@@ -25,9 +25,9 @@ import WarningAmber from '@mui/icons-material/WarningAmber';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import DateTimePopover from '@/shared-ui/DateTimePopover';
-import { MultiSelectField, FreeTypeSelectField, CombinedLocationField, ImpScoreField, GlobalSearchField, SimpleTooltip } from '@/shared-ui';
-import AppButton from '@/shared-ui/button';
+import { DateTimePopover } from '@/shared-components';
+import { MultiSelectField, FreeTypeSelectField, CombinedLocationField, ImpScoreField, GlobalSearchField, SimpleTooltip } from '@/shared-components';
+import { AppButton } from '@/shared-components';
 import Visibility from '@mui/icons-material/Visibility';
 
 type Filters = {
@@ -411,8 +411,8 @@ export default function TaskSearchCard({
                       label="Location"
                       locationType={filters.locationType}
                       locationValue={filters.locationValue}
-                      onTypeChange={(val) => setFilters((prev) => ({ ...prev, locationType: val }))}
-                      onValueChange={(val) => setFilters((prev) => ({ ...prev, locationValue: val }))}
+                      onTypeChange={(val: any) => setFilters((prev) => ({ ...prev, locationType: val }))}
+                      onValueChange={(val: any) => setFilters((prev) => ({ ...prev, locationValue: val }))}
                       sx={{ maxWidth: 'none' }}
                     />
                 </Grid>
@@ -422,8 +422,8 @@ export default function TaskSearchCard({
                       label="IMP Score"
                       condition={(filters.scoreCondition as any) || ''}
                       value={filters.scoreValue}
-                      onConditionChange={(next) => setFilters((prev) => ({ ...prev, scoreCondition: next }))}
-                      onValueChange={(next) => setFilters((prev) => ({ ...prev, scoreValue: next }))}
+                      onConditionChange={(next: any) => setFilters((prev) => ({ ...prev, scoreCondition: next }))}
+                      onValueChange={(next: any) => setFilters((prev) => ({ ...prev, scoreValue: next }))}
                       sx={{ maxWidth: 'none' }}
                     />
                 </Grid>
@@ -440,7 +440,7 @@ export default function TaskSearchCard({
         fromTime={filters.fromTime}
         toDate={filters.toDate}
         toTime={filters.toTime}
-        onChangeField={(name, value) => setFilters((prev) => ({ ...prev, [name]: value }))}
+        onChangeField={(name: string, value: any) => setFilters((prev) => ({ ...prev, [name]: value }))}
         onClear={() => setFilters((prev) => ({ ...prev, fromDate: '', fromTime: '', toDate: '', toTime: '' }))}
       />
 
@@ -476,7 +476,7 @@ export default function TaskSearchCard({
               <AppButton
                 variant="contained"
                 size="small"
-                onClick={(e) => setActionsAnchorEl(e.currentTarget)}
+                onClick={(e: React.MouseEvent) => setActionsAnchorEl(e.currentTarget as HTMLElement)}
                 sx={{ ml: 1 }}
               >
                 Menu Items

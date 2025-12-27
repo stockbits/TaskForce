@@ -1,13 +1,13 @@
 import React, { useMemo, useState, useEffect, MutableRefObject, useRef, memo } from 'react';
 import { Box, useTheme, Paper, Typography, Skeleton, Fade } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import { useAppSnackbar } from '@/shared-components/SnackbarProvider';
+import { useAppSnackbar } from '@/shared-components';
 import { GridColDef, useGridApiRef, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarDensitySelector } from '@mui/x-data-grid';
 import { DataGrid } from '@mui/x-data-grid';
 // keep imports minimal: use built-in DataGrid behavior
 // framer-motion removed — using static elements
 // icon imports removed (unused)
-import TaskRowContextMenu from '@/shared-components/TaskRowContextMenu';
+import { TaskRowContextMenu } from '@/shared-components';
 import { useTheme as useAppTheme } from '@/System Settings/Dark Mode Handler - Component';
 
  type Props = {

@@ -21,7 +21,7 @@ import PlayArrow from '@mui/icons-material/PlayArrow';
 import Build from '@mui/icons-material/Build';
 import Check from '@mui/icons-material/Check';
 import type { TaskDetails, ProgressNoteEntry } from "@/types";
-import ExpandableSectionCard from "@/shared-ui/ExpandableSectionCard";
+import { ExpandableSectionCard } from '@/shared-components';
 import { ProgressNoteAdd } from "./Progress Note Add - Component";
 
 export interface TaskDetailsModalProps {

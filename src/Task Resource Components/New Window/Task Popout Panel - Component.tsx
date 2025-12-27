@@ -8,12 +8,12 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Box, Paper, Stack, Typography, useTheme } from "@mui/material";
-import AppButton from '@/shared-ui/button';
+import { AppButton } from '@/shared-components';
 import { alpha } from "@mui/material/styles";
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import TaskDetailsModal from "@/Task Resource Components/Inline Window/Task Information Card - Component";
-import PillGroup, { /* for types */ } from "@/shared-ui/PillGroup";
+import { PillGroup } from '@/shared-components';
 import type { TaskDetails } from "@/types";
 
 interface TaskPopoutPanelProps {

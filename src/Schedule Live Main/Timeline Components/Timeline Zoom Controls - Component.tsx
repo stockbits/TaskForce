@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { IconButton } from "@mui/material";
 import FitScreenIcon from "@mui/icons-material/FitScreen";
-import { SimpleTooltip } from "@/shared-ui";
+import { SimpleTooltip } from "@/shared-components";
 
 interface TimelineZoomControlProps {
   onZoomChange: (zoomLevel: number) => void;

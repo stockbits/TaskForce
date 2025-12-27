@@ -1,10 +1,10 @@
 import React from "react";
 import { Dialog, DialogTitle, DialogContent, Box, Stack, Typography, IconButton, Paper, FormControl, InputLabel, Select, MenuItem, Divider, Alert } from "@mui/material";
-import AppButton from '@/shared-ui/button';
+import { AppButton } from '@/shared-components';
 import Close from '@mui/icons-material/Close';
 import ListAlt from '@mui/icons-material/ListAlt';
 import { alpha, useTheme } from "@mui/material/styles";
-import { TextInputField, useFieldSizes } from '@/shared-ui';
+import { TextInputField, useFieldSizes } from '@/shared-components';
 
 export type ProgressPreview = {
   id: string | null | undefined;

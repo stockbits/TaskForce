@@ -1,6 +1,6 @@
 import React, { useRef, memo } from "react";
 import { Box } from "@mui/material";
-import TaskTableMUI from "@/shared-ui/ResponsiveTable/TaskTableMUI";
+import TaskTableMUI from "@/shared-components/tables/responsive-data-tables/ResponsiveTable/TaskTableMUI";
 
 const TaskTableAdvanced: React.FC<any> = memo(({ rows, columns: _columns, loading, disablePagination = false, ...rest }) => {
   const containerRef = useRef<HTMLElement | null>(null);

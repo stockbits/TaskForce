@@ -15,7 +15,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import AppButton from '@/shared-ui/button';
+import { AppButton } from '@/shared-components';
 import { alpha, useTheme } from "@mui/material/styles";
 import type { Theme } from "@mui/material/styles";
 import { InputAdornment } from "@mui/material";
@@ -29,7 +29,7 @@ import X from '@mui/icons-material/Close';
 import type { ResourceRecord } from '@/types';
 import { CalloutOutcomeConfig } from '@/types';
 import type { CalloutHistoryEntry } from "@/Callout Component/useCalloutHistory";
-import ExpandableSectionCard from "@/shared-ui/ExpandableSectionCard";
+import { ExpandableSectionCard } from '@/shared-components';
 
 interface ResourcePopoutPanelProps {
   open: boolean;

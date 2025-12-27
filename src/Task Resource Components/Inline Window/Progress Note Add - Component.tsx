@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Alert, Stack, TextField, Typography, useTheme } from "@mui/material";
-import AppButton from '@/shared-ui/button';
+import { AppButton } from '@/shared-components';
 import type { ProgressNoteEntry } from "@/types";
 
 const isBrowser = typeof window !== "undefined";

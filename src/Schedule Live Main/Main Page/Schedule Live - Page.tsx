@@ -4,14 +4,14 @@
 // ============================================================================
 
 import React, { useState, useMemo, useRef, useCallback, lazy, Suspense } from "react";
-import type { ScheduleLiveSearchFilters } from "@/shared-ui";
+import type { ScheduleLiveSearchFilters } from "@/shared-components";
 
-const ScheduleLegend = lazy(() => import("../UI Components/Schedule Legend - Component"));
-const ScheduleLiveSearch = lazy(() => import("@/shared-ui").then(m => ({ default: m.ScheduleLiveSearch })));
+const ScheduleLegend = lazy(() => import("../../A - Schedule Live Main/UI Components/Schedule Legend - Component"));
+const ScheduleLiveSearch = lazy(() => import("@/shared-components").then(m => ({ default: m.ScheduleLiveSearch })));
 const TimelinePanel = lazy(() => import("../Timeline Components/Timeline View - Component"));
-const MapPanel = lazy(() => import("../Map Components/Map Display - Component"));
-const TaskTablePanel = lazy(() => import("../Table Components/Task Table - Component"));
-const ResourceTablePanel = lazy(() => import("../Table Components/Resource Table - Component"));
+const MapPanel = lazy(() => import("../../A - Schedule Live Main/Map Components/Map Display - Component"));
+const TaskTablePanel = lazy(() => import("../../A - Schedule Live Main/Table Components/Task Table - Component"));
+const ResourceTablePanel = lazy(() => import("../../A - Schedule Live Main/Table Components/Resource Table - Component"));
 
 import mockTasks from "@/Database Models/Task - Model.json";
 import ResourceMock from "@/Database Models/Resource - Model.json";
@@ -25,7 +25,7 @@ import { useSearchLeftMenu } from "@/Custom React - Hooks/search Tool Tab - comp
 
 import { useLiveSelectEngine } from "@/Custom React - Hooks/Table selection - component";
 
-import { GlobalSearchField, SelectField } from "@/shared-ui";
+import { GlobalSearchField, SelectField } from "@/shared-components";
 
 import SlidersHorizontal from '@mui/icons-material/Tune';
 import HelpOutline from '@mui/icons-material/HelpOutline';
@@ -50,7 +50,7 @@ import {
 } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import { useSettings } from '@/System Settings/Settings Manager - Component';
-import AppButton from '@/shared-ui/button';
+import { AppButton } from '@/shared-components';
 
 /* ============================================================================
    PANEL DEFINITIONS
@@ -679,7 +679,7 @@ export default function ScheduleLivePage() {
 
       <GlobalSearchField
         value={searchAnywhere}
-        onChange={(e) => setSearchAnywhere(e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSearchAnywhere(e.target.value)}
         onSearch={runGlobalSearch}
         placeholder="Global Search"
         size="small"

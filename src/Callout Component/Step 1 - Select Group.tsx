@@ -3,9 +3,8 @@ import { Box, Paper, Stack, Typography, Chip } from "@mui/material";
 import Users from '@mui/icons-material/People';
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import Engineering from '@mui/icons-material/Engineering';
-import { alpha, useTheme } from "@mui/material/styles";
-import { ResourceRecord } from '@/types';
-import { SingleSelectField } from '@/shared-ui';
+import { useTheme } from "@mui/material/styles";
+import { SingleSelectField } from '@/shared-components';
 import { sharedStyles } from '@/Reusable helper/Shared styles - component';
 
 interface Step1Props {
@@ -111,7 +110,7 @@ export const Step1: React.FC<Step1Props> = ({
           value={selectedGroup || null}
           inputValue={query}
           disabled={isStarting}
-          onInputChange={(v) => {
+          onInputChange={(v: any) => {
             onQueryChange(v);
             if (!v) onGroupSelect("");
           }}
@@ -121,7 +120,7 @@ export const Step1: React.FC<Step1Props> = ({
             minWidth: '100%',
             px: 0,
           }}
-          renderOption={(props, option) => {
+          renderOption={(props: any, option: any) => {
             const label = typeof option === 'string' ? option : option.label;
             const resourceCount = resourceCountByGroup.get(label) ?? 0;
             return (

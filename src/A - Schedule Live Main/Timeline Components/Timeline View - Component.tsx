@@ -20,7 +20,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import TimelineZoomControl from "./Timeline Zoom Controls - Component";
 import TaskBlock from "../UI Components/Task Block - Component";
-import { TimeTooltip, SimpleTooltip } from "@/shared-ui";
+import { TimeTooltip, SimpleTooltip } from "@/shared-components";
 
 type ResourceRow = {
   resourceId?: string;

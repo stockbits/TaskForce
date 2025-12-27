@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { useAppSnackbar } from '@/shared-ui/SnackbarProvider';
+import { useAppSnackbar } from '@/shared-components';
 import rawMockTasks from "@/Database Models/Task - Model.json";
 import TaskSearchCard from "@/A - Task Management Main/Search Component/Task Search Card - Component";
-import TaskTableMUI from "@/shared-ui/ResponsiveTable/TaskTableMUI";
+import TaskTableMUI from "@/shared-components/tables/responsive-data-tables/ResponsiveTable/TaskTableMUI";
 import ProgressTasksDialog, { ProgressPreview } from "@/Task Resource Components/Inline Window/Multi Task Progress - Component";
 import { useExternalWindow } from "@/Custom React - Hooks/Popup window - component";
 import { Box, Paper, Typography } from "@mui/material";

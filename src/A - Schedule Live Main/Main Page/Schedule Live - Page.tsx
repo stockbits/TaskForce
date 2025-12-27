@@ -25,7 +25,7 @@ import { useSearchLeftMenu } from "@/Custom React - Hooks/search Tool Tab - comp
 
 import { useLiveSelectEngine } from "@/Custom React - Hooks/Table selection - component";
 
-import { GlobalSearchField, SelectField } from "@/shared-ui";
+import { GlobalSearchField, SelectField } from "@/shared-components";
 
 import SlidersHorizontal from '@mui/icons-material/Tune';
 import HelpOutline from '@mui/icons-material/HelpOutline';
@@ -50,7 +50,7 @@ import {
 } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import { useSettings } from '@/System Settings/Settings Manager - Component';
-import AppButton from '@/shared-ui/button';
+import { AppButton } from '@/shared-components';
 
 /* ============================================================================
    PANEL DEFINITIONS
@@ -679,7 +679,7 @@ export default function ScheduleLivePage() {
 
       <GlobalSearchField
         value={searchAnywhere}
-        onChange={(e) => setSearchAnywhere(e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSearchAnywhere(e.target.value)}
         onSearch={runGlobalSearch}
         placeholder="Global Search"
         size="small"
@@ -831,7 +831,6 @@ export default function ScheduleLivePage() {
                       </Box>
                     }>
                       <ScheduleLiveSearch
-                      mode={mapSelectedMode(selectedMode)}
                       onSearch={(filters: ScheduleLiveSearchFilters) => {
                         currentFiltersRef.current = filters;
                       }}
