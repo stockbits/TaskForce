@@ -282,13 +282,12 @@ export default function ScheduleLivePage() {
       setResourceTableData(resourceRows);
       setResourceData(resourceRows);
 
-      // Also load tasks for these resources
-      const resourceIds = resourceRows.map(r => r.resourceId);
+      // Load all tasks for the division, not just those assigned to loaded resources
       let taskResults = [...(mockTasks as TaskRecord[])];
       if (division) {
         taskResults = taskResults.filter((t) => t.division === division);
       }
-      taskResults = taskResults.filter((t) => resourceIds.includes(t.employeeId) || resourceIds.includes(t.resourceId));
+      // Removed resource filtering to show all tasks for the division
       setTaskData(taskResults);
     }
 
@@ -429,13 +428,12 @@ export default function ScheduleLivePage() {
     setResourceTableData(results);
     setResourceData(results);
 
-    // Also populate timeline with tasks for these resources
-    const resourceIds = results.map(r => r.resourceId);
+    // Load all tasks for the division, not just those assigned to loaded resources
     let taskResults = [...(mockTasks as TaskRecord[])];
     if (division) {
       taskResults = taskResults.filter((t) => t.division === division);
     }
-    taskResults = taskResults.filter((t) => resourceIds.includes(t.employeeId) || resourceIds.includes(t.resourceId));
+    // Removed resource filtering to show all tasks for the division
     setTaskData(taskResults);
     // Removed handleCloseSearchPanel() to keep panel open with filters selected
   };
