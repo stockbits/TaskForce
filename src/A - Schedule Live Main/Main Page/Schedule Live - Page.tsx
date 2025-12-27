@@ -281,6 +281,15 @@ export default function ScheduleLivePage() {
       const resourceRows = allResources.filter((r) => r.division === division);
       setResourceTableData(resourceRows);
       setResourceData(resourceRows);
+
+      // Also load tasks for these resources
+      const resourceIds = resourceRows.map(r => r.resourceId);
+      let taskResults = [...(mockTasks as TaskRecord[])];
+      if (division) {
+        taskResults = taskResults.filter((t) => t.division === division);
+      }
+      taskResults = taskResults.filter((t) => resourceIds.includes(t.employeeId) || resourceIds.includes(t.resourceId));
+      setTaskData(taskResults);
     }
 
     setSearchAnywhere("");
