@@ -6,7 +6,7 @@ import { BaseFieldProps } from '../types';
 import useFieldSizes from '../utils/useFieldSizes';
 import mockTasks from '@/Database Models/Task - Model.json';
 import ResourceMock from '@/Database Models/Resource - Model.json';
-import { SimpleTooltip } from '@/shared-ui';
+import { SimpleTooltip } from '@/shared-components';
 
 interface GlobalSearchFieldProps extends BaseFieldProps {
   value: string;

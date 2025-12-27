@@ -4,10 +4,10 @@
 // ============================================================================
 
 import React, { useState, useMemo, useRef, useCallback, lazy, Suspense } from "react";
-import type { ScheduleLiveSearchFilters } from "@/shared-ui";
+import type { ScheduleLiveSearchFilters } from "@/shared-components";
 
 const ScheduleLegend = lazy(() => import("../UI Components/Schedule Legend - Component"));
-const ScheduleLiveSearch = lazy(() => import("@/shared-ui").then(m => ({ default: m.ScheduleLiveSearch })));
+const ScheduleLiveSearch = lazy(() => import("@/shared-components").then(m => ({ default: m.ScheduleLiveSearch })));
 const TimelinePanel = lazy(() => import("../Timeline Components/Timeline View - Component"));
 const MapPanel = lazy(() => import("../Map Components/Map Display - Component"));
 const TaskTablePanel = lazy(() => import("../Table Components/Task Table - Component"));

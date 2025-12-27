@@ -6,7 +6,7 @@ import {
   Grid,
   Fade,
 } from "@mui/material";
-import { MultiSelectField, FreeTypeSelectField, CombinedLocationField, ImpScoreField } from "@/shared-ui";
+import { MultiSelectField, FreeTypeSelectField, CombinedLocationField, ImpScoreField } from "@/shared-components";
 
 export interface ScheduleLiveSearchFilters {
   taskSearch: string;

@@ -17,7 +17,7 @@ import type {
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import BaseField from '../base/BaseField';
 import { MultiSelectableFieldProps } from '../types';
-import { SimpleTooltip } from '@/shared-ui';
+import { SimpleTooltip } from '@/shared-components';
 
 const SELECT_ALL_VALUE = '__SELECT_ALL__';
 

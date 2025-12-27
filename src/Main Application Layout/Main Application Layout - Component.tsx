@@ -30,8 +30,8 @@ import {
   CalloutOutcomeConfig,
   ResourceRecord,
 } from '@/types';
-import { Step1 } from "@/Callout Component/Step 1 - Select Group";
-import { Step2 } from "@/Callout Component/Step 2 - Save outcome";
+import { Step1 } from "@/Callout Component/Callout Component/Callout Component/Step 1 - Select Group";
+import { Step2 } from "@/Callout Component/Callout Component/Callout Component/Step 2 - Save outcome";
 import { sharedStyles } from "@/Reusable helper/Shared styles - component";
 
 import Menu from '@mui/icons-material/Menu';
@@ -57,9 +57,9 @@ import { Sidebar as SidebarNavigation } from '@/Main Application Layout/Navigati
 import { cardMap } from "@/Main Application Layout/Navigation Menu Registry";
 import { TaskDetails, ProgressNoteEntry } from "@/types";
 import { useExternalWindow } from "@/Custom React - Hooks/Popup window - component";
-import { useCalloutHistory } from "@/Callout Component/useCalloutHistory";
+import { useCalloutHistory } from "@/Callout Component/Callout Component/Callout Component/useCalloutHistory";
 import { filterTasks } from "@/Reusable helper/Task filtering - component";
-import type { CalloutHistoryEntry } from "@/Callout Component/useCalloutHistory";
+import type { CalloutHistoryEntry } from "@/Callout Component/Callout Component/Callout Component/useCalloutHistory";
 
 /* ========================================================= */
 const iconMap: Record<string, any> = {

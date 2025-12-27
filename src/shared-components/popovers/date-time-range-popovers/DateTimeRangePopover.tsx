@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { Menu, Box, Stack, TextField, InputAdornment } from '@mui/material';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ScheduleIcon from '@mui/icons-material/Schedule';
-import AppButton from '@/shared-ui/button';
+import AppButton from '@/shared-components/button';
 
 interface Props {
   anchorEl: HTMLElement | null;
