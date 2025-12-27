@@ -185,7 +185,7 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
 
           {/* TIMELINE TAB */}
           {activeTab === 2 && (
-            <Stack spacing={1.5}>
+            <Stack spacing={1} sx={{ pl: 1 }}>
               <Typography
                 variant="overline"
                 sx={{
@@ -197,11 +197,11 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
                 Timeline
               </Typography>
               <Stack spacing={1.5}>
-                <Stack direction="row" spacing={2} alignItems="center">
+                <Stack direction="row" spacing={1} alignItems="center">
                   <Box
                     sx={{
-                      width: 16,
-                      height: 16,
+                      width: 14,
+                      height: 14,
                       bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.3) : "primary.main",
                       opacity: theme.palette.mode === 'dark' ? 1 : 0.15,
                       borderLeft: `3px solid ${theme.palette.mode === 'dark' ? theme.palette.common.white : "#000000"}`,
@@ -214,11 +214,11 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
                     Working Hours
                   </Typography>
                 </Stack>
-                <Stack direction="row" spacing={2} alignItems="center">
+                <Stack direction="row" spacing={1} alignItems="center">
                   <Box
                     sx={{
-                      width: 16,
-                      height: 16,
+                      width: 14,
+                      height: 14,
                       bgcolor: theme.palette.mode === 'dark' ? "#ff8c00" : "#ff9800",
                       opacity: 0.25,
                       borderRadius: 0,
@@ -228,6 +228,55 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
                     Lunch Break
                   </Typography>
                 </Stack>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Box
+                    sx={{
+                      width: 14,
+                      height: 14,
+                      bgcolor: theme.palette.error.main,
+                      transform: 'rotate(45deg)',
+                      transformOrigin: 'center center',
+                      border: `2px solid ${theme.palette.background.paper}`,
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                      boxSizing: 'content-box',
+                      ml: 0.5,
+                      overflow: 'visible',
+                      position: 'relative',
+                    }}
+                  />
+                  <Typography variant="caption" color="text.secondary">
+                    ECBT (Estimated Come Back Time)
+                  </Typography>
+                </Stack>
+              </Stack>
+              <Typography
+                variant="overline"
+                sx={{
+                  fontWeight: 700,
+                  letterSpacing: 1.1,
+                  color: alpha(theme.palette.text.secondary, 0.85),
+                  mt: 2,
+                }}
+              >
+                Task Blocks
+              </Typography>
+              <Stack spacing={1.5}>
+                {Object.entries(COMMIT_COLORS).map(([type, color]) => (
+                  <Stack direction="row" spacing={2} alignItems="center" key={type}>
+                    <Box
+                      sx={{
+                        width: 16,
+                        height: 16,
+                        bgcolor: color,
+                        borderRadius: 1,
+                        border: `1px solid ${alpha(theme.palette.common.black, 0.2)}`,
+                      }}
+                    />
+                    <Typography variant="caption" color="text.secondary">
+                      {type}
+                    </Typography>
+                  </Stack>
+                ))}
               </Stack>
             </Stack>
           )}
