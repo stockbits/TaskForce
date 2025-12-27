@@ -644,6 +644,7 @@ export default function MainLayout() {
   const [query, setQuery] = useState<string>("");
   const [isStarting, setIsStarting] = useState(false);
   const [calloutOverviewOpen, setCalloutOverviewOpen] = useState(false);
+  const [hasUnsavedCalloutChanges, setHasUnsavedCalloutChanges] = useState(false);
 
   const resourceCountByGroup = useMemo(() => {
     const countMap = new Map<string, number>();
@@ -1386,7 +1387,6 @@ export default function MainLayout() {
           open
           fullWidth
           maxWidth="xl"
-          onClose={() => setCalloutOverviewOpen(false)}
           PaperProps={{
             sx: {
               width: '100%',
@@ -1421,10 +1421,10 @@ export default function MainLayout() {
 
               <Stack spacing={0.5}>
                 <Typography variant="h6" fontWeight={600} color="text.primary">
-                  Active Callout: {activeCalloutGroup}
+                  Configure Callout Outcomes
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Callout started successfully. Monitor responses below.
+                  Set outcomes for each engineer and save the callout results.
                 </Typography>
               </Stack>
             </Stack>
@@ -1432,11 +1432,8 @@ export default function MainLayout() {
 
           <DialogContent dividers sx={{ px: { xs: 2, md: 4 }, py: { xs: 2, md: 3 } }}>
             <Step2
+              task={incidentTask}
               selectedGroup={activeCalloutGroup}
-              resourceCountByGroup={new Map(
-                Array.from(new Set(resources.map(r => r.calloutGroup).filter((group): group is string => Boolean(group))))
-                  .map(group => [group, resources.filter(r => r.calloutGroup === group).length])
-              )}
               isStarting={false}
               resources={resources}
               calloutHistory={calloutHistory}
@@ -1446,6 +1443,8 @@ export default function MainLayout() {
               }}
               taskId={null}
               onSaveOutcome={handleCalloutRowSave}
+              onHistoryUpdate={appendCalloutHistory}
+              onUnsavedChanges={setHasUnsavedCalloutChanges}
             />
           </DialogContent>
 
@@ -1468,6 +1467,7 @@ export default function MainLayout() {
               }}
               variant="contained"
               color="primary"
+              disabled={hasUnsavedCalloutChanges}
               sx={{ minWidth: 120 }}
             >
               Finish Callout
