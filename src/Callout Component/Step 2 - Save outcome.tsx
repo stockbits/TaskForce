@@ -274,7 +274,6 @@ export const Step2: React.FC<Step2Props> = ({
         [resourceId]: { outcome: "", availableAgainAt: "", saving: false },
       }));
 
-      const label = CalloutOutcomeConfig[outcomeValue].label;
     } catch (err) {
       console.error("save error", err);
     } finally {
