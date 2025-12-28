@@ -1,23 +1,5 @@
 import { createTheme } from "@mui/material/styles";
 
-declare module '@mui/material/styles' {
-  interface Theme {
-    custom: {
-      inputHeight: number;
-      chipSize: number;
-      selectionColor: string;
-    };
-  }
-  // allow configuration when creating the theme
-  interface ThemeOptions {
-    custom?: {
-      inputHeight?: number;
-      chipSize?: number;
-      selectionColor?: string;
-    };
-  }
-}
-
 // Palette matched to provided logo (navy + mint ring)
 const primaryNavy = "#0F2740"; // logo background
 const primaryNavyLight = "#304862";
@@ -161,6 +143,13 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
           boxShadow: mode === 'dark' 
             ? "0 6px 18px rgba(0, 0, 0, 0.3)"
             : "0 6px 18px rgba(45, 24, 88, 0.06)",
+        },
+      },
+    },
+    MuiCardActions: {
+      styleOverrides: {
+        root: {
+          backgroundColor: mode === 'dark' ? "#1e1e1e" : neutralBackground,
         },
       },
     },
@@ -315,6 +304,13 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
         },
       },
     },
+    MuiTabs: {
+      styleOverrides: {
+        indicator: {
+          backgroundColor: mode === 'dark' ? primaryNavyLight : primaryNavy,
+        },
+      },
+    },
     MuiMenu: {
       styleOverrides: {
         paper: {
@@ -338,11 +334,6 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
         },
       },
     },
-  },
-  custom: {
-    inputHeight: 40,
-    chipSize: 28,
-    selectionColor: mode === 'dark' ? "rgba(59, 224, 137, 0.2)" : "rgba(15, 39, 64, 0.1)",
   },
 });
 

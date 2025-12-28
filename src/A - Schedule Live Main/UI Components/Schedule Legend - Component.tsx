@@ -50,7 +50,7 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
           borderRadius: 3,
           px: 3,
           py: 2.5,
-          border: `1px solid ${alpha(theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main, 0.18)}`,
+          border: `1px solid ${alpha(theme.palette.primary.main, 0.18)}`,
           boxShadow: "0 18px 46px rgba(8,58,97,0.22)",
           backgroundImage: "none",
           maxHeight: '80vh',
@@ -69,8 +69,8 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
             sx={{
               color: alpha(theme.palette.text.primary, 0.6),
               '&:hover': {
-                color: theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main,
-                bgcolor: alpha(theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main, 0.08),
+                color: theme.palette.primary.main,
+                bgcolor: alpha(theme.palette.primary.main, 0.08),
               },
             }}
             aria-label="Close legend"
@@ -126,11 +126,6 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
             <Stack spacing={1.5}>
               <Typography
                 variant="overline"
-                sx={{
-                  fontWeight: 700,
-                  letterSpacing: 1.1,
-                  color: alpha(theme.palette.text.secondary, 0.85),
-                }}
               >
                 Resources
               </Typography>
@@ -157,11 +152,6 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
             <Stack spacing={1.5}>
               <Typography
                 variant="overline"
-                sx={{
-                  fontWeight: 700,
-                  letterSpacing: 1.1,
-                  color: alpha(theme.palette.text.secondary, 0.85),
-                }}
               >
                 Tasks
               </Typography>
@@ -188,11 +178,6 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
             <Stack spacing={1} sx={{ pl: 1 }}>
               <Typography
                 variant="overline"
-                sx={{
-                  fontWeight: 700,
-                  letterSpacing: 1.1,
-                  color: alpha(theme.palette.text.secondary, 0.85),
-                }}
               >
                 Timeline
               </Typography>
@@ -252,9 +237,6 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
               <Typography
                 variant="overline"
                 sx={{
-                  fontWeight: 700,
-                  letterSpacing: 1.1,
-                  color: alpha(theme.palette.text.secondary, 0.85),
                   mt: 2,
                 }}
               >

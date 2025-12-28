@@ -31,7 +31,6 @@ import History from '@mui/icons-material/History';
 import Users from '@mui/icons-material/People';
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import { alpha, useTheme } from "@mui/material/styles";
-import { sharedStyles } from '@/Reusable helper/Shared styles - component';
 import { CalloutOutcome, CalloutOutcomeConfig, ResourceRecord } from "@/shared-types";
 import { CalloutHistoryEntry } from "@/Callout Component/useCalloutHistory";
 
@@ -71,7 +70,6 @@ export const Step2: React.FC<Step2Props> = ({
 
 }) => {
   const theme = useTheme();
-  const styles = sharedStyles(theme);
 
   // Get resources for the selected group
   const groupResources = useMemo(() => {
@@ -408,11 +406,11 @@ export const Step2: React.FC<Step2Props> = ({
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
             {/* Progress Information */}
             {task && (
-              <Paper variant="outlined" sx={{ ...styles.taskDetailsPaper, flex: 1 }}>
+              <Paper variant="outlined" sx={{ ...{ p: 2, borderRadius: 2 }, flex: 1 }}>
                 <Stack spacing={2}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <Stack spacing={2} sx={{ flex: 1 }}>
-                      <Typography variant="overline" sx={styles.sectionTitle}>
+                      <Typography variant="overline">
                         Progress
                       </Typography>
                       <Stack direction="row" spacing={2} alignItems="center">

@@ -692,7 +692,7 @@ export default function ScheduleLivePage() {
         size="small"
         showSearchButton={true}
         searchTooltip="Search by Task ID, Work ID, Estimate Number, Employee ID"
-        sx={{ height: theme.custom?.inputHeight ?? 40, '& .MuiInputBase-input': { fontSize: 13, lineHeight: `${theme.custom?.chipSize ?? 28}px` } }}
+        sx={{ height: 40, '& .MuiInputBase-input': { fontSize: 13, lineHeight: '28px' } }}
       />
 
       {/* Search Tool + Clear All buttons on the left */}

@@ -452,7 +452,7 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
               },
             },
             '& .selected-row': {
-              backgroundColor: theme.custom.selectionColor,
+              backgroundColor: mode === 'dark' ? "rgba(59, 224, 137, 0.2)" : "rgba(15, 39, 64, 0.1)",
               '&:hover': {
                 backgroundColor: mode === 'dark' 
                   ? alpha(theme.palette.common.white, 0.3) 

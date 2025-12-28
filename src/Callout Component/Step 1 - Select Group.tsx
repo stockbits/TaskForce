@@ -5,7 +5,6 @@ import ChevronRight from '@mui/icons-material/ChevronRight';
 import Engineering from '@mui/icons-material/Engineering';
 import { useTheme } from "@mui/material/styles";
 import { SingleSelectField } from '@/shared-components';
-import { sharedStyles } from '@/Reusable helper/Shared styles - component';
 
 interface Step1Props {
   task: Record<string, any> | null | undefined;
@@ -29,7 +28,6 @@ export const Step1: React.FC<Step1Props> = ({
   onGroupSelect,
 }) => {
   const theme = useTheme();
-  const styles = sharedStyles(theme);
 
   const filteredGroups = calloutGroups.filter(group =>
     group.toLowerCase().includes(query.toLowerCase())
@@ -43,9 +41,9 @@ export const Step1: React.FC<Step1Props> = ({
     <Stack spacing={4}>
       {/* Task Details */}
       {task && (
-        <Paper variant="outlined" sx={styles.taskDetailsPaper}>
+        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
           <Stack spacing={2}>
-            <Typography variant="overline" sx={styles.sectionTitle}>
+            <Typography variant="overline">
               Task Details
             </Typography>
             <Stack direction="row" spacing={2} alignItems="center">
@@ -99,7 +97,7 @@ export const Step1: React.FC<Step1Props> = ({
 
       {/* Callout Group Selection */}
       <Stack spacing={2}>
-        <Typography variant="overline" sx={styles.sectionTitle}>
+        <Typography variant="overline">
           Callout Group
         </Typography>
 
