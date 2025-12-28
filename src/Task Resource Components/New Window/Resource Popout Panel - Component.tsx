@@ -181,14 +181,14 @@ export default function ResourcePopoutPanel({
           ? alpha(theme.palette.primary.main, 0.12) 
           : alpha(theme.palette.primary.main, 0.06),
         color: "text.primary",
-        overflow: "hidden",
+        overflow: "visible",
       }}
     >
       <Stack
         sx={{
           flex: 1,
           bgcolor: theme.palette.background.paper,
-          overflow: "hidden",
+          overflow: "visible",
         }}
       >
         {/* HEADER */}
@@ -306,13 +306,17 @@ export default function ResourcePopoutPanel({
             <Paper
               elevation={10}
               sx={{
-                width: { xs: '100%', sm: 'min(100%, 720px)' },
+                width: '100%',
+                maxWidth: 720,
+                mx: 'auto',
+                boxSizing: 'border-box',
                 borderRadius: 3,
                 border: `1px solid ${alpha(theme.palette.primary.main, 0.14)}`,
                 boxShadow: theme.palette.mode === 'dark' ? theme.shadows[17] : theme.shadows[17],
                 bgcolor: alpha(theme.palette.background.paper, 0.98),
                 px: { xs: 3, md: 4 },
                 py: { xs: 3, md: 4 },
+                overflowX: 'visible',
               }}
             >
               <Stack spacing={3}>
@@ -347,7 +351,7 @@ export default function ResourcePopoutPanel({
                           Copy ID
                         </AppButton>
                     </Stack>
-                    <Grid container spacing={2.5}>
+                    <Grid container spacing={2.5} sx={{ width: '100%' }}>
                       {details.map(({ label, value }) => (
                         <Grid item xs={12} sm={6} key={label}>
                           <Typography
@@ -376,7 +380,7 @@ export default function ResourcePopoutPanel({
                   onToggle={() => onToggleSection("Availability")}
                 >
                   <Stack spacing={3}>
-                    <Grid container spacing={2.5}>
+                    <Grid container spacing={2.5} sx={{ width: '100%' }}>
                       {availabilityNotes.map(({ label, value }) => (
                         <Grid item xs={12} sm={6} key={label}>
                           <Paper
@@ -403,7 +407,7 @@ export default function ResourcePopoutPanel({
                       ))}
                     </Grid>
 
-                    <Grid container spacing={2.5}>
+                    <Grid container spacing={2.5} sx={{ width: '100%' }}>
                       {contactDetails.map(({ label, value }) => (
                         <Grid item xs={12} sm={6} key={label}>
                           <Paper

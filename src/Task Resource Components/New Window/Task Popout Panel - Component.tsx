@@ -106,14 +106,14 @@ export default function TaskPopoutPanel({
           ? alpha(theme.palette.primary.main, 0.12) 
           : alpha(theme.palette.primary.main, 0.06),
         color: "text.primary",
-        overflow: "hidden",
+        overflow: "visible",
       }}
     >
       <Stack
         sx={{
           flex: 1,
           bgcolor: theme.palette.background.paper,
-          overflow: "hidden",
+          overflow: "visible",
         }}
       >
         {/* HEADER */}
@@ -329,6 +329,8 @@ export default function TaskPopoutPanel({
                     bgcolor: alpha(theme.palette.background.paper, 0.98),
                     px: { xs: 3, md: 4 },
                     py: { xs: 3, md: 4 },
+                    boxSizing: 'border-box',
+                    overflowX: 'visible',
                   }}
                 >
                   <TaskDetailsModal

@@ -9,6 +9,9 @@ import ResourcePopoutPanel from "@/Task Resource Components/New Window/Resource 
 import { TaskDetails } from "@/shared-types";
 import type { ResourceRecord } from '@/shared-types';
 import type { CalloutHistoryEntry } from "@/Callout Component/useCalloutHistory";
+import { AppThemeProvider } from '@/System Settings/Dark Mode Handler - Component';
+import { SettingsProvider } from '@/System Settings/Settings Manager - Component';
+import { CssBaseline } from '@mui/material';
 
 declare global {
   interface Window {
@@ -81,13 +84,10 @@ function PopupApp() {
       setViewportSize({ width: currentWidth, height: currentHeight });
     };
 
-    // Remove default body margin for a flush canvas and align palette
-    // with the primary application.
+    // Remove default body margin for a flush canvas and keep overflow hidden.
     const previousMargin = document.body.style.margin;
-    const previousBg = document.body.style.backgroundColor;
     const previousOverflow = document.body.style.overflow;
     document.body.style.margin = "0";
-    document.body.style.backgroundColor = "#F5F7FA";
     document.body.style.overflow = "hidden";
 
     applyViewportMetrics();
@@ -96,7 +96,6 @@ function PopupApp() {
     return () => {
       window.removeEventListener("resize", applyViewportMetrics);
       document.body.style.margin = previousMargin;
-      document.body.style.backgroundColor = previousBg;
       document.body.style.overflow = previousOverflow;
     };
   }, []);
@@ -129,53 +128,58 @@ function PopupApp() {
   }, []);
 
   return (
-    <div
-      className="min-h-screen w-screen overflow-hidden"
-      style={{
-        height:
-          viewportSize.height === 0
-            ? "100%"
-            : `${viewportSize.height / uiScale}px`,
-        width:
-          viewportSize.width === 0
-            ? "100%"
-            : `${viewportSize.width / uiScale}px`,
-        transform: `scale(${uiScale})`,
-        transformOrigin: "top left",
-      }}
-    >
-      {isTaskMode && (
-        <TaskPopoutPanel
-          open={true}
-          tasks={tasks}
-          expanded={expanded}
-          onToggleSection={onToggleSection}
-          onExpandAll={onExpandAll}
-          onCollapseAll={onCollapseAll}
-          onClose={() => window.__POPUP_CLOSE__?.()}
-        />
-      )}
-
-      {!isTaskMode && resource && (
-        <ResourcePopoutPanel
-          open={true}
-          resource={resource}
-          history={resourceHistory}
-          expanded={expanded}
-          onToggleSection={onToggleSection}
-          onExpandAll={() => {
-            setExpanded([
-              "Resource Summary",
-              "Availability",
-              "Callout History",
-              "Capabilities",
-            ]);
+    <SettingsProvider>
+      <AppThemeProvider>
+        <CssBaseline />
+        <div
+          className="min-h-screen w-screen overflow-hidden"
+          style={{
+            height:
+              viewportSize.height === 0
+                ? "100%"
+                : `${viewportSize.height / uiScale}px`,
+            width:
+              viewportSize.width === 0
+                ? "100%"
+                : `${viewportSize.width / uiScale}px`,
+            transform: `scale(${uiScale})`,
+            transformOrigin: "top left",
           }}
-          onCollapseAll={onCollapseAll}
-          onClose={() => window.__POPUP_CLOSE__?.()}
-        />
-      )}
-    </div>
+        >
+          {isTaskMode && (
+            <TaskPopoutPanel
+              open={true}
+              tasks={tasks}
+              expanded={expanded}
+              onToggleSection={onToggleSection}
+              onExpandAll={onExpandAll}
+              onCollapseAll={onCollapseAll}
+              onClose={() => window.__POPUP_CLOSE__?.()}
+            />
+          )}
+
+          {!isTaskMode && resource && (
+            <ResourcePopoutPanel
+              open={true}
+              resource={resource}
+              history={resourceHistory}
+              expanded={expanded}
+              onToggleSection={onToggleSection}
+              onExpandAll={() => {
+                setExpanded([
+                  "Resource Summary",
+                  "Availability",
+                  "Callout History",
+                  "Capabilities",
+                ]);
+              }}
+              onCollapseAll={onCollapseAll}
+              onClose={() => window.__POPUP_CLOSE__?.()}
+            />
+          )}
+        </div>
+      </AppThemeProvider>
+    </SettingsProvider>
   );
 }
 
