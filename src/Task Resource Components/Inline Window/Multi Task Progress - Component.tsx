@@ -101,7 +101,44 @@ export default function ProgressTasksDialog({
         </Stack>
 
         <Stack spacing={2.5}>
-          <FormControl fullWidth size="small" required>
+          <FormControl 
+            fullWidth 
+            size="small" 
+            required
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: mode === 'dark' ? alpha(theme.palette.background.paper, 0.8) : theme.palette.background.paper,
+                '& fieldset': {
+                  borderColor: mode === 'dark' ? alpha(theme.palette.common.white, 0.23) : alpha(theme.palette.common.black, 0.23),
+                },
+                '&:hover fieldset': {
+                  borderColor: mode === 'dark' ? alpha(theme.palette.common.white, 0.4) : alpha(theme.palette.common.black, 0.4),
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: mode === 'dark' ? theme.palette.primary.light : theme.palette.primary.main,
+                  borderWidth: 2,
+                },
+                '&.Mui-focused': {
+                  boxShadow: mode === 'dark' 
+                    ? `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`
+                    : `0 0 0 2px ${alpha(theme.palette.primary.main, 0.1)}`,
+                  backgroundColor: mode === 'dark' ? alpha(theme.palette.background.paper, 0.9) : theme.palette.background.paper,
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: mode === 'dark' ? theme.palette.common.white : theme.palette.text.primary,
+                '&.Mui-focused': {
+                  color: mode === 'dark' ? theme.palette.primary.light : theme.palette.primary.main,
+                },
+              },
+              '& .MuiSelect-select': {
+                color: mode === 'dark' ? theme.palette.common.white : theme.palette.text.primary,
+              },
+              '& .MuiSelect-icon': {
+                color: mode === 'dark' ? alpha(theme.palette.common.white, 0.7) : alpha(theme.palette.text.primary, 0.7),
+              },
+            }}
+          >
             <InputLabel 
               id="target-status-label"
               sx={{
@@ -120,13 +157,13 @@ export default function ProgressTasksDialog({
               onChange={(e) => setTargetStatus(e.target.value)}
               sx={{
                 '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: mode === 'dark' ? alpha(theme.palette.common.white, 0.23) : alpha(theme.palette.common.black, 0.23),
+                  borderColor: 'transparent', // Remove default border since FormControl handles it
                 },
                 '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: mode === 'dark' ? alpha(theme.palette.common.white, 0.4) : alpha(theme.palette.common.black, 0.4),
+                  borderColor: 'transparent',
                 },
                 '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: mode === 'dark' ? theme.palette.primary.light : theme.palette.primary.main,
+                  borderColor: 'transparent',
                 },
                 '& .MuiSelect-select': {
                   color: mode === 'dark' ? theme.palette.common.white : theme.palette.text.primary,
@@ -134,7 +171,7 @@ export default function ProgressTasksDialog({
                 '& .MuiSelect-icon': {
                   color: mode === 'dark' ? alpha(theme.palette.common.white, 0.7) : alpha(theme.palette.text.primary, 0.7),
                 },
-                backgroundColor: mode === 'dark' ? alpha(theme.palette.background.paper, 0.8) : theme.palette.background.paper,
+                backgroundColor: 'transparent', // Let FormControl handle background
               }}
             >
               <MenuItem disabled value="__CORE__"><Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>Core progression</Typography></MenuItem>
