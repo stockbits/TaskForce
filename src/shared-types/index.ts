@@ -75,8 +75,8 @@ export interface ResourceHistoryEntry {
   previousOutcome: string | null;
   previousAvailableAgainAt: string | null;
   changedAt: string; // ISO timestamp
-  taskIdUsed: string | number | null;
-  outcomeApplied: CalloutOutcome;
+  taskIdUsed?: string | number | null;
+  outcomeApplied?: CalloutOutcome;
   availableAgainAt?: string | null;
 }
 
@@ -92,8 +92,16 @@ export interface ResourceRecord {
   history?: ResourceHistoryEntry[];
   division?: string;
   primarySkill?: string;
-  secondarySkill?: string;
-  updatedAt?: string;
+  secondarySkill?: string | null;
+  updatedAt?: string | null;
+  pwa?: string;
+  homePostCode?: string;
+  homeLat?: number;
+  homeLng?: number;
+  shiftStart?: string;
+  shiftEnd?: string;
+  lunchStart?: string;
+  lunchEnd?: string;
 }
 
 /* Schedule/Panel Types */

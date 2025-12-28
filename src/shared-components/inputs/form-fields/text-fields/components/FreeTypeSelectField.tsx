@@ -23,6 +23,13 @@ const FreeTypeSelectField = forwardRef<HTMLInputElement, FreeTypeSelectFieldProp
 }, ref) => {
   const [inputValue, setInputValue] = useState<string>(value ?? '');
 
+  // Find the current option object based on the value
+  const currentOption = useMemo(() => {
+    return options.find((opt) => 
+      typeof opt === 'string' ? opt === value : opt.value === value
+    ) || null;
+  }, [options, value]);
+
   const normalizedQuery = inputValue.trim().toLowerCase();
 
   const filteredOptions = useMemo(() => {
@@ -41,11 +48,19 @@ const FreeTypeSelectField = forwardRef<HTMLInputElement, FreeTypeSelectFieldProp
         disableClearable
         componentsProps={{ popper: { style: { zIndex: 13000 } } }}
         options={filteredOptions}
-        value={value || ''}
+        value={currentOption || undefined}
         inputValue={inputValue}
         onInputChange={(_e, newInput) => setInputValue(newInput)}
-        onChange={(_e, newValue) => onChange(String(newValue ?? ''))}
-        getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+        onChange={(_e, newValue) => {
+          const selectedValue = typeof newValue === 'string' 
+            ? newValue 
+            : (newValue as any)?.value ?? '';
+          onChange(selectedValue);
+        }}
+        getOptionLabel={(option) => {
+          if (typeof option === 'string') return option;
+          return option?.label || '';
+        }}
         renderOption={(props, option) => (
           <ListItem {...props} dense>
             <ListItemText primary={typeof option === 'string' ? option : option.label} />
