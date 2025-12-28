@@ -1364,7 +1364,14 @@ export default function MainLayout() {
               onClick={handleBack}
               variant="outlined"
               disabled={isStarting}
-              sx={{ minWidth: 100 }}
+              sx={{
+                minWidth: 100,
+                color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.text.primary,
+                borderColor: theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.12) : alpha(theme.palette.primary.main, 0.12),
+                '&:hover': {
+                  backgroundColor: theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.04) : alpha(theme.palette.primary.main, 0.04),
+                },
+              }}
             >
               Cancel
             </AppButton>
@@ -1459,7 +1466,7 @@ export default function MainLayout() {
                 setSelectedGroup(activeCalloutGroup || "");
                 setQuery(activeCalloutGroup || "");
               }}
-              variant="contained"
+              variant="outlined"
               disabled={hasUnsavedCalloutChanges}
               sx={{ minWidth: 120 }}
             >

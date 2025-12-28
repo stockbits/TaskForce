@@ -419,7 +419,7 @@ export const Step2: React.FC<Step2Props> = ({
                         <Chip
                           label={task.taskId || task.TaskID || task.id || 'Unknown'}
                           size="small"
-                          color="primary"
+                          color={theme.palette.mode === 'dark' ? 'secondary' : 'primary'}
                           variant="outlined"
                         />
 
@@ -427,7 +427,7 @@ export const Step2: React.FC<Step2Props> = ({
 
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <Users sx={{ fontSize: 18, color: 'success.main' }} />
-                          <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                          <Typography variant="body2" sx={{ fontWeight: 700, color: theme.palette.mode === 'dark' ? 'text.primary' : 'primary.main' }}>
                             Selected: {selectedGroup}
                           </Typography>
                         </Box>
@@ -526,7 +526,13 @@ export const Step2: React.FC<Step2Props> = ({
                         <TextField
                           type="datetime-local"
                           size="small"
-                          sx={{ maxWidth: 180 }}
+                          sx={{
+                            maxWidth: 180,
+                            '& input': { color: theme.palette.text.primary },
+                            '& input::-webkit-calendar-picker-indicator': {
+                              filter: theme.palette.mode === 'dark' ? 'invert(1)' : 'none'
+                            }
+                          }}
                           disabled={!requiresUnavailable}
                           value={draft.availableAgainAt || ""}
                           onChange={(event) => handleDraftChange(resource.resourceId, {
@@ -559,7 +565,7 @@ export const Step2: React.FC<Step2Props> = ({
                           <IconButton
                             size="small"
                             onClick={() => onResourceSelect?.(resource.resourceId)}
-                            sx={{ color: 'black' }}
+                            sx={{ color: theme.palette.text.primary }}
                           >
                             <Person sx={{ fontSize: 16 }} />
                           </IconButton>
@@ -569,14 +575,14 @@ export const Step2: React.FC<Step2Props> = ({
                               // Placeholder for task action - implement onTaskSelect if needed
                               console.log('Task action for', resource.resourceId);
                             }}
-                            sx={{ color: 'black' }}
+                            sx={{ color: theme.palette.text.primary }}
                           >
                             <AssignmentIcon sx={{ fontSize: 16 }} />
                           </IconButton>
                           <IconButton
                             size="small"
                             onClick={() => toggleHistoryPanel(resource.resourceId)}
-                            sx={{ color: 'black' }}
+                            sx={{ color: theme.palette.text.primary }}
                           >
                             <History sx={{ fontSize: 16 }} />
                           </IconButton>
@@ -612,7 +618,7 @@ export const Step2: React.FC<Step2Props> = ({
                   Callout History - {selectedHistoryResourceId}
                 </Typography>
                 <IconButton size="small" onClick={() => setSelectedHistoryResourceId(null)}>
-                  <Typography variant="caption" sx={{ fontSize: 12 }}>✕</Typography>
+                  <Typography variant="caption" sx={{ fontSize: 12, color: theme.palette.text.primary }}>✕</Typography>
                 </IconButton>
               </Stack>
               <List dense sx={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
@@ -629,7 +635,7 @@ export const Step2: React.FC<Step2Props> = ({
                                 <Stack direction="row" alignItems="center" spacing={0.5} sx={{ ml: 1 }}>
                                   <IconButton
                                     size="small"
-                                    sx={{ p: 0.5, color: 'black' }}
+                                    sx={{ p: 0.5, color: theme.palette.text.primary }}
                                     onClick={() => console.log('task clicked', entry.taskId)}
                                   >
                                     {renderIconFor(entry.taskIcon)}

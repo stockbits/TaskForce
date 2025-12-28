@@ -55,7 +55,7 @@ export const Step1: React.FC<Step1Props> = ({
               <Chip
                 label={task.taskId || task.TaskID || task.id || 'Unknown'}
                 size="small"
-                color="primary"
+                color={theme.palette.mode === 'dark' ? 'secondary' : 'primary'}
                 variant="outlined"
               />
 
@@ -64,7 +64,7 @@ export const Step1: React.FC<Step1Props> = ({
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Users sx={{ fontSize: 18, color: 'success.main' }} />
                 <Stack spacing={0} sx={{ lineHeight: 1 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 700, color: theme.palette.mode === 'dark' ? 'text.primary' : 'primary.main' }}>
                     {selectedGroup ? `Selected: ${selectedGroup}` : 'No group selected'}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">

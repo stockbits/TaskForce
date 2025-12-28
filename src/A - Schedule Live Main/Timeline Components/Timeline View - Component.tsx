@@ -20,7 +20,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import TimelineZoomControl from "./Timeline Zoom Controls - Component";
 import TaskBlock from "../UI Components/Task Block - Component";
-import { TimeTooltip, SimpleTooltip } from "@/shared-components";
+import { TimeTooltip, SimpleTooltip, AppButton } from "@/shared-components";
 
 type ResourceRow = {
   resourceId?: string;
@@ -1149,7 +1149,7 @@ export default function TimelinePanel({
           </LocalizationProvider>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDateModalOpen(false)} variant="contained">Cancel</Button>
+          <AppButton onClick={() => setDateModalOpen(false)} variant="outlined">Cancel</AppButton>
           <Button onClick={() => setDateModalOpen(false)} variant="contained">
             Apply
           </Button>

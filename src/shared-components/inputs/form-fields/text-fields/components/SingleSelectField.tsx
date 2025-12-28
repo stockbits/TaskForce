@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { Autocomplete, Box, ListItem, ListItemText, TextField, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import useFieldSizes from '../utils/useFieldSizes';
 
 type OptionItem = string | { label: string; value: string };
@@ -37,6 +38,8 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
 
   const { INPUT_HEIGHT, CHIP_SIZE, MAX_WIDTH, MIN_WIDTH } = useFieldSizes();
 
+  const theme = useTheme();
+
   const DEFAULT_WRAPPER_SX = {
     maxWidth: MAX_WIDTH,
     minWidth: MIN_WIDTH,
@@ -72,7 +75,6 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
       <Typography variant="body2" sx={{ fontSize: 12, color: 'text.secondary' }}>{label}</Typography>
       <Autocomplete
       componentsProps={{ popper: { style: { zIndex: 13000 } } }}
-      disableClearable
       options={filteredOptions}
       value={
         (() => {
@@ -120,7 +122,46 @@ const SingleSelectField: React.FC<SingleSelectFieldProps> = ({
         );
       }}
       ListboxProps={{ sx: { zIndex: 2000, maxHeight: 320 } }}
-      sx={{ width: '90ch', '& .MuiAutocomplete-inputRoot': { minHeight: INPUT_HEIGHT, maxHeight: INPUT_HEIGHT, alignItems: 'center', '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, paddingRight: '56px', fontSize: 13, lineHeight: `${CHIP_SIZE}px` } } }}
+      sx={{
+        width: '90ch',
+        '& .MuiAutocomplete-inputRoot': {
+          minHeight: INPUT_HEIGHT,
+          maxHeight: INPUT_HEIGHT,
+          alignItems: 'center',
+          '& .MuiInputBase-input': { paddingTop: 0, paddingBottom: 0, paddingRight: '56px', fontSize: 13, lineHeight: `${CHIP_SIZE}px` }
+        },
+        '& .MuiAutocomplete-clearIndicator': {
+          backgroundColor: 'transparent',
+          color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.text.primary,
+          borderRadius: 0,
+          width: 20,
+          height: 20,
+          padding: 0,
+          marginRight: 4,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          alignSelf: 'center',
+          position: 'relative',
+          top: 0,
+          transform: 'none',
+          '&:hover': { backgroundColor: 'transparent' },
+          '& .MuiSvgIcon-root': { fontSize: 18, lineHeight: 1 }
+        },
+        '& .MuiAutocomplete-popupIndicator': {
+          color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.text.primary,
+          width: 20,
+          height: 20,
+          padding: 0,
+          marginRight: 2,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          alignSelf: 'center',
+          transform: 'none',
+          '& .MuiSvgIcon-root': { fontSize: 14, lineHeight: 1 }
+        }
+      }}
       {...rest}
     />
     </Box>

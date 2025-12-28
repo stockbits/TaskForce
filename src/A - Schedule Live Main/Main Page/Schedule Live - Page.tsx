@@ -709,7 +709,7 @@ export default function ScheduleLivePage() {
         Search Tool
       </AppButton>
 
-      <AppButton variant="contained" size="small" onClick={handleClearAll} sx={{ minWidth: 96, fontWeight: 500, mr: 1 }}>
+      <AppButton variant="outlined" size="small" onClick={handleClearAll} sx={{ minWidth: 96, fontWeight: 500, mr: 1 }}>
         Clear All
       </AppButton>
 
@@ -860,7 +860,7 @@ export default function ScheduleLivePage() {
 
                 <Stack direction="row" justifyContent="flex-end" spacing={1}>
                   <AppButton
-                    variant="contained"
+                    variant="outlined"
                     color="primary"
                     size="medium"
                     onClick={() => {
@@ -869,7 +869,7 @@ export default function ScheduleLivePage() {
                     sx={{
                       px: 3.5,
                       fontWeight: 700,
-                      boxShadow: "0 18px 38px rgba(8,58,97,0.24)",
+                      boxShadow: "0 18px 38px rgba(8,58,97,0.04)",
                     }}
                   >
                     Clear

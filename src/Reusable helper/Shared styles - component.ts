@@ -10,7 +10,7 @@ export const sharedStyles = (theme: Theme) => ({
   sectionTitle: {
     fontWeight: 700,
     letterSpacing: 1.2,
-    color: alpha(theme.palette.primary.main, 0.8),
+    color: theme.palette.mode === 'dark' ? theme.palette.text.primary : alpha(theme.palette.primary.main, 0.8),
   },
   iconBox: {
     height: theme.spacing(4.5),

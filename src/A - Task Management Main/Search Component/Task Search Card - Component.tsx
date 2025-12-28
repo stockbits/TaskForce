@@ -580,7 +580,7 @@ export default function TaskSearchCard({
 
         <Stack direction="row" spacing={1} alignItems="center">
           <AppButton
-            variant="contained"
+            variant="outlined"
             size="small"
             onClick={handleClear}
           >

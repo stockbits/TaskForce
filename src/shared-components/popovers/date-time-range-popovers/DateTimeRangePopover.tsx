@@ -264,7 +264,7 @@ export default function DateTimePopover({
           />
         </Stack>
         <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-          <AppButton variant="contained" size="small" onClick={() => { onClear && onClear(); }}>
+          <AppButton variant="outlined" size="small" onClick={() => { onClear && onClear(); }}>
             Clear
           </AppButton>
           <AppButton variant="contained" size="small" onClick={onClose}>
