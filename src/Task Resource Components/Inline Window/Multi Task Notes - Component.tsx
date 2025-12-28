@@ -37,8 +37,6 @@ export default function ProgressNotesDialog({
 }: Props) {
   const theme = useTheme();
 
-  console.log('[DEBUG] ProgressNotesDialog render - open:', open, 'tasksCount:', tasksCount, 'preview:', preview);
-
   return (
     <Dialog 
       open={open} 

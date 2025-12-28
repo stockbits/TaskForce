@@ -310,13 +310,10 @@ export default function TaskManagementPage() {
 
   // Open progress notes dialog
   const openProgressNotes = useCallback((tasks: any[]) => {
-    console.log('[DEBUG] openProgressNotes called with tasks:', tasks);
     if (!tasks || !tasks.length) {
-      console.log('[DEBUG] No tasks selected, returning');
       return snackbar.error("No tasks selected");
     }
     const preview = tasks.map((t) => ({ id: String(t.taskId ?? t.workId ?? t.id ?? ""), currentStatus: t.taskStatus ?? t.status ?? null, nextStatus: null }));
-    console.log('[DEBUG] Setting progressNotesDialogOpen to true, preview:', preview);
     setProgressNotesPreview(preview);
     setProgressNotesDialogOpen(true);
     setProgressNotesError(null);
@@ -499,8 +496,6 @@ export default function TaskManagementPage() {
         progressSuccess={progressNotesSuccess}
         progressSaving={progressNotesSaving}
       />
-      {console.log('[DEBUG] Rendering ProgressNotesDialog - open:', progressNotesDialogOpen, 'preview length:', progressNotesPreview.length)}
-      {console.log('Rendering ProgressNotesDialog, open:', progressNotesDialogOpen)}
       </>
     );
 }

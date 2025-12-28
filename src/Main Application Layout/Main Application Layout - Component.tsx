@@ -49,6 +49,7 @@ import Cog from '@mui/icons-material/Build';
 import Engineering from '@mui/icons-material/Engineering';
 import TaskPopoutPanel from "@/Task Resource Components/New Window/Task Popout Panel - Component";
 import ProgressTasksDialog from '@/Task Resource Components/Inline Window/Multi Task Progress - Component';
+import ProgressNotesDialog from '@/Task Resource Components/Inline Window/Multi Task Notes - Component';
 import TaskSearchCard from '@/A - Task Management Main/Search Component/Task Search Card - Component';
 import TaskTableAdvanced from '@/A - Task Management Main/MUI Table Component/Task Table Advanced - Component';
 import { useAppSnackbar } from '@/shared-components';
@@ -427,6 +428,12 @@ export default function MainLayout() {
   const [targetResourceId, setTargetResourceId] = useState<string>('');
   const [progressNote, setProgressNote] = useState<string>('');
   const [progressSaving, setProgressSaving] = useState<boolean>(false);
+
+  // Progress notes dialog state
+  const [progressNotesDialogOpen, setProgressNotesDialogOpen] = useState(false);
+  const [progressNotesTasks, setProgressNotesTasks] = useState<Record<string, any>[]>([]);
+  const [progressNotesNote, setProgressNotesNote] = useState<string>('');
+  const [progressNotesSaving, setProgressNotesSaving] = useState<boolean>(false);
   // Inline popout state
   useEffect(() => {
     return () => closeExternalWindow();
@@ -527,6 +534,16 @@ export default function MainLayout() {
     setProgressDialogOpen(true);
   }, []);
 
+  // Open Progress Notes dialog programmatically (used by Actions menu)
+  const openProgressNotes = useCallback((tasks: any[]) => {
+    if (!tasks || !tasks.length) {
+      snackbar.error('No tasks selected');
+      return;
+    }
+    setProgressNotesTasks(tasks);
+    setProgressNotesDialogOpen(true);
+  }, []);
+
   // Listen for progress-tasks events fired by Actions menu or row menu (backwards compatibility)
   useEffect(() => {
     const handler = (ev: Event) => {
@@ -539,6 +556,19 @@ export default function MainLayout() {
     window.addEventListener('taskforce:progress-tasks', handler as EventListener);
     return () => window.removeEventListener('taskforce:progress-tasks', handler as EventListener);
   }, [openProgressTasks]);
+
+  // Listen for progress-notes events fired by Actions menu or row menu (backwards compatibility)
+  useEffect(() => {
+    const handler = (ev: Event) => {
+      try {
+        const custom = ev as CustomEvent<any>;
+        openProgressNotes(custom.detail?.tasks ?? []);
+      } catch {}
+    };
+
+    window.addEventListener('taskforce:progress-notes', handler as EventListener);
+    return () => window.removeEventListener('taskforce:progress-notes', handler as EventListener);
+  }, [openProgressNotes]);
 
   useEffect(() => {
     const handleTasksProgressed = (event: Event) => {
@@ -1237,7 +1267,7 @@ export default function MainLayout() {
                   handleOpenPopout(tasks, coordsX, coordsY);
                 }}
                 onProgressTasks={(tasks: any[]) => openProgressTasks(tasks)}
-                onProgressNotes={(tasks: any[]) => window.dispatchEvent(new CustomEvent('taskforce:progress-notes', { detail: { tasks } }))}
+                onProgressNotes={(tasks: any[]) => openProgressNotes(tasks)}
                 onOpenCalloutIncident={(task: any) => handleOpenCalloutIncident(task)}
               />
 
@@ -1255,7 +1285,7 @@ export default function MainLayout() {
                   onOpenPopout={handleOpenPopout}
                   onOpenCalloutIncident={handleOpenCalloutIncident}
                   onProgressTasks={(tasks: any[]) => openProgressTasks(tasks)}
-                  onProgressNotes={(tasks: any[]) => window.dispatchEvent(new CustomEvent('taskforce:progress-notes', { detail: { tasks } }))}
+                  onProgressNotes={(tasks: any[]) => openProgressNotes(tasks)}
                   onSelectionChange={(rows: Record<string, any>[]) => {
                     setSelectedRows(rows);
                   }}
@@ -1548,6 +1578,29 @@ export default function MainLayout() {
         coreStatuses={['Assigned','In Progress','Completed']}
         additionalStatuses={['Escalated','Cancelled']}
         resources={resources}
+      />
+      <ProgressNotesDialog
+        open={progressNotesDialogOpen}
+        preview={progressNotesTasks.map((t) => ({ id: String(t.taskId ?? t.id ?? t.TaskID ?? ''), currentStatus: t.taskStatus ?? t.status ?? null, nextStatus: null }))}
+        tasksCount={progressNotesTasks.length}
+        progressNote={progressNotesNote}
+        setProgressNote={(s) => setProgressNotesNote(s)}
+        onClose={() => { setProgressNotesDialogOpen(false); setProgressNotesTasks([]); setProgressNotesNote(''); }}
+        progressSaving={progressNotesSaving}
+        onSave={async () => {
+          try {
+            setProgressNotesSaving(true);
+            // simulate save
+            snackbar.success(`Added progress notes to ${progressNotesTasks.length} task${progressNotesTasks.length>1 ? 's' : ''}`);
+            setProgressNotesDialogOpen(false);
+            setProgressNotesTasks([]);
+            setProgressNotesNote('');
+          } catch {
+            snackbar.error('Failed to save progress notes');
+          } finally {
+            setProgressNotesSaving(false);
+          }
+        }}
       />
     </Box>
   );
