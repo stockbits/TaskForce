@@ -204,7 +204,7 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
                     sx={{
                       width: 14,
                       height: 14,
-                      bgcolor: theme.palette.mode === 'dark' ? "#ff8c00" : "#ff9800",
+                      bgcolor: theme.palette.warning.main,
                       opacity: 0.25,
                       borderRadius: 0,
                     }}

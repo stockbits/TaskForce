@@ -86,7 +86,7 @@ export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane
           width: Math.max(widthPx, 10),
           height: 4,
           borderRadius: 0,
-          bgcolor: '#D97706', // Dark amber/yellow color
+          bgcolor: theme.palette.taskBlock.main, // Task block background color
           border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.08)'}`,
           boxSizing: "border-box",
           cursor: "pointer",

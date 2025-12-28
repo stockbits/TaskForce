@@ -1,4 +1,19 @@
 import { createTheme } from "@mui/material/styles";
+import { PaletteColor } from "@mui/material/styles";
+
+// Extend MUI theme types to include custom colors
+declare module "@mui/material/styles" {
+  interface Palette {
+    taskBlock: PaletteColor;
+    timelineText: PaletteColor;
+    travel: PaletteColor;
+  }
+  interface PaletteOptions {
+    taskBlock?: PaletteColor;
+    timelineText?: PaletteColor;
+    travel?: PaletteColor;
+  }
+}
 
 // Palette matched to provided logo (navy + mint ring)
 const primaryNavy = "#0F2740"; // logo background
@@ -7,6 +22,8 @@ const primaryNavyDark = "#0A1A2A";
 const accentMint = "#3BE089"; // mint ring
 const accentMintDark = "#1EA46A";
 const neutralBackground = "#F3F6F8";
+const taskBlockColor = "#D97706"; // task block background
+const timelineTextColor = "#666"; // timeline text color
 
 export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme({
   palette: {
@@ -64,6 +81,25 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
       dark: mode === 'dark' ? "#46954a" : "#1b5e20",
       contrastText: mode === 'dark' ? "#000000" : "#ffffff",
     },
+    // Custom application colors
+    taskBlock: {
+      main: taskBlockColor,
+      light: taskBlockColor,
+      dark: taskBlockColor,
+      contrastText: "#ffffff",
+    },
+    timelineText: {
+      main: timelineTextColor,
+      light: timelineTextColor,
+      dark: timelineTextColor,
+      contrastText: "#ffffff",
+    },
+    travel: {
+      main: accentMint,
+      light: accentMint,
+      dark: accentMintDark,
+      contrastText: "#ffffff",
+    },
   },
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
@@ -85,7 +121,7 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
         },
         // Remove default MUI focus rings that might show blue
         '.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
-          borderColor: mode === 'dark' ? accentMint : primaryNavy + ' !important',
+          borderColor: mode === 'dark' ? primaryNavyLight : primaryNavy + ' !important',
         },
         // Ensure no blue focus rings appear
         '*': {

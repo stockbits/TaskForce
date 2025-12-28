@@ -115,12 +115,12 @@ export default function ProgressTasksDialog({
                   borderColor: mode === 'dark' ? alpha(theme.palette.common.white, 0.4) : alpha(theme.palette.common.black, 0.4),
                 },
                 '&.Mui-focused fieldset': {
-                  borderColor: mode === 'dark' ? theme.palette.primary.light : theme.palette.primary.main,
+                  borderColor: mode === 'dark' ? '#3BE089' : theme.palette.primary.main,
                   borderWidth: 2,
                 },
                 '&.Mui-focused': {
                   boxShadow: mode === 'dark' 
-                    ? `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`
+                    ? `0 0 0 2px ${alpha('#3BE089', 0.2)}`
                     : `0 0 0 2px ${alpha(theme.palette.primary.main, 0.1)}`,
                   backgroundColor: mode === 'dark' ? alpha(theme.palette.background.paper, 0.9) : theme.palette.background.paper,
                 },
@@ -216,7 +216,7 @@ export default function ProgressTasksDialog({
                   borderColor: mode === 'dark' ? alpha(theme.palette.common.white, 0.4) : alpha(theme.palette.common.black, 0.4),
                 },
                 '&.Mui-focused fieldset': {
-                  borderColor: mode === 'dark' ? theme.palette.primary.light : theme.palette.primary.main,
+                  borderColor: mode === 'dark' ? '#3BE089' : theme.palette.primary.main,
                 },
               },
               '& .MuiInputBase-input': {

@@ -247,7 +247,7 @@ const Header: React.FC<HeaderProps> = memo(
                 boxShadow: '0px 0px 0px 2px rgba(255,255,255,0.08)',
               }}
             >
-              <User sx={{ fontSize: 20, color: "#FFFFFF" }} />
+              <User sx={{ fontSize: 20, color: theme.palette.common.white }} />
             </Avatar>
           </Box>
         </Toolbar>

@@ -756,7 +756,7 @@ export default function TimelinePanel({
                     alignItems: "center",
                     justifyContent: "center",
                     fontSize: "0.75rem",
-                    color: "#666",
+                    color: theme.palette.timelineText.main,
                     borderRight:
                       i < timelineIntervals.length - 1
                         ? "1px solid #eee"
@@ -878,8 +878,8 @@ export default function TimelinePanel({
                       borderRadius: 0,
                       bgcolor: theme.palette.mode === 'dark' ? "rgba(59, 224, 137, 0.3)" : "primary.main",
                       opacity: theme.palette.mode === 'dark' ? 1 : 0.15,
-                      borderLeft: `3px solid ${theme.palette.mode === 'dark' ? "#3BE089" : "#000000"}`,
-                      borderRight: `3px solid ${theme.palette.mode === 'dark' ? "#3BE089" : "#000000"}`,
+                      borderLeft: `3px solid ${theme.palette.mode === 'dark' ? theme.palette.travel.main : "#000000"}`,
+                      borderRight: `3px solid ${theme.palette.mode === 'dark' ? theme.palette.travel.main : "#000000"}`,
                       boxSizing: "border-box",
                     }}
                   />
@@ -899,7 +899,7 @@ export default function TimelinePanel({
                         width: b.widthPx,
                         height: ROW_HEIGHT,
                         borderRadius: 0,
-                        bgcolor: theme.palette.mode === 'dark' ? "#ff8c00" : "#ff9800", // Orange color for lunch breaks
+                        bgcolor: theme.palette.warning.main, // Orange color for lunch breaks
                         opacity: 0.25,
                         boxSizing: "border-box",
                         cursor: "pointer",
@@ -974,7 +974,7 @@ export default function TimelinePanel({
                               top: ROW_HEIGHT / 2 - 1, // center vertically in the row
                               width: Math.min(lineLengthPx, contentWidth - Math.max(0, shiftStartPx)), // Don't extend past timeline end
                               height: 2,
-                              bgcolor: '#3BE089', // Travel color
+                              bgcolor: theme.palette.travel.main, // Travel color
                               opacity: 0.6,
                             }}
                           />
@@ -1003,7 +1003,7 @@ export default function TimelinePanel({
                                   top: ROW_HEIGHT / 2 - 1, // center vertically in the row
                                   width: Math.min(lineLengthPx, contentWidth - prevEndPx), // Don't extend past timeline end
                                   height: 2,
-                                  bgcolor: '#3BE089', // Travel color
+                                  bgcolor: theme.palette.travel.main, // Travel color
                                   opacity: 0.6,
                                 }}
                               />

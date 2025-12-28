@@ -106,7 +106,7 @@ export default function ProgressNotesDialog({
                   borderColor: mode === 'dark' ? alpha(theme.palette.common.white, 0.4) : alpha(theme.palette.common.black, 0.4),
                 },
                 '&.Mui-focused fieldset': {
-                  borderColor: mode === 'dark' ? theme.palette.primary.light : theme.palette.primary.main,
+                  borderColor: mode === 'dark' ? '#3BE089' : theme.palette.primary.main,
                 },
               },
               '& .MuiInputBase-input': {

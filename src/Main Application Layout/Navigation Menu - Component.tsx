@@ -231,7 +231,7 @@ export const Sidebar = memo(function Sidebar({
                 borderColor: alpha(theme.palette.text.primary, 0.3),
               },
               "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                borderColor: theme.palette.primary.main,
+                borderColor: theme.palette.mode === 'dark' ? '#3BE089' : theme.palette.primary.main,
               },
             },
           }}
@@ -330,7 +330,7 @@ export const Sidebar = memo(function Sidebar({
                               ? alpha(theme.palette.grey[100], 0.2) 
                               : alpha(theme.palette.primary.main, 0.12),
                             color: theme.palette.mode === 'dark' 
-                              ? '#ffffff' 
+                              ? theme.palette.common.white 
                               : theme.palette.primary.main,
                             "&::before": {
                               content: '""',
@@ -341,7 +341,7 @@ export const Sidebar = memo(function Sidebar({
                               width: 3,
                               borderRadius: 999,
                               backgroundColor: theme.palette.mode === 'dark' 
-                                ? '#ffffff' 
+                                ? theme.palette.common.white 
                                 : theme.palette.primary.main,
                             },
                           }
