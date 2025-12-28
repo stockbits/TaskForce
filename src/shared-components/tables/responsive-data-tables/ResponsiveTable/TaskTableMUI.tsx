@@ -575,7 +575,6 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
         x={contextMenu.x}
         y={contextMenu.y}
         selectedRows={gridRows.filter((r) => rowSelectionModel.ids.has(String(r.id)))}
-        clickedColumnKey={contextMenu.clickedColumnKey ?? null}
         clickedRow={contextMenu.clickedRow ?? null}
         onClose={closeContextMenu}
         mouseScreenX={contextMenu.mouseScreenX ?? 0}
