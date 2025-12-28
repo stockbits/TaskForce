@@ -76,7 +76,7 @@ function mapSelectedMode(id: string): "task" | "resource" {
 ============================================================================ */
 export default function ScheduleLivePage() {
   const theme = useTheme();
-  const accent = theme.palette.primary.main;
+  const accent = theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main;
   const borderColor = alpha(accent, 0.18);
   const surfaceShadow = "0 24px 54px rgba(8,58,97,0.22)";
 
@@ -657,7 +657,7 @@ export default function ScheduleLivePage() {
       elevation={0}
       sx={{
         width: "100%",
-        borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+        borderBottom: `1px solid ${alpha(theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main, 0.1)}`,
         px: 2.5,
         py: 1.5,
         display: "flex",
@@ -1005,10 +1005,10 @@ export default function ScheduleLivePage() {
                 transform: 'translate(-50%, -50%)',
                 width: 4,
                 height: 24,
-                bgcolor: alpha(theme.palette.primary.main, 0.3),
+                bgcolor: alpha(theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main, 0.3),
                 borderRadius: 1,
                 '&:hover': {
-                  bgcolor: alpha(theme.palette.primary.main, 0.5),
+                  bgcolor: alpha(theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main, 0.5),
                 },
               }
             : {
@@ -1017,10 +1017,10 @@ export default function ScheduleLivePage() {
                 transform: 'translate(-50%, -50%)',
                 width: 24,
                 height: 4,
-                bgcolor: alpha(theme.palette.primary.main, 0.3),
+                bgcolor: alpha(theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main, 0.3),
                 borderRadius: 1,
                 '&:hover': {
-                  bgcolor: alpha(theme.palette.primary.main, 0.5),
+                  bgcolor: alpha(theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main, 0.5),
                 },
               }
           ),

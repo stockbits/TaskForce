@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useAppSnackbar } from '@/shared-components';
 import rawMockTasks from "@/Database Models/Task - Model.json";
 import TaskSearchCard from "@/A - Task Management Main/Search Component/Task Search Card - Component";
-import TaskTableMUI from "@/shared-components/tables/responsive-data-tables/ResponsiveTable/TaskTableMUI";
+import TaskTableAdvanced from "@/A - Task Management Main/MUI Table Component/Task Table Advanced - Component";
 import ProgressTasksDialog, { ProgressPreview } from "@/Task Resource Components/Inline Window/Multi Task Progress - Component";
 import { useExternalWindow } from "@/Custom React - Hooks/Popup window - component";
 import { Box, Paper, Typography } from "@mui/material";
@@ -339,7 +339,7 @@ export default function TaskManagementPage() {
 
   return (
     <>
-    <Box
+    <Box className="task-management-page"
       ref={containerRef}
       sx={{
         display: "flex",
@@ -378,11 +378,11 @@ export default function TaskManagementPage() {
       </Box>
 
       {filteredTasks.length > 0 ? (
-        <TaskTableMUI
+        <TaskTableAdvanced
           rows={filteredTasks}
           headerNames={headerNames}
           tableHeight={tableHeight}
-          
+          containerRef={containerRef}
           onOpenPopout={(tasks: any[], mX: number, mY: number) => {
             if (!tasks || tasks.length === 0) return;
             openExternalWindow(tasks as any, mX, mY);
@@ -393,10 +393,8 @@ export default function TaskManagementPage() {
           onProgressTasks={(tasks: any[]) => openProgressTasks(tasks)}
           onProgressNotes={(tasks: any[]) => openProgressTasks(tasks)}
           onOpenCalloutIncident={(task: any) => {
-            // TaskRowContextMenu already ensures single-click for clickedRow; here we validate selection
             try {
               if (!task) return;
-              // if task is array (from some callers), handle accordingly
               if (Array.isArray(task)) {
                 if (task.length !== 1) return snackbar.error('Callout Incident requires exactly one selected task');
                 handleOpenCalloutIncident(task[0]);
@@ -405,7 +403,6 @@ export default function TaskManagementPage() {
               }
             } catch {}
           }}
-          
         />
       ) : (
         <Paper

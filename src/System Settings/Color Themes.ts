@@ -30,7 +30,7 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
   palette: {
     mode,
     primary: {
-      main: primaryNavy,
+      main: mode === 'dark' ? primaryNavyLight : primaryNavy,
       light: primaryNavyLight,
       dark: primaryNavyDark,
       contrastText: "#FFFFFF",
@@ -111,6 +111,26 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
             outline: mode === 'dark' ? `2px solid ${accentMint}` : `2px solid ${primaryNavy}`,
             outlineOffset: '1px',
           },
+        },
+        // DataGrid header checkbox: ensure checked header checkbox uses theme's dark-mode accent
+        '.MuiDataGrid-root .MuiDataGrid-columnHeader .MuiCheckbox-root.Mui-checked': {
+          color: mode === 'dark' ? `${accentMint} !important` : `${primaryNavy} !important`,
+        },
+        '.MuiDataGrid-root .MuiDataGrid-columnHeader .MuiCheckbox-root.Mui-indeterminate': {
+          color: mode === 'dark' ? `${accentMint} !important` : `${primaryNavy} !important`,
+        },
+        '.MuiDataGrid-root .MuiDataGrid-columnHeader .MuiCheckbox-root:hover': {
+          backgroundColor: mode === 'dark' ? `rgba(255, 255, 255, 0.08) !important` : `rgba(0, 0, 0, 0.04) !important`,
+        },
+        // Backup selector with slightly less specificity
+        '.MuiDataGrid-columnHeader .MuiCheckbox-root.Mui-checked': {
+          color: mode === 'dark' ? `${accentMint} !important` : `${primaryNavy} !important`,
+        },
+        '.MuiDataGrid-columnHeader .MuiCheckbox-root.Mui-indeterminate': {
+          color: mode === 'dark' ? `${accentMint} !important` : `${primaryNavy} !important`,
+        },
+        '.MuiDataGrid-columnHeader .MuiCheckbox-root:hover': {
+          backgroundColor: mode === 'dark' ? `rgba(255, 255, 255, 0.08) !important` : `rgba(0, 0, 0, 0.04) !important`,
         },
       },
     },

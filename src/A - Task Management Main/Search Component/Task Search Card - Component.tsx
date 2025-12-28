@@ -260,7 +260,7 @@ export default function TaskSearchCard({
             sx={{ 
               minHeight: 36,
               '& .MuiTabs-indicator': (theme) => ({
-                backgroundColor: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.primary.main,
+                backgroundColor: theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main,
               }),
             }}
           >
@@ -501,7 +501,7 @@ export default function TaskSearchCard({
                   disabled={!selectedRows || selectedRows.length === 0}
                 >
                   <ListItemIcon>
-                    <Visibility style={{ fontSize: 16, color: '#1976d2' }} />
+                    <Visibility sx={{ fontSize: 16, color: theme.palette.primary.main }} />
                   </ListItemIcon>
                   Open Viewer{selectedRows && selectedRows.length > 1 ? ` (${selectedRows.length})` : ""}
                 </MenuItem>

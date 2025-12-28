@@ -230,7 +230,6 @@ html {
   pointer-events: auto;
   /* keep headers above common overlays (leaflet, panels) */
   z-index: inherit;
-  position: relative;
   transform: translateZ(0);
 }
 
@@ -243,6 +242,10 @@ html {
 .MuiDataGrid-root {
   z-index: 2147482999;
 }
+
+/* Header (select-all) checkbox color is controlled via the theme (MuiCssBaseline
+   overrides). Removed page-specific `.task-management-page` selectors so all
+   DataGrid headers are themed centrally. */
 
 /* ===================================================================
    DataGrid Header Hover Affordance (subtle UX hint)

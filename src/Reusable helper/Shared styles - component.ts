@@ -19,8 +19,8 @@ export const sharedStyles = (theme: Theme) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    bgcolor: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.primary.main,
-    color: theme.palette.mode === 'dark' ? theme.palette.common.black : theme.palette.primary.contrastText,
+    bgcolor: theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
   },
   taskDetailsPaper: {
     p: 2,

@@ -451,12 +451,12 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
               whiteSpace: 'nowrap', 
               overflow: 'hidden', 
               textOverflow: 'ellipsis',
-              color: mode === 'dark' ? "#ffffff" : "#0B2233",
-              borderBottom: mode === 'dark' ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(0, 0, 0, 0.12)",
+              color: theme.palette.text.primary,
+              borderBottom: `1px solid ${theme.palette.divider}`,
             }, 
             '& .MuiDataGrid-columnHeaders': { 
-              backgroundColor: mode === 'dark' ? "#2a2a2a" : theme.palette.action.hover,
-              borderBottom: mode === 'dark' ? "1px solid rgba(255, 255, 255, 0.2)" : "1px solid rgba(0, 0, 0, 0.12)",
+              backgroundColor: mode === 'dark' ? theme.palette.background.paper : theme.palette.action.hover,
+              borderBottom: `1px solid ${theme.palette.divider}`,
               position: 'sticky',
               top: 0,
               zIndex: 1,
@@ -465,13 +465,13 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
               whiteSpace: 'nowrap', 
               overflow: 'hidden', 
               textOverflow: 'ellipsis',
-              color: mode === 'dark' ? "#ffffff" : "#0B2233",
+              color: theme.palette.text.primary,
               fontWeight: 600,
             },
             '& .MuiDataGrid-row': {
               cursor: controlledSelectedRowIds ? 'pointer' : 'default',
               '&:hover': {
-                backgroundColor: controlledSelectedRowIds ? (mode === 'dark' ? "rgba(255, 255, 255, 0.04)" : theme.palette.action.hover) : 'transparent',
+                backgroundColor: controlledSelectedRowIds ? (mode === 'dark' ? theme.palette.action.hover : theme.palette.action.hover) : 'transparent',
               },
             },
             '& .selected-row': {
@@ -479,25 +479,25 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
               '&:hover': {
                 backgroundColor: mode === 'dark' 
                   ? alpha(theme.palette.common.white, 0.3) 
-                  : theme.palette.primary.main + '20',
+                  : alpha(theme.palette.primary.main, 0.2),
               },
             },
             '& .MuiDataGrid-footerContainer': {
-              backgroundColor: mode === 'dark' ? "#2a2a2a" : "#f5f5f5",
-              borderTop: mode === 'dark' ? "1px solid rgba(255, 255, 255, 0.2)" : "1px solid rgba(0, 0, 0, 0.12)",
-              color: mode === 'dark' ? "#ffffff" : "#0B2233",
+              backgroundColor: theme.palette.background.paper,
+              borderTop: `1px solid ${theme.palette.divider}`,
+              color: theme.palette.text.primary,
             },
             '& .MuiTablePagination-root': {
-              color: mode === 'dark' ? "#ffffff" : "#0B2233",
+              color: theme.palette.text.primary,
             },
             '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
-              color: mode === 'dark' ? "#b0b0b0" : "#475569",
+              color: theme.palette.text.secondary,
             },
             '& .MuiTablePagination-select': {
-              color: mode === 'dark' ? "#ffffff" : "#0B2233",
+              color: theme.palette.text.primary,
             },
             '& .MuiTablePagination-actions .MuiIconButton-root': {
-              color: mode === 'dark' ? "#b0b0b0" : "#475569",
+              color: theme.palette.text.secondary,
               '&:hover': {
                 backgroundColor: mode === 'dark' ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.04)",
               },
@@ -505,12 +505,16 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
             '& .MuiCheckbox-root': {
               color: mode === 'dark' ? "rgba(255, 255, 255, 0.7)" : theme.palette.text.secondary,
               '&.Mui-checked': {
-                color: mode === 'dark' ? '#3BE089 !important' : theme.palette.primary.main,
+                color: mode === 'dark' ? theme.palette.secondary.main : theme.palette.primary.main,
+              },
+              '&.Mui-indeterminate': {
+                color: mode === 'dark' ? theme.palette.secondary.main : theme.palette.primary.main,
               },
               '&:hover': {
-                backgroundColor: mode === 'dark' ? "rgba(255, 255, 255, 0.08)" : alpha(theme.palette.primary.main, 0.04),
+                backgroundColor: mode === 'dark' ? theme.palette.action.hover : alpha(theme.palette.primary.main, 0.04),
               },
             },
+            // header checkbox styling is handled globally via theme (MuiCssBaseline)
           }}
           // ensure DataGrid performs client-side sorting (do not accidentally enter server-mode)
           sortingMode={sortingMode || 'client'}

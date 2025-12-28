@@ -943,7 +943,7 @@ export default function TimelinePanel({
                             top: ROW_HEIGHT / 2 - 1, // center vertically in the row
                             width: lineLengthPx,
                             height: 2,
-                            bgcolor: theme.palette.primary.main,
+                            bgcolor: theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main,
                             opacity: 0.6,
                           }}
                         />

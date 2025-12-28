@@ -8,6 +8,7 @@ import {
   CardContent,
   Avatar,
   Chip,
+  useTheme,
   List,
   ListItem,
   ListItemAvatar,
@@ -42,6 +43,7 @@ interface ResourceAssignment {
 }
 
 export default function ResourceTaskSimulator() {
+  const theme = useTheme();
   const [assignments, setAssignments] = useState<ResourceAssignment[]>([]);
   const [lastShuffleTime, setLastShuffleTime] = useState<Date | null>(null);
   const [travelStats, setTravelStats] = useState<{[key: string]: number}>({});
@@ -179,7 +181,7 @@ export default function ResourceTaskSimulator() {
             <Card sx={{ height: '100%' }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }}>
+                  <Avatar sx={{ mr: 2, bgcolor: theme.palette.mode === 'dark' ? theme.palette.primary.dark : 'primary.main' }}>
                     {getInitials(resource.resourceName)}
                   </Avatar>
                   <Box>

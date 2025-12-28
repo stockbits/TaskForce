@@ -50,7 +50,7 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
           borderRadius: 3,
           px: 3,
           py: 2.5,
-          border: `1px solid ${alpha(theme.palette.primary.main, 0.18)}`,
+          border: `1px solid ${alpha(theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main, 0.18)}`,
           boxShadow: "0 18px 46px rgba(8,58,97,0.22)",
           backgroundImage: "none",
           maxHeight: '80vh',
@@ -69,8 +69,8 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
             sx={{
               color: alpha(theme.palette.text.primary, 0.6),
               '&:hover': {
-                color: theme.palette.primary.main,
-                bgcolor: alpha(theme.palette.primary.main, 0.08),
+                color: theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main,
+                bgcolor: alpha(theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main, 0.08),
               },
             }}
             aria-label="Close legend"
@@ -202,7 +202,7 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
                     sx={{
                       width: 14,
                       height: 14,
-                      bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.3) : "primary.main",
+                      bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.primary.dark, 0.3) : "primary.main",
                       opacity: theme.palette.mode === 'dark' ? 1 : 0.15,
                       borderLeft: `3px solid ${theme.palette.mode === 'dark' ? theme.palette.common.white : "#000000"}`,
                       borderRight: `3px solid ${theme.palette.mode === 'dark' ? theme.palette.common.white : "#000000"}`,
