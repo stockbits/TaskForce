@@ -35,6 +35,8 @@ import { useTheme as useAppTheme } from '@/System Settings/Dark Mode Handler - C
 };
 
 const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef: _containerRef, reserveBottom: _reserveBottom = 160, disablePagination = false, hideToolbar = false, loading = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns: _onRequestCloseColumns, onSortChange, scrollToTopTrigger, sortingMode, sortModel }: Props) {
+  console.log('[DEBUG] TaskTableMUI render - onProgressNotes exists:', !!onProgressNotes);
+
   // Internal state for uncontrolled components
   const [selection, setSelection] = useState<string[]>([]);
   
@@ -554,6 +556,7 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
           if (onProgressTasks) onProgressTasks(tasks);
         }}
         onProgressNotes={(tasks: any[]) => {
+          console.log('[DEBUG] TaskTableMUI onProgressNotes called with tasks:', tasks, 'onProgressNotes exists:', !!onProgressNotes);
           if (onProgressNotes) onProgressNotes(tasks);
         }}
       />

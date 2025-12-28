@@ -5,6 +5,8 @@ import TaskTableMUI from "@/shared-components/tables/responsive-data-tables/Resp
 const TaskTableAdvanced: React.FC<any> = memo(({ rows, columns: _columns, loading, disablePagination = false, ...rest }) => {
   const containerRef = useRef<HTMLElement | null>(null);
 
+  console.log('[DEBUG] TaskTableAdvanced render - onProgressNotes exists:', !!rest.onProgressNotes);
+
   return (
     <Box sx={{ width: '100%', display: 'flex', flex: 1, minHeight: 0 }} ref={containerRef as any}>
       <TaskTableMUI
