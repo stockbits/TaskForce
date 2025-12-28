@@ -88,12 +88,17 @@ export default function TaskRowContextMenu({
   };
 
   const handleProgressNotes = () => {
-    if (!actionableRows.length || !onProgressNotes) return;
+    console.log('[DEBUG] TaskRowContextMenu handleProgressNotes called, actionableRows:', actionableRows, 'onProgressNotes:', !!onProgressNotes);
+    if (!actionableRows.length || !onProgressNotes) {
+      console.log('[DEBUG] Missing actionableRows or onProgressNotes, returning');
+      return;
+    }
 
     try {
+      console.log('[DEBUG] Calling onProgressNotes from context menu');
       onProgressNotes(actionableRows);
     } catch (err) {
-      console.error("ContextMenu → onProgressNotes error:", err);
+      console.error("[DEBUG] ContextMenu → onProgressNotes error:", err);
     }
 
     onClose();

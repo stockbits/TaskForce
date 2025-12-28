@@ -144,6 +144,7 @@ export function createTaskActionItems(
   onOpenPopout?: () => void,
   onOpenCalloutIncident?: () => void
 ): TaskActionItem[] {
+  console.log('[DEBUG] createTaskActionItems called - count:', actionableCount, 'onProgressNotes:', !!onProgressNotes);
   const items: TaskActionItem[] = [];
 
   if (onOpenPopout) {
@@ -196,6 +197,7 @@ export function createContextMenuItems(
   onProgressNotes?: () => void,
   onCalloutIncident?: () => void
 ): TaskActionItem[] {
+  console.log('[DEBUG] createContextMenuItems called - rows:', actionableRows.length, 'onProgressNotes:', !!onProgressNotes);
   const items: TaskActionItem[] = [];
 
   // Copy value (only if clicked on a cell)

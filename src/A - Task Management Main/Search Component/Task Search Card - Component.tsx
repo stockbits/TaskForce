@@ -250,9 +250,18 @@ export default function TaskSearchCard({
   }, [selectedRows, onProgressTasks]);
 
   const handleProgressNotesMenu = useCallback(() => {
-    if (!selectedRows || !selectedRows.length) return;
-    if (onProgressNotes) onProgressNotes(selectedRows);
-    else window.dispatchEvent(new CustomEvent('taskforce:progress-notes', { detail: { tasks: selectedRows } }));
+    console.log('[DEBUG] TaskSearchCard handleProgressNotesMenu called, selectedRows:', selectedRows);
+    if (!selectedRows || !selectedRows.length) {
+      console.log('[DEBUG] No selectedRows, returning');
+      return;
+    }
+    if (onProgressNotes) {
+      console.log('[DEBUG] Calling onProgressNotes with selectedRows');
+      onProgressNotes(selectedRows);
+    } else {
+      console.log('[DEBUG] No onProgressNotes prop, dispatching custom event');
+      window.dispatchEvent(new CustomEvent('taskforce:progress-notes', { detail: { tasks: selectedRows } }));
+    }
     setActionsAnchorEl(null);
   }, [selectedRows, onProgressNotes]);
 
