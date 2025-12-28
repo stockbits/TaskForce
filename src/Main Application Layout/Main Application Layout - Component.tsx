@@ -394,6 +394,11 @@ export default function MainLayout() {
   // Resources for callout
   const [resources, setResources] = useState<ResourceRecord[]>([]);
 
+  // Load resources data
+  useEffect(() => {
+    setResources(ResourceMock);
+  }, []);
+
   // AUTO-GENERATE callout groups from resource dataset
   const calloutGroups = useMemo(() => {
     const groups = resources
@@ -1542,6 +1547,7 @@ export default function MainLayout() {
         }}
         coreStatuses={['Assigned','In Progress','Completed']}
         additionalStatuses={['Escalated','Cancelled']}
+        resources={resources}
       />
     </Box>
   );

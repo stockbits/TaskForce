@@ -3,6 +3,7 @@ import { Dialog, DialogTitle, DialogContent, Box, Stack, Typography, IconButton,
 import Close from '@mui/icons-material/Close';
 import ListAlt from '@mui/icons-material/ListAlt';
 import { alpha, useTheme } from "@mui/material/styles";
+import { FreeTypeSelectField } from "@/shared-components/inputs/form-fields/text-fields";
 
 export type ProgressPreview = {
   id: string | null | undefined;
@@ -27,6 +28,7 @@ interface Props {
   progressSaving?: boolean;
   coreStatuses: string[];
   additionalStatuses: string[];
+  resources?: Array<{ resourceId: string; name: string }>;
 }
 
 export default function ProgressTasksDialog({
@@ -46,6 +48,7 @@ export default function ProgressTasksDialog({
   progressSaving,
   coreStatuses,
   additionalStatuses,
+  resources = [],
 }: Props) {
   const theme = useTheme();
 
@@ -96,6 +99,19 @@ export default function ProgressTasksDialog({
               {additionalStatuses.map((s) => <MenuItem key={s} value={s}>{s}</MenuItem>)}
             </Select>
           </FormControl>
+
+          <FreeTypeSelectField
+            label="Assign to Employee/Resource ID"
+            placeholder="Enter employee ID or resource pin..."
+            value={_targetResourceId}
+            onChange={_setTargetResourceId}
+            options={resources.map(resource => ({
+              label: `${resource.resourceId} - ${resource.name}`,
+              value: resource.resourceId
+            }))}
+            helperText="Required: Assign tasks to a specific employee or resource"
+            required
+          />
         </Stack>
 
         <Stack spacing={1.5} sx={{ gridColumn: "1 / -1" }}>
