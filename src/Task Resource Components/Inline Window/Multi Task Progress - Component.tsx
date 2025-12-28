@@ -86,17 +86,34 @@ export default function ProgressTasksDialog({
         </Stack>
 
         <Stack spacing={2.5}>
+          <TextField
+            fullWidth
+            size="small"
+            label="Target Status/Pin"
+            placeholder="Enter status or pin to progress tasks to..."
+            value={targetStatus}
+            onChange={(e) => setTargetStatus(e.target.value)}
+            helperText="Type a custom status/pin or select from presets below"
+            variant="outlined"
+            required
+          />
+
           <FormControl fullWidth size="small">
-            <InputLabel id="target-status-label">Target Status</InputLabel>
-            <Select labelId="target-status-label" label="Target Status" value={targetStatus} onChange={(e) => setTargetStatus(e.target.value)}>
-              <MenuItem disabled value="__CORE__"><Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>Core progression</Typography></MenuItem>
+            <InputLabel id="target-status-label">Quick Select (Optional)</InputLabel>
+            <Select
+              labelId="target-status-label"
+              label="Quick Select (Optional)"
+              value=""
+              onChange={(e) => setTargetStatus(e.target.value)}
+              displayEmpty
+            >
+              <MenuItem disabled value=""><Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>Core progression</Typography></MenuItem>
               {coreStatuses.map((s) => <MenuItem key={s} value={s}>{s}</MenuItem>)}
               <Divider component="li" sx={{ my: 0.5 }} />
-              <MenuItem disabled value="__ADDITIONAL__"><Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>Additional statuses</Typography></MenuItem>
+              <MenuItem disabled value=""><Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>Additional statuses</Typography></MenuItem>
               {additionalStatuses.map((s) => <MenuItem key={s} value={s}>{s}</MenuItem>)}
             </Select>
           </FormControl>
-          {/* Assign to Resource ID removed — pins handled elsewhere */}
         </Stack>
 
         <Stack spacing={1.5} sx={{ gridColumn: "1 / -1" }}>
@@ -110,7 +127,7 @@ export default function ProgressTasksDialog({
 
         <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ gridColumn: "1 / -1" }}>
           <Button variant="outlined" size="small" onClick={onClose} sx={{ fontWeight: 600, color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.text.primary, borderColor: theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.12) : alpha(theme.palette.primary.main, 0.12), '&:hover': { backgroundColor: theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.04) : alpha(theme.palette.primary.main, 0.04) } }}>Cancel</Button>
-          <Button variant="contained" size="small" onClick={() => onSave()} disabled={progressSaving || !progressNote.trim()} sx={{ fontWeight: 700 }}>Save</Button>
+          <Button variant="contained" size="small" onClick={() => onSave()} disabled={progressSaving || !progressNote.trim() || !targetStatus.trim()} sx={{ fontWeight: 700 }}>Save</Button>
         </Stack>
       </DialogContent>
     </Dialog>
