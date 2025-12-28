@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useEffect, MutableRefObject, useRef, memo } from 'react';
 import { Box, useTheme, Paper, Typography, Skeleton, Fade } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import { useAppSnackbar } from '@/shared-components';
 import { GridColDef, useGridApiRef, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarDensitySelector } from '@mui/x-data-grid';
 import { DataGrid } from '@mui/x-data-grid';
 // keep imports minimal: use built-in DataGrid behavior
@@ -63,54 +62,19 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
   const density: 'compact' | 'standard' | 'comfortable' = (typeof window !== 'undefined' && localStorage.getItem('taskTableDensity') as 'compact' | 'standard' | 'comfortable') || 'compact';
 
   const columns: GridColDef[] = useMemo(() => {
-    // Small component for rendering a copyable cell: clicking the text copies value and flashes a highlight
+    // Small component for rendering a cell
     const CellWithCopy: React.FC<{ value: any }> = ({ value }) => {
-      const [copied, setCopied] = React.useState(false);
       const display = value == null ? '' : String(value);
-      const snackbar = useAppSnackbar();
-      const theme = useTheme();
-
-      const handleCopy = async (ev: React.MouseEvent) => {
-        ev.stopPropagation();
-        try {
-          await navigator.clipboard.writeText(display);
-          setCopied(true);
-          snackbar.success('Copied to clipboard');
-          window.setTimeout(() => setCopied(false), 1500);
-        } catch {
-          try {
-            const ta = document.createElement('textarea');
-            ta.value = display;
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand('copy');
-            ta.remove();
-            setCopied(true);
-            snackbar.success('Copied to clipboard');
-            window.setTimeout(() => setCopied(false), 1500);
-          } catch {
-            snackbar.error('Copy failed');
-          }
-        }
-      };
 
       return (
         <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', gap: 1, position: 'relative' }} className="tf-cell-copy">
           <Typography
             variant="body2"
-            onClick={handleCopy}
             sx={{
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
               px: 0.25,
-              transition: theme.transitions.create(['color', 'background-color'], {
-                duration: theme.transitions.duration.shortest,
-              }),
-              backgroundColor: copied ? theme.palette.success.main : 'transparent',
-              color: copied ? theme.palette.success.contrastText : 'inherit',
-              cursor: 'pointer',
-              borderRadius: 0.5,
             }}
           >
             {display}
@@ -575,6 +539,7 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
         x={contextMenu.x}
         y={contextMenu.y}
         selectedRows={gridRows.filter((r) => rowSelectionModel.ids.has(String(r.id)))}
+        clickedColumnKey={contextMenu.clickedColumnKey ?? null}
         clickedRow={contextMenu.clickedRow ?? null}
         onClose={closeContextMenu}
         mouseScreenX={contextMenu.mouseScreenX ?? 0}

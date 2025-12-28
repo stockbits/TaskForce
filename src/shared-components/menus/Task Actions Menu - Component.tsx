@@ -4,6 +4,7 @@ import { Paper, List, ListItem, ListItemIcon, ListItemText, Menu, MenuItem, Typo
 import ListAlt from '@mui/icons-material/ListAlt';
 import StickyNote2 from '@mui/icons-material/StickyNote2';
 import Visibility from '@mui/icons-material/Visibility';
+import ContentCopy from '@mui/icons-material/ContentCopy';
 import WarningAmber from '@mui/icons-material/WarningAmber';
 
 export interface TaskActionItem {
@@ -167,12 +168,28 @@ export function createTaskActionItems(
 export function createContextMenuItems(
   actionableRows: any[],
   clickedRow: any,
+  clickedColumnKey: string | null,
+  onCopyValue: () => void,
   onOpenViewer: () => void,
   onProgressTasks?: () => void,
   onProgressNotes?: () => void,
   onCalloutIncident?: () => void
 ): TaskActionItem[] {
   const items: TaskActionItem[] = [];
+
+  // Copy value (only if clicked on a cell)
+  if (clickedColumnKey && clickedRow) {
+    const previewValue = clickedRow && clickedColumnKey
+      ? String(clickedRow[clickedColumnKey] ?? "")
+      : "";
+
+    items.push({
+      id: 'copy-value',
+      label: `Copy value: ${previewValue}`,
+      icon: <ContentCopy sx={{ fontSize: 18, color: 'text.secondary' }} />,
+      onClick: onCopyValue,
+    });
+  }
 
   // Progress Tasks
   if (actionableRows.length > 0 && onProgressTasks) {

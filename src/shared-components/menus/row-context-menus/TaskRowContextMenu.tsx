@@ -7,6 +7,7 @@ interface TaskRowContextMenuProps {
   y: number;
 
   selectedRows: Record<string, any>[];
+  clickedColumnKey?: string | null;
   clickedRow?: Record<string, any> | null;
 
   onClose: () => void;
@@ -30,6 +31,7 @@ export default function TaskRowContextMenu({
   x,
   y,
   selectedRows,
+  clickedColumnKey,
   clickedRow,
   onClose,
   onOpenPopout,
@@ -44,6 +46,21 @@ export default function TaskRowContextMenu({
     : clickedRow
     ? [clickedRow]
     : [];
+
+  const handleCopyValue = async () => {
+    if (!clickedRow || !clickedColumnKey) return;
+
+    const raw = clickedRow[clickedColumnKey];
+    const value = raw == null ? "" : String(raw);
+
+    try {
+      await navigator.clipboard.writeText(value);
+    } catch (err) {
+      console.error("Clipboard write error:", err);
+    }
+
+    onClose();
+  };
 
   const handleOpen = () => {
     if (!actionableRows.length) return;
@@ -96,11 +113,13 @@ export default function TaskRowContextMenu({
   const menuItems = useMemo(() => createContextMenuItems(
     actionableRows,
     clickedRow,
+    clickedColumnKey ?? null,
+    handleCopyValue,
     handleOpen,
     actionableRows.length > 0 ? handleProgressTasks : undefined,
     actionableRows.length > 0 ? handleProgressNotes : undefined,
     actionableRows.length === 1 ? handleCalloutIncident : undefined
-  ), [actionableRows, clickedRow, handleOpen, handleProgressTasks, handleProgressNotes, handleCalloutIncident]);
+  ), [actionableRows, clickedRow, clickedColumnKey, handleCopyValue, handleOpen, handleProgressTasks, handleProgressNotes, handleCalloutIncident]);
 
   return (
     <TaskActionsMenu
