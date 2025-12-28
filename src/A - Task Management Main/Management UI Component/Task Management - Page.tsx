@@ -4,8 +4,6 @@ import rawMockTasks from "@/Database Models/Task - Model.json";
 import TaskSearchCard from "@/A - Task Management Main/Search Component/Task Search Card - Component";
 import TaskTableAdvanced from "@/A - Task Management Main/MUI Table Component/Task Table Advanced - Component";
 import ProgressTasksDialog, { ProgressPreview } from "@/Task Resource Components/Inline Window/Multi Task Progress - Component";
-import ProgressNotesDialog from "@/Task Resource Components/Inline Window/Multi Task Notes - Component";
-import BulkTaskActions from "@/Task Resource Components/Inline Window/Bulk Task Actions - Component";
 import { useExternalWindow } from "@/Custom React - Hooks/Popup window - component";
 import { Box, Paper, Typography } from "@mui/material";
 
@@ -90,14 +88,6 @@ export default function TaskManagementPage() {
   const [progressSaving, setProgressSaving] = useState(false);
   const [progressError, setProgressError] = useState<string | null>(null);
   const [progressSuccess, setProgressSuccess] = useState<string | null>(null);
-
-  // Notes dialog state (for batch notes without status change)
-  const [notesDialogOpen, setNotesDialogOpen] = useState(false);
-  const [notesPreview, setNotesPreview] = useState<ProgressPreview[]>([]);
-  const [notesNote, setNotesNote] = useState<string>("");
-  const [notesSaving, setNotesSaving] = useState(false);
-  const [notesError, setNotesError] = useState<string | null>(null);
-  const [notesSuccess, setNotesSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     return () => closeExternalWindow();
@@ -309,17 +299,6 @@ export default function TaskManagementPage() {
     setProgressNote("");
   }, []);
 
-  // Open notes dialog (used by table/search actions)
-  const openNotesTasks = useCallback((tasks: any[]) => {
-    if (!tasks || !tasks.length) return snackbar.error("No tasks selected");
-    const preview = tasks.map((t) => ({ id: String(t.taskId ?? t.workId ?? t.id ?? ""), currentStatus: t.taskStatus ?? t.status ?? null, nextStatus: null }));
-    setNotesPreview(preview);
-    setNotesDialogOpen(true);
-    setNotesError(null);
-    setNotesSuccess(null);
-    setNotesNote("");
-  }, []);
-
   const closeProgress = useCallback(() => {
     setProgressDialogOpen(false);
   }, []);
@@ -334,23 +313,6 @@ export default function TaskManagementPage() {
     } catch {
       setProgressError("Failed to save progress");
       setProgressSaving(false);
-    }
-  }, []);
-
-  const closeNotes = useCallback(() => {
-    setNotesDialogOpen(false);
-  }, []);
-
-  const saveNotes = useCallback(async () => {
-    try {
-      setNotesSaving(true);
-      // simulate save
-      await new Promise((res) => setTimeout(res, 500));
-      setNotesSuccess("Notes saved");
-      setTimeout(() => { setNotesSaving(false); setNotesDialogOpen(false); }, 600);
-    } catch {
-      setNotesError("Failed to save notes");
-      setNotesSaving(false);
     }
   }, []);
 
@@ -410,21 +372,13 @@ export default function TaskManagementPage() {
             openExternalWindow(tasks as any, window.innerWidth / 2, window.innerHeight / 2);
           }}
           onProgressTasks={(tasks) => openProgressTasks(tasks)}
-          onProgressNotes={(tasks) => openNotesTasks(tasks)}
+          onProgressNotes={(tasks) => openProgressTasks(tasks)}
           onOpenCalloutIncident={(task) => handleOpenCalloutIncident(task)}
         />
       </Box>
 
       {filteredTasks.length > 0 ? (
-        <>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
-            <BulkTaskActions
-              selectedRows={selectedRows}
-              onProgressTasks={openProgressTasks}
-              onProgressNotes={openNotesTasks}
-            />
-          </Box>
-          <TaskTableAdvanced
+        <TaskTableAdvanced
           rows={filteredTasks}
           headerNames={headerNames}
           tableHeight={tableHeight}
@@ -437,7 +391,7 @@ export default function TaskManagementPage() {
             setSelectedRows(rows);
           }}
           onProgressTasks={(tasks: any[]) => openProgressTasks(tasks)}
-          onProgressNotes={(tasks: any[]) => openNotesTasks(tasks)}
+          onProgressNotes={(tasks: any[]) => openProgressTasks(tasks)}
           onOpenCalloutIncident={(task: any) => {
             try {
               if (!task) return;
@@ -450,7 +404,6 @@ export default function TaskManagementPage() {
             } catch {}
           }}
         />
-        </>
       ) : (
         <Paper
           elevation={0}
@@ -491,18 +444,6 @@ export default function TaskManagementPage() {
         progressSaving={progressSaving}
         coreStatuses={["Open", "Assigned", "In Progress", "Completed"]}
         additionalStatuses={[]}
-      />
-      <ProgressNotesDialog
-        open={notesDialogOpen}
-        preview={notesPreview}
-        tasksCount={notesPreview.length}
-        progressNote={notesNote}
-        setProgressNote={setNotesNote}
-        onSave={saveNotes}
-        onClose={closeNotes}
-        progressError={notesError}
-        progressSuccess={notesSuccess}
-        progressSaving={notesSaving}
       />
       </>
     );
