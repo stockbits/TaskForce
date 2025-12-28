@@ -53,7 +53,17 @@ export default function ProgressTasksDialog({
   const theme = useTheme();
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+    <Dialog 
+      open={open} 
+      onClose={(event, reason) => {
+        // Only close on escape key, not on backdrop click
+        if (reason === 'escapeKeyDown') {
+          onClose();
+        }
+      }} 
+      maxWidth="lg" 
+      fullWidth
+    >
       <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2 }}>
         <Stack direction="row" spacing={2} alignItems="center">
           <Box sx={{ height: 40, width: 40, borderRadius: "50%", bgcolor: theme.palette.primary.main, color: theme.palette.primary.contrastText, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 20px rgba(8,58,97,0.35)" }}>
