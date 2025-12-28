@@ -494,6 +494,7 @@ export default function TaskManagementPage() {
         progressSuccess={progressNotesSuccess}
         progressSaving={progressNotesSaving}
       />
+      {console.log('Rendering ProgressNotesDialog, open:', progressNotesDialogOpen)}
       </>
     );
 }
