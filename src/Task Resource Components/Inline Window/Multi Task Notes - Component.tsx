@@ -1,5 +1,5 @@
 import React from "react";
-import { Dialog, DialogTitle, DialogContent, Box, Stack, Typography, IconButton, Paper, FormControl, InputLabel, Select, MenuItem, Divider, Alert, Button, TextField } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, Box, Stack, Typography, IconButton, Paper, Alert, Button, TextField } from "@mui/material";
 import Close from '@mui/icons-material/Close';
 import ListAlt from '@mui/icons-material/ListAlt';
 import { alpha, useTheme } from "@mui/material/styles";
@@ -14,10 +14,6 @@ interface Props {
   open: boolean;
   preview: ProgressPreview[];
   tasksCount: number;
-  targetStatus: string;
-  setTargetStatus: (s: string) => void;
-  targetResourceId: string;
-  setTargetResourceId: (s: string) => void;
   progressNote: string;
   setProgressNote: (s: string) => void;
   onSave: () => Promise<void> | void;
@@ -25,18 +21,12 @@ interface Props {
   progressError?: string | null;
   progressSuccess?: string | null;
   progressSaving?: boolean;
-  coreStatuses: string[];
-  additionalStatuses: string[];
 }
 
-export default function ProgressTasksDialog({
+export default function ProgressNotesDialog({
   open,
   preview,
   tasksCount,
-  targetStatus,
-  setTargetStatus,
-  targetResourceId: _targetResourceId,
-  setTargetResourceId: _setTargetResourceId,
   progressNote,
   setProgressNote,
   onSave,
@@ -44,8 +34,6 @@ export default function ProgressTasksDialog({
   progressError,
   progressSuccess,
   progressSaving,
-  coreStatuses,
-  additionalStatuses,
 }: Props) {
   const theme = useTheme();
 
@@ -57,7 +45,7 @@ export default function ProgressTasksDialog({
             <ListAlt style={{ fontSize: 22 }} />
           </Box>
           <div>
-            <Typography variant="h6" fontWeight={600} color="text.primary">Progress Tasks</Typography>
+            <Typography variant="h6" fontWeight={600} color="text.primary">Add Progress Notes</Typography>
             <Typography variant="body2" color="text.secondary">{tasksCount} task{tasksCount === 1 ? "" : "s"} selected</Typography>
           </div>
         </Stack>
@@ -66,7 +54,7 @@ export default function ProgressTasksDialog({
         </IconButton>
       </DialogTitle>
 
-      <DialogContent dividers sx={{ display: "grid", gap: 3, gridTemplateColumns: { lg: "1.6fr 1fr", xs: "1fr" } }}>
+      <DialogContent dividers sx={{ display: "grid", gap: 3, gridTemplateColumns: { lg: "1fr", xs: "1fr" } }}>
         <Stack spacing={2}>
           <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: 1 }}>Selected Tasks</Typography>
           <Paper sx={{ maxHeight: 180, overflowY: "auto", borderRadius: 3, bgcolor: alpha(theme.palette.primary.main, 0.03), p: 2 }}>
@@ -74,10 +62,10 @@ export default function ProgressTasksDialog({
               {preview.length === 0 ? (
                 <Typography variant="caption" color="text.secondary">No task identifiers.</Typography>
               ) : (
-                preview.map(({ id, currentStatus, nextStatus }, index) => (
+                preview.map(({ id, currentStatus }, index) => (
                   <Stack key={id ?? `task-${index}`} direction="row" spacing={2} alignItems="center" justifyContent="space-between" sx={{ px: 2, py: 1.25 }}>
                     <Typography variant="subtitle2" color="text.primary" noWrap>{id ?? "Unknown Task"}</Typography>
-                    <Typography variant="caption" color="text.secondary" noWrap>{currentStatus ? currentStatus : "—"}<Typography component="span" sx={{ mx: 1, color: "text.disabled" }}>→</Typography>{nextStatus}</Typography>
+                    <Typography variant="caption" color="text.secondary" noWrap>{currentStatus ?? "—"}</Typography>
                   </Stack>
                 ))
               )}
@@ -85,22 +73,8 @@ export default function ProgressTasksDialog({
           </Paper>
         </Stack>
 
-        <Stack spacing={2.5}>
-          <FormControl fullWidth size="small">
-            <InputLabel id="target-status-label">Target Status</InputLabel>
-            <Select labelId="target-status-label" label="Target Status" value={targetStatus} onChange={(e) => setTargetStatus(e.target.value)}>
-              <MenuItem disabled value="__CORE__"><Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>Core progression</Typography></MenuItem>
-              {coreStatuses.map((s) => <MenuItem key={s} value={s}>{s}</MenuItem>)}
-              <Divider component="li" sx={{ my: 0.5 }} />
-              <MenuItem disabled value="__ADDITIONAL__"><Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>Additional statuses</Typography></MenuItem>
-              {additionalStatuses.map((s) => <MenuItem key={s} value={s}>{s}</MenuItem>)}
-            </Select>
-          </FormControl>
-          {/* Assign to Resource ID removed — pins handled elsewhere */}
-        </Stack>
-
         <Stack spacing={1.5} sx={{ gridColumn: "1 / -1" }}>
-          <Typography variant="overline" sx={{ letterSpacing: 1, color: "text.secondary" }}>Quick Note</Typography>
+          <Typography variant="overline" sx={{ letterSpacing: 1, color: "text.secondary" }}>Progress Note</Typography>
           <TextField multiline minRows={4} value={progressNote} onChange={(e) => setProgressNote(e.target.value)} placeholder="Share the next steps, blockers, or field updates for these tasks…" size="small" fullWidth />
         </Stack>
 
@@ -110,7 +84,7 @@ export default function ProgressTasksDialog({
 
         <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ gridColumn: "1 / -1" }}>
           <Button variant="outlined" size="small" onClick={onClose} sx={{ fontWeight: 600, color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.text.primary, borderColor: theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.12) : alpha(theme.palette.primary.main, 0.12), '&:hover': { backgroundColor: theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.04) : alpha(theme.palette.primary.main, 0.04) } }}>Cancel</Button>
-          <Button variant="contained" size="small" onClick={() => onSave()} disabled={progressSaving || !progressNote.trim()} sx={{ fontWeight: 700 }}>Save</Button>
+          <Button variant="contained" size="small" onClick={() => onSave()} disabled={progressSaving || !progressNote.trim()} sx={{ fontWeight: 700 }}>Save Notes</Button>
         </Stack>
       </DialogContent>
     </Dialog>

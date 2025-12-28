@@ -196,42 +196,7 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
      
   }, [gridRows]);
 
-  // handle right-click on rows to open context menu
-  // const onRowContextMenu = (params: any, event: React.MouseEvent) => {
-  //   event.preventDefault();
-  //   const colElem = (event.target as HTMLElement).closest('[data-field]') as HTMLElement | null;
-  //   const colKey = colElem ? colElem.getAttribute('data-field') : null;
-  //   // ensure the clicked row becomes selected when right-clicking
-  //   try {
-  //     const id = params?.id;
-  //     if (id != null) {
-  //       if (controlledSelectedRowIds !== undefined) {
-  //         // For controlled components, notify parent of selection change
-  //         if (onSelectionChange) {
-  //           const selected = (gridRows || []).filter((r) => String(r.id) === String(id));
-  //           onSelectionChange(selected as Record<string, any>[]);
-  //         }
-  //       } else {
-  //         // For uncontrolled components, update internal state and notify parent
-  //         setSelection((prev) => (Array.isArray(prev) && prev.includes(String(id)) ? prev : [String(id)]));
-  //         if (onSelectionChange) {
-  //           const selected = (gridRows || []).filter((r) => String(r.id) === String(id));
-  //           onSelectionChange(selected as Record<string, any>[]);
-  //         }
-  //       }
-  //       // We select the right-clicked row; let DataGrid manage selection indices for shift/range.
-  //     }
-  //   } catch {}
-  //   setContextMenu({
-  //     visible: true,
-  //     x: event.clientX,
-  //     y: event.clientY,
-  //     clickedRow: params.row,
-  //     clickedColumnKey: colKey,
-  //     mouseScreenX: (event as any).screenX ?? 0,
-  //     mouseScreenY: (event as any).screenY ?? 0,
-  //   });
-  // };
+  // handle right-click on rows to open context menu via slotProps
 
   // column menu state (simple column selector)
   // const [columnVisibilityModel, setColumnVisibilityModel] = useState<Record<string, boolean>>(() => {
@@ -430,6 +395,53 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
             // Convert back to the same type as input for the parent component
             const selectedRows = gridRows.filter(r => newSelection.includes(String(r.id)));
             onSelectionChange(selectedRows as Record<string, any>[]);
+          }}
+          slotProps={{
+            row: {
+              onContextMenu: (event: React.MouseEvent) => {
+                event.preventDefault();
+                const target = event.target as HTMLElement;
+                const rowElement = target.closest('.MuiDataGrid-row') as HTMLElement;
+                if (!rowElement) return;
+                
+                const rowId = rowElement.getAttribute('data-id');
+                if (!rowId) return;
+                
+                const row = gridRows.find(r => String(r.id) === rowId);
+                if (!row) return;
+                
+                const colElem = target.closest('[data-field]') as HTMLElement | null;
+                const colKey = colElem ? colElem.getAttribute('data-field') : null;
+                
+                // ensure the clicked row becomes selected when right-clicking
+                try {
+                  if (controlledSelectedRowIds !== undefined) {
+                    // For controlled components, notify parent of selection change
+                    if (onSelectionChange) {
+                      const selected = [row];
+                      onSelectionChange(selected as Record<string, any>[]);
+                    }
+                  } else {
+                    // For uncontrolled components, update internal state and notify parent
+                    setSelection((prev) => (Array.isArray(prev) && prev.includes(rowId) ? prev : [rowId]));
+                    if (onSelectionChange) {
+                      const selected = [row];
+                      onSelectionChange(selected as Record<string, any>[]);
+                    }
+                  }
+                } catch {}
+                
+                setContextMenu({
+                  visible: true,
+                  x: event.clientX,
+                  y: event.clientY,
+                  clickedRow: row,
+                  clickedColumnKey: colKey,
+                  mouseScreenX: event.screenX,
+                  mouseScreenY: event.screenY,
+                });
+              },
+            },
           }}
           pagination={true}
           hideFooter={disablePagination}

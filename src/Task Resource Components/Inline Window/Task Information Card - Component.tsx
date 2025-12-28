@@ -2,7 +2,7 @@
 // Task Information Card - Component.tsx — CARD VERSION (RESTORED)
 // ===============================================
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import {
   Box,
   Chip,
@@ -22,17 +22,12 @@ import Build from '@mui/icons-material/Build';
 import Check from '@mui/icons-material/Check';
 import type { TaskDetails, ProgressNoteEntry } from "@/shared-types";
 import { ExpandableSectionCard } from '@/shared-components';
-import { ProgressNoteAdd } from "./Progress Note Add - Component";
 
 export interface TaskDetailsModalProps {
   task: TaskDetails;
   expanded: string[];
   onToggleSection: (section: string) => void;
 }
-
-const isBrowser = typeof window !== "undefined";
-
-const storageKeyForNotes = (taskId: string) => `task:${taskId}:progressNotes`;
 
 const normalizeProgressNotes = (value: unknown): ProgressNoteEntry[] => {
   if (Array.isArray(value)) {
@@ -65,42 +60,6 @@ const normalizeProgressNotes = (value: unknown): ProgressNoteEntry[] => {
   }
 
   return [];
-};
-
-const mergeNotes = (base: ProgressNoteEntry[], extras: ProgressNoteEntry[]) => {
-  const map = new Map<string, ProgressNoteEntry>();
-  [...base, ...extras].forEach((entry) => {
-    if (!entry?.text?.trim()) return;
-    const key = `${entry.ts}-${entry.text}`;
-    map.set(key, entry);
-  });
-  return Array.from(map.values()).sort((a, b) => {
-    const aTime = new Date(a.ts).getTime();
-    const bTime = new Date(b.ts).getTime();
-    return bTime - aTime;
-  });
-};
-
-const loadLocalNotes = (taskId: string): ProgressNoteEntry[] => {
-  if (!isBrowser) return [];
-  try {
-    const raw = window.localStorage.getItem(storageKeyForNotes(taskId));
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return normalizeProgressNotes(parsed);
-  } catch (err) {
-    console.warn("Failed to read local progress notes", err);
-    return [];
-  }
-};
-
-const persistLocalNotes = (taskId: string, notes: ProgressNoteEntry[]) => {
-  if (!isBrowser) return;
-  try {
-    window.localStorage.setItem(storageKeyForNotes(taskId), JSON.stringify(notes));
-  } catch (err) {
-    console.warn("Unable to persist progress notes", err);
-  }
 };
 
 
@@ -300,27 +259,8 @@ export default function TaskDetailsModal({
 }: TaskDetailsModalProps) {
   const theme = useTheme();
   const baseProgressNotes = useMemo(() => normalizeProgressNotes(task.progressNotes), [task]);
-  const [customNotes, setCustomNotes] = useState<ProgressNoteEntry[]>([]);
 
-  useEffect(() => {
-    setCustomNotes(loadLocalNotes(task.taskId));
-  }, [task.taskId]);
-
-  const allNotes = useMemo(
-    () => mergeNotes(baseProgressNotes, customNotes),
-    [baseProgressNotes, customNotes]
-  );
-
-  const handleAddNote = useCallback(
-    (entry: ProgressNoteEntry) => {
-      setCustomNotes((prev) => {
-        const next = [...prev, entry];
-        persistLocalNotes(task.taskId, next);
-        return next;
-      });
-    },
-    [task.taskId]
-  );
+  const allNotes = useMemo(() => baseProgressNotes, [baseProgressNotes]);
 
   const sections = [
     {
@@ -384,11 +324,6 @@ export default function TaskDetailsModal({
         <Stack spacing={2.5}>
           {/* Resource pin input removed — pins are shown at the top of the callout UI */}
           {/* Quick progress action removed — use Progress Notes or batch actions instead */}
-          <ProgressNoteAdd
-            taskId={task.taskId}
-            taskStatus={task.taskStatus}
-            onAdd={handleAddNote}
-          />
           <ProgressNotesList notes={allNotes} />
         </Stack>
       ),
