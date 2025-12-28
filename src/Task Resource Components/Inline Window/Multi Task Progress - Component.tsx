@@ -86,31 +86,13 @@ export default function ProgressTasksDialog({
         </Stack>
 
         <Stack spacing={2.5}>
-          <TextField
-            fullWidth
-            size="small"
-            label="Target Status/Pin"
-            placeholder="Enter status or pin to progress tasks to..."
-            value={targetStatus}
-            onChange={(e) => setTargetStatus(e.target.value)}
-            helperText="Type a custom status/pin or select from presets below"
-            variant="outlined"
-            required
-          />
-
-          <FormControl fullWidth size="small">
-            <InputLabel id="target-status-label">Quick Select (Optional)</InputLabel>
-            <Select
-              labelId="target-status-label"
-              label="Quick Select (Optional)"
-              value=""
-              onChange={(e) => setTargetStatus(e.target.value)}
-              displayEmpty
-            >
-              <MenuItem disabled value=""><Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>Core progression</Typography></MenuItem>
+          <FormControl fullWidth size="small" required>
+            <InputLabel id="target-status-label">Target Status</InputLabel>
+            <Select labelId="target-status-label" label="Target Status" value={targetStatus} onChange={(e) => setTargetStatus(e.target.value)}>
+              <MenuItem disabled value="__CORE__"><Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>Core progression</Typography></MenuItem>
               {coreStatuses.map((s) => <MenuItem key={s} value={s}>{s}</MenuItem>)}
               <Divider component="li" sx={{ my: 0.5 }} />
-              <MenuItem disabled value=""><Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>Additional statuses</Typography></MenuItem>
+              <MenuItem disabled value="__ADDITIONAL__"><Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>Additional statuses</Typography></MenuItem>
               {additionalStatuses.map((s) => <MenuItem key={s} value={s}>{s}</MenuItem>)}
             </Select>
           </FormControl>
