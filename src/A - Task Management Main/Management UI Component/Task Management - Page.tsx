@@ -78,7 +78,7 @@ export default function TaskManagementPage() {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const searchRef = useRef<HTMLDivElement | null>(null);
 
-  const { openExternalWindow, closeExternalWindow } = useExternalWindow();
+  const { openExternalWindow, openResourceWindow, closeExternalWindow } = useExternalWindow();
 
   // Progress dialog state (for batch progress / quick notes)
   const [progressDialogOpen, setProgressDialogOpen] = useState(false);
@@ -441,6 +441,12 @@ export default function TaskManagementPage() {
                 handleOpenCalloutIncident(task);
               }
             } catch {}
+          }}
+          onOpenTaskPopup={(task: any) => {
+            openExternalWindow([task], window.innerWidth / 2, window.innerHeight / 2);
+          }}
+          onOpenResourcePopup={(resource: any) => {
+            openResourceWindow(resource, []);
           }}
         />
       ) : (

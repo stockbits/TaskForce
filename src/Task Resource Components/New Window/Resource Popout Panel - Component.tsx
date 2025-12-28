@@ -309,7 +309,7 @@ export default function ResourcePopoutPanel({
                 width: { xs: '100%', sm: 'min(100%, 720px)' },
                 borderRadius: 3,
                 border: `1px solid ${alpha(theme.palette.primary.main, 0.14)}`,
-                boxShadow: "0 24px 48px rgba(8,58,97,0.18)",
+                boxShadow: theme.palette.mode === 'dark' ? theme.shadows[17] : theme.shadows[17],
                 bgcolor: alpha(theme.palette.background.paper, 0.98),
                 px: { xs: 3, md: 4 },
                 py: { xs: 3, md: 4 },
@@ -522,7 +522,7 @@ export default function ResourcePopoutPanel({
                             borderColor: alpha(theme.palette.primary.main, 0.12),
                             px: 2.5,
                             py: 2,
-                            boxShadow: "0 10px 24px rgba(8,58,97,0.08)",
+                            boxShadow: theme.palette.mode === 'dark' ? theme.shadows[10] : theme.shadows[10],
                             bgcolor: theme.palette.background.paper,
                           }}
                         >

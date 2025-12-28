@@ -415,6 +415,7 @@ export default function MainLayout() {
     externalTasks,
     externalExpandedSections,
     openExternalWindow,
+    openResourceWindow,
     closeExternalWindow,
     setExternalExpandedSections,
   } = useExternalWindow();
@@ -1288,6 +1289,12 @@ export default function MainLayout() {
                   onProgressNotes={(tasks: any[]) => openProgressNotes(tasks)}
                   onSelectionChange={(rows: Record<string, any>[]) => {
                     setSelectedRows(rows);
+                  }}
+                  onOpenTaskPopup={(task: any) => {
+                    openExternalWindow([task], window.innerWidth / 2, window.innerHeight / 2);
+                  }}
+                  onOpenResourcePopup={(resource: any) => {
+                    openResourceWindow(resource, []);
                   }}
                   sx={{ borderRadius: '0 0 12px 12px', mt: 0 }}
                 />

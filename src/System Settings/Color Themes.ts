@@ -113,6 +113,34 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
   shape: {
     borderRadius: 4,
   },
+  shadows: [
+    'none',
+    '0 1px 3px rgba(0, 0, 0, 0.12)', // 1
+    '0 2px 8px rgba(0, 0, 0, 0.15)', // 2
+    '0 4px 16px rgba(0, 0, 0, 0.2)', // 3
+    '0 8px 24px rgba(8, 58, 97, 0.15)', // 4 - Brand shadow
+    '0 12px 32px rgba(8, 58, 97, 0.18)', // 5 - Brand shadow medium
+    '0 16px 40px rgba(8, 58, 97, 0.2)', // 6 - Brand shadow large
+    '0 20px 48px rgba(8, 58, 97, 0.22)', // 7 - Brand shadow extra large
+    '0 24px 54px rgba(8, 58, 97, 0.22)', // 8 - Brand shadow popup
+    '0 6px 18px rgba(8, 58, 97, 0.08)', // 9 - Brand shadow subtle
+    '0 10px 24px rgba(8, 58, 97, 0.08)', // 10 - Brand shadow card
+    '0 18px 38px rgba(8, 58, 97, 0.04)', // 11 - Brand shadow minimal
+    '0 18px 38px rgba(8, 58, 97, 0.24)', // 12 - Brand shadow strong
+    '0 18px 40px rgba(8, 58, 97, 0.16)', // 13 - Brand shadow medium
+    '0 6px 18px rgba(8, 58, 97, 0.08)', // 14 - Brand shadow light
+    '0 8px 20px rgba(8, 58, 97, 0.35)', // 15 - Brand shadow button
+    '0 18px 46px rgba(8, 58, 97, 0.22)', // 16 - Brand shadow legend
+    '0 24px 48px rgba(8, 58, 97, 0.18)', // 17 - Brand shadow popup card
+    '0 4px 16px rgba(0, 0, 0, 0.2)', // 18
+    '0 8px 20px rgba(0, 0, 0, 0.2)', // 19
+    '0 12px 24px rgba(0, 0, 0, 0.2)', // 20
+    '0 16px 28px rgba(0, 0, 0, 0.2)', // 21
+    '0 20px 32px rgba(0, 0, 0, 0.2)', // 22
+    '0 24px 36px rgba(0, 0, 0, 0.2)', // 23
+    '0 28px 40px rgba(0, 0, 0, 0.2)', // 24
+    '0 32px 44px rgba(0, 0, 0, 0.2)', // 25
+  ] as any,
   components: {
     MuiCssBaseline: {
       styleOverrides: {

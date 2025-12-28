@@ -9,6 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { ExpandMore, ExpandLess } from "@mui/icons-material";
+import { useTheme } from "@mui/material/styles";
 
 interface ExpandableSectionCardProps {
   title: string;
@@ -37,6 +38,7 @@ const ExpandableSectionCard: React.FC<ExpandableSectionCardProps> = memo(({
   contentSx,
   paperProps,
 }) => {
+  const theme = useTheme();
   // If expanded prop is provided, use controlled mode; else use internal state
   const [internalExpanded, setInternalExpanded] = useState(defaultExpanded);
   const isControlled = typeof expanded === "boolean";
@@ -50,15 +52,19 @@ const ExpandableSectionCard: React.FC<ExpandableSectionCardProps> = memo(({
   }, [isControlled, onToggle]);
 
   return (
-    <Card elevation={3} sx={{ mb: 2 }} {...paperProps}>
+    <Card elevation={3} sx={{ mb: 2, cursor: 'pointer' }} {...paperProps}>
       <CardHeader
+        onClick={handleToggle}
         title={<Typography variant="h6">{title}</Typography>}
         subheader={subtitle}
         action={
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {actions}
             <IconButton
-              onClick={handleToggle}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleToggle();
+              }}
               aria-label={isExpanded ? "Collapse" : "Expand"}
               size="small"
             >
@@ -67,6 +73,12 @@ const ExpandableSectionCard: React.FC<ExpandableSectionCardProps> = memo(({
           </Box>
         }
         {...headerProps}
+        sx={{
+          ...headerProps?.sx,
+          '&:hover': {
+            backgroundColor: theme.palette.action.hover,
+          },
+        }}
       />
       <Collapse in={isExpanded} timeout="auto" unmountOnExit>
         <CardContent {...contentProps} sx={contentSx}>{children}</CardContent>

@@ -32,9 +32,12 @@ import { useTheme as useAppTheme } from '@/System Settings/Dark Mode Handler - C
   scrollToTopTrigger?: number;
   sortingMode?: 'client' | 'server';
   sortModel?: any[];
+  onRowDoubleClick?: (row: Record<string, any>) => void;
+  onOpenTaskPopup?: (task: Record<string, any>) => void;
+  onOpenResourcePopup?: (resource: Record<string, any>) => void;
 };
 
-const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef: _containerRef, reserveBottom: _reserveBottom = 160, disablePagination = false, hideToolbar = false, loading = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns: _onRequestCloseColumns, onSortChange, scrollToTopTrigger, sortingMode, sortModel }: Props) {
+const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef: _containerRef, reserveBottom: _reserveBottom = 160, disablePagination = false, hideToolbar = false, loading = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns: _onRequestCloseColumns, onSortChange, scrollToTopTrigger, sortingMode, sortModel, onRowDoubleClick, onOpenTaskPopup, onOpenResourcePopup }: Props) {
 
   // Internal state for uncontrolled components
   const [selection, setSelection] = useState<string[]>([]);
@@ -520,6 +523,20 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
                   prev.forEach((c) => { if (!order.includes(c.field)) ordered.push({ ...c }); });
                   return ordered;
                 });
+              }
+            } catch {}
+          }}
+          onRowDoubleClick={(params: any) => {
+            try {
+              if (onRowDoubleClick) {
+                onRowDoubleClick(params.row);
+              } else {
+                // Default double-click behavior: open popup for task or resource
+                if (params.row.taskId && onOpenTaskPopup) {
+                  onOpenTaskPopup(params.row);
+                } else if (params.row.resourceId && onOpenResourcePopup) {
+                  onOpenResourcePopup(params.row);
+                }
               }
             } catch {}
           }}

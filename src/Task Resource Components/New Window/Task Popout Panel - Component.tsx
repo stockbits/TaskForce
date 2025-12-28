@@ -7,11 +7,12 @@
 // ===============================================================
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Box, Paper, Stack, Typography, useTheme } from "@mui/material";
+import { Box, Paper, Stack, Typography, Chip, IconButton } from "@mui/material";
 import { AppButton } from '@/shared-components';
-import { alpha } from "@mui/material/styles";
+import { alpha, useTheme } from "@mui/material/styles";
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
+import X from '@mui/icons-material/Close';
 import TaskDetailsModal from "@/Task Resource Components/Inline Window/Task Information Card - Component";
 import { PillGroup } from '@/shared-components';
 import type { TaskDetails } from "@/shared-types";
@@ -95,53 +96,63 @@ export default function TaskPopoutPanel({
 
   if (!open) return null;
 
-  // ======================================================
   return (
     <Box
       sx={{
-        display: 'flex',
+        display: "flex",
         height: '100%',
         width: '100%',
-        bgcolor: "background.default",
+        bgcolor: theme.palette.mode === 'dark' 
+          ? alpha(theme.palette.primary.main, 0.12) 
+          : alpha(theme.palette.primary.main, 0.06),
         color: "text.primary",
+        overflow: "hidden",
       }}
     >
-      <Box
+      <Stack
         sx={{
-          display: "flex",
-          flexDirection: "column",
           flex: 1,
-          bgcolor: "background.paper",
+          bgcolor: theme.palette.background.paper,
           overflow: "hidden",
         }}
       >
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-          spacing={3}
+        {/* HEADER */}
+        <Box
           sx={{
-            px: 4,
-            py: 2.5,
-            borderBottom: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
-            boxShadow: "0 8px 20px rgba(10, 74, 122, 0.08)",
-            position: "relative",
-            zIndex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            px: { xs: 3, md: 6 },
+            py: 3,
+            borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
+            bgcolor: alpha(theme.palette.background.paper, 0.96),
+            backdropFilter: "blur(6px)",
           }}
         >
-          <Typography variant="h6" fontWeight={600} color="text.primary">
-            Task Details ({tasks.length})
-          </Typography>
+          <Stack spacing={0.5}>
+            <Typography variant="h6" fontWeight={600} color="text.primary">
+              Task Details {tasks.length > 1 ? `(${tasks.length})` : ''}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {tasks.length === 1 
+                ? "Explore task details and current status." 
+                : "Compare multiple tasks and their details."
+              }
+            </Typography>
+          </Stack>
 
-          <Stack direction="row" spacing={2} alignItems="center">
+          <Stack direction="row" spacing={1.5} alignItems="center">
             <AppButton
-              size="small"
               variant="contained"
+              color="primary"
+              size="small"
               onClick={() =>
                 expanded.length > 0 ? onCollapseAll() : onExpandAll()
               }
-              startIcon={expanded.length > 0 ? <ExpandLess style={{ fontSize: 16 }} /> : <ExpandMore style={{ fontSize: 16 }} />}
-              sx={{ boxShadow: "none" }}
+              startIcon={expanded.length ? <ExpandLess style={{ fontSize: 14 }} /> : <ExpandMore style={{ fontSize: 14 }} />}
+              sx={{
+                fontWeight: 600,
+              }}
             >
               {expanded.length > 0 ? "Collapse All" : "Expand All"}
             </AppButton>
@@ -152,6 +163,7 @@ export default function TaskPopoutPanel({
                   size="small"
                   variant="outlined"
                   onClick={unselectAll}
+                  sx={{ fontWeight: 600 }}
                 >
                   Unselect All
                 </AppButton>
@@ -160,7 +172,7 @@ export default function TaskPopoutPanel({
                   size="small"
                   variant="contained"
                   onClick={selectAll}
-                  sx={{ boxShadow: "none" }}
+                  sx={{ boxShadow: "none", fontWeight: 600 }}
                 >
                   Select All
                 </AppButton>
@@ -168,86 +180,168 @@ export default function TaskPopoutPanel({
             )}
 
             <AppButton
-              size="small"
               variant="outlined"
+              color="primary"
+              size="small"
+              sx={{ fontWeight: 600 }}
             >
               Edit
             </AppButton>
-          </Stack>
-        </Stack>
 
-        <Box
-          sx={{
-            px: 4,
-            py: 1.5,
-            backgroundColor: alpha(theme.palette.primary.main, 0.06),
-            borderBottom: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
-          }}
-        >
-          <Stack
-            ref={pillRailRef}
-            direction="row"
-            spacing={1.5}
-            sx={{
-              overflowX: "auto",
-              pb: 0.5,
-              alignItems: "center",
-              '&::-webkit-scrollbar': { height: theme.spacing(0.75) }, // 6px
-            }}
-          >
-            <PillGroup
-              items={tasks.map((t) => ({ id: t.taskId, label: String(t.taskId) }))}
-              activeIds={activePills}
-              maxVisible={6}
-              onToggle={(id: string) => handlePillClick(id)}
-              onSelectAll={selectAll}
-              onClearAll={unselectAll}
-            />
+            <IconButton
+              size="small"
+              onClick={_onClose}
+              sx={{
+                color: theme.palette.mode === 'dark' ? theme.palette.common.white : alpha(theme.palette.text.primary, 0.9),
+                bgcolor: 'transparent',
+                '&:hover': { bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.06) : alpha(theme.palette.text.primary, 0.06) },
+              }}
+              aria-label="Close task panel"
+            >
+              <X style={{ fontSize: 16 }} />
+            </IconButton>
           </Stack>
         </Box>
 
         <Box
           sx={{
-            flex: 1,
-            px: 4,
-            py: 4,
-            bgcolor: alpha(theme.palette.primary.main, 0.05),
-            overflow: "auto",
+            px: { xs: 3, md: 6 },
+            py: 2,
+            borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+            bgcolor: theme.palette.mode === 'dark' 
+              ? alpha(theme.palette.primary.main, 0.08) 
+              : alpha(theme.palette.primary.main, 0.04),
           }}
         >
-          <Stack
-            direction="row"
-            spacing={2.5}
-            justifyContent={singleTaskMode ? "center" : "flex-start"}
+          <Stack direction="row" spacing={1.5} flexWrap="wrap" alignItems="center">
+            {tasks.length === 1 ? (
+              <>
+                <Chip
+                  label={tasks[0].taskId}
+                  size="small"
+                  sx={{
+                    fontWeight: 700,
+                    letterSpacing: 0.6,
+                    textTransform: "uppercase",
+                    color: theme.palette.mode === 'dark' 
+                      ? theme.palette.common.white 
+                      : theme.palette.primary.main,
+                    borderColor: alpha(theme.palette.primary.main, 0.4),
+                    bgcolor: alpha(theme.palette.primary.main, 0.16),
+                  }}
+                  variant="outlined"
+                />
+                {tasks[0].taskType && (
+                  <Chip
+                    label={tasks[0].taskType}
+                    size="small"
+                    variant="outlined"
+                    sx={{
+                      color: alpha(theme.palette.text.primary, 0.85),
+                      borderColor: alpha(theme.palette.text.primary, 0.2),
+                      bgcolor: theme.palette.background.paper,
+                    }}
+                  />
+                )}
+              </>
+            ) : (
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                {tasks.length} tasks selected
+              </Typography>
+            )}
+          </Stack>
+        </Box>
+
+        {showSelectionControls && (
+          <Box
             sx={{
-              pb: 2,
-              flexWrap: singleTaskMode ? "wrap" : "nowrap",
+              px: { xs: 3, md: 6 },
+              py: 1.5,
+              backgroundColor: alpha(theme.palette.primary.main, 0.06),
+              borderBottom: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
             }}
           >
-            {visibleTasks.map((task) => (
-              <Paper
-                key={task.taskId}
-                elevation={3}
-                sx={{
-                  borderRadius: 3,
-                  minWidth: singleTaskMode ? theme.spacing(90) : theme.spacing(65), // 720px or 520px
-                  maxWidth: singleTaskMode ? theme.spacing(90) : theme.spacing(65),
-                  flexShrink: 0,
-                  border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
-                }}
-              >
-                <Box sx={{ px: 4, pt: 4, pb: 4 }}>
+            <Stack
+              ref={pillRailRef}
+              direction="row"
+              spacing={1.5}
+              sx={{
+                overflowX: "auto",
+                pb: 0.5,
+                alignItems: "center",
+                '&::-webkit-scrollbar': { height: theme.spacing(0.75) }, // 6px
+              }}
+            >
+              <PillGroup
+                items={tasks.map((t) => ({ id: t.taskId, label: String(t.taskId) }))}
+                activeIds={activePills}
+                maxVisible={6}
+                onToggle={(id: string) => handlePillClick(id)}
+                onSelectAll={selectAll}
+                onClearAll={unselectAll}
+              />
+            </Stack>
+          </Box>
+        )}
+
+        {/* BODY */}
+        <Box
+          sx={{
+            flex: 1,
+            px: { xs: 2.5, md: 6 },
+            py: { xs: 3, md: 5 },
+            bgcolor: theme.palette.mode === 'dark' 
+              ? alpha(theme.palette.grey[100], 0.04) 
+              : alpha(theme.palette.primary.main, 0.02),
+            overflowY: "auto",
+          }}
+        >
+          <Box sx={{ display: "flex", justifyContent: "center", pb: 3 }}>
+            <Box
+              sx={{
+                width: '100%',
+                maxWidth: singleTaskMode ? 720 : '100%',
+                display: "grid",
+                gridTemplateColumns: singleTaskMode 
+                  ? '1fr' 
+                  : {
+                      xs: '1fr', // 1 column on mobile
+                      sm: 'repeat(auto-fit, minmax(320px, 1fr))', // 1-2 columns on tablet
+                      md: 'repeat(auto-fit, minmax(400px, 1fr))', // 2-3 columns on desktop
+                      lg: 'repeat(auto-fit, minmax(480px, 1fr))', // 2-3 columns on large desktop
+                    },
+                gap: 2.5,
+                justifyContent: "center",
+                alignItems: singleTaskMode ? "center" : "start",
+                pb: 2,
+              }}
+            >
+              {visibleTasks.map((task) => (
+                <Paper
+                  key={task.taskId}
+                  elevation={10}
+                  sx={{
+                    borderRadius: 3,
+                    width: '100%',
+                    minHeight: singleTaskMode ? 'auto' : 400,
+                    border: `1px solid ${alpha(theme.palette.primary.main, 0.14)}`,
+                    boxShadow: theme.palette.mode === 'dark' ? theme.shadows[17] : theme.shadows[17],
+                    bgcolor: alpha(theme.palette.background.paper, 0.98),
+                    px: { xs: 3, md: 4 },
+                    py: { xs: 3, md: 4 },
+                  }}
+                >
                   <TaskDetailsModal
                     task={task}
                     expanded={expanded}
                     onToggleSection={onToggleSection}
                   />
-                </Box>
-              </Paper>
-            ))}
-          </Stack>
+                </Paper>
+              ))}
+            </Box>
+          </Box>
         </Box>
-      </Box>
+      </Stack>
     </Box>
   );
 }
