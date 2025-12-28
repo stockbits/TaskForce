@@ -3,6 +3,7 @@ import { Dialog, DialogTitle, DialogContent, Box, Stack, Typography, IconButton,
 import Close from '@mui/icons-material/Close';
 import ListAlt from '@mui/icons-material/ListAlt';
 import { alpha, useTheme } from "@mui/material/styles";
+import { useTheme as useAppTheme } from '@/System Settings/Dark Mode Handler - Component';
 
 export type ProgressPreview = {
   id: string | null | undefined;
@@ -36,6 +37,7 @@ export default function ProgressNotesDialog({
   progressSaving,
 }: Props) {
   const theme = useTheme();
+  const { mode } = useAppTheme();
 
   return (
     <Dialog 
@@ -86,7 +88,36 @@ export default function ProgressNotesDialog({
 
         <Stack spacing={1.5} sx={{ gridColumn: "1 / -1" }}>
           <Typography variant="overline" sx={{ letterSpacing: 1, color: "text.secondary" }}>Progress Note</Typography>
-          <TextField multiline minRows={4} value={progressNote} onChange={(e) => setProgressNote(e.target.value)} placeholder="Share the next steps, blockers, or field updates for these tasks…" size="small" fullWidth />
+          <TextField 
+            multiline 
+            minRows={4} 
+            value={progressNote} 
+            onChange={(e) => setProgressNote(e.target.value)} 
+            placeholder="Share the next steps, blockers, or field updates for these tasks…" 
+            size="small" 
+            fullWidth 
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: mode === 'dark' ? alpha(theme.palette.background.paper, 0.8) : theme.palette.background.paper,
+                '& fieldset': {
+                  borderColor: mode === 'dark' ? alpha(theme.palette.common.white, 0.23) : alpha(theme.palette.common.black, 0.23),
+                },
+                '&:hover fieldset': {
+                  borderColor: mode === 'dark' ? alpha(theme.palette.common.white, 0.4) : alpha(theme.palette.common.black, 0.4),
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: mode === 'dark' ? theme.palette.primary.light : theme.palette.primary.main,
+                },
+              },
+              '& .MuiInputBase-input': {
+                color: mode === 'dark' ? theme.palette.common.white : theme.palette.text.primary,
+              },
+              '& .MuiInputBase-input::placeholder': {
+                color: mode === 'dark' ? alpha(theme.palette.common.white, 0.5) : alpha(theme.palette.text.primary, 0.5),
+                opacity: 1,
+              },
+            }}
+          />
         </Stack>
 
         {(progressError || progressSuccess) && (
@@ -94,7 +125,7 @@ export default function ProgressNotesDialog({
         )}
 
         <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ gridColumn: "1 / -1" }}>
-          <Button variant="outlined" size="small" onClick={onClose} sx={{ fontWeight: 600, color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.text.primary, borderColor: theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.12) : alpha(theme.palette.primary.main, 0.12), '&:hover': { backgroundColor: theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.04) : alpha(theme.palette.primary.main, 0.04) } }}>Cancel</Button>
+          <Button variant="outlined" size="small" onClick={onClose} sx={{ fontWeight: 600, color: mode === 'dark' ? theme.palette.common.white : theme.palette.text.primary, borderColor: mode === 'dark' ? alpha(theme.palette.common.white, 0.12) : alpha(theme.palette.primary.main, 0.12), '&:hover': { backgroundColor: mode === 'dark' ? alpha(theme.palette.common.white, 0.04) : alpha(theme.palette.primary.main, 0.04) } }}>Cancel</Button>
           <Button variant="contained" size="small" onClick={() => onSave()} disabled={progressSaving || !progressNote.trim()} sx={{ fontWeight: 700 }}>Save Notes</Button>
         </Stack>
       </DialogContent>
