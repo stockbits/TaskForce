@@ -16,7 +16,9 @@ export { default as ThemedIcon } from "./icons/themed-icons/ThemedIcon";
 export { default as PillGroup } from "./badges/pill-selectors/SelectablePillGroup";
 export { default as AppSnackbarProvider } from "./notifications/snackbar-provider/SnackbarNotificationProvider";
 export { useAppSnackbar } from "./notifications/snackbar-provider/SnackbarNotificationProvider";
-export { default as TaskRowContextMenu } from "./menus/row-context-menus/TaskRowContextMenu";
+export { default as TaskRowContextMenu } from "./menus/TaskRowContextMenu";
+export { default as TaskActionsMenu, createTaskActionItems, createContextMenuItems } from "./menus/TaskActionsMenu";
+export { default as BulkTaskActions } from "./menus/BulkTaskActions";
 export { default as AppButton } from "./buttons/action-buttons/button";
 
 export default MultiSelectField;

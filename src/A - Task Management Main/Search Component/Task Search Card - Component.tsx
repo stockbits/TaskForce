@@ -19,16 +19,7 @@ import {
   Tab,
   Stack,
 } from '@mui/material';
-import ListAlt from '@mui/icons-material/ListAlt';
-import StickyNote2 from '@mui/icons-material/StickyNote2';
-import WarningAmber from '@mui/icons-material/WarningAmber';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import { DateTimePopover } from '@/shared-components';
-import { MultiSelectField, FreeTypeSelectField, CombinedLocationField, ImpScoreField, GlobalSearchField, SimpleTooltip } from '@/shared-components';
-import { AppButton } from '@/shared-components';
-import Visibility from '@mui/icons-material/Visibility';
+import TaskActionsMenu, { createTaskActionItems } from '@/shared-components/menus/TaskActionsMenu';
 
 type Filters = {
   taskSearch: string;
@@ -237,6 +228,43 @@ export default function TaskSearchCard({
     }
     handleMenuClose();
   }, [canCopy, handleMenuClose, onExport]);
+
+  const handleOpenPopout = useCallback(() => {
+    if (!selectedRows || !selectedRows.length) return;
+    if (onOpenPopout) onOpenPopout(selectedRows);
+    else window.dispatchEvent(new CustomEvent('taskforce:open-popout', { detail: { tasks: selectedRows } }));
+    setActionsAnchorEl(null);
+  }, [selectedRows, onOpenPopout]);
+
+  const handleProgressTasksMenu = useCallback(() => {
+    if (!selectedRows || !selectedRows.length) return;
+    if (onProgressTasks) onProgressTasks(selectedRows);
+    else window.dispatchEvent(new CustomEvent('taskforce:progress-tasks', { detail: { tasks: selectedRows } }));
+    setActionsAnchorEl(null);
+  }, [selectedRows, onProgressTasks]);
+
+  const handleProgressNotesMenu = useCallback(() => {
+    if (!selectedRows || !selectedRows.length) return;
+    if (onProgressNotes) onProgressNotes(selectedRows);
+    else window.dispatchEvent(new CustomEvent('taskforce:progress-notes', { detail: { tasks: selectedRows } }));
+    setActionsAnchorEl(null);
+  }, [selectedRows, onProgressNotes]);
+
+  const handleCalloutIncidentMenu = useCallback(() => {
+    const task = selectedRows && selectedRows.length ? selectedRows[0] : null;
+    if (!task) return;
+    if (onOpenCalloutIncident) onOpenCalloutIncident(task);
+    else window.dispatchEvent(new CustomEvent('taskforce:open-callout-incident', { detail: { task } }));
+    setActionsAnchorEl(null);
+  }, [selectedRows, onOpenCalloutIncident]);
+
+  const actionsMenuItems = useMemo(() => createTaskActionItems(
+    selectedRows?.length || 0,
+    selectedRows?.length ? handleProgressTasksMenu : undefined,
+    selectedRows?.length ? handleProgressNotesMenu : undefined,
+    selectedRows?.length ? handleOpenPopout : undefined,
+    selectedRows?.length === 1 ? handleCalloutIncidentMenu : undefined
+  ), [selectedRows, handleProgressTasksMenu, handleProgressNotesMenu, handleOpenPopout, handleCalloutIncidentMenu]);
 
   const snackbar = useAppSnackbar();
 
@@ -482,77 +510,13 @@ export default function TaskSearchCard({
                 Menu Items
               </AppButton>
 
-              <Menu
+              <TaskActionsMenu
+                type="dropdown"
                 anchorEl={actionsAnchorEl}
                 open={Boolean(actionsAnchorEl)}
                 onClose={() => setActionsAnchorEl(null)}
-                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                transformOrigin={{ vertical: "top", horizontal: "left" }}
-              >
-                {/* Copy and Export moved out — use Actions menu for viewer/progress/callout only */}
-
-                <MenuItem
-                  onClick={() => {
-                    if (!selectedRows || !selectedRows.length) return;
-                    if (onOpenPopout) onOpenPopout(selectedRows || []);
-                    else window.dispatchEvent(new CustomEvent('taskforce:open-popout', { detail: { tasks: selectedRows } }));
-                    setActionsAnchorEl(null);
-                  }}
-                  disabled={!selectedRows || selectedRows.length === 0}
-                >
-                  <ListItemIcon>
-                    <Visibility sx={{ fontSize: 16, color: theme.palette.primary.main }} />
-                  </ListItemIcon>
-                  Open Viewer{selectedRows && selectedRows.length > 1 ? ` (${selectedRows.length})` : ""}
-                </MenuItem>
-
-                <MenuItem
-                  onClick={() => {
-                    if (!selectedRows || !selectedRows.length) return;
-                    if (onProgressTasks) onProgressTasks(selectedRows || []);
-                    else window.dispatchEvent(new CustomEvent('taskforce:progress-tasks', { detail: { tasks: selectedRows } }));
-                    setActionsAnchorEl(null);
-                  }}
-                  disabled={!selectedRows || selectedRows.length === 0}
-                >
-                  <ListItemIcon>
-                    <ListAlt style={{ fontSize: 16, color: '#2e7d32' }} />
-                  </ListItemIcon>
-                  Progress Tasks{selectedRows && selectedRows.length > 1 ? ` (${selectedRows.length})` : ""}
-                </MenuItem>
-
-                <MenuItem
-                  onClick={() => {
-                    if (!selectedRows || !selectedRows.length) return;
-                    if (onProgressNotes) onProgressNotes(selectedRows || []);
-                    else window.dispatchEvent(new CustomEvent('taskforce:progress-notes', { detail: { tasks: selectedRows } }));
-                    setActionsAnchorEl(null);
-                  }}
-                  disabled={!selectedRows || selectedRows.length === 0}
-                >
-                  <ListItemIcon>
-                    <StickyNote2 style={{ fontSize: 16, color: '#ed6c02' }} />
-                  </ListItemIcon>
-                  Progress Notes{selectedRows && selectedRows.length > 1 ? ` (${selectedRows.length})` : ""}
-                </MenuItem>
-
-                <MenuItem
-                  onClick={() => {
-                    // prefer single task for callout incident; fall back to first selected
-                    const task = selectedRows && selectedRows.length ? selectedRows[0] : null;
-                    if (!task) return;
-                    if (onOpenCalloutIncident) onOpenCalloutIncident(task);
-                    else window.dispatchEvent(new CustomEvent('taskforce:open-callout-incident', { detail: { task } }));
-                    setActionsAnchorEl(null);
-                  }}
-                  disabled={!(selectedRows && selectedRows.length === 1)}
-                >
-                  <ListItemIcon>
-                    <WarningAmber style={{ fontSize: 16, color: '#d32f2f' }} />
-                  </ListItemIcon>
-                  Callout Incident
-                </MenuItem>
-              </Menu>
+                items={actionsMenuItems}
+              />
             </>
           )}
           {/* Columns button removed — using DataGrid's built-in column menu */}

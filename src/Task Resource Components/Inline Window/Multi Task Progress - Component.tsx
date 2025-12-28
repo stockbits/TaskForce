@@ -89,8 +89,8 @@ export default function ProgressTasksDialog({
               ) : (
                 preview.map(({ id, currentStatus, nextStatus }, index) => (
                   <Stack key={id ?? `task-${index}`} direction="row" spacing={2} alignItems="center" justifyContent="space-between" sx={{ px: 2, py: 1.25 }}>
-                    <Typography variant="subtitle2" color="text.primary" noWrap>{id ?? "Unknown Task"}</Typography>
-                    <Typography variant="caption" color="text.secondary" noWrap>{currentStatus ? currentStatus : "—"}<Typography component="span" sx={{ mx: 1, color: "text.disabled" }}>→</Typography>{nextStatus}</Typography>
+                    <Typography variant="subtitle2" color="text.primary">{id ?? "Unknown Task"}</Typography>
+                    <Typography variant="caption" color="text.secondary">{currentStatus ? currentStatus : "—"}<Typography component="span" sx={{ mx: 1, color: "text.disabled" }}>→</Typography>{nextStatus}</Typography>
                   </Stack>
                 ))
               )}

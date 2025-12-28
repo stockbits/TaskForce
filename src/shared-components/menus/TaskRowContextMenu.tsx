@@ -1,5 +1,6 @@
+//Right-click context menu (for individual row actions)
 import React, { useMemo } from "react";
-import TaskActionsMenu, { createContextMenuItems } from "@/shared-components/menus/Task Actions Menu - Component";
+import TaskActionsMenu, { createContextMenuItems } from "./TaskActionsMenu";
 
 interface TaskRowContextMenuProps {
   visible: boolean;

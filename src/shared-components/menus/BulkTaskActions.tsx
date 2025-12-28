@@ -1,7 +1,8 @@
+//BulkTaskActions.tsx - Bulk actions button + menu (for multi-selection actions)
 import React, { useState, useCallback, useMemo } from "react";
 import { Button } from "@mui/material";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import TaskActionsMenu, { createTaskActionItems } from "@/shared-components/menus/Task Actions Menu - Component";
+import TaskActionsMenu, { createTaskActionItems } from "./TaskActionsMenu";
 
 interface BulkTaskActionsProps {
   selectedRows: Record<string, any>[];

@@ -1,3 +1,4 @@
+//TaskActionsMenu.tsx - Main menu component (handles dropdown and positioned menus)
 import React from "react";
 import { createPortal } from "react-dom";
 import { Paper, List, ListItem, ListItemIcon, ListItemText, Menu, MenuItem, Typography } from "@mui/material";
@@ -139,9 +140,20 @@ export default function TaskActionsMenu({
 export function createTaskActionItems(
   actionableCount: number,
   onProgressTasks?: () => void,
-  onProgressNotes?: () => void
+  onProgressNotes?: () => void,
+  onOpenPopout?: () => void,
+  onOpenCalloutIncident?: () => void
 ): TaskActionItem[] {
   const items: TaskActionItem[] = [];
+
+  if (onOpenPopout) {
+    items.push({
+      id: 'open-viewer',
+      label: actionableCount > 1 ? `Open Viewer (${actionableCount})` : "Open Viewer",
+      icon: <Visibility sx={{ fontSize: 18, color: 'primary.main' }} />,
+      onClick: onOpenPopout,
+    });
+  }
 
   if (onProgressTasks) {
     items.push({
@@ -158,6 +170,15 @@ export function createTaskActionItems(
       label: actionableCount > 1 ? `Progress Notes (${actionableCount})` : "Progress Notes",
       icon: <StickyNote2 sx={{ fontSize: 18, color: 'primary.main' }} />,
       onClick: onProgressNotes,
+    });
+  }
+
+  if (onOpenCalloutIncident && actionableCount === 1) {
+    items.push({
+      id: 'callout-incident',
+      label: "Callout Incident",
+      icon: <WarningAmber sx={{ fontSize: 18, color: 'error.main' }} />,
+      onClick: onOpenCalloutIncident,
     });
   }
 
