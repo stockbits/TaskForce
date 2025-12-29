@@ -70,13 +70,28 @@ interface DraggableDialogProps extends DialogProps {
 
 export default function DraggableDialog({
   children,
+  onClose,
   ...props
 }: DraggableDialogProps) {
+  // Filter out backdrop clicks and Escape key closes to keep the dialog open
+  const handleClose: DialogProps['onClose'] = (event, reason) => {
+    if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
+      // ignore - we want the user to interact with the page outside the dialog
+      return;
+    }
+    onClose?.(event, reason);
+  };
+
   return (
     <Dialog
       {...props}
+      onClose={handleClose}
       PaperComponent={PaperComponent}
       aria-labelledby="draggable-dialog-title"
+      // hide the backdrop so clicks can reach underlying UI
+      hideBackdrop={true}
+      // prevent Escape key from closing by default (also handled in onClose)
+      disableEscapeKeyDown={true}
     >
       {children}
     </Dialog>
