@@ -12,11 +12,11 @@ export type CommitType =
   | string;
 
 export const COMMIT_COLORS: Record<CommitType, string> = {
-  Appointment: "#F59E0B",
-  "Start By": "#EC4899",
-  "Complete By": "#3B82F6",
-  Future: "#10B981",
-  Tail: "#6B7280",
+  Appointment: "#F59E0B", // Modern amber for scheduling/meetings
+  "Start By": "#EC4899", // Original pink for urgency/priority
+  "Complete By": "#3B82F6", // Original blue for completion/deadlines
+  Future: "#059669", // Modern emerald for upcoming tasks
+  Tail: "#64748B", // Modern slate for continuation/follow-up
 };
 
 export const STATUS_COLORS: Record<string, string> = {

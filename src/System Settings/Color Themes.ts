@@ -117,7 +117,7 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
       hover: mode === 'dark' ? alpha('#ffffff', 0.04) : alpha('#374151', 0.06),
       selected: mode === 'dark' ? alpha(accentTeal, 0.16) : alpha('#374151', 0.08),
       // Make light-mode working-hours accessible: higher contrast against background.paper
-      shiftBg: mode === 'dark' ? alpha(accentTeal, 0.6) : '#607d8b',
+      shiftBg: mode === 'dark' ? alpha(accentTeal, 0.6) : alpha('#9e9e9e', 0.25),
       // explicit lunch background token so we can swap color without changing warning palette
       // Make lunch visually distinct from shift in light mode
       lunchBg: mode === 'dark' ? alpha(accentTeal, 0.5) : '#1de9b6',

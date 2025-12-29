@@ -181,6 +181,7 @@ export default function TimelinePanel({
 
   const [dateModalOpen, setDateModalOpen] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1); // Default zoom level (1x)
+  const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
 
   // Quick date range selection
   const handleQuickSelect = (days: number) => {
@@ -465,8 +466,8 @@ export default function TimelinePanel({
         rows.push(bars);
         continue;
       }
-      const shiftStartMs = new Date(today).setHours(shiftStart.h, shiftStart.m, 0, 0);
-      const shiftEndMs = new Date(today).setHours(shiftEnd.h, shiftEnd.m, 0, 0);
+      const shiftStartMs = new Date(dateRange.startDate).setHours(shiftStart.h, shiftStart.m, 0, 0);
+      const shiftEndMs = new Date(dateRange.startDate).setHours(shiftEnd.h, shiftEnd.m, 0, 0);
 
       // Calculate travel segments using distance-based logic
       const travelSegments: Record<number, { travelStartMs: number; travelEndMs: number; type?: string }> = {};
@@ -519,6 +520,21 @@ export default function TimelinePanel({
       }
 
       // Position tasks with proper travel scheduling
+      const taskBars: Array<{ leftPx: number; widthPx: number; task: any; type: 'task' | 'travel' }> = [];
+
+      // Track the earliest available time for the next task (after previous task + travel)
+      let nextAvailableStartMs = shiftStartMs;
+
+      // Add travel time from home to first task
+      if (resourceTasks.length > 0 && r.homeLat != null && r.homeLng != null) {
+        const firstTask = resourceTasks[0];
+        if (firstTask.lat != null && firstTask.lng != null) {
+          const distance = calculateDistance(r.homeLat, r.homeLng, firstTask.lat, firstTask.lng);
+          const travelMinutes = calculateTravelTime(distance, 10); // Minimum 10 minutes for home travel
+          const travelDurationMs = travelMinutes * 60 * 1000;
+          nextAvailableStartMs = shiftStartMs + travelDurationMs;
+        }
+      }
 
       for (let i = 0; i < resourceTasks.length; i++) {
         const task = resourceTasks[i];
@@ -531,9 +547,30 @@ export default function TimelinePanel({
         if (!startStr) continue;
 
         const expectedDate = parseTaskDate(startStr) || new Date();
-
-        // Position tasks at their expected times, but force start after travel if applicable
         let startMs = expectedDate.getTime();
+
+        // For tasks after the first, ensure they start after travel time from previous task
+        if (i > 0) {
+          // Calculate travel time from previous task to this one
+          const prevTask = resourceTasks[i - 1];
+          if (prevTask.lat != null && prevTask.lng != null && task.lat != null && task.lng != null) {
+            const distance = calculateDistance(prevTask.lat, prevTask.lng, task.lat, task.lng);
+            const travelMinutes = calculateTravelTime(distance, 5); // Minimum 5 minutes between tasks
+            const travelDurationMs = travelMinutes * 60 * 1000;
+
+            // Add travel time to next available start
+            nextAvailableStartMs += travelDurationMs;
+          } else {
+            // If no coordinates, add minimum travel time
+            nextAvailableStartMs += 5 * 60 * 1000; // 5 minutes minimum
+          }
+        }
+
+        // Ensure task starts after the previous task/travel ends
+        if (startMs < nextAvailableStartMs) {
+          startMs = nextAvailableStartMs;
+          task.debug = { ...(task.debug || {}), scheduledStartMs: startMs, originalExpectedMs: expectedDate.getTime() };
+        }
 
         // Check if there's travel before this task that should force the start time
         const travelBefore = travelSegments[i];
@@ -542,7 +579,7 @@ export default function TimelinePanel({
           const forcedStartMs = travelBefore.travelEndMs;
           const originalExpectedMs = startMs;
 
-          // Only force if travel end is later than expected start (to avoid moving tasks backwards)
+          // Only force if travel end is later than current start (to avoid moving tasks backwards)
           if (forcedStartMs > startMs) {
             startMs = forcedStartMs;
             task.debug = { ...(task.debug || {}), forcedStartMs, originalExpectedMs };
@@ -550,25 +587,27 @@ export default function TimelinePanel({
         }
 
         // Render any precomputed travel segment for this task (from previous)
-        // Note: Travel calculations are kept for task scheduling logic but not rendered visually
+        // Note: Travel calculations are kept for task scheduling logic but travel blocks are not rendered - using straight lines instead
         const seg = travelSegments[i];
         if (seg) {
-          const clippedStart = clamp(seg.travelStartMs, shiftStartMs, shiftEndMs);
-          const clippedEnd = clamp(seg.travelEndMs, shiftStartMs, shiftEndMs);
-
-          if (clippedEnd > clippedStart) {
-            // Travel blocks are rendered visually to show travel time
-            const leftPx = ((clippedStart - dateRange.start) / MS_HOUR) * PX_PER_HOUR;
-            const widthPx = ((clippedEnd - clippedStart) / MS_HOUR) * PX_PER_HOUR;
-            const travelTaskId = seg.type === 'home' ? 'Travel from Home' : 'Travel';
-            bars.push({ leftPx, widthPx, task: { taskId: travelTaskId, debug: { travelStartMs: seg.travelStartMs, travelEndMs: seg.travelEndMs } }, type: 'travel' });
-          }
+          // Travel blocks are no longer rendered visually - using straight connecting lines instead
+          // const clippedStart = clamp(seg.travelStartMs, shiftStartMs, shiftEndMs);
+          // const clippedEnd = clamp(seg.travelEndMs, shiftStartMs, shiftEndMs);
+          // if (clippedEnd > clippedStart) {
+          //   const leftPx = ((clippedStart - dateRange.start) / MS_HOUR) * PX_PER_HOUR;
+          //   const widthPx = ((clippedEnd - clippedStart) / MS_HOUR) * PX_PER_HOUR;
+          //   const travelTaskId = seg.type === 'home' ? 'Travel from Home' : 'Travel';
+          //   taskBars.push({ leftPx, widthPx, task: { taskId: travelTaskId, debug: { travelStartMs: seg.travelStartMs, travelEndMs: seg.travelEndMs } }, type: 'travel' });
+          // }
         }
 
         task.expectedDate = expectedDate; // store for line drawing
 
         const durationMs = (task.estimatedDuration || 60) * 60 * 1000; // minutes to ms
         const endMs = startMs + durationMs;
+
+        // Update next available start time for the following task
+        nextAvailableStartMs = endMs;
 
         // Clip to shift
         const clippedStart = clamp(startMs, shiftStartMs, shiftEndMs);
@@ -577,17 +616,11 @@ export default function TimelinePanel({
         if (clippedEnd > clippedStart) {
           const leftPx = ((clippedStart - dateRange.start) / MS_HOUR) * PX_PER_HOUR;
           const widthPx = ((clippedEnd - clippedStart) / MS_HOUR) * PX_PER_HOUR;
-          // Small visual gap between adjacent task bars to avoid touching/overlap
-          const GAP_PX = 2; // total gap in pixels between bars
-          const adjLeftPx = leftPx + GAP_PX / 2;
-          const adjWidthPx = Math.max(1, widthPx - GAP_PX);
-          bars.push({ leftPx: adjLeftPx, widthPx: adjWidthPx, task, type: 'task' });
-          // update prevRendered end marker for the next iteration
-          // prevRenderedEndMs = clippedEnd;
+          taskBars.push({ leftPx, widthPx, task, type: 'task' });
         }
       }
 
-      rows.push(bars);
+      rows.push(taskBars);
     }
 
     return rows;
@@ -660,13 +693,9 @@ export default function TimelinePanel({
       const fraction = body.scrollLeft / bodyScrollMax;
       header.scrollLeft = fraction * headerScrollMax;
     }
+    // Sync left column vertical scrolling immediately
     if (leftScrollRef.current) {
-      // Use requestAnimationFrame to ensure synchronization happens after scroll event
-      requestAnimationFrame(() => {
-        if (leftScrollRef.current) {
-          leftScrollRef.current.scrollTop = body.scrollTop;
-        }
-      });
+      leftScrollRef.current.scrollTop = body.scrollTop;
     }
   };
 
@@ -686,11 +715,12 @@ export default function TimelinePanel({
     <Box
       sx={{
         height: "100%",
+        minHeight: "600px", // Ensure adequate height for scrolling
         width: "100%",
         display: "flex",
         flexDirection: "column",
         bgcolor: theme.palette.background.default,
-        overflow: isMaximized ? "hidden" : "visible",
+        overflow: isMaximized ? "hidden" : "auto", // Allow scrolling when not maximized
       }}
     >
       {/* Header */}
@@ -794,6 +824,13 @@ export default function TimelinePanel({
             // Use scrollBy for smooth native-like behavior
             body.scrollBy({ top: e.deltaY, left: 0, behavior: 'auto' });
           }}
+          onScroll={(e: React.UIEvent<HTMLDivElement>) => {
+            // Sync vertical scrolling with the main body
+            const left = e.currentTarget;
+            if (bodyScrollRef.current && left) {
+              bodyScrollRef.current.scrollTop = left.scrollTop;
+            }
+          }}
           sx={{
             width: LABEL_COL_WIDTH,
             flexShrink: 0,
@@ -802,6 +839,7 @@ export default function TimelinePanel({
             overflow: "auto",
             overscrollBehavior: 'contain',
             "&::-webkit-scrollbar": { display: "none" },
+            height: '100%', // Ensure full height
           }}
         >
           {resources.map((r, rowIndex) => {
@@ -809,16 +847,19 @@ export default function TimelinePanel({
             return (
               <Box
                 key={`${rid}-${rowIndex}`}
-                onClick={() => onResourceClick?.(r)}
+                onClick={() => {
+                  onResourceClick?.(r);
+                  setSelectedRowIndex(rowIndex);
+                }}
                 sx={{
                   height: ROW_HEIGHT,
                   display: "flex",
                   alignItems: "center",
                   px: 1,
                   borderBottom: "1px solid #cccccc",
-                  backgroundColor: rowIndex % 2 === 0 ? 'rgba(0, 0, 0, 0.02)' : 'transparent',
+                  backgroundColor: selectedRowIndex === rowIndex ? 'rgba(25, 118, 210, 0.12)' : 'transparent',
                   '&:hover': {
-                    backgroundColor: rowIndex % 2 === 0 ? 'rgba(0, 0, 0, 0.04)' : 'rgba(0, 0, 0, 0.02)',
+                    backgroundColor: selectedRowIndex === rowIndex ? 'rgba(25, 118, 210, 0.12)' : 'rgba(0, 0, 0, 0.02)',
                   },
                   cursor: 'pointer',
                 }}
@@ -845,6 +886,7 @@ export default function TimelinePanel({
             flex: 1,
             overflow: "auto",
             "&::-webkit-scrollbar": { display: "none" },
+            height: '100%', // Ensure full height to match left column
           }}
         >
           <Box
@@ -856,14 +898,16 @@ export default function TimelinePanel({
             {categories.map((rid, rowIndex) => (
               <Box
                 key={`${rid}-${rowIndex}`}
+                onClick={() => setSelectedRowIndex(rowIndex)}
                 sx={{
                   position: "relative",
                   height: ROW_HEIGHT,
                   borderBottom: "1px solid #cccccc",
-                  backgroundColor: rowIndex % 2 === 0 ? 'rgba(0, 0, 0, 0.02)' : 'transparent',
+                  backgroundColor: selectedRowIndex === rowIndex ? 'rgba(25, 118, 210, 0.08)' : 'transparent',
                   '&:hover': {
-                    backgroundColor: rowIndex % 2 === 0 ? 'rgba(0, 0, 0, 0.04)' : 'rgba(0, 0, 0, 0.02)',
+                    backgroundColor: selectedRowIndex === rowIndex ? 'rgba(25, 118, 210, 0.08)' : 'rgba(0, 0, 0, 0.02)',
                   },
+                  cursor: 'pointer',
                 }}
               >
                 {/* shift bars */}
@@ -878,7 +922,7 @@ export default function TimelinePanel({
                       width: b.widthPx,
                       height: ROW_HEIGHT - 2,
                       borderRadius: 0,
-                      bgcolor: (theme.palette as any).timeline?.shiftBg ?? (theme.palette.mode === 'dark' ? alpha(theme.palette.primary.main, 0.12) : theme.palette.primary.main),
+                      bgcolor: (theme.palette as any).timeline?.shiftBg ?? alpha('#f8f8f8', 0.15),
                       borderLeft: `1px solid ${(theme.palette as any).timeline?.shiftBorder ?? (theme.palette.mode === 'dark' ? theme.palette.primary.main : '#000000')}`,
                       borderRight: `1px solid ${(theme.palette as any).timeline?.shiftBorder ?? (theme.palette.mode === 'dark' ? theme.palette.primary.main : '#000000')}`,
                       boxSizing: "border-box",
@@ -887,7 +931,7 @@ export default function TimelinePanel({
                   />
                 ))}
 
-                {/* lunch break bars */}
+                {/* lunch break bars - clean gradient style */}
                 {lunchBarsByRow[rowIndex]?.map((b, i) => (
                   <SimpleTooltip
                     key={`${rid}-lunch-${i}`}
@@ -902,12 +946,12 @@ export default function TimelinePanel({
                         width: b.widthPx,
                         height: ROW_HEIGHT - 2,
                         borderRadius: 0,
-                        bgcolor: (theme.palette as any).timeline?.lunchBg ?? alpha(theme.palette.warning.main, (theme.palette as any).timeline?.lunchOpacity ?? 0.3),
-                        borderLeft: `1px solid ${(theme.palette as any).timeline?.shiftBorder ?? (theme.palette.mode === 'dark' ? theme.palette.primary.main : '#000000')}`,
-                        borderRight: `1px solid ${(theme.palette as any).timeline?.shiftBorder ?? (theme.palette.mode === 'dark' ? theme.palette.primary.main : '#000000')}`,
                         boxSizing: "border-box",
                         cursor: "pointer",
                         zIndex: 1,
+                        // Clean light green background for lunch breaks
+                        bgcolor: alpha(theme.palette.success.light, 0.4),
+                        border: `1px solid ${alpha(theme.palette.success.main, 0.3)}`,
                       }}
                     />
                   </SimpleTooltip>
@@ -921,13 +965,13 @@ export default function TimelinePanel({
                     widthPx={b.widthPx}
                     task={b.task}
                     type={b.type}
-                    rowHeight={ROW_HEIGHT}
+                    rowHeight={ROW_HEIGHT * 0.9}
                     onClick={onTaskClick}
                     onDoubleClick={onTaskDoubleClick}
                   />
                 ))}
 
-                {/* connecting lines between consecutive tasks */}
+                {/* connecting lines between consecutive tasks (including travel) */}
                 {(() => {
                   const taskBars = taskBarsByRow[rowIndex]?.filter(b => b.type === 'task') || [];
                   return taskBars.slice(1).map((currentBar, i) => {
@@ -938,6 +982,7 @@ export default function TimelinePanel({
                     const lineEndPx = currentStartPx;
                     const lineLengthPx = lineEndPx - lineStartPx;
 
+                    // Only draw travel line if there's actual space between tasks
                     if (lineLengthPx > 0) {
                       return (
                         <Box
@@ -945,11 +990,11 @@ export default function TimelinePanel({
                           sx={{
                             position: 'absolute',
                             left: lineStartPx,
-                            top: ROW_HEIGHT / 2 - 1, // center vertically in the row
-                            width: lineLengthPx,
-                            height: 4,
-                            bgcolor: (theme.palette as any).travel?.main ?? (theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main),
-                            opacity: 0.95,
+                            top: ROW_HEIGHT / 2 - 2, // center vertically in the row
+                            width: Math.min(lineLengthPx, contentWidth - lineStartPx),
+                            height: 6, // thicker for better visibility
+                            bgcolor: '#000000', // jet black
+                            borderRadius: 0, // completely square
                           }}
                         />
                       );
@@ -958,67 +1003,34 @@ export default function TimelinePanel({
                   });
                 })()}
 
-                {/* connecting lines for travel segments */}
+                {/* straight travel lines from home to first task */}
                 {(() => {
-                  const travelBars = taskBarsByRow[rowIndex]?.filter(b => b.type === 'travel' && b.widthPx > 0) || [];
-                  return travelBars.map((travelBar, i) => {
-                    // For home travel: connect from shift start to travel start (only if within timeline bounds)
-                    if (travelBar.task?.taskId === 'Travel from Home') {
-                      const shiftStartPx = Math.max(0, ((new Date(resources[rowIndex]?.shiftStart || '08:00').getTime() - dateRange.start) / MS_HOUR) * PX_PER_HOUR);
-                      const travelStartPx = travelBar.leftPx;
-                      const lineLengthPx = travelStartPx - shiftStartPx;
+                  const firstTaskBar = taskBarsByRow[rowIndex]?.find(b => b.type === 'task');
+                  if (firstTaskBar && resources[rowIndex]) {
+                    const shiftStart = parseShiftTime(resources[rowIndex].shiftStart);
+                    const shiftStartMs = shiftStart ? new Date(dateRange.startDate).setHours(shiftStart.h, shiftStart.m, 0, 0) : dateRange.start;
+                    const shiftStartPx = Math.max(0, ((shiftStartMs - dateRange.start) / MS_HOUR) * PX_PER_HOUR);
+                    const taskStartPx = firstTaskBar.leftPx;
+                    const lineLengthPx = taskStartPx - shiftStartPx;
 
-                      // Only draw if the line is within timeline bounds and has positive length
-                      if (lineLengthPx > 0 && travelStartPx >= 0 && travelStartPx <= contentWidth) {
-                        return (
-                          <Box
-                            key={`${rid}-travel-line-home-${i}`}
-                            sx={{
-                              position: 'absolute',
-                              left: Math.max(0, shiftStartPx), // Don't go before timeline start
-                              top: ROW_HEIGHT / 2 - 1, // center vertically in the row
-                              width: Math.min(lineLengthPx, contentWidth - Math.max(0, shiftStartPx)), // Don't extend past timeline end
-                                height: 4,
-                                bgcolor: (theme.palette as any).travel?.main ?? theme.palette.secondary.main, // Travel color
-                                opacity: 0.95,
-                            }}
-                          />
-                        );
-                      }
+                    if (lineLengthPx > 0 && taskStartPx >= 0 && taskStartPx <= contentWidth) {
+                      return (
+                        <Box
+                          key={`${rid}-travel-line-home`}
+                          sx={{
+                            position: 'absolute',
+                            left: Math.max(0, shiftStartPx),
+                            top: ROW_HEIGHT / 2 - 2, // center vertically in the row
+                            width: Math.min(lineLengthPx, contentWidth - Math.max(0, shiftStartPx)),
+                            height: 6, // thicker for better visibility
+                            bgcolor: '#000000', // jet black
+                            borderRadius: 0, // completely square
+                          }}
+                        />
+                      );
                     }
-                    // For inter-task travel: connect from previous task end to travel start
-                    else {
-                      const allBars = taskBarsByRow[rowIndex] || [];
-                      const travelIndex = allBars.findIndex(b => b === travelBar);
-                      if (travelIndex > 0) {
-                        const prevBar = allBars[travelIndex - 1];
-                        if (prevBar && prevBar.type === 'task') {
-                          const prevEndPx = prevBar.leftPx + prevBar.widthPx;
-                          const travelStartPx = travelBar.leftPx;
-                          const lineLengthPx = travelStartPx - prevEndPx;
-
-                          // Only draw if within timeline bounds and has positive length
-                          if (lineLengthPx > 0 && travelStartPx >= 0 && travelStartPx <= contentWidth) {
-                            return (
-                              <Box
-                                key={`${rid}-travel-line-${i}`}
-                                sx={{
-                                  position: 'absolute',
-                                  left: prevEndPx,
-                                  top: ROW_HEIGHT / 2 - 1, // center vertically in the row
-                                  width: Math.min(lineLengthPx, contentWidth - prevEndPx), // Don't extend past timeline end
-                                    height: 4,
-                                    bgcolor: (theme.palette as any).travel?.main ?? theme.palette.secondary.main, // Travel color
-                                    opacity: 0.95,
-                                }}
-                              />
-                            );
-                          }
-                        }
-                      }
-                    }
-                    return null;
-                  });
+                  }
+                  return null;
                 })()}
 
                 {/* debug: show travel/first-task timestamps if available */}

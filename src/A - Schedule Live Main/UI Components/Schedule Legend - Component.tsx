@@ -202,7 +202,7 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
                     sx={{
                       width: 14,
                       height: 14,
-                      bgcolor: (theme.palette as any).timeline?.shiftBg ?? (theme.palette.mode === 'dark' ? alpha(theme.palette.primary.dark, 0.3) : theme.palette.primary.main),
+                      bgcolor: (theme.palette as any).timeline?.shiftBg ?? alpha('#78909c', 0.6),
                       borderLeft: `1px solid ${(theme.palette as any).timeline?.shiftBorder ?? (theme.palette.mode === 'dark' ? theme.palette.common.white : "#000000")}`,
                       borderRight: `1px solid ${(theme.palette as any).timeline?.shiftBorder ?? (theme.palette.mode === 'dark' ? theme.palette.common.white : "#000000")}`,
                       borderRadius: 0,
@@ -218,9 +218,32 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
                     sx={{
                       width: 14,
                       height: 14,
-                      bgcolor: (theme.palette as any).timeline?.lunchBg ?? alpha(theme.palette.warning.main, (theme.palette as any).timeline?.lunchOpacity ?? 0.3),
-                      border: `1px solid ${(theme.palette as any).timeline?.shiftBorder ?? (theme.palette.mode === 'dark' ? theme.palette.common.white : '#000000')}`,
+                      position: 'relative',
                       borderRadius: 0,
+                      boxSizing: "border-box",
+                      // Working hours background
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        bgcolor: (theme.palette as any).timeline?.shiftBg ?? alpha('#78909c', 0.6),
+                        borderLeft: `1px solid ${(theme.palette as any).timeline?.shiftBorder ?? (theme.palette.mode === 'dark' ? theme.palette.common.white : "#000000")}`,
+                        borderRight: `1px solid ${(theme.palette as any).timeline?.shiftBorder ?? (theme.palette.mode === 'dark' ? theme.palette.common.white : "#000000")}`,
+                      },
+                      // Light green overlay for lunch break
+                      '&::after': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: alpha(theme.palette.success.light, 0.4),
+                        border: `1px solid ${alpha(theme.palette.success.main, 0.3)}`,
+                      },
                     }}
                   />
                   <Typography variant="caption" color="text.secondary">

@@ -105,7 +105,8 @@ export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane
           top: (() => {
             const innerHeight = rowHeight - 8;
             const laneH = Math.max( Math.floor(innerHeight / totalLanes), 14 );
-            const base = 4;
+            // Adjust base to center the smaller task blocks vertically
+            const base = rowHeight === 36 ? 7 : 4; // Center smaller blocks at 7px instead of 4px
             return base + (lane >= 0 ? lane * laneH : 0);
           })(),
           left: leftPx,
@@ -118,6 +119,7 @@ export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane
           })(),
           borderRadius: 0,
           bgcolor: theme.palette.mode === 'dark' ? getTaskColor(task) : getTaskColor(task),
+          opacity: 0.85,
           border: `1px solid ${(theme.palette as any).timeline?.taskBlockBorder ?? darkenHex(getTaskColor(task), 0.35)}`,
           boxSizing: "border-box",
           cursor: "pointer",
