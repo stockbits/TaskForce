@@ -472,8 +472,12 @@ export default function ScheduleLivePage() {
 
     setSearchAnywhere("");
     setTaskData([]);
+    setTaskTableData([]);
     setResourceData([]);
+    setResourceTableData([]);
+    setMapTaskData([]);
     setResetKey((n) => n + 1);
+    setClearKey((n) => n + 1);
 
     if (division) {
       const rows = (mockTasks as TaskRecord[]).filter((t) => t.division === division);
@@ -488,7 +492,7 @@ export default function ScheduleLivePage() {
     }
 
     handleCloseSearchPanel();
-  }, [clearAll, division, handleCloseSearchPanel]);
+  }, [clearAll, division, handleCloseSearchPanel, setTaskTableData, setResourceTableData, setMapTaskData, setClearKey]);
 
   /* ==========================================================================
      TIMELINE TASK INTERACTIONS
