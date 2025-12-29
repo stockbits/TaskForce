@@ -185,12 +185,26 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
                 <Stack direction="row" spacing={1} alignItems="center">
                   <Box
                     sx={{
+                      width: 24,
+                      height: 6,
+                      bgcolor: (theme.palette as any).travel?.main ?? '#ffee58',
+                      borderRadius: 1,
+                      boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.06)',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                  <Typography variant="caption" color="text.secondary">
+                    Travel
+                  </Typography>
+                </Stack>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Box
+                    sx={{
                       width: 14,
                       height: 14,
-                      bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.primary.dark, 0.3) : "primary.main",
-                      opacity: theme.palette.mode === 'dark' ? 1 : 0.15,
-                      borderLeft: `3px solid ${theme.palette.mode === 'dark' ? theme.palette.common.white : "#000000"}`,
-                      borderRight: `3px solid ${theme.palette.mode === 'dark' ? theme.palette.common.white : "#000000"}`,
+                      bgcolor: (theme.palette as any).timeline?.shiftBg ?? (theme.palette.mode === 'dark' ? alpha(theme.palette.primary.dark, 0.3) : theme.palette.primary.main),
+                      borderLeft: `1px solid ${(theme.palette as any).timeline?.shiftBorder ?? (theme.palette.mode === 'dark' ? theme.palette.common.white : "#000000")}`,
+                      borderRight: `1px solid ${(theme.palette as any).timeline?.shiftBorder ?? (theme.palette.mode === 'dark' ? theme.palette.common.white : "#000000")}`,
                       borderRadius: 0,
                       boxSizing: "border-box",
                     }}
@@ -204,8 +218,8 @@ export default function ScheduleLegend({ visible, onClose, anchorEl }: ScheduleL
                     sx={{
                       width: 14,
                       height: 14,
-                      bgcolor: theme.palette.warning.main,
-                      opacity: 0.25,
+                      bgcolor: (theme.palette as any).timeline?.lunchBg ?? alpha(theme.palette.warning.main, (theme.palette as any).timeline?.lunchOpacity ?? 0.3),
+                      border: `1px solid ${(theme.palette as any).timeline?.shiftBorder ?? (theme.palette.mode === 'dark' ? theme.palette.common.white : '#000000')}`,
                       borderRadius: 0,
                     }}
                   />

@@ -81,13 +81,13 @@ export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane
       <Box
         sx={{
           position: "absolute",
-          top: (rowHeight - 4) / 2,
+          top: (rowHeight - 6) / 2,
           left: leftPx,
-          width: Math.max(widthPx, 10),
-          height: 4,
+          width: Math.max(widthPx, 12),
+          height: 6,
           borderRadius: 0,
-          bgcolor: theme.palette.taskBlock.main, // Task block background color
-          border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.08)'}`,
+          bgcolor: (theme.palette as any).travel?.main ?? '#ffee58',
+          border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.24)' : 'rgba(0,0,0,0.12)'}`,
           boxSizing: "border-box",
           cursor: "pointer",
         }}
@@ -113,13 +113,15 @@ export default function TaskBlock({ leftPx, widthPx, task, type, rowHeight, lane
           height: (() => {
             const innerHeight = rowHeight - 8;
             const laneH = Math.max( Math.floor(innerHeight / totalLanes), 14 );
-            return lane >= 0 ? Math.max(laneH - 4, 12) : innerHeight;
+            // reduce height slightly so block borders do not overlap row separators
+            return lane >= 0 ? Math.max(laneH - 6, 12) : Math.max(innerHeight - 2, 12);
           })(),
           borderRadius: 0,
-          bgcolor: getTaskColor(task),
-          border: `1px solid ${darkenHex(getTaskColor(task), 0.35)}`,
+          bgcolor: theme.palette.mode === 'dark' ? getTaskColor(task) : getTaskColor(task),
+          border: `1px solid ${(theme.palette as any).timeline?.taskBlockBorder ?? darkenHex(getTaskColor(task), 0.35)}`,
           boxSizing: "border-box",
           cursor: "pointer",
+          zIndex: 2,
           display: "flex",
           alignItems: "center",
           px: 0.5,

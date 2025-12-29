@@ -1,17 +1,31 @@
-import { createTheme } from "@mui/material/styles";
+import { createTheme, alpha } from "@mui/material/styles";
 import { PaletteColor } from "@mui/material/styles";
 
 // Extend MUI theme types to include custom colors
 declare module "@mui/material/styles" {
+  interface TimelinePalette {
+    strip: string;
+    hover: string;
+    selected: string;
+    shiftBg: string;
+    shiftBorder: string;
+    lunchBg: string;
+    ecbtShadow: string;
+    lunchOpacity: number;
+    taskBlockBorder: string;
+  }
+
   interface Palette {
     taskBlock: PaletteColor;
     timelineText: PaletteColor;
     travel: PaletteColor;
+    timeline?: TimelinePalette;
   }
   interface PaletteOptions {
     taskBlock?: PaletteColor;
     timelineText?: PaletteColor;
     travel?: PaletteColor;
+    timeline?: Partial<TimelinePalette>;
   }
 }
 
@@ -21,6 +35,7 @@ const primaryNavyLight = "#304862";
 const primaryNavyDark = "#0A1A2A";
 const accentMint = "#3BE089"; // mint ring
 const accentMintDark = "#1EA46A";
+const accentTeal = "#4FD1C5"; // replacement accent for dark-mode (cool teal)
 const neutralBackground = "#F3F6F8";
 const taskBlockColor = "#D97706"; // task block background
 const timelineTextColor = "#666"; // timeline text color
@@ -35,7 +50,7 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
       contrastText: "#FFFFFF",
     },
     secondary: {
-      main: accentMint,
+      main: mode === 'dark' ? accentTeal : accentMint,
       light: "#7FF2B6",
       dark: accentMintDark,
       contrastText: mode === 'dark' ? "#052035" : "#FFFFFF",
@@ -81,6 +96,13 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
       dark: mode === 'dark' ? "#46954a" : "#1b5e20",
       contrastText: mode === 'dark' ? "#000000" : "#ffffff",
     },
+    // Travel color palette (used for travel lines/segments)
+    travel: {
+      main: mode === 'dark' ? '#FFEE58' : '#ffee58',
+      light: mode === 'dark' ? '#fff58d' : '#fff59d',
+      dark: mode === 'dark' ? '#c8b800' : '#b08900',
+      contrastText: mode === 'dark' ? '#000000' : '#000000',
+    },
     // Custom application colors
     taskBlock: {
       main: taskBlockColor,
@@ -88,17 +110,21 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
       dark: taskBlockColor,
       contrastText: "#ffffff",
     },
-    timelineText: {
-      main: timelineTextColor,
-      light: timelineTextColor,
-      dark: timelineTextColor,
-      contrastText: "#ffffff",
-    },
-    travel: {
-      main: accentMint,
-      light: accentMint,
-      dark: accentMintDark,
-      contrastText: "#ffffff",
+    timeline: {
+      // Enterprise Slate (option A): modern professional greys for light mode;
+      // dark mode keeps existing mint/navy accents.
+      strip: mode === 'dark' ? alpha('#ffffff', 0.02) : '#F3F4F6',
+      hover: mode === 'dark' ? alpha('#ffffff', 0.04) : alpha('#374151', 0.06),
+      selected: mode === 'dark' ? alpha(accentTeal, 0.16) : alpha('#374151', 0.08),
+      // Make light-mode working-hours accessible: higher contrast against background.paper
+      shiftBg: mode === 'dark' ? alpha(accentTeal, 0.6) : '#607d8b',
+      // explicit lunch background token so we can swap color without changing warning palette
+      lunchBg: mode === 'dark' ? alpha(accentTeal, 0.5) : '#8d6e63',
+      // keep a clear, but not overpowering border
+      shiftBorder: mode === 'dark' ? accentTeal : '#1F2937',
+      ecbtShadow: mode === 'dark' ? '0 2px 6px rgba(0,0,0,0.30)' : '0 2px 6px rgba(0,0,0,0.15)',
+      lunchOpacity: mode === 'dark' ? 0.25 : 0.25,
+      taskBlockBorder: mode === 'dark' ? alpha('#ffffff', 0.08) : 'rgba(0,0,0,0.18)',
     },
   },
   typography: {
@@ -154,26 +180,26 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
         // Ensure no blue focus rings appear
         '*': {
           '&:focus-visible': {
-            outline: mode === 'dark' ? `2px solid ${accentMint}` : `2px solid ${primaryNavy}`,
+            outline: mode === 'dark' ? `2px solid ${accentTeal}` : `2px solid ${primaryNavy}`,
             outlineOffset: '1px',
           },
         },
         // DataGrid header checkbox: ensure checked header checkbox uses theme's dark-mode accent
         '.MuiDataGrid-root .MuiDataGrid-columnHeader .MuiCheckbox-root.Mui-checked': {
-          color: mode === 'dark' ? `${accentMint} !important` : `${primaryNavy} !important`,
+          color: mode === 'dark' ? `${accentTeal} !important` : `${primaryNavy} !important`,
         },
         '.MuiDataGrid-root .MuiDataGrid-columnHeader .MuiCheckbox-root.Mui-indeterminate': {
-          color: mode === 'dark' ? `${accentMint} !important` : `${primaryNavy} !important`,
+          color: mode === 'dark' ? `${accentTeal} !important` : `${primaryNavy} !important`,
         },
         '.MuiDataGrid-root .MuiDataGrid-columnHeader .MuiCheckbox-root:hover': {
           backgroundColor: mode === 'dark' ? `rgba(255, 255, 255, 0.08) !important` : `rgba(0, 0, 0, 0.04) !important`,
         },
         // Backup selector with slightly less specificity
         '.MuiDataGrid-columnHeader .MuiCheckbox-root.Mui-checked': {
-          color: mode === 'dark' ? `${accentMint} !important` : `${primaryNavy} !important`,
+          color: mode === 'dark' ? `${accentTeal} !important` : `${primaryNavy} !important`,
         },
         '.MuiDataGrid-columnHeader .MuiCheckbox-root.Mui-indeterminate': {
-          color: mode === 'dark' ? `${accentMint} !important` : `${primaryNavy} !important`,
+          color: mode === 'dark' ? `${accentTeal} !important` : `${primaryNavy} !important`,
         },
         '.MuiDataGrid-columnHeader .MuiCheckbox-root:hover': {
           backgroundColor: mode === 'dark' ? `rgba(255, 255, 255, 0.08) !important` : `rgba(0, 0, 0, 0.04) !important`,
@@ -247,7 +273,7 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
             borderColor: mode === 'dark' ? "rgba(255, 255, 255, 0.4)" : undefined,
           },
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: mode === 'dark' ? accentMint : primaryNavy,
+            borderColor: mode === 'dark' ? accentTeal : primaryNavy,
           },
         },
         notchedOutline: {
@@ -260,7 +286,7 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
         root: {
           color: mode === 'dark' ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.54)",
           '&.Mui-checked': {
-            color: mode === 'dark' ? accentMint : primaryNavy,
+            color: mode === 'dark' ? accentTeal : primaryNavy,
           },
           '&:hover': {
             backgroundColor: mode === 'dark' ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.04)",
@@ -281,8 +307,8 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
           '& .MuiInputLabel-root': {
             color: mode === 'dark' ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.6)",
             '&.Mui-focused': {
-              color: mode === 'dark' ? accentMint : primaryNavy,
-            },
+                color: mode === 'dark' ? accentTeal : primaryNavy,
+              },
           },
           '& .MuiOutlinedInput-root': {
             '& fieldset': {
@@ -292,11 +318,11 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
               borderColor: mode === 'dark' ? "rgba(255, 255, 255, 0.4)" : undefined,
             },
             '&.Mui-focused fieldset': {
-              borderColor: mode === 'dark' ? accentMint : primaryNavy + ' !important',
+              borderColor: mode === 'dark' ? accentTeal : primaryNavy + ' !important',
             },
             '&.Mui-focused': {
               '& fieldset': {
-                borderColor: mode === 'dark' ? accentMint : primaryNavy + ' !important',
+                borderColor: mode === 'dark' ? accentTeal : primaryNavy + ' !important',
               },
             },
           },

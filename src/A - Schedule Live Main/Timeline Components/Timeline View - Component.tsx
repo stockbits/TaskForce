@@ -13,6 +13,7 @@ import {
   Stack,
   useTheme,
 } from "@mui/material";
+import { alpha } from '@mui/material/styles';
 import PersonIcon from "@mui/icons-material/Person";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -756,7 +757,7 @@ export default function TimelinePanel({
                     alignItems: "center",
                     justifyContent: "center",
                     fontSize: "0.75rem",
-                    color: theme.palette.timelineText.main,
+                    color: (theme.palette as any).timelineText?.main ?? theme.palette.text.secondary,
                     borderRight:
                       i < timelineIntervals.length - 1
                         ? "1px solid #eee"
@@ -871,16 +872,17 @@ export default function TimelinePanel({
                     key={`${rid}-shift-${i}`}
                     sx={{
                       position: "absolute",
-                      top: 0,
+                      // inset slightly to avoid covering the row bottom border lines
+                      top: 1,
                       left: b.leftPx,
                       width: b.widthPx,
-                      height: ROW_HEIGHT,
+                      height: ROW_HEIGHT - 2,
                       borderRadius: 0,
-                      bgcolor: theme.palette.mode === 'dark' ? "rgba(59, 224, 137, 0.3)" : "primary.main",
-                      opacity: theme.palette.mode === 'dark' ? 1 : 0.15,
-                      borderLeft: `3px solid ${theme.palette.mode === 'dark' ? theme.palette.travel.main : "#000000"}`,
-                      borderRight: `3px solid ${theme.palette.mode === 'dark' ? theme.palette.travel.main : "#000000"}`,
+                      bgcolor: (theme.palette as any).timeline?.shiftBg ?? (theme.palette.mode === 'dark' ? alpha(theme.palette.primary.main, 0.12) : theme.palette.primary.main),
+                      borderLeft: `1px solid ${(theme.palette as any).timeline?.shiftBorder ?? (theme.palette.mode === 'dark' ? theme.palette.primary.main : '#000000')}`,
+                      borderRight: `1px solid ${(theme.palette as any).timeline?.shiftBorder ?? (theme.palette.mode === 'dark' ? theme.palette.primary.main : '#000000')}`,
                       boxSizing: "border-box",
+                      zIndex: 0,
                     }}
                   />
                 ))}
@@ -894,15 +896,18 @@ export default function TimelinePanel({
                     <Box
                       sx={{
                         position: "absolute",
-                        top: 0,
+                        // align visually with shift bars so edges match
+                        top: 1,
                         left: b.leftPx,
                         width: b.widthPx,
-                        height: ROW_HEIGHT,
+                        height: ROW_HEIGHT - 2,
                         borderRadius: 0,
-                        bgcolor: theme.palette.warning.main, // Orange color for lunch breaks
-                        opacity: 0.25,
+                        bgcolor: (theme.palette as any).timeline?.lunchBg ?? alpha(theme.palette.warning.main, (theme.palette as any).timeline?.lunchOpacity ?? 0.3),
+                        borderLeft: `1px solid ${(theme.palette as any).timeline?.shiftBorder ?? (theme.palette.mode === 'dark' ? theme.palette.primary.main : '#000000')}`,
+                        borderRight: `1px solid ${(theme.palette as any).timeline?.shiftBorder ?? (theme.palette.mode === 'dark' ? theme.palette.primary.main : '#000000')}`,
                         boxSizing: "border-box",
                         cursor: "pointer",
+                        zIndex: 1,
                       }}
                     />
                   </SimpleTooltip>
@@ -942,9 +947,9 @@ export default function TimelinePanel({
                             left: lineStartPx,
                             top: ROW_HEIGHT / 2 - 1, // center vertically in the row
                             width: lineLengthPx,
-                            height: 2,
-                            bgcolor: theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main,
-                            opacity: 0.6,
+                            height: 4,
+                            bgcolor: (theme.palette as any).travel?.main ?? (theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main),
+                            opacity: 0.95,
                           }}
                         />
                       );
@@ -973,9 +978,9 @@ export default function TimelinePanel({
                               left: Math.max(0, shiftStartPx), // Don't go before timeline start
                               top: ROW_HEIGHT / 2 - 1, // center vertically in the row
                               width: Math.min(lineLengthPx, contentWidth - Math.max(0, shiftStartPx)), // Don't extend past timeline end
-                              height: 2,
-                              bgcolor: theme.palette.travel.main, // Travel color
-                              opacity: 0.6,
+                                height: 4,
+                                bgcolor: (theme.palette as any).travel?.main ?? theme.palette.secondary.main, // Travel color
+                                opacity: 0.95,
                             }}
                           />
                         );
@@ -1002,9 +1007,9 @@ export default function TimelinePanel({
                                   left: prevEndPx,
                                   top: ROW_HEIGHT / 2 - 1, // center vertically in the row
                                   width: Math.min(lineLengthPx, contentWidth - prevEndPx), // Don't extend past timeline end
-                                  height: 2,
-                                  bgcolor: theme.palette.travel.main, // Travel color
-                                  opacity: 0.6,
+                                    height: 4,
+                                    bgcolor: (theme.palette as any).travel?.main ?? theme.palette.secondary.main, // Travel color
+                                    opacity: 0.95,
                                 }}
                               />
                             );
