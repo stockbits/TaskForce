@@ -59,6 +59,8 @@ function PaperComponent(props: PaperProps) {
         ...props.style,
         transform: `translate(${position.x}px, ${position.y}px)`,
         cursor: isDragging ? 'grabbing' : 'grab',
+        // ensure the dialog content receives pointer events while the modal root does not
+        pointerEvents: 'auto',
       }}
     />
   );
@@ -92,6 +94,8 @@ export default function DraggableDialog({
       hideBackdrop={true}
       // prevent Escape key from closing by default (also handled in onClose)
       disableEscapeKeyDown={true}
+      // allow pointer events to pass through the modal root so background is interactive
+      sx={{ pointerEvents: 'none' }}
     >
       {children}
     </Dialog>
