@@ -459,7 +459,6 @@ export default function TimelinePanel({
       const bars: Array<{ leftPx: number; widthPx: number; task: any; type: 'task' | 'travel' }> = [];
 
       // Get shift times for today
-      const today = new Date();
       const shiftStart = parseShiftTime(r.shiftStart);
       const shiftEnd = parseShiftTime(r.shiftEnd);
       if (!shiftStart || !shiftEnd) {
