@@ -38,7 +38,7 @@ const accentMintDark = "#1EA46A";
 const accentTeal = "#4FD1C5"; // replacement accent for dark-mode (cool teal)
 const neutralBackground = "#F3F6F8";
 const taskBlockColor = "#D97706"; // task block background
-const timelineTextColor = "#666"; // timeline text color
+//const timelineTextColor = "#666"; // timeline text color
 
 export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme({
   palette: {
@@ -119,8 +119,8 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'light') => createTheme(
       // Make light-mode working-hours accessible: higher contrast against background.paper
       shiftBg: mode === 'dark' ? alpha(accentTeal, 0.6) : '#607d8b',
       // explicit lunch background token so we can swap color without changing warning palette
-      // In light mode use the working-hours color as a base and make a variant for lunch
-      lunchBg: mode === 'dark' ? alpha(accentTeal, 0.5) : alpha('#607d8b', 0.35),
+      // Make lunch visually distinct from shift in light mode
+      lunchBg: mode === 'dark' ? alpha(accentTeal, 0.5) : '#1de9b6',
       // keep a clear, but not overpowering border
       shiftBorder: mode === 'dark' ? accentTeal : '#1F2937',
       ecbtShadow: mode === 'dark' ? '0 2px 6px rgba(0,0,0,0.30)' : '0 2px 6px rgba(0,0,0,0.15)',
