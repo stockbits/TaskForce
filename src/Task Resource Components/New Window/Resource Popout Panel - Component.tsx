@@ -205,7 +205,7 @@ export default function ResourcePopoutPanel({
           }}
         >
           <Stack spacing={0.5}>
-            <Typography variant="h6" fontWeight={600} color="text.primary">
+            <Typography variant="subtitle1" fontWeight={600} color="text.primary">
               Resource Details
             </Typography>
             <Typography variant="caption" color="text.secondary">

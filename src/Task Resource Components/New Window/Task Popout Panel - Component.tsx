@@ -130,7 +130,7 @@ export default function TaskPopoutPanel({
           }}
         >
           <Stack spacing={0.5}>
-            <Typography variant="h6" fontWeight={600} color="text.primary">
+            <Typography variant="subtitle1" fontWeight={600} color="text.primary">
               Task Details {tasks.length > 1 ? `(${tasks.length})` : ''}
             </Typography>
             <Typography variant="caption" color="text.secondary">
