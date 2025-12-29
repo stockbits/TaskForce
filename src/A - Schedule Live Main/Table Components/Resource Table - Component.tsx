@@ -236,7 +236,7 @@ export default function ResourceTablePanel({
           }
         }}
         onOpenTaskPopup={(task: any) => {
-          openExternalWindow([task], window.innerWidth / 2, window.innerHeight / 2);
+          openExternalWindow([task]);
         }}
         onOpenResourcePopup={(resource: any) => {
           openResourceWindow(resource, []);

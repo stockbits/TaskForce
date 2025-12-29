@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useMemo, memo, lazy, Suspense } from "react";
-import { createPortal } from 'react-dom';
 import {
   AppBar,
   Avatar,
@@ -44,6 +43,9 @@ import Users from '@mui/icons-material/People';
 import User from '@mui/icons-material/Person';
 import UserCog from '@mui/icons-material/AdminPanelSettings';
 import Globe from '@mui/icons-material/Public';
+import OpenInFull from '@mui/icons-material/OpenInFull';
+import Badge from '@mui/material/Badge';
+import DriveFileMoveIcon from '@mui/icons-material/DriveFileMove';
 import Calendar from '@mui/icons-material/CalendarMonth';
 import Cog from '@mui/icons-material/Build';
 import Engineering from '@mui/icons-material/Engineering';
@@ -60,6 +62,7 @@ import { TaskDetails, ProgressNoteEntry } from "@/shared-types";
 import { useExternalWindow } from "@/Custom React - Hooks/Popup window - component";
 import { useCalloutHistory } from "@/Callout Component/useCalloutHistory";
 import { filterTasks } from "@/Reusable helper/Task filtering - component";
+import { DraggablePopupDialog } from '@/shared-components';
 
 /* ========================================================= */
 const iconMap: Record<string, any> = {
@@ -153,6 +156,7 @@ interface HeaderProps {
   onToggleSidebar: () => void;
   overrideTitle?: string | null;
   whiteBackground?: boolean;
+  rightExtras?: React.ReactNode;
 }
 
 /* =========================================================
@@ -166,6 +170,7 @@ const Header: React.FC<HeaderProps> = memo(
     onToggleSidebar,
     overrideTitle,
     whiteBackground = false,
+    rightExtras,
   }) => {
     const theme = useTheme();
     const displayLabel = useMemo(() => {
@@ -238,6 +243,7 @@ const Header: React.FC<HeaderProps> = memo(
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+            {rightExtras}
             <Avatar
               sx={{
                 width: theme.spacing(5.25), // 42px
@@ -411,14 +417,18 @@ export default function MainLayout() {
 
   /* ---------------------- External window hook ---------------------- */
   const {
-    externalContainer,
-    externalTasks,
-    externalExpandedSections,
+    isOpen,
+    popupData,
+    expandedSections,
     openExternalWindow,
     openResourceWindow,
     closeExternalWindow,
-    setExternalExpandedSections,
+    setExpandedSections,
   } = useExternalWindow();
+
+  // header dock state for popup minimize
+  const [popupMinimized, setPopupMinimized] = useState(false);
+  const [headerPopupAnchor, setHeaderPopupAnchor] = useState<HTMLElement | null>(null);
 
   const [incidentTask, setIncidentTask] = useState<Record<string, any> | null>(
     null
@@ -448,10 +458,9 @@ export default function MainLayout() {
         const custom = ev as CustomEvent<any>;
         const tasks = custom.detail?.tasks ?? null;
         if (!tasks || !tasks.length) return;
-        // open in external window centered
-        const coordsX = window.innerWidth / 2;
-        const coordsY = window.innerHeight / 2;
-        openExternalWindow(tasks, coordsX, coordsY);
+        openExternalWindow(tasks);
+        // if the popup was docked/minimized to the header, restore it when opening a task
+        setPopupMinimized(false);
       } catch {}
     };
 
@@ -507,10 +516,8 @@ export default function MainLayout() {
 
       if (!targetRow) return;
 
-      setExternalExpandedSections(["Progress Notes"]);
-      const coordsX = window.innerWidth / 2;
-      const coordsY = window.innerHeight / 2;
-      openExternalWindow([targetRow as TaskDetails], coordsX, coordsY);
+      setExpandedSections(["Progress Notes"]);
+      openExternalWindow([targetRow as TaskDetails]);
     };
 
     window.addEventListener(
@@ -523,7 +530,7 @@ export default function MainLayout() {
         handleViewProgressNotes as EventListener
       );
     };
-  }, [allRows, openExternalWindow, setExternalExpandedSections]);
+  }, [allRows, openExternalWindow, setExpandedSections]);
 
   // Open Progress Tasks dialog programmatically (used by Actions menu)
   const openProgressTasks = useCallback((tasks: any[]) => {
@@ -936,7 +943,7 @@ export default function MainLayout() {
   const handleOpenPopout = useCallback(
     (tasks: Record<string, any>[], mouseX: number, mouseY: number) => {
       if (!tasks || tasks.length === 0) return;
-      openExternalWindow(tasks as TaskDetails[], mouseX, mouseY);
+      openExternalWindow(tasks as TaskDetails[]);
     },
     [openExternalWindow]
   );
@@ -981,20 +988,20 @@ export default function MainLayout() {
   // External panel expand handlers
   const handleExternalToggleSection = useCallback(
     (section: string) => {
-      setExternalExpandedSections((prev: string[]) =>
+      setExpandedSections((prev: string[]) =>
         prev.includes(section) ? prev.filter((s) => s !== section) : [...prev, section]
       );
     },
-    [setExternalExpandedSections]
+    [setExpandedSections]
   );
 
   const handleExternalExpandAll = useCallback(() => {
-    setExternalExpandedSections(ALL_TASK_SECTIONS);
-  }, [setExternalExpandedSections]);
+    setExpandedSections(ALL_TASK_SECTIONS);
+  }, [setExpandedSections]);
 
   const handleExternalCollapseAll = useCallback(() => {
-    setExternalExpandedSections([]);
-  }, [setExternalExpandedSections]);
+    setExpandedSections([]);
+  }, [setExpandedSections]);
 
   // MANUAL save from CalloutIncidentPanel (per row)
   const handleCalloutRowSave = useCallback(
@@ -1229,6 +1236,23 @@ export default function MainLayout() {
           onToggleSidebar={() =>
             window.dispatchEvent(new CustomEvent("toggleSidebar"))
           }
+          rightExtras={
+            isOpen ? (
+              <IconButton
+                size="small"
+                onClick={() => setPopupMinimized((s) => !s)}
+                sx={{ color: 'inherit' }}
+                aria-label="Toggle popup minimize"
+                title={popupMinimized ? 'Restore panel' : 'Minimize panel'}
+              >
+                {popupMinimized ? (
+                  <DriveFileMoveIcon sx={{ fontSize: 20, transform: 'scaleX(-1)' }} />
+                ) : (
+                  <DriveFileMoveIcon sx={{ fontSize: 20 }} />
+                )}
+              </IconButton>
+            ) : null
+          }
         />
 
         {/* PAGE BODY */}
@@ -1263,9 +1287,7 @@ export default function MainLayout() {
                 selectedRows={selectedRows}
                 onOpenPopout={(tasks: any[]) => {
                   if (!tasks || !tasks.length) return;
-                  const coordsX = window.innerWidth / 2;
-                  const coordsY = window.innerHeight / 2;
-                  handleOpenPopout(tasks, coordsX, coordsY);
+                  handleOpenPopout(tasks, 0, 0);
                 }}
                 onProgressTasks={(tasks: any[]) => openProgressTasks(tasks)}
                 onProgressNotes={(tasks: any[]) => openProgressNotes(tasks)}
@@ -1291,7 +1313,7 @@ export default function MainLayout() {
                     setSelectedRows(rows);
                   }}
                   onOpenTaskPopup={(task: any) => {
-                    openExternalWindow([task], window.innerWidth / 2, window.innerHeight / 2);
+                    openExternalWindow([task]);
                   }}
                   onOpenResourcePopup={(resource: any) => {
                     openResourceWindow(resource, []);
@@ -1530,22 +1552,19 @@ export default function MainLayout() {
         </Dialog>
       )}
 
-      {/* EXTERNAL WINDOW PORTAL */}
-      {externalContainer &&
-        externalTasks &&
-        externalTasks.length > 0 &&
-        createPortal(
-          <TaskPopoutPanel
-            open={true}
-            tasks={externalTasks}
-            expanded={externalExpandedSections}
-            onToggleSection={handleExternalToggleSection}
-            onExpandAll={handleExternalExpandAll}
-            onCollapseAll={handleExternalCollapseAll}
-            onClose={closeExternalWindow}
-          />,
-          externalContainer
-        )}
+      {/* DRAGGABLE POPUP DIALOG */}
+      <DraggablePopupDialog
+        open={isOpen}
+        data={popupData}
+        onClose={closeExternalWindow}
+        externalMinimized={popupMinimized}
+        setExternalMinimized={setPopupMinimized}
+        onCreateNew={() => {
+          // restore panel when 'Create new' requested from compact menu
+          setPopupMinimized(false);
+          // Optionally open a new task flow here — currently we just restore the panel
+        }}
+      />
 
       {/* Global DOM-scraped row menu removed; rely on per-table context menus from DataGrid */}
       <ProgressTasksDialog

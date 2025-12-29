@@ -408,7 +408,7 @@ export default function TaskManagementPage() {
           selectedRows={selectedRows}
           onOpenPopout={(tasks) => {
             if (!tasks || !tasks.length) return;
-            openExternalWindow(tasks as any, window.innerWidth / 2, window.innerHeight / 2);
+            openExternalWindow(tasks as any);
           }}
           onProgressTasks={(tasks) => openProgressTasks(tasks)}
           onProgressNotes={(tasks) => openProgressNotes(tasks)}
@@ -424,7 +424,7 @@ export default function TaskManagementPage() {
           containerRef={containerRef}
           onOpenPopout={(tasks: any[], mX: number, mY: number) => {
             if (!tasks || tasks.length === 0) return;
-            openExternalWindow(tasks as any, mX, mY);
+            openExternalWindow(tasks as any);
           }}
           onSelectionChange={(rows: Record<string, any>[]) => {
             setSelectedRows(rows);
@@ -443,7 +443,7 @@ export default function TaskManagementPage() {
             } catch {}
           }}
           onOpenTaskPopup={(task: any) => {
-            openExternalWindow([task], window.innerWidth / 2, window.innerHeight / 2);
+            openExternalWindow([task]);
           }}
           onOpenResourcePopup={(resource: any) => {
             openResourceWindow(resource, []);

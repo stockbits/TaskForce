@@ -562,8 +562,8 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
         onClose={closeContextMenu}
         mouseScreenX={contextMenu.mouseScreenX ?? 0}
         mouseScreenY={contextMenu.mouseScreenY ?? 0}
-        onOpenPopout={(tasks: any[], mX: number, mY: number) => {
-          if (onOpenPopout) onOpenPopout(tasks, mX, mY);
+        onOpenPopout={(tasks: any[]) => {
+          if (onOpenPopout) onOpenPopout(tasks, 0, 0);
         }}
         onOpenCalloutIncident={(task: any) => {
           if (onOpenCalloutIncident) onOpenCalloutIncident(task);

@@ -39,6 +39,7 @@ export interface TaskDetails {
   startDate: string;
   fieldNotes?: string;
   progressNotes?: ProgressNoteEntry[] | string;
+  accessRestrictions?: string;
 }
 
 export interface ProgressNoteEntry {

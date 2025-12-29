@@ -37,12 +37,10 @@ export default defineConfig({
     emptyOutDir: true,
     chunkSizeWarningLimit: 1500,
 
-    // ⭐ IMPORTANT: Tell Vite to build BOTH index.html and popup.html
+    // Build configuration
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, "index.html"),
-        popup: path.resolve(__dirname, "popup.html"),
-        // (OR: "public/popup.html" if you placed it in /public)
       },
       output: {
         manualChunks: {

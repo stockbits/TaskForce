@@ -35,10 +35,6 @@ interface ResourcePopoutPanelProps {
   open: boolean;
   resource: ResourceRecord;
   history: CalloutHistoryEntry[];
-  expanded: string[];
-  onToggleSection: (section: string) => void;
-  onExpandAll: () => void;
-  onCollapseAll: () => void;
   onClose: () => void;
 }
 
@@ -101,10 +97,6 @@ export default function ResourcePopoutPanel({
   open,
   resource,
   history,
-  expanded,
-  onToggleSection,
-  onExpandAll,
-  onCollapseAll,
   onClose,
 }: ResourcePopoutPanelProps) {
   const theme = useTheme();
@@ -214,18 +206,6 @@ export default function ResourcePopoutPanel({
           </Stack>
 
           <Stack direction="row" spacing={1.5} alignItems="center">
-              <AppButton
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() => (expanded.length ? onCollapseAll() : onExpandAll())}
-                startIcon={expanded.length ? <ChevronUp style={{ fontSize: 14 }} /> : <ChevronDown style={{ fontSize: 14 }} />}
-                sx={{
-                  fontWeight: 600,
-                }}
-              >
-              {expanded.length ? "Collapse All" : "Expand All"}
-            </AppButton>
             <AppButton
               variant="outlined"
               color="primary"
@@ -323,8 +303,7 @@ export default function ResourcePopoutPanel({
                 <ExpandableSectionCard
                   key="Resource Summary"
                   title="Resource Summary"
-                  expanded={expanded.includes("Resource Summary")}
-                  onToggle={() => onToggleSection("Resource Summary")}
+                  expanded={true}
                 >
                   <Stack spacing={3}>
                     <Stack
@@ -376,8 +355,7 @@ export default function ResourcePopoutPanel({
                 <ExpandableSectionCard
                   key="Availability"
                   title="Availability & Contact"
-                  expanded={expanded.includes("Availability")}
-                  onToggle={() => onToggleSection("Availability")}
+                  expanded={true}
                 >
                   <Stack spacing={3}>
                     <Grid container spacing={2.5} sx={{ width: '100%' }}>
@@ -487,8 +465,7 @@ export default function ResourcePopoutPanel({
                 <ExpandableSectionCard
                   key="Callout History"
                   title="Callout History"
-                  expanded={expanded.includes("Callout History")}
-                  onToggle={() => onToggleSection("Callout History")}
+                  expanded={true}
                 >
                   <Stack spacing={2.5} sx={{ maxHeight: theme.spacing(40), overflowY: 'auto', pr: 1 }}>
                     {sortedHistory.length === 0 && (
@@ -563,8 +540,7 @@ export default function ResourcePopoutPanel({
                 <ExpandableSectionCard
                   key="Capabilities"
                   title="Capabilities"
-                  expanded={expanded.includes("Capabilities")}
-                  onToggle={() => onToggleSection("Capabilities")}
+                  expanded={true}
                 >
                   <Stack spacing={3}>
                     <TextField

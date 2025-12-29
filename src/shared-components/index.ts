@@ -20,6 +20,8 @@ export { default as TaskRowContextMenu } from "./menus/TaskRowContextMenu";
 export { default as TaskActionsMenu, createTaskActionItems, createContextMenuItems } from "./menus/TaskActionsMenu";
 export { default as BulkTaskActions } from "./menus/BulkTaskActions";
 export { default as AppButton } from "./buttons/action-buttons/button";
+export { default as DraggableDialog } from "./dialogs/DraggableDialog";
+export { default as DraggablePopupDialog } from "./dialogs/DraggablePopupDialog";
 
 export default MultiSelectField;
 

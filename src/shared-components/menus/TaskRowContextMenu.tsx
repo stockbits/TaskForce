@@ -13,11 +13,7 @@ interface TaskRowContextMenuProps {
 
   onClose: () => void;
 
-  onOpenPopout: (
-    tasks: Record<string, any>[],
-    mouseScreenX: number,
-    mouseScreenY: number
-  ) => void;
+  onOpenPopout: (tasks: Record<string, any>[]) => void;
 
   onOpenCalloutIncident: (task: Record<string, any>) => void;
   onProgressTasks?: (tasks: Record<string, any>[]) => void;
@@ -67,7 +63,7 @@ export default function TaskRowContextMenu({
     if (!actionableRows.length) return;
 
     try {
-      onOpenPopout(actionableRows, mouseScreenX, mouseScreenY);
+      onOpenPopout(actionableRows);
     } catch (err) {
       console.error("ContextMenu → onOpenPopout error:", err);
     }
