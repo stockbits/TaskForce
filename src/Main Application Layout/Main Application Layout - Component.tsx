@@ -426,6 +426,21 @@ export default function MainLayout() {
     setExpandedSections,
   } = useExternalWindow();
 
+  // Helpers that restore the popup if it's docked, then open the external window
+  const openExternalWindowRestored = (tasks: any[]) => {
+    try {
+      setPopupMinimized(false);
+    } catch {}
+    openExternalWindow(tasks as TaskDetails[]);
+  };
+
+  const openResourceWindowRestored = (resource: any, history: any[]) => {
+    try {
+      setPopupMinimized(false);
+    } catch {}
+    openResourceWindow(resource, history);
+  };
+
   // header dock state for popup minimize
   const [popupMinimized, setPopupMinimized] = useState(false);
   const [headerPopupAnchor, setHeaderPopupAnchor] = useState<HTMLElement | null>(null);
@@ -517,7 +532,7 @@ export default function MainLayout() {
       if (!targetRow) return;
 
       setExpandedSections(["Progress Notes"]);
-      openExternalWindow([targetRow as TaskDetails]);
+      openExternalWindowRestored([targetRow as TaskDetails]);
     };
 
     window.addEventListener(
@@ -943,7 +958,7 @@ export default function MainLayout() {
   const handleOpenPopout = useCallback(
     (tasks: Record<string, any>[], mouseX: number, mouseY: number) => {
       if (!tasks || tasks.length === 0) return;
-      openExternalWindow(tasks as TaskDetails[]);
+      openExternalWindowRestored(tasks as TaskDetails[]);
     },
     [openExternalWindow]
   );
@@ -1313,11 +1328,11 @@ export default function MainLayout() {
                     setSelectedRows(rows);
                   }}
                   onOpenTaskPopup={(task: any) => {
-                    openExternalWindow([task]);
-                  }}
-                  onOpenResourcePopup={(resource: any) => {
-                    openResourceWindow(resource, []);
-                  }}
+                      openExternalWindowRestored([task]);
+                    }}
+                    onOpenResourcePopup={(resource: any) => {
+                      openResourceWindowRestored(resource, []);
+                    }}
                   sx={{ borderRadius: '0 0 12px 12px', mt: 0 }}
                 />
               ) : (
