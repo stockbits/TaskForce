@@ -37,7 +37,7 @@ import { useTheme as useAppTheme } from '@/System Settings/Dark Mode Handler - C
   onOpenResourcePopup?: (resource: Record<string, any>) => void;
 };
 
-const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef: _containerRef, reserveBottom: _reserveBottom = 160, disablePagination = false, hideToolbar = false, loading = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns: _onRequestCloseColumns, onSortChange, scrollToTopTrigger, sortingMode, sortModel, _onRowDoubleClick, _onOpenTaskPopup, _onOpenResourcePopup }: Props) {
+const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef: _containerRef, reserveBottom: _reserveBottom = 160, disablePagination = false, hideToolbar = false, loading = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns: _onRequestCloseColumns, onSortChange, scrollToTopTrigger, sortingMode, sortModel, onRowDoubleClick, onOpenTaskPopup, onOpenResourcePopup }: Props) {
 
   // Internal state for uncontrolled components
   const [selection, setSelection] = useState<string[]>([]);

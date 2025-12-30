@@ -35,7 +35,7 @@ interface TaskPopoutPanelProps {
 export default function TaskPopoutPanel({
   open,
   tasks,
-  _onClose,
+  onClose,
   editing = false,
   onEditToggle,
   onRequestSave,

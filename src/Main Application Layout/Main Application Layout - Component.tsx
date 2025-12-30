@@ -1267,14 +1267,14 @@ export default function MainLayout() {
                   cursor: 'default',
                 }}
                 aria-hidden="true"
-                title={profileMinimized ? 'Restore profile panel' : 'Minimize profile panel'}
+                title="Profile panel"
               >
                 <Avatar
                   alt="User"
                   sx={{
                     width: 32,
                     height: 32,
-                    bgcolor: profileMinimized ? theme.palette.secondary.main : (theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main),
+                    bgcolor: theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main,
                     border: `2px solid ${alpha(theme.palette.secondary.main, 0.28)}`,
                     boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
                     borderRadius: '50%'
