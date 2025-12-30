@@ -891,7 +891,7 @@ export default function TimelinePanel({
           <Box
             sx={{
               width: isMaximized ? "100%" : contentWidth,
-              minWidth: contentWidth,
+              minWidth: 0,
             }}
           >
             {categories.map((rid, rowIndex) => (

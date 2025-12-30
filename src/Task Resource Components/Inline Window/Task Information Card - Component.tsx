@@ -139,7 +139,7 @@ const ProgressNotesList = ({ notes }: { notes: ProgressNoteEntry[] }) => {
   }
 
   return (
-    <Stack spacing={{ xs: 1, sm: 1.5 }} sx={{ maxHeight: theme.spacing(25), overflowY: 'auto', pr: 0.5 }}>
+    <Stack spacing={{ xs: 1, sm: 1.5 }} sx={{ maxHeight: theme.spacing(40), overflowY: 'auto', pr: 0.5 }}>
       {notes.map((note, index) => {
         const visuals = getStatusVisuals(note.status || "", theme);
 
@@ -235,61 +235,6 @@ const formatDuration = (mins: number | undefined) => {
   const rm = Math.round(m % 60);
   return rm === 0 ? `${h}h` : `${h}h ${rm}m`;
 };
-
-interface InfoGridProps {
-  items: Array<{ label: string; value?: React.ReactNode; field?: string }>;
-  editing?: boolean;
-  editValues?: Record<string, any>;
-  onFieldChange?: (field: string, value: any) => void;
-}
-
-const InfoGrid = ({ items, editing, editValues, onFieldChange }: InfoGridProps) => (
-  <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 0.5, sm: 0.75 } }}>
-    {items.map(({ label, value, field }) => (
-      <Box key={label} sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, py: 0.5 }}>
-        <Typography
-          variant="caption"
-          sx={{
-            width: { xs: '38%', sm: '30%' },
-            textAlign: 'left',
-            pr: 2,
-            textTransform: 'uppercase',
-            letterSpacing: 0.6,
-            fontWeight: 700,
-            color: 'text.secondary',
-            fontSize: { xs: '0.6875rem', sm: '0.75rem' },
-            lineHeight: 1.2,
-          }}
-        >
-          {label}
-        </Typography>
-
-        <Box sx={{ width: { xs: '62%', sm: '70%' } }}>
-          {editing && field ? (
-            <TextField
-              size="small"
-              fullWidth
-              value={editValues?.[field] ?? (typeof value === 'string' ? value : '')}
-              onChange={(e) => onFieldChange?.(field, e.target.value)}
-            />
-          ) : (
-            <Typography
-              variant="body2"
-              color="text.primary"
-              sx={{
-                fontSize: { xs: '0.8125rem', sm: '0.875rem' },
-                lineHeight: 1.3,
-                wordBreak: 'break-word'
-              }}
-            >
-              {value ?? '—'}
-            </Typography>
-          )}
-        </Box>
-      </Box>
-    ))}
-  </Box>
-);
 
 export interface TaskDetailsModalProps {
   task: TaskDetails;
@@ -602,7 +547,7 @@ export function createTaskSections(task: TaskDetails, opts?: {
 }
 
 function TaskDetailsModal(props: TaskDetailsModalProps) {
-  const { task, hideTabs = false, activeTab: activeTabProp, onTabChange, editing = false, onSave, onCancel, externalEditValues = null, onExternalFieldChange } = props;
+  const { task, hideTabs = false, activeTab: activeTabProp, onTabChange, editing = false, externalEditValues = null, onExternalFieldChange } = props;
   const theme = useTheme();
   const [internalTab, setInternalTab] = useState(0);
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {

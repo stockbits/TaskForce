@@ -422,7 +422,7 @@ export default function TaskManagementPage() {
           headerNames={headerNames}
           tableHeight={tableHeight}
           containerRef={containerRef}
-          onOpenPopout={(tasks: any[], mX: number, mY: number) => {
+          onOpenPopout={(tasks: any[], _mX: number, _mY: number) => {
             if (!tasks || tasks.length === 0) return;
             openExternalWindow(tasks as any);
           }}

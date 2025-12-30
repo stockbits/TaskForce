@@ -3,8 +3,8 @@
 // Uses DraggableDialog to display task and resource details
 // =====================================================================
 
-import React, { useState, useCallback } from "react";
-import { DialogTitle, DialogContent, IconButton, Box, Button, Stack } from "@mui/material";
+import React, { useState } from "react";
+import { DialogTitle, DialogContent, IconButton, Box } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import CloseIcon from '@mui/icons-material/Close';
 import { DraggableDialog } from '@/shared-components';
@@ -82,7 +82,7 @@ export default function DraggablePopupDialog({
             onClick={() => setExternalMinimized ? setExternalMinimized(true) : onClose()}
             size="small"
             sx={{
-              color: theme.palette.mode === 'dark' ? theme.palette.common.white : alpha(theme.palette.text.primary, 0.9),
+              color: '#000000',
               '&:hover': {
                 bgcolor: theme.palette.mode === 'dark'
                   ? alpha(theme.palette.common.white, 0.06)
@@ -135,13 +135,12 @@ export default function DraggablePopupDialog({
       fullWidth={dialogSize.fullWidth}
       PaperProps={{
         sx: {
-          // Let content dictate height but cap at viewport fraction
+          // Let content dictate dimensions
           height: 'auto',
-          maxHeight: '80vh',
-          // More compact defaults to reduce visual bulk and layout jumps
-          width: 'min(720px, 95vw)',
-          minWidth: 560,
-          minHeight: 360,
+          width: 'auto',
+          minWidth: 700,
+          minHeight: 300,
+          maxHeight: '60vh',
           p: 0,
         },
       }}
@@ -170,7 +169,7 @@ export default function DraggablePopupDialog({
             onClick={() => setExternalMinimized ? setExternalMinimized(true) : onClose()}
             size="small"
             sx={{
-              color: theme.palette.mode === 'dark' ? theme.palette.common.white : alpha(theme.palette.text.primary, 0.9),
+              color: '#000000',
               '&:hover': {
                 bgcolor: theme.palette.mode === 'dark'
                   ? alpha(theme.palette.common.white, 0.06)
@@ -184,7 +183,7 @@ export default function DraggablePopupDialog({
         </Box>
       </DialogTitle>
 
-      <DialogContent sx={{ p: 0, overflow: 'hidden', display: 'flex' }}>
+      <DialogContent sx={{ p: 0, overflow: 'hidden', display: 'flex', transform: 'translateZ(0)', willChange: 'transform, opacity', transition: 'opacity 200ms ease' }}>
           {isTaskMode && (
           <TaskPopoutPanel
             open={true}

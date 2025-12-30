@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, memo, lazy, Suspense } from "react";
 import {
   AppBar,
-  Avatar,
   Box,
   Card,
   CardActionArea,
@@ -12,6 +11,7 @@ import {
   DialogActions,
   Grid,
   IconButton,
+  Avatar,
   Paper,
   Stack,
   Toolbar,
@@ -43,12 +43,12 @@ import Users from '@mui/icons-material/People';
 import User from '@mui/icons-material/Person';
 import UserCog from '@mui/icons-material/AdminPanelSettings';
 import Globe from '@mui/icons-material/Public';
-import OpenInFull from '@mui/icons-material/OpenInFull';
-import Badge from '@mui/material/Badge';
-import DriveFileMoveIcon from '@mui/icons-material/DriveFileMove';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import Calendar from '@mui/icons-material/CalendarMonth';
 import Cog from '@mui/icons-material/Build';
 import Engineering from '@mui/icons-material/Engineering';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import TaskPopoutPanel from "@/Task Resource Components/New Window/Task Popout Panel - Component";
 import ProgressTasksDialog from '@/Task Resource Components/Inline Window/Multi Task Progress - Component';
 import ProgressNotesDialog from '@/Task Resource Components/Inline Window/Multi Task Notes - Component';
@@ -112,16 +112,6 @@ const headerNames: Record<string, string> = {
   estimateNumber: "Estimate Number",
   startDate: "Start Date",
 };
-
-const ALL_TASK_SECTIONS = [
-  "Work Details",
-  "Commitments / Customer / Location",
-  "Scheduling / Resources",
-  "Access Restrictions",
-  "Job Notes",
-  "Progress Notes",
-  "Closure",
-];
 
 // motion-backed Card removed; use plain Card with hover styles instead
 
@@ -224,7 +214,7 @@ const Header: React.FC<HeaderProps> = memo(
                 width: theme.spacing(5.5), // 44px
                 height: theme.spacing(5.5),
                 borderRadius: 2,
-                color: theme.palette.common.white,
+                color: whiteBackground ? theme.palette.text.primary : theme.palette.common.white,
               }}
             >
               <Menu sx={{ fontSize: 26 }} />
@@ -242,19 +232,8 @@ const Header: React.FC<HeaderProps> = memo(
             </Typography>
           </Box>
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 3, color: whiteBackground ? theme.palette.text.primary : theme.palette.common.white }}>
             {rightExtras}
-            <Avatar
-              sx={{
-                width: theme.spacing(5.25), // 42px
-                height: theme.spacing(5.25),
-                bgcolor: alpha(theme.palette.common.black, 0.85),
-                border: `1px solid ${alpha(theme.palette.common.white, 0.25)}`,
-                boxShadow: '0px 0px 0px 2px rgba(255,255,255,0.08)',
-              }}
-            >
-              <User sx={{ fontSize: 20, color: theme.palette.common.white }} />
-            </Avatar>
           </Box>
         </Toolbar>
       </AppBar>
@@ -419,6 +398,7 @@ export default function MainLayout() {
   const {
     isOpen,
     popupData,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     expandedSections,
     openExternalWindow,
     openResourceWindow,
@@ -443,7 +423,7 @@ export default function MainLayout() {
 
   // header dock state for popup minimize
   const [popupMinimized, setPopupMinimized] = useState(false);
-  const [headerPopupAnchor, setHeaderPopupAnchor] = useState<HTMLElement | null>(null);
+  const [resourceMinimized, setResourceMinimized] = useState(false);
 
   const [incidentTask, setIncidentTask] = useState<Record<string, any> | null>(
     null
@@ -488,12 +468,23 @@ export default function MainLayout() {
       } catch {}
     };
 
+    const openResource = (ev: Event) => {
+      try {
+        const custom = ev as CustomEvent<any>;
+        const resource = custom.detail?.resource ?? null;
+        if (!resource) return;
+        openResourceWindow(resource, []);
+      } catch {}
+    };
+
     window.addEventListener('taskforce:open-popout', openPopout as EventListener);
     window.addEventListener('taskforce:open-callout-incident', openCallout as EventListener);
+    window.addEventListener('taskforce:open-resource-popout', openResource as EventListener);
     // copy/export handled via Actions menu removed — keep only open-popout/open-callout handlers
     return () => {
       window.removeEventListener('taskforce:open-popout', openPopout as EventListener);
       window.removeEventListener('taskforce:open-callout-incident', openCallout as EventListener);
+      window.removeEventListener('taskforce:open-resource-popout', openResource as EventListener);
     };
   }, []);
   
@@ -956,7 +947,7 @@ export default function MainLayout() {
 
   // Callback passed into TaskTable_Advanced for popout
   const handleOpenPopout = useCallback(
-    (tasks: Record<string, any>[], mouseX: number, mouseY: number) => {
+    (tasks: Record<string, any>[], _mouseX: number, _mouseY: number) => {
       if (!tasks || tasks.length === 0) return;
       openExternalWindowRestored(tasks as TaskDetails[]);
     },
@@ -999,24 +990,6 @@ export default function MainLayout() {
         return currentStatus;
     }
   };
-
-  // External panel expand handlers
-  const handleExternalToggleSection = useCallback(
-    (section: string) => {
-      setExpandedSections((prev: string[]) =>
-        prev.includes(section) ? prev.filter((s) => s !== section) : [...prev, section]
-      );
-    },
-    [setExpandedSections]
-  );
-
-  const handleExternalExpandAll = useCallback(() => {
-    setExpandedSections(ALL_TASK_SECTIONS);
-  }, [setExpandedSections]);
-
-  const handleExternalCollapseAll = useCallback(() => {
-    setExpandedSections([]);
-  }, [setExpandedSections]);
 
   // MANUAL save from CalloutIncidentPanel (per row)
   const handleCalloutRowSave = useCallback(
@@ -1252,21 +1225,65 @@ export default function MainLayout() {
             window.dispatchEvent(new CustomEvent("toggleSidebar"))
           }
           rightExtras={
-            isOpen ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+              <IconButton
+                size="small"
+                onClick={() => setResourceMinimized((s) => !s)}
+                sx={{ color: 'inherit', width: 40, height: 40 }}
+                aria-label="Toggle resource panel"
+                title={resourceMinimized ? 'Restore resource panel' : 'Minimize resource panel'}
+              >
+                <AssignmentIndIcon
+                  sx={{
+                    fontSize: 22,
+                    color: resourceMinimized ? theme.palette.secondary.main : 'inherit',
+                  }}
+                />
+              </IconButton>
+
               <IconButton
                 size="small"
                 onClick={() => setPopupMinimized((s) => !s)}
-                sx={{ color: 'inherit' }}
+                sx={{ color: 'inherit', width: 40, height: 40 }}
                 aria-label="Toggle popup minimize"
                 title={popupMinimized ? 'Restore panel' : 'Minimize panel'}
               >
-                {popupMinimized ? (
-                  <DriveFileMoveIcon sx={{ fontSize: 20, transform: 'scaleX(-1)' }} />
-                ) : (
-                  <DriveFileMoveIcon sx={{ fontSize: 20 }} />
-                )}
+                <AssignmentIcon
+                  sx={{
+                    fontSize: 24,
+                    color: popupMinimized ? theme.palette.secondary.main : 'inherit',
+                  }}
+                />
               </IconButton>
-            ) : null
+
+              <Box
+                sx={{
+                  width: 40,
+                  height: 40,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'inherit',
+                  cursor: 'default',
+                }}
+                aria-hidden="true"
+                title={profileMinimized ? 'Restore profile panel' : 'Minimize profile panel'}
+              >
+                <Avatar
+                  alt="User"
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    bgcolor: profileMinimized ? theme.palette.secondary.main : (theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main),
+                    border: `2px solid ${alpha(theme.palette.secondary.main, 0.28)}`,
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
+                    borderRadius: '50%'
+                  }}
+                >
+                  <User sx={{ fontSize: 18, color: '#fff', pointerEvents: 'none' }} />
+                </Avatar>
+              </Box>
+            </Box>
           }
         />
 

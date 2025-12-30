@@ -82,6 +82,8 @@ export function usePanelDocking(
     maximizePanel,
     updatePanelSize,
     updateRowSize,
+    // Expose setter so callers can restore or set visible panels programmatically
+    setVisiblePanels,
   };
 }
 
@@ -96,6 +98,7 @@ export function PanelContainer({
   onClose,
   children,
   visibleCount,
+  actions,
   onMouseMove,
   onMouseDown,
 }: {
@@ -107,6 +110,7 @@ export function PanelContainer({
   children: React.ReactNode;
   /** number of currently visible panels */
   visibleCount: number;
+  actions?: React.ReactNode;
   onMouseMove?: (event: React.MouseEvent) => void;
   onMouseDown?: (event: React.MouseEvent) => void;
 }) {
@@ -121,6 +125,8 @@ export function PanelContainer({
         flexDirection: "column",
         height: "100%",
         width: "100%",
+        minWidth: 0,
+        minHeight: 0,
         borderRadius: 1,
         overflow: "hidden",
         backgroundColor: theme.palette.background.paper,
@@ -135,20 +141,24 @@ export function PanelContainer({
         alignItems="center"
         justifyContent="space-between"
         sx={{
-          px: 2,
-          py: 1,
+          px: 1.5,
+          py: 0.5,
           backgroundColor: headerBg,
-          minHeight: 36,
+          minHeight: 32,
         }}
       >
-        <Stack direction="row" spacing={1.5} alignItems="center">
+        <Stack direction="row" spacing={1} alignItems="center">
           <Icon sx={{ fontSize: 18, color: iconTone as any }} />
           <Typography
             variant="subtitle2"
-            sx={{ fontWeight: 600, color: theme.palette.text.primary }}
+            sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: 13 }}
           >
             {title}
           </Typography>
+          {/* Actions (tool icons) render after the title for clearer ordering */}
+          {actions ? (
+            <Box sx={{ ml: 1, display: 'flex', alignItems: 'center' }}>{actions}</Box>
+          ) : null}
         </Stack>
 
         <Stack direction="row" alignItems="center" spacing={0.5}>

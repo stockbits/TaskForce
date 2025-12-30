@@ -37,7 +37,7 @@ import { useTheme as useAppTheme } from '@/System Settings/Dark Mode Handler - C
   onOpenResourcePopup?: (resource: Record<string, any>) => void;
 };
 
-const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef: _containerRef, reserveBottom: _reserveBottom = 160, disablePagination = false, hideToolbar = false, loading = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns: _onRequestCloseColumns, onSortChange, scrollToTopTrigger, sortingMode, sortModel, onRowDoubleClick, onOpenTaskPopup, onOpenResourcePopup }: Props) {
+const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, tableHeight = 600, containerRef: _containerRef, reserveBottom: _reserveBottom = 160, disablePagination = false, hideToolbar = false, loading = false, controlledSelectedRowIds, rowIdKey, onOpenPopout, onSelectionChange, onOpenCalloutIncident, onProgressTasks, onProgressNotes, openColumnsAnchor, onRequestCloseColumns: _onRequestCloseColumns, onSortChange, scrollToTopTrigger, sortingMode, sortModel, _onRowDoubleClick, _onOpenTaskPopup, _onOpenResourcePopup }: Props) {
 
   // Internal state for uncontrolled components
   const [selection, setSelection] = useState<string[]>([]);
@@ -341,29 +341,6 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
             }
             return '';
           }}
-          onRowClick={(params: any) => {
-            if (!controlledSelectedRowIds || !onSelectionChange) return;
-            
-            // Toggle selection for this row (additional functionality beyond checkboxes)
-            const rowId = String(params.id);
-            const currentSelection = Array.isArray(controlledSelectedRowIds) 
-              ? controlledSelectedRowIds 
-              : Array.from(controlledSelectedRowIds);
-            const isSelected = currentSelection.includes(rowId);
-            
-            let newSelection;
-            if (isSelected) {
-              // Remove from selection
-              newSelection = currentSelection.filter(id => id !== rowId);
-            } else {
-              // Add to selection
-              newSelection = [...currentSelection, rowId];
-            }
-            
-            // Convert back to the same type as input for the parent component
-            const selectedRows = gridRows.filter(r => newSelection.includes(String(r.id)));
-            onSelectionChange(selectedRows as Record<string, any>[]);
-          }}
           slotProps={{
             row: {
               onContextMenu: (event: React.MouseEvent) => {
@@ -526,19 +503,13 @@ const TaskTableMUIComponent = memo(function TaskTableMUI({ rows, headerNames, ta
               }
             } catch {}
           }}
-          onRowDoubleClick={(params: any) => {
-            try {
-              if (onRowDoubleClick) {
-                onRowDoubleClick(params.row);
-              } else {
-                // Default double-click behavior: open popup for task or resource
-                if (params.row.taskId && onOpenTaskPopup) {
-                  onOpenTaskPopup(params.row);
-                } else if (params.row.resourceId && onOpenResourcePopup) {
-                  onOpenResourcePopup(params.row);
-                }
+          onRowClick={(params: any, event: any) => {
+            if (event.detail === 1) {
+              // Single click: select the row
+              if (onSelectionChange) {
+                onSelectionChange([params.row]);
               }
-            } catch {}
+            }
           }}
 
         />

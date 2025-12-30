@@ -9,8 +9,6 @@ import { TaskDetails } from "@/shared-types";
 import type { ResourceRecord } from '@/shared-types';
 import type { CalloutHistoryEntry } from "../Callout Component/useCalloutHistory";
 
-type PopupMode = "tasks" | "resource";
-
 type PopupData =
   | {
       mode: "tasks";
@@ -45,15 +43,26 @@ export function useExternalWindow() {
     (tasks: TaskDetails[]) => {
       if (!tasks || tasks.length === 0) return;
 
-      const payload: PopupData = {
-        mode: "tasks",
-        tasks,
-        expanded: expandedSections,
-      };
+      setPopupData((prev) => {
+        // If popup already open and is showing tasks, update tasks in-place
+        if (prev && prev.mode === 'tasks') {
+          return {
+            ...prev,
+            tasks,
+            // keep previously expanded sections so the UI/position is preserved
+            expanded: prev.expanded ?? expandedSections,
+          } as PopupData;
+        }
 
-      setPopupData(payload);
+        // otherwise open fresh with provided tasks and keep the current expandedSections
+        return {
+          mode: "tasks",
+          tasks,
+          expanded: expandedSections,
+        } as PopupData;
+      });
+
       setIsOpen(true);
-      setExpandedSections([]);
     },
     [expandedSections]
   );
@@ -65,16 +74,25 @@ export function useExternalWindow() {
     (resource: ResourceRecord, history: CalloutHistoryEntry[]) => {
       if (!resource) return;
 
-      const payload: PopupData = {
-        mode: "resource",
-        resource,
-        history,
-        expanded: [],
-      };
+      setPopupData((prev) => {
+        if (prev && prev.mode === 'resource') {
+          return {
+            ...prev,
+            resource,
+            history,
+            expanded: prev.expanded ?? [],
+          } as PopupData;
+        }
 
-      setPopupData(payload);
+        return {
+          mode: "resource",
+          resource,
+          history,
+          expanded: [],
+        } as PopupData;
+      });
+
       setIsOpen(true);
-      setExpandedSections([]);
     },
     []
   );

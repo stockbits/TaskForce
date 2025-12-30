@@ -6,7 +6,7 @@
 // - 4+ tasks: horizontal scroll (scrollbar outside cards)
 // ===============================================================
 
-import React, { useEffect, useMemo, useState, useRef, useLayoutEffect } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { Box, Stack, Typography, Chip, Tabs, Tab, Button, Menu, MenuItem, Tooltip, Slide, Divider } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import { OpenInFull } from '@mui/icons-material';
@@ -35,7 +35,7 @@ interface TaskPopoutPanelProps {
 export default function TaskPopoutPanel({
   open,
   tasks,
-  onClose,
+  _onClose,
   editing = false,
   onEditToggle,
   onRequestSave,
@@ -165,15 +165,19 @@ export default function TaskPopoutPanel({
         overflow: "visible",
       }}
     >
-      {/* Main panel slides away when minimized */}
-      <Slide in={!minimized} direction="down" mountOnEnter unmountOnExit>
-        <Stack
-          sx={{
-            flex: 1,
-            bgcolor: theme.palette.background.paper,
-            overflow: "visible",
-          }}
-        >
+      {/* Main panel slides away when minimized - use GPU-accelerated transforms and smoother timing */}
+          <Slide in={!minimized} direction="down" mountOnEnter unmountOnExit timeout={{ enter: 320, exit: 200 }}>
+            <Stack
+              sx={{
+                flex: 1,
+                bgcolor: theme.palette.background.paper,
+                overflow: "visible",
+                transform: 'translateZ(0)',
+                willChange: 'transform, opacity',
+                transition: 'transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 220ms ease',
+                backfaceVisibility: 'hidden',
+              }}
+            >
         {/* Header moved to outer dialog to avoid duplication */}
 
         <Box
@@ -184,6 +188,7 @@ export default function TaskPopoutPanel({
             bgcolor: theme.palette.mode === 'dark'
               ? alpha(theme.palette.primary.main, 0.08)
               : alpha(theme.palette.primary.main, 0.04),
+            transform: 'translateZ(0)',
           }}
         >
             <Stack direction="row" alignItems="center" justifyContent="space-between">
@@ -205,7 +210,7 @@ export default function TaskPopoutPanel({
                             <span>
                               <Chip
                                 label={
-                                  <Box component="span" sx={{ display: 'inline-block', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  <Box component="span" sx={{ display: 'inline-block', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'center', width: '100%' }}>
                                     {id}
                                   </Box>
                                 }
@@ -221,16 +226,20 @@ export default function TaskPopoutPanel({
                                 }}
                                 variant={selected ? 'filled' : 'outlined'}
                                 sx={{
-                                  borderRadius: 1,
-                                  px: 0.75,
-                                  py: 0.15,
-                                  minHeight: 28,
-                                  fontSize: '0.75rem',
+                                  borderRadius: 2,
+                                  px: 1,
+                                  py: 0.25,
+                                  minHeight: 32,
+                                  fontSize: '0.8rem',
                                   textTransform: 'none',
                                   fontWeight: 600,
-                                  bgcolor: selected ? theme.palette.primary.main : undefined,
-                                  color: selected ? theme.palette.common.white : undefined,
-                                  borderColor: alpha(theme.palette.divider, 0.9),
+                                  bgcolor: selected ? theme.palette.primary.main : alpha(theme.palette.primary.main, 0.05),
+                                  color: selected ? theme.palette.common.white : theme.palette.text.primary,
+                                  borderColor: selected ? theme.palette.primary.main : alpha(theme.palette.divider, 0.5),
+                                  '&:hover': {
+                                    bgcolor: selected ? theme.palette.primary.dark : alpha(theme.palette.primary.main, 0.1),
+                                  },
+                                  boxShadow: selected ? theme.shadows[2] : 'none',
                                 }}
                               />
                             </span>
@@ -283,7 +292,7 @@ export default function TaskPopoutPanel({
               )}
             </Box>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }} />
+            {/* removed duplicate bottom close button — use dialog title close instead */}
           </Stack>
 
           {/* External Tabs that fill the available width */}
@@ -325,15 +334,17 @@ export default function TaskPopoutPanel({
               ? alpha(theme.palette.grey[100], 0.03) 
               : alpha(theme.palette.primary.main, 0.01),
             overflowY: "auto",
+            transform: 'translateZ(0)',
+            willChange: 'transform, scroll-position',
           }}
         >
               <Box sx={{ display: "flex", justifyContent: "flex-start", pt: 0.5, pb: 0.5 }}>
                 <Box
                   sx={{
                     width: '100%',
-                    maxWidth: singleTaskMode ? 880 : '100%',
-                    minWidth: singleTaskMode ? 720 : '100%',
-                    minHeight: 380,
+                    maxWidth: singleTaskMode ? 720 : '100%',
+                    minWidth: singleTaskMode ? 600 : '100%',
+                    minHeight: 500,
                     gap: 1,
                     justifyContent: "flex-start",
                     alignItems: 'stretch',
@@ -423,7 +434,6 @@ export default function TaskPopoutPanel({
               zIndex: 10,
             }}
           >
-            <Button size="small" onClick={() => onClose?.()}>Close</Button>
             {onEditToggle && !editing && (
               <Button size="small" variant="contained" onClick={onEditToggle}>Edit</Button>
             )}

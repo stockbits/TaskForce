@@ -3,14 +3,30 @@
 // Based on: https://mui.com/material-ui/react-dialog/#draggable-dialog
 // =====================================================================
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Dialog, DialogProps, Paper, PaperProps } from '@mui/material';
 
 function PaperComponent(props: PaperProps) {
   const paperRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState<{ x: number; y: number }>(() => {
+    try {
+      const raw = sessionStorage.getItem('draggable-dialog-position');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (typeof parsed.x === 'number' && typeof parsed.y === 'number') return parsed;
+      }
+    } catch {
+      // ignore and fall back to default
+    }
+    return { x: 0, y: 0 };
+  });
+  const positionRef = useRef(position);
+
+  useEffect(() => {
+    positionRef.current = position;
+  }, [position]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).id === 'draggable-dialog-title') {
@@ -33,7 +49,23 @@ function PaperComponent(props: PaperProps) {
 
   const handleMouseUp = () => {
     setIsDragging(false);
+    try {
+      sessionStorage.setItem('draggable-dialog-position', JSON.stringify(position));
+    } catch {
+      // ignore storage errors
+    }
   };
+
+  // Ensure we persist the last known position when the component unmounts
+  useEffect(() => {
+    return () => {
+      try {
+        sessionStorage.setItem('draggable-dialog-position', JSON.stringify(positionRef.current));
+      } catch {
+        // ignore
+      }
+    };
+  }, []);
 
   React.useEffect(() => {
     if (isDragging) {

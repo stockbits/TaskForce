@@ -25,16 +25,19 @@ import { useSearchLeftMenu } from "@/Custom React - Hooks/search Tool Tab - comp
 
 import { useLiveSelectEngine } from "@/Custom React - Hooks/Table selection - component";
 
-import { GlobalSearchField, SelectField } from "@/shared-components";
+import { useSettings } from "@/System Settings/Settings Manager - Component";
+
+import { GlobalSearchField, SelectField, AppButton } from "@/shared-components";
 
 import SlidersHorizontal from '@mui/icons-material/Tune';
-import HelpOutline from '@mui/icons-material/HelpOutline';
-import InfoIcon from '@mui/icons-material/Info';
-import Bookmark from '@mui/icons-material/Bookmark';
 import Clock from '@mui/icons-material/AccessTime';
 import Map from '@mui/icons-material/Map';
 import Users from '@mui/icons-material/People';
 import ClipboardList from '@mui/icons-material/ListAlt';
+import HelpOutline from '@mui/icons-material/HelpOutline';
+import InfoIcon from '@mui/icons-material/Info';
+import Bookmark from '@mui/icons-material/Bookmark';
+import TableViewIcon from '@mui/icons-material/TableView';
 
 import type { TaskRecord, ResourceRecord } from "@/Custom React - Hooks/Table selection - component";
 
@@ -45,13 +48,11 @@ import {
   IconButton,
   Paper,
   Popper,
-  Skeleton,
   Stack,
+  Skeleton,
 } from "@mui/material";
-import { alpha, useTheme } from "@mui/material/styles";
-import { useSettings } from '@/System Settings/Settings Manager - Component';
-import { AppButton } from '@/shared-components';
 
+import { useTheme, alpha } from '@mui/material/styles';
 /* ============================================================================
    PANEL DEFINITIONS
 ============================================================================ */
@@ -137,6 +138,12 @@ export default function ScheduleLivePage() {
 
   /* ---------------- LEFT MENU ---------------- */
   const { selectedMode } = useSearchLeftMenu();
+
+  // Preload the Search tool chunk on first render to reduce initial popper delay
+  React.useEffect(() => {
+    // warm the module cache so the lazy chunk is fetched earlier
+    import('@/shared-components').catch(() => {});
+  }, []);
 
   React.useEffect(() => {
     setSearchTab(mapSelectedMode(selectedMode));
@@ -240,6 +247,8 @@ export default function ScheduleLivePage() {
   ============================================================================ */
   const handleDivisionChange = useCallback((value: string) => {
     setDivision(value);
+    // Ensure all panels are visible when a division is selected
+    try { setVisiblePanels(['timeline', 'map', 'resources', 'tasks']); } catch {}
     setTaskData([]);
     setTaskTableData([]);
     setResourceData([]);
@@ -264,6 +273,8 @@ export default function ScheduleLivePage() {
 
   const handleDomainChange = useCallback((value: string) => {
     setDomain(value);
+    // Ensure all panels are visible when domain changes
+    try { setVisiblePanels(['timeline', 'map', 'resources', 'tasks']); } catch {}
     setTaskData([]);
     setTaskTableData([]);
     setResourceData([]);
@@ -308,6 +319,7 @@ export default function ScheduleLivePage() {
     rowSizes,
     updatePanelSize,
     updateRowSize,
+    setVisiblePanels,
   } = usePanelDocking();
 
   /* ==========================================================================
@@ -382,7 +394,8 @@ export default function ScheduleLivePage() {
 
     setTaskTableData(results);
     setMapTaskData(results);
-    // Removed handleCloseSearchPanel() to keep panel open with filters selected
+    // Close the search panel after running search for better UX
+    handleCloseSearchPanel();
   };
 
   /* ==========================================================================
@@ -435,7 +448,8 @@ export default function ScheduleLivePage() {
     }
     // Removed resource filtering to show all tasks for the division
     setTaskData(taskResults);
-    // Removed handleCloseSearchPanel() to keep panel open with filters selected
+    // Close the search panel after running search for better UX
+    handleCloseSearchPanel();
   };
 
   /* ==========================================================================
@@ -461,7 +475,8 @@ export default function ScheduleLivePage() {
       handleResourceTableSelect(resourceMatches);
     }
 
-    // Removed handleCloseSearchPanel() to keep panel open with filters selected
+    // Close the search panel after running search for better UX
+    handleCloseSearchPanel();
   };
 
   /* ==========================================================================
@@ -645,11 +660,6 @@ export default function ScheduleLivePage() {
 
   const topRowHas = Number(topLeftVisible || topRightVisible);
   const bottomRowHas = Number(bottomLeftVisible || bottomRightVisible);
-  const rowsCount = topRowHas + bottomRowHas;
-
-  const leftColHas = Number(topLeftVisible || bottomLeftVisible);
-  const rightColHas = Number(topRightVisible || bottomRightVisible);
-  const colsCount = leftColHas + rightColHas;
 
   const panelsContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -662,15 +672,12 @@ export default function ScheduleLivePage() {
       sx={{
         width: "100%",
         borderBottom: `1px solid ${alpha(theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.main, 0.1)}`,
-        px: 2.5,
         py: 1.5,
-        display: "flex",
-        alignItems: "center",
-        gap: 2,
         backgroundImage: "none",
         borderRadius: 0,
       }}
     >
+      <Box sx={{ width: '100%', maxWidth: { xs: '100%', md: 1200 }, px: { xs: 2, sm: 3, md: 4 }, display: 'flex', alignItems: 'center', gap: 2 }}>
       {/* Division selector */}
       <SelectField
         value={division}
@@ -735,9 +742,9 @@ export default function ScheduleLivePage() {
         sx={{
           mr: 0.5,
         }}
-        title="Help"
+        title="Favorites"
       >
-        <HelpOutline sx={{ fontSize: 18 }} />
+        <Bookmark sx={{ fontSize: 18 }} />
       </IconButton>
 
       <IconButton
@@ -745,9 +752,9 @@ export default function ScheduleLivePage() {
         sx={{
           mr: 0.5,
         }}
-        title="Favorites"
+        title="Help"
       >
-        <Bookmark sx={{ fontSize: 18 }} />
+        <HelpOutline sx={{ fontSize: 18 }} />
       </IconButton>
 
       <Box sx={{ flexGrow: 1 }} />
@@ -773,6 +780,7 @@ export default function ScheduleLivePage() {
           ))}
         </Stack>
       )}
+      </Box>
     </Paper>
   );
 
@@ -785,19 +793,23 @@ export default function ScheduleLivePage() {
       anchorEl={anchorEl}
       placement="bottom"
       transition
-      modifiers={[{ name: "offset", options: { offset: [0, 10] } }]}
+      modifiers={[
+        { name: "offset", options: { offset: [0, 10] } },
+        { name: 'preventOverflow', options: { padding: 8 } },
+        { name: 'computeStyles', options: { gpuAcceleration: true } },
+      ]}
       sx={{ zIndex: 12000 }}
     >
         {({ TransitionProps }) => (
           <Grow
             {...TransitionProps}
-            timeout={400}
-            style={{ 
+            timeout={{ enter: 320, exit: 200 }}
+            style={{
               transformOrigin: 'top left',
-              willChange: 'transform',
+              willChange: 'transform, opacity',
             }}
             easing={{
-              enter: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+              enter: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
               exit: 'cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
@@ -814,6 +826,8 @@ export default function ScheduleLivePage() {
                     boxShadow: surfaceShadow,
                     backgroundColor: theme.palette.background.paper,
                     transform: 'translateZ(0)', // Force hardware acceleration
+                    willChange: 'transform, opacity',
+                    transition: 'opacity 220ms ease, transform 320ms cubic-bezier(0.2,0.8,0.2,1)',
                     overflow: 'hidden', // Prevent content overflow during animation
                   }}
                 >
@@ -975,24 +989,23 @@ export default function ScheduleLivePage() {
   // Resize handle component
   const ResizeHandle = ({ 
     type, 
-    handleKey, 
-    sx = {} 
+    handleKey
   }: { 
     type: 'horizontal' | 'vertical'; 
     handleKey: string; 
-    sx?: any 
   }) => (
     <Box
       sx={{
         position: 'relative',
         cursor: type === 'horizontal' ? 'ew-resize' : 'ns-resize',
         userSelect: 'none',
+        width: type === 'horizontal' ? 6 : '100%',
+        height: type === 'vertical' ? 6 : '100%',
         '&:hover': {
           '& .resize-indicator': {
             opacity: 1,
           },
         },
-        ...sx,
       }}
       onMouseDown={handleResizeStart(type, handleKey)}
     >
@@ -1033,10 +1046,153 @@ export default function ScheduleLivePage() {
     </Box>
   );
 
+  const effectiveSingle = maximizedPanel ?? visiblePanels[0];
+
+  const panelsMarkup = (maximizedPanel || visiblePanels.length === 1) ? (
+    <Box sx={{ display: 'flex', height: '100%', minHeight: 0 }}>
+      <PanelContainer
+        title={PANEL_DEFS[effectiveSingle].label}
+        icon={PANEL_DEFS[effectiveSingle].icon}
+        isMaximized={true}
+        onMaximize={() => maximizePanel(effectiveSingle)}
+        onClose={() => closePanel(effectiveSingle)}
+        actions={effectiveSingle === 'tasks' ? (
+          <IconButton
+            size="small"
+            onClick={() => {
+              if (selectedTasks.length > 0) {
+                window.dispatchEvent(new CustomEvent('taskforce:open-popout', { detail: { tasks: selectedTasks } }));
+              }
+            }}
+            disabled={selectedTasks.length === 0}
+            title="Open selected tasks"
+            sx={{ ml: 1, p: '6px', bgcolor: selectedTasks.length > 0 ? alpha(accent, 0.08) : 'transparent' }}
+          >
+            <TableViewIcon sx={{ fontSize: 18, color: selectedTasks.length > 0 ? accent : 'inherit' }} />
+          </IconButton>
+        ) : undefined}
+        visibleCount={visiblePanels.length}
+      >
+        {renderPanelBody(effectiveSingle)}
+      </PanelContainer>
+    </Box>
+  ) : (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        height: '100%',
+        minHeight: 0,
+      }}
+    >
+      {/* Top row */}
+      {topRowHas > 0 && (
+        <Box sx={{ display: 'flex', flex: topRowHas > 0 && bottomRowHas > 0 ? rowSizes.top : 1, minHeight: 0 }}>
+          {visiblePanels.includes('timeline') && (
+            <Box sx={{ flex: topLeftVisible && topRightVisible ? panelSizes.timeline : 1, minWidth: 0, display: 'flex' }}>
+              <PanelContainer
+                title={PANEL_DEFS['timeline'].label}
+                icon={PANEL_DEFS['timeline'].icon}
+                isMaximized={false}
+                onMaximize={() => maximizePanel('timeline')}
+                onClose={() => closePanel('timeline')}
+                visibleCount={visiblePanels.length}
+              >
+                {renderPanelBody('timeline')}
+              </PanelContainer>
+            </Box>
+          )}
+          {topLeftVisible && topRightVisible && (
+            <ResizeHandle
+              type="horizontal"
+              handleKey="top"
+            />
+          )}
+          {visiblePanels.includes('map') && (
+            <Box sx={{ flex: topLeftVisible && topRightVisible ? panelSizes.map : 1, minWidth: 0, display: 'flex' }}>
+              <PanelContainer
+                title={PANEL_DEFS['map'].label}
+                icon={PANEL_DEFS['map'].icon}
+                isMaximized={false}
+                onMaximize={() => maximizePanel('map')}
+                onClose={() => closePanel('map')}
+                visibleCount={visiblePanels.length}
+              >
+                {renderPanelBody('map')}
+              </PanelContainer>
+            </Box>
+          )}
+        </Box>
+      )}
+
+      {topRowHas > 0 && bottomRowHas > 0 && (
+        <ResizeHandle
+          type="vertical"
+          handleKey="top"
+        />
+      )}
+
+      {/* Bottom row */}
+      {bottomRowHas > 0 && (
+        <Box sx={{ display: 'flex', flex: topRowHas > 0 && bottomRowHas > 0 ? rowSizes.bottom : 1, minHeight: 0 }}>
+          {visiblePanels.includes('resources') && (
+            <Box sx={{ flex: bottomLeftVisible && bottomRightVisible ? panelSizes.resources : 1, minWidth: 0, display: 'flex' }}>
+              <PanelContainer
+                title={PANEL_DEFS['resources'].label}
+                icon={PANEL_DEFS['resources'].icon}
+                isMaximized={false}
+                onMaximize={() => maximizePanel('resources')}
+                onClose={() => closePanel('resources')}
+                visibleCount={visiblePanels.length}
+              >
+                {renderPanelBody('resources')}
+              </PanelContainer>
+            </Box>
+          )}
+          {bottomLeftVisible && bottomRightVisible && (
+            <ResizeHandle
+              type="horizontal"
+              handleKey="bottom"
+            />
+          )}
+          {visiblePanels.includes('tasks') && (
+            <Box sx={{ flex: bottomLeftVisible && bottomRightVisible ? panelSizes.tasks : 1, minWidth: 0, display: 'flex' }}>
+              <PanelContainer
+                title={PANEL_DEFS['tasks'].label}
+                icon={PANEL_DEFS['tasks'].icon}
+                isMaximized={false}
+                onMaximize={() => maximizePanel('tasks')}
+                onClose={() => closePanel('tasks')}
+                actions={(
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      if (selectedTasks.length > 0) {
+                        window.dispatchEvent(new CustomEvent('taskforce:open-popout', { detail: { tasks: selectedTasks } }));
+                      }
+                    }}
+                    disabled={selectedTasks.length === 0}
+                    title="Open selected tasks"
+                    sx={{ ml: 1, p: '6px', bgcolor: selectedTasks.length > 0 ? alpha(accent, 0.08) : 'transparent' }}
+                  >
+                    <TableViewIcon sx={{ fontSize: 18, color: selectedTasks.length > 0 ? accent : 'inherit' }} />
+                  </IconButton>
+                )}
+                visibleCount={visiblePanels.length}
+              >
+                {renderPanelBody('tasks')}
+              </PanelContainer>
+            </Box>
+          )}
+        </Box>
+      )}
+    </Box>
+  );
+
     return (
       <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", position: "relative" }}>
         {toolbar}
-
         <Suspense fallback={<div>Loading legend...</div>}>
           <ClickAwayListener onClickAway={() => setLegendOpen(false)}>
             <ScheduleLegend 
@@ -1049,167 +1205,8 @@ export default function ScheduleLivePage() {
 
         {searchToolPopper}
 
-        <Box ref={panelsContainerRef} sx={{ minHeight: 0, position: 'relative', height: '100%', overflow: 'hidden' }} data-visible-panels={visiblePanels.join(',')}>
-          { (maximizedPanel || visiblePanels.length === 1) ? (
-            (() => {
-              const single = maximizedPanel ?? visiblePanels[0];
-              return (
-                <Box sx={{ display: 'flex', height: '100%', minHeight: 0 }}>
-                  <PanelContainer
-                    title={PANEL_DEFS[single].label}
-                    icon={PANEL_DEFS[single].icon}
-                    isMaximized={true}
-                    onMaximize={() => maximizePanel(single)}
-                    onClose={() => closePanel(single)}
-                    visibleCount={visiblePanels.length}
-                  >
-                    {renderPanelBody(single)}
-                  </PanelContainer>
-                </Box>
-              );
-            })()
-          ) : (
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateRows: rowsCount === 1
-                  ? '1fr'
-                  : `1fr ${rowsCount === 2 ? '6px' : ''} 1fr`.trim(),
-                gridTemplateColumns: (() => {
-                  if (colsCount === 1) return '1fr';
-
-                  const leftWidth = topLeftVisible ? panelSizes.timeline : panelSizes.resources;
-                  const rightWidth = topRightVisible ? panelSizes.map : panelSizes.tasks;
-                  const totalWidth = leftWidth + rightWidth;
-
-                  // Normalize to ensure they add up to 100%
-                  const leftPercent = Math.round((leftWidth / totalWidth) * 100);
-                  const rightPercent = 100 - leftPercent;
-
-                  return `${leftPercent}% 6px ${rightPercent}%`;
-                })(),
-                width: '100%',
-                height: '100%',
-                minHeight: 0,
-                gap: 0,
-              }}
-            >
-              {/* Top-left */}
-              <Box sx={{ gridRow: '1', gridColumn: topLeftVisible && !topRightVisible ? '1 / span 3' : '1', display: 'flex', minHeight: 0, zIndex: 10 }}>
-                {visiblePanels.includes('timeline') && (
-                  <PanelContainer
-                    title={PANEL_DEFS['timeline'].label}
-                    icon={PANEL_DEFS['timeline'].icon}
-                    isMaximized={false}
-                    onMaximize={() => maximizePanel('timeline')}
-                    onClose={() => closePanel('timeline')}
-                    visibleCount={visiblePanels.length}
-                  >
-                    {renderPanelBody('timeline')}
-                  </PanelContainer>
-                )}
-              </Box>
-
-              {/* Horizontal resize handle (top row) */}
-              {colsCount === 2 && (
-                <ResizeHandle
-                  type="horizontal"
-                  handleKey="top"
-                  sx={{
-                    gridRow: '1',
-                    gridColumn: '2',
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                />
-              )}
-
-              {/* Top-right */}
-              <Box sx={{ gridRow: '1', gridColumn: !topLeftVisible && topRightVisible ? '1 / span 3' : '3', display: 'flex', minHeight: 0, zIndex: 10 }}>
-                {visiblePanels.includes('map') && (
-                  <PanelContainer
-                    title={PANEL_DEFS['map'].label}
-                    icon={PANEL_DEFS['map'].icon}
-                    isMaximized={false}
-                    onMaximize={() => maximizePanel('map')}
-                    onClose={() => closePanel('map')}
-                    visibleCount={visiblePanels.length}
-                  >
-                    {renderPanelBody('map')}
-                  </PanelContainer>
-                )}
-              </Box>
-
-              {/* Vertical resize handle */}
-              {rowsCount === 2 && (
-                <ResizeHandle
-                  type="vertical"
-                  handleKey="top"
-                  sx={{
-                    gridRow: '2',
-                    gridColumn: '1 / span 3',
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                />
-              )}
-
-              {/* Bottom-left */}
-              <Box sx={{ gridRow: '3', gridColumn: bottomLeftVisible && !bottomRightVisible ? '1 / span 3' : '1', display: 'flex', minHeight: 0, zIndex: 10 }}>
-                {visiblePanels.includes('resources') && (
-                  <PanelContainer
-                    title={PANEL_DEFS['resources'].label}
-                    icon={PANEL_DEFS['resources'].icon}
-                    isMaximized={false}
-                    onMaximize={() => maximizePanel('resources')}
-                    onClose={() => closePanel('resources')}
-                    visibleCount={visiblePanels.length}
-                  >
-                    {renderPanelBody('resources')}
-                  </PanelContainer>
-                )}
-              </Box>
-
-              {/* Horizontal resize handle (bottom row) */}
-              {colsCount === 2 && (
-                <ResizeHandle
-                  type="horizontal"
-                  handleKey="bottom"
-                  sx={{
-                    gridRow: '3',
-                    gridColumn: '2',
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                />
-              )}
-
-              {/* Bottom-right */}
-              <Box sx={{ gridRow: '3', gridColumn: !bottomLeftVisible && bottomRightVisible ? '1 / span 3' : '3', display: 'flex', minHeight: 0, zIndex: 10 }}>
-                {visiblePanels.includes('tasks') && (
-                  <PanelContainer
-                    title={PANEL_DEFS['tasks'].label}
-                    icon={PANEL_DEFS['tasks'].icon}
-                    isMaximized={false}
-                    onMaximize={() => maximizePanel('tasks')}
-                    onClose={() => closePanel('tasks')}
-                    visibleCount={visiblePanels.length}
-                  >
-                    {renderPanelBody('tasks')}
-                  </PanelContainer>
-                )}
-              </Box>
-            </Box>
-          )}
+        <Box ref={panelsContainerRef} sx={{ flex: 1, minHeight: 0, position: 'relative', width: '100%', overflow: 'hidden' }} data-visible-panels={visiblePanels.join(',')}>
+          {panelsMarkup}
         </Box>
       </Box>
     );

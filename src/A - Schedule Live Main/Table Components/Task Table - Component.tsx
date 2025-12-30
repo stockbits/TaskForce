@@ -7,7 +7,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { Box, Stack, Typography } from "@mui/material";
 import TaskTableAdvanced from "@/A - Task Management Main/MUI Table Component/Task Table Advanced - Component";
-import { useExternalWindow } from "@/Custom React - Hooks/Popup window - component";
 import type { TaskRecord } from "@/Custom React - Hooks/Table selection - component";
 
 const PRIORITY_KEYS = [
@@ -52,8 +51,6 @@ export default function TaskTablePanel({
   const [currentSortModel, setCurrentSortModel] = useState<any[]>([]);
   const [pinnedOrder, setPinnedOrder] = useState<string[]>([]);
   const [prevDataLength, setPrevDataLength] = useState(0);
-
-  const { openExternalWindow, openResourceWindow } = useExternalWindow();
 
   /* ==========================================================================
      AUTO HEADER BUILDER
@@ -241,12 +238,6 @@ export default function TaskTablePanel({
           if (hasSorting && onClearSelection) {
             onClearSelection();
           }
-        }}
-        onOpenTaskPopup={(task: any) => {
-          openExternalWindow([task]);
-        }}
-        onOpenResourcePopup={(resource: any) => {
-          openResourceWindow(resource, []);
         }}
       />
     </Box>

@@ -19,8 +19,6 @@ import { AppButton } from '@/shared-components';
 import { alpha, useTheme } from "@mui/material/styles";
 import type { Theme } from "@mui/material/styles";
 import { InputAdornment } from "@mui/material";
-import ChevronDown from '@mui/icons-material/ExpandMore';
-import ChevronUp from '@mui/icons-material/ExpandLess';
 import MapPin from '@mui/icons-material/Place';
 import Clock from '@mui/icons-material/AccessTime';
 import Search from '@mui/icons-material/Search';

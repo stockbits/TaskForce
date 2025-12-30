@@ -35,7 +35,9 @@ export default function TaskRowContextMenu({
   onOpenCalloutIncident,
   onProgressTasks,
   onProgressNotes,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   mouseScreenX,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   mouseScreenY,
 }: TaskRowContextMenuProps) {
   const actionableRows = selectedRows.length
