@@ -4,7 +4,8 @@ export type NavigationIdentifier =
   | "dashboard"
   | "task-management"
   | "live-schedule"
-  | "application-settings";
+  | "application-settings"
+  | "component-library";
 
 export interface NavigationItem {
   identifier: NavigationIdentifier;

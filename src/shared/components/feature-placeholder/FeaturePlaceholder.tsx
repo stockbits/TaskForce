@@ -1,4 +1,4 @@
-import ConstructionOutlined from "@mui/icons-material/ConstructionOutlined";
+import { ConstructionIcon } from "@shared/icons/applicationIcons";
 import { Box, Paper, Typography } from "@mui/material";
 
 interface FeaturePlaceholderProperties {
@@ -8,7 +8,7 @@ interface FeaturePlaceholderProperties {
 
 export default function FeaturePlaceholder({
   title,
-  description
+  description,
 }: FeaturePlaceholderProperties) {
   return (
     <Paper
@@ -20,8 +20,10 @@ export default function FeaturePlaceholder({
         flexDirection: "column",
         justifyContent: "center",
         minHeight: 360,
-        p: 4,
-        textAlign: "center"
+        minWidth: 0,
+        overflowWrap: "anywhere",
+        p: { xs: 4, sm: 8 },
+        textAlign: "center",
       }}
     >
       <Box
@@ -34,10 +36,10 @@ export default function FeaturePlaceholder({
           height: 64,
           justifyContent: "center",
           mb: 2,
-          width: 64
+          width: 64,
         }}
       >
-        <ConstructionOutlined fontSize="large" />
+        <ConstructionIcon fontSize="large" />
       </Box>
       <Typography variant="h5" fontWeight={750} gutterBottom>
         {title}

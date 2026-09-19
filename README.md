@@ -27,4 +27,18 @@ npm install
 npm run dev
 npm run build
 npm run lint
+node --test validation/foundation.test.mjs
 ```
+
+## Preview the foundation
+
+Open **Component Library** in the navigation to try the reusable controls.
+Task Management and Live Schedule remain placeholders.
+
+For mobile checks, open `/validation/responsive-preview.html` on the development
+server. Select a viewport width and text scale, navigate inside the preview, and
+use **Measure overflow**. Also check with browser zoom and a real mobile device.
+The validation harness is development-only and excluded from the production build.
+
+Build, lint, and four architecture checks pass. Visual browser validation is
+pending; see `documentation/architecture.md` for the checklist and limitations.

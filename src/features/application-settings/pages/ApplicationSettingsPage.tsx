@@ -1,6 +1,7 @@
-import DarkModeOutlined from "@mui/icons-material/DarkModeOutlined";
-import LightModeOutlined from "@mui/icons-material/LightModeOutlined";
-import { Box, Button, Paper, Stack, Typography } from "@mui/material";
+import PageContainer from "@shared/components/page-container/PageContainer";
+import { DarkThemeIcon, LightThemeIcon } from "@shared/icons/applicationIcons";
+import ApplicationButton from "@shared/components/buttons/ApplicationButton";
+import { Box, Paper, Stack, Typography } from "@mui/material";
 import PageHeader from "@shared/components/page-header/PageHeader";
 import { useApplicationTheme } from "@shared/theme/ApplicationThemeProvider";
 
@@ -8,29 +9,41 @@ export default function ApplicationSettingsPage() {
   const { colourMode, toggleColourMode } = useApplicationTheme();
 
   return (
-    <Box sx={{ px: { xs: 2, sm: 3, lg: 5 }, py: { xs: 3, lg: 5 } }}>
+    <PageContainer>
       <PageHeader
         eyebrow="Application preferences"
         title="Application Settings"
         description="Application-wide preferences remain separate from individual business features."
       />
-      <Paper variant="outlined" sx={{ p: 3, maxWidth: 640 }}>
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={3} alignItems={{ sm: "center" }} justifyContent="space-between">
+      <Paper
+        variant="outlined"
+        sx={{ p: 6, maxWidth: 640, minWidth: 0, overflowWrap: "anywhere" }}
+      >
+        <Stack
+          direction={{ xs: "column", lg: "row" }}
+          spacing={3}
+          alignItems={{ sm: "center" }}
+          justifyContent="space-between"
+        >
           <Box>
-            <Typography variant="h6" fontWeight={750}>Colour theme</Typography>
+            <Typography variant="h6" fontWeight={750}>
+              Colour theme
+            </Typography>
             <Typography color="text.secondary">
               Current theme: {colourMode === "light" ? "Light" : "Dark"}
             </Typography>
           </Box>
-          <Button
+          <ApplicationButton
             variant="contained"
             onClick={toggleColourMode}
-            startIcon={colourMode === "light" ? <DarkModeOutlined /> : <LightModeOutlined />}
+            startIcon={
+              colourMode === "light" ? <DarkThemeIcon /> : <LightThemeIcon />
+            }
           >
             Use {colourMode === "light" ? "dark" : "light"} theme
-          </Button>
+          </ApplicationButton>
         </Stack>
       </Paper>
-    </Box>
+    </PageContainer>
   );
 }

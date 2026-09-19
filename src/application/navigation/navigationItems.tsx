@@ -1,28 +1,36 @@
-import DashboardOutlined from "@mui/icons-material/DashboardOutlined";
-import EventAvailableOutlined from "@mui/icons-material/EventAvailableOutlined";
-import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
-import TaskAltOutlined from "@mui/icons-material/TaskAltOutlined";
+import {
+  DashboardIcon,
+  LiveScheduleIcon,
+  ApplicationSettingsIcon,
+  TaskManagementIcon,
+  ComponentLibraryIcon,
+} from "@shared/icons/applicationIcons";
 import type { NavigationItem } from "@shared/types/navigation";
 
 export const navigationItems: NavigationItem[] = [
   {
     identifier: "dashboard",
     label: "Dashboard",
-    icon: <DashboardOutlined />
+    icon: <DashboardIcon />,
   },
   {
     identifier: "task-management",
     label: "Task Management",
-    icon: <TaskAltOutlined />
+    icon: <TaskManagementIcon />,
   },
   {
     identifier: "live-schedule",
     label: "Live Schedule",
-    icon: <EventAvailableOutlined />
+    icon: <LiveScheduleIcon />,
   },
   {
     identifier: "application-settings",
     label: "Application Settings",
-    icon: <SettingsOutlined />
-  }
+    icon: <ApplicationSettingsIcon />,
+  },
+  {
+    identifier: "component-library",
+    label: "Component Library",
+    icon: <ComponentLibraryIcon />,
+  },
 ];

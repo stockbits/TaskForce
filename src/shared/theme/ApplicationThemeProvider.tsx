@@ -2,8 +2,9 @@ import {
   createContext,
   useContext,
   useMemo,
+  useEffect,
   useState,
-  type PropsWithChildren
+  type PropsWithChildren,
 } from "react";
 import type { PaletteMode } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
@@ -20,8 +21,13 @@ const ApplicationThemeContext =
 const colourModeStorageKey = "taskforce-colour-mode";
 
 function getInitialColourMode(): PaletteMode {
-  const storedColourMode = window.localStorage.getItem(colourModeStorageKey);
-  return storedColourMode === "dark" ? "dark" : "light";
+  try {
+    return window.localStorage.getItem(colourModeStorageKey) === "dark"
+      ? "dark"
+      : "light";
+  } catch {
+    return "light";
+  }
 }
 
 export function useApplicationTheme() {
@@ -29,7 +35,7 @@ export function useApplicationTheme() {
 
   if (!context) {
     throw new Error(
-      "useApplicationTheme must be used within ApplicationThemeProvider."
+      "useApplicationTheme must be used within ApplicationThemeProvider.",
     );
   }
 
@@ -37,10 +43,18 @@ export function useApplicationTheme() {
 }
 
 export default function ApplicationThemeProvider({
-  children
+  children,
 }: PropsWithChildren) {
   const [colourMode, setColourMode] =
     useState<PaletteMode>(getInitialColourMode);
+  useEffect(() => {
+    document.documentElement.style.colorScheme = colourMode;
+    try {
+      window.localStorage.setItem(colourModeStorageKey, colourMode);
+    } catch {
+      // Storage may be unavailable; the in-memory preference still works.
+    }
+  }, [colourMode]);
 
   const contextValue = useMemo<ApplicationThemeContextValue>(
     () => ({
@@ -49,18 +63,14 @@ export default function ApplicationThemeProvider({
         setColourMode((currentColourMode) => {
           const nextColourMode =
             currentColourMode === "light" ? "dark" : "light";
-          window.localStorage.setItem(colourModeStorageKey, nextColourMode);
           return nextColourMode;
         });
-      }
+      },
     }),
-    [colourMode]
+    [colourMode],
   );
 
-  const theme = useMemo(
-    () => createApplicationTheme(colourMode),
-    [colourMode]
-  );
+  const theme = useMemo(() => createApplicationTheme(colourMode), [colourMode]);
 
   return (
     <ApplicationThemeContext.Provider value={contextValue}>

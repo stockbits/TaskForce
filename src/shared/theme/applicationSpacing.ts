@@ -4,5 +4,5 @@ export const applicationSpacing = {
   medium: 16,
   large: 24,
   extraLarge: 40,
-  section: 64
+  section: 64,
 } as const;

@@ -7,8 +7,10 @@ import {
   ListItemIcon,
   ListItemText,
   Toolbar,
-  Typography
+  Typography,
 } from "@mui/material";
+import ApplicationIconButton from "@shared/components/buttons/ApplicationIconButton";
+import { CloseIcon } from "@shared/icons/applicationIcons";
 import { navigationItems } from "@application/navigation/navigationItems";
 import type { NavigationIdentifier } from "@shared/types/navigation";
 
@@ -25,12 +27,12 @@ export default function NavigationSidebar({
   mobileOpen,
   selectedNavigationIdentifier,
   onCloseMobileNavigation,
-  onSelectNavigation
+  onSelectNavigation,
 }: NavigationSidebarProperties) {
   const navigationContent = (
     <Box sx={{ height: "100%", bgcolor: "background.paper" }}>
-      <Toolbar sx={{ px: 3 }}>
-        <Box>
+      <Toolbar sx={{ px: 4, py: 2, gap: 2 }}>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="h6" fontWeight={800} letterSpacing="-0.03em">
             TaskForce
           </Typography>
@@ -38,6 +40,13 @@ export default function NavigationSidebar({
             Operational workspace
           </Typography>
         </Box>
+        <ApplicationIconButton
+          label="Close navigation"
+          onClick={onCloseMobileNavigation}
+          sx={{ display: { md: "none" } }}
+        >
+          <CloseIcon />
+        </ApplicationIconButton>
       </Toolbar>
       <Divider />
       <List sx={{ px: 1.5, py: 2 }}>
@@ -45,6 +54,11 @@ export default function NavigationSidebar({
           <ListItemButton
             key={item.identifier}
             selected={selectedNavigationIdentifier === item.identifier}
+            aria-current={
+              selectedNavigationIdentifier === item.identifier
+                ? "page"
+                : undefined
+            }
             onClick={() => {
               onSelectNavigation(item.identifier);
               onCloseMobileNavigation();
@@ -54,7 +68,10 @@ export default function NavigationSidebar({
             <ListItemIcon sx={{ minWidth: 42 }}>{item.icon}</ListItemIcon>
             <ListItemText
               primary={item.label}
-              primaryTypographyProps={{ fontWeight: 650 }}
+              primaryTypographyProps={{
+                fontWeight: 650,
+                sx: { overflowWrap: "anywhere" },
+              }}
             />
           </ListItemButton>
         ))}
@@ -63,15 +80,24 @@ export default function NavigationSidebar({
   );
 
   return (
-    <Box component="nav" sx={{ width: { md: navigationSidebarWidth }, flexShrink: { md: 0 } }}>
+    <Box
+      component="nav"
+      aria-label="Application navigation"
+      sx={{ width: { md: navigationSidebarWidth }, flexShrink: 0 }}
+    >
       <Drawer
         variant="temporary"
+        id="mobile-navigation"
         open={mobileOpen}
         onClose={onCloseMobileNavigation}
         ModalProps={{ keepMounted: true }}
         sx={{
           display: { xs: "block", md: "none" },
-          "& .MuiDrawer-paper": { width: navigationSidebarWidth }
+          "& .MuiDrawer-paper": {
+            width: navigationSidebarWidth,
+            maxWidth: "calc(100vw - 24px)",
+            height: "100dvh",
+          },
         }}
       >
         {navigationContent}
@@ -83,8 +109,8 @@ export default function NavigationSidebar({
           display: { xs: "none", md: "block" },
           "& .MuiDrawer-paper": {
             width: navigationSidebarWidth,
-            borderRightColor: "divider"
-          }
+            borderRightColor: "divider",
+          },
         }}
       >
         {navigationContent}

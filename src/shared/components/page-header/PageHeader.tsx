@@ -9,10 +9,10 @@ interface PageHeaderProperties {
 export default function PageHeader({
   eyebrow,
   title,
-  description
+  description,
 }: PageHeaderProperties) {
   return (
-    <Box sx={{ mb: 4, maxWidth: 820 }}>
+    <Box sx={{ mb: 8, maxWidth: 820, minWidth: 0, overflowWrap: "anywhere" }}>
       <Typography
         color="primary.main"
         fontWeight={800}

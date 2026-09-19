@@ -10,10 +10,13 @@ interface ApplicationCardProperties {
 export default function ApplicationCard({
   icon,
   title,
-  description
+  description,
 }: ApplicationCardProperties) {
   return (
-    <Paper variant="outlined" sx={{ height: "100%", p: 3 }}>
+    <Paper
+      variant="outlined"
+      sx={{ height: "100%", minWidth: 0, p: 6, overflowWrap: "anywhere" }}
+    >
       <Stack spacing={2}>
         <Box
           sx={{
@@ -24,7 +27,7 @@ export default function ApplicationCard({
             display: "flex",
             height: 44,
             justifyContent: "center",
-            width: 44
+            width: 44,
           }}
         >
           {icon}
