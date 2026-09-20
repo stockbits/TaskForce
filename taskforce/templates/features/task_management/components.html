@@ -1,0 +1,34 @@
+{% from "components/icons.html" import icon %}
+
+{% macro multiple_filter(name, label, options, selected_values, required=False) -%}
+<div class="field">
+  <label for="{{ name }}">{{ label }}{% if required %}<span aria-hidden="true"> *</span>{% endif %}</label>
+  <select id="{{ name }}" name="{{ name }}" multiple size="4" {% if required %}aria-required="true"{% endif %}>
+    {% for option in options %}
+      <option value="{{ option }}" {% if option in selected_values %}selected{% endif %}>{{ option }}</option>
+    {% endfor %}
+  </select>
+</div>
+{%- endmacro %}
+
+{% macro row_action_menu(task) -%}
+<details class="action-menu row-action-menu">
+  <summary class="icon-button" aria-label="Actions for {{ task.task_identifier }}">
+    {{ icon("more") }}
+  </summary>
+  <div class="menu-surface menu-align-end" role="menu" aria-label="Actions for {{ task.task_identifier }}">
+    <button type="button" role="menuitem" class="menu-item" data-notification="Opened {{ task.task_identifier }}.">
+      {{ icon("view") }}<span>Open task</span>
+    </button>
+    <button type="button" role="menuitem" class="menu-item" data-notification="Progress workflow for {{ task.task_identifier }} is not connected yet.">
+      {{ icon("tasks") }}<span>Progress task</span>
+    </button>
+    <button type="button" role="menuitem" class="menu-item" data-notification="Notes workflow for {{ task.task_identifier }} is not connected yet.">
+      {{ icon("notes") }}<span>Progress notes</span>
+    </button>
+    <button type="button" role="menuitem" class="menu-item" data-notification="Callout workflow for {{ task.task_identifier }} is not connected yet.">
+      {{ icon("warning") }}<span>Create callout incident</span>
+    </button>
+  </div>
+</details>
+{%- endmacro %}

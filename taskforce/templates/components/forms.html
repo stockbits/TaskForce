@@ -1,0 +1,40 @@
+{% macro text_field(identifier, label, value='', field_type='text', helper_text=None, error_text=None, disabled=False, required=False, extra_attributes='') -%}
+<div class="field{% if error_text %} field-error{% endif %}">
+  <label for="{{ identifier }}">{{ label }}{% if required %}<span aria-hidden="true"> *</span>{% endif %}</label>
+  <input
+    id="{{ identifier }}"
+    name="{{ identifier }}"
+    type="{{ field_type }}"
+    value="{{ value }}"
+    {% if disabled %}disabled{% endif %}
+    {% if required %}required aria-required="true"{% endif %}
+    {% if error_text %}aria-invalid="true" aria-describedby="{{ identifier }}-message"{% elif helper_text %}aria-describedby="{{ identifier }}-message"{% endif %}
+    {{ extra_attributes | safe }}
+  >
+  {% if error_text %}
+    <p class="field-message error-message" id="{{ identifier }}-message">{{ error_text }}</p>
+  {% elif helper_text %}
+    <p class="field-message" id="{{ identifier }}-message">{{ helper_text }}</p>
+  {% endif %}
+</div>
+{%- endmacro %}
+
+{% macro select_field(identifier, label, options, selected=None, helper_text=None, multiple=False, disabled=False) -%}
+<div class="field">
+  <label for="{{ identifier }}">{{ label }}</label>
+  <select id="{{ identifier }}" name="{{ identifier }}" {% if multiple %}multiple{% endif %} {% if disabled %}disabled{% endif %} {% if helper_text %}aria-describedby="{{ identifier }}-message"{% endif %}>
+    {% for value, option_label in options %}
+      <option value="{{ value }}" {% if value == selected %}selected{% endif %}>{{ option_label }}</option>
+    {% endfor %}
+  </select>
+  {% if helper_text %}<p class="field-message" id="{{ identifier }}-message">{{ helper_text }}</p>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro text_area(identifier, label, helper_text=None) -%}
+<div class="field">
+  <label for="{{ identifier }}">{{ label }}</label>
+  <textarea id="{{ identifier }}" name="{{ identifier }}" rows="4" {% if helper_text %}aria-describedby="{{ identifier }}-message"{% endif %}></textarea>
+  {% if helper_text %}<p class="field-message" id="{{ identifier }}-message">{{ helper_text }}</p>{% endif %}
+</div>
+{%- endmacro %}

@@ -1,5 +1,6 @@
 {
-  "name": "Devcontainer",
-  "image": "ghcr.io/codesandbox/devcontainers/typescript-node:latest"
+  "name": "TaskForce Python",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
+  "postCreateCommand": "python -m pip install -r requirements-development.txt",
+  "forwardPorts": [8000]
 }
-  

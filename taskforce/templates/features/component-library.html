@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% from "components/page.html" import page_header %}
+{% from "components/forms.html" import text_field, select_field, text_area %}
+{% from "components/actions.html" import button, icon_button, action_menu %}
+{% from "components/table.html" import data_table %}
+
+{% set selection_options = [
+  ("planning", "Planning"),
+  ("delivery", "Delivery"),
+  ("assurance", "Assurance"),
+  ("long", "An intentionally long option label that must wrap on narrow screens")
+] %}
+{% set generic_actions = [
+  {"label": "View information", "icon_name": "information", "message": "Viewed example information.", "disabled": false, "destructive": false},
+  {"label": "Unavailable action", "icon_name": none, "message": "", "disabled": true, "destructive": false},
+  {"label": "Remove example", "icon_name": "warning", "message": "Removed the disposable example.", "disabled": false, "destructive": true}
+] %}
+{% set task_actions = [
+  {"label": "Open tasks (2)", "icon_name": "view", "message": "Opened two example tasks.", "disabled": false, "destructive": false},
+  {"label": "Progress tasks (2)", "icon_name": "tasks", "message": "Progressed two example tasks.", "disabled": false, "destructive": false},
+  {"label": "Progress notes (2)", "icon_name": "notes", "message": "Updated notes for two example tasks.", "disabled": false, "destructive": false}
+] %}
+{% set example_columns = [
+  {"identifier": "name", "label": "Name"},
+  {"identifier": "status", "label": "Status"},
+  {"identifier": "description", "label": "Description"}
+] %}
+{% set example_rows = [
+  {"name": "Planning", "status": "Example only", "description": "A short record used to validate the table layout."},
+  {"name": "Long content", "status": "Pending", "description": "LongUnbrokenExampleIdentifierThatMustNotPushThePageOutsideTheMobileViewport"}
+] %}
+
+{% block content %}
+  {{ page_header("Foundation preview", page_title, page_description) }}
+
+  <section class="catalogue-section" aria-labelledby="input-fields-title">
+    <div class="section-heading">
+      <h2 id="input-fields-title">Input fields</h2>
+      <p>Templates accept values, errors and options from their consumer. They contain no task data or repository access.</p>
+    </div>
+    <div class="form-grid">
+      {{ text_field("standard-text", "Standard text input", helper_text="Use the shared field macro for normal input behaviour.") }}
+      {{ text_field("validation-example", "Example validation", error_text="A longer validation message wraps without widening the page.") }}
+      {{ text_field("disabled-example", "Disabled input", value="Unavailable", disabled=true) }}
+      {{ select_field("fixed-selection", "Short fixed list", selection_options[:3], selected="planning", helper_text="Use a select when the complete list is short.") }}
+      {{ text_field("searchable-selection", "Searchable suggestion", helper_text="Choose a suggestion or enter a new value.", extra_attributes='list="selection-suggestions"') }}
+      <datalist id="selection-suggestions">
+        {% for value, label in selection_options %}<option value="{{ label }}">{{ value }}</option>{% endfor %}
+      </datalist>
+      {{ select_field("multiple-selection", "Multiple selection", selection_options, helper_text="Hold Control or Command to choose more than one option.", multiple=true) }}
+      {{ text_field("search-examples", "Search examples", field_type="search", helper_text="Search validation belongs to the consuming feature.") }}
+      {{ text_area("notes-example", "Notes", "Long text remains within the page container.") }}
+    </div>
+
+    <div class="subsection">
+      <h3>Date and time range</h3>
+      <div class="date-time-grid">
+        {{ text_field("start-date", "Start date", field_type="date") }}
+        {{ text_field("start-time", "Start time", field_type="time") }}
+        {{ text_field("end-date", "End date", field_type="date") }}
+        {{ text_field("end-time", "End time", field_type="time") }}
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3>Task-management compound fields</h3>
+      <div class="compound-field">
+        {{ select_field("score-condition", "Score condition", [("greater", "Greater than"), ("equal", "Equal to"), ("less", "Less than")], selected="greater") }}
+        {{ text_field("importance-score", "Importance score", field_type="number", helper_text="Enter a score from 0 to 999.", extra_attributes='min="0" max="999" inputmode="numeric"') }}
+      </div>
+      <div class="compound-field">
+        {{ select_field("location-condition", "Location criterion", [("starts", "Starts with"), ("contains", "Contains"), ("equals", "Equals")], selected="contains") }}
+        {{ text_field("location-value", "Location value", helper_text="The feature supplies the permitted criteria.") }}
+      </div>
+    </div>
+  </section>
+
+  <section class="catalogue-section" aria-labelledby="actions-title">
+    <div class="section-heading">
+      <h2 id="actions-title">Buttons and actions</h2>
+      <p>Shared markup provides accessible presentation. Features decide which actions exist and enforce authorisation in their service layer.</p>
+    </div>
+    <div class="wrapping-actions">
+      {{ button("Primary action") }}
+      {{ button("Secondary action", "secondary") }}
+      {{ button("Text action", "text") }}
+      {{ button("Disabled action", disabled=true) }}
+      {{ icon_button("Example information", "information") }}
+      {{ action_menu("Generic menu", generic_actions) }}
+      {{ action_menu("Task actions", task_actions, 2) }}
+    </div>
+  </section>
+
+  <section class="catalogue-section" aria-labelledby="feedback-title">
+    <div class="section-heading">
+      <h2 id="feedback-title">Dialogs and feedback</h2>
+      <p>Native dialog semantics keep focus and Escape behaviour without a JavaScript framework.</p>
+    </div>
+    <div class="wrapping-actions">
+      {{ button("Open example dialog", attributes='data-dialog-open="example-dialog"') }}
+      {{ button("Show notification", "secondary", attributes='data-notification="Example notification. No data was saved."') }}
+    </div>
+    <dialog id="example-dialog" class="application-dialog">
+      <form method="dialog">
+        <header class="dialog-header">
+          <h2>Example responsive dialog</h2>
+          {{ icon_button("Close dialog", "close", "data-dialog-close") }}
+        </header>
+        <div class="dialog-content">
+          <p>The dialog fits narrow screens and uses native focus and dismissal behaviour.</p>
+          {{ text_area("dialog-input", "Example dialog input") }}
+        </div>
+        <footer class="dialog-actions">{{ button("Close", "secondary", attributes="data-dialog-close") }}</footer>
+      </form>
+    </dialog>
+  </section>
+
+  <section class="catalogue-section" aria-labelledby="table-title">
+    <div class="section-heading">
+      <h2 id="table-title">Data table</h2>
+      <p>On small screens, the table scrolls inside its labelled region rather than widening the document.</p>
+    </div>
+    {{ data_table("Example records", example_columns, example_rows) }}
+  </section>
+{% endblock %}

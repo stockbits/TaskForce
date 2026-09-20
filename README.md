@@ -1,47 +1,60 @@
-# TaskForce clean architecture
+# TaskForce Python foundation
 
-This branch contains the new application foundation. The previous feature implementation remains available on the main branch while features are redesigned and migrated deliberately.
+TaskForce is a mobile-first FastAPI application rendered with Jinja templates.
+It installs and runs with Python and pip only. The application has no Node,
+npm, React, Vite, Material UI, CDN, or browser package-manager dependency.
+
+The previous full React implementation remains available on the `Refactor`
+branch at commit `f9e4c3e` while features are migrated deliberately. Task
+Management read-only search, filtering, selection and CSV export are now wired.
+
+## Requirements
+
+- Python 3.12 or newer
+- pip
+
+## Local setup
+
+```bash
+python -m venv .venv
+```
+
+Activate the virtual environment and install the development requirements:
+
+```bash
+python -m pip install -r requirements-development.txt
+```
+
+Start the application:
+
+```bash
+python -m uvicorn taskforce.application:application --reload
+```
+
+Open `http://127.0.0.1:8000`. The component catalogue is available at
+`/component-library`, and the responsive harness is available at
+`/validation/responsive-preview`.
+
+## Validation
+
+```bash
+python -m pytest
+python -m ruff check .
+python -m ruff format --check .
+```
 
 ## Structure
 
-- `src/application`: application entry point, providers, layout, and navigation
-- `src/features`: self-contained business features
-- `src/shared`: reusable components, theme, types, and utilities
-- `src/styles`: global styling
-- `documentation`: architecture and migration guidance
+- `taskforce/application.py`: FastAPI application composition
+- `taskforce/routes`: HTTP route modules
+- `taskforce/features`: feature-owned models, queries, repositories, services and routes
+- `taskforce/templates/components`: business-independent Jinja macros
+- `taskforce/templates/features`: feature-owned pages and compositions
+- `taskforce/static`: local styles, scripts, and semantic icon catalogue
+- `taskforce/view_models`: presentation-only Python models
+- `tests`: route and architecture validation
+- `documentation`: architectural and migration guidance
 
-See `documentation/component-catalogue.md` for the main-branch component
-inventory and the old-to-new migration decisions.
-
-## Naming
-
-- React components use PascalCase and descriptive full words.
-- Hooks use camelCase and start with `use`.
-- Utility files use camelCase.
-- Folders use lowercase kebab-case.
-- File and folder names do not contain spaces.
-- Avoid abbreviations in project-owned names.
-- External contract fields are not renamed without an adapter.
-
-## Commands
-
-```bash
-npm install
-npm run dev
-npm run build
-npm run lint
-node --test validation/foundation.test.mjs
-```
-
-## Preview the foundation
-
-Open **Component Library** in the navigation to try the reusable controls.
-Task Management and Live Schedule remain placeholders.
-
-For mobile checks, open `/validation/responsive-preview.html` on the development
-server. Select a viewport width and text scale, navigate inside the preview, and
-use **Measure overflow**. Also check with browser zoom and a real mobile device.
-The validation harness is development-only and excluded from the production build.
-
-Build, lint, and six architecture checks pass. Visual browser validation is
-pending; see `documentation/architecture.md` for the checklist and limitations.
+Project-owned Python modules use descriptive snake_case names. Templates,
+styles, and scripts use lowercase kebab-case paths. Avoid abbreviations unless
+they are part of an external contract that is adapted at the boundary.

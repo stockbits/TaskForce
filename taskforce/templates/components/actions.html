@@ -1,0 +1,37 @@
+{% from "components/icons.html" import icon %}
+
+{% macro button(label, variant='primary', icon_name=None, disabled=False, attributes='') -%}
+<button class="button button-{{ variant }}" type="button" {% if disabled %}disabled{% endif %} {{ attributes | safe }}>
+  <span>{{ label }}</span>
+  {% if icon_name %}{{ icon(icon_name) }}{% endif %}
+</button>
+{%- endmacro %}
+
+{% macro icon_button(label, icon_name, attributes='') -%}
+<button class="icon-button" type="button" aria-label="{{ label }}" title="{{ label }}" {{ attributes | safe }}>
+  {{ icon(icon_name) }}
+</button>
+{%- endmacro %}
+
+{% macro action_menu(label, items, count=None) -%}
+<details class="action-menu">
+  <summary class="button button-secondary">
+    <span>{{ label }}{% if count is not none %} ({{ count }}){% endif %}</span>
+    {{ icon("more") }}
+  </summary>
+  <div class="menu-surface" role="menu" aria-label="{{ label }}">
+    {% for item in items %}
+      <button
+        type="button"
+        role="menuitem"
+        class="menu-item{% if item.destructive %} destructive-action{% endif %}"
+        {% if item.disabled %}disabled{% endif %}
+        data-notification="{{ item.message }}"
+      >
+        {% if item.icon_name %}{{ icon(item.icon_name) }}{% endif %}
+        <span>{{ item.label }}</span>
+      </button>
+    {% endfor %}
+  </div>
+</details>
+{%- endmacro %}

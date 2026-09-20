@@ -1,0 +1,14 @@
+{% macro page_header(eyebrow, title, description) -%}
+<header class="page-header">
+  <p class="eyebrow">{{ eyebrow }}</p>
+  <h1>{{ title }}</h1>
+  <p class="page-description">{{ description }}</p>
+</header>
+{%- endmacro %}
+
+{% macro placeholder(title, description) -%}
+<section class="card placeholder-card">
+  <h2>{{ title }}</h2>
+  <p>{{ description }}</p>
+</section>
+{%- endmacro %}
