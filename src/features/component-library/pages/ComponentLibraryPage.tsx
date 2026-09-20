@@ -14,6 +14,7 @@ import { useNotification } from "@shared/components/notifications/NotificationPr
 import InputFieldExamples, {
   exampleSelectionOptions,
 } from "../examples/InputFieldExamples";
+import ActionExamples from "../examples/ActionExamples";
 
 const exampleRows = exampleSelectionOptions.map((option) => ({
   id: option.identifier,
@@ -39,29 +40,39 @@ export default function ComponentLibraryPage() {
       />
       <Stack spacing={6}>
         <InputFieldExamples />
-        <Stack direction="row" useFlexGap flexWrap="wrap" spacing={3}>
-          <ApplicationButton
-            variant="contained"
-            onClick={() => setDialogOpen(true)}
-          >
-            Open example dialog
-          </ApplicationButton>
-          <ApplicationButton
-            variant="outlined"
-            onClick={(event) => setPopoverAnchor(event.currentTarget)}
-          >
-            Open example popover
-          </ApplicationButton>
-          <ApplicationTooltip title="This notification contains example text only.">
+        <ActionExamples />
+        <Box>
+          <Typography component="h2" variant="h5" gutterBottom>
+            Dialogs and feedback
+          </Typography>
+          <Typography color="text.secondary" sx={{ mb: 3 }}>
+            Overlay controls keep focus and dismissal behaviour within Material
+            UI contracts.
+          </Typography>
+          <Stack direction="row" useFlexGap flexWrap="wrap" spacing={3}>
             <ApplicationButton
-              onClick={() =>
-                notify("Example notification. No data was saved.", "success")
-              }
+              variant="contained"
+              onClick={() => setDialogOpen(true)}
             >
-              Show notification
+              Open example dialog
             </ApplicationButton>
-          </ApplicationTooltip>
-        </Stack>
+            <ApplicationButton
+              variant="outlined"
+              onClick={(event) => setPopoverAnchor(event.currentTarget)}
+            >
+              Open example popover
+            </ApplicationButton>
+            <ApplicationTooltip title="This notification contains example text only.">
+              <ApplicationButton
+                onClick={() =>
+                  notify("Example notification. No data was saved.", "success")
+                }
+              >
+                Show notification
+              </ApplicationButton>
+            </ApplicationTooltip>
+          </Stack>
+        </Box>
         <ExpandableSection title="Long content and keyboard behaviour">
           <Typography>
             These controls inherit the shared theme, preserve keyboard

@@ -43,14 +43,18 @@ selection, and narrow-screen compound layouts, live in
 
 ## Actions and icons
 
-| Main-branch component         | Clean destination                                     | Decision and status                                                                            |
-| ----------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `AppButton`                   | `shared/components/buttons/ApplicationButton.tsx`     | Rebuilt. Shared theme owns appearance and touch-target sizing.                                 |
-| Icon imports and `ThemedIcon` | `shared/icons/applicationIcons.ts`                    | Consolidated into named semantic exports; direct Material UI icon imports are lint-restricted. |
-| Icon-only actions             | `shared/components/buttons/ApplicationIconButton.tsx` | Added. An accessible label is required.                                                        |
-| `BulkTaskActions`             | Task Management                                       | Queued. It is a task workflow, not a shared menu.                                              |
-| `TaskActionsMenu`             | Task Management                                       | Queued. Rebuild from task permissions and callbacks.                                           |
-| `TaskRowContextMenu`          | Task Management                                       | Queued. Right-click may be supplementary, never the only action path.                          |
+| Main-branch component         | Clean destination                                                 | Decision and status                                                                                                                                                    |
+| ----------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AppButton`                   | `shared/components/buttons/ApplicationButton.tsx`                 | Rebuilt. Shared theme owns appearance and touch-target sizing.                                                                                                         |
+| Icon imports and `ThemedIcon` | `shared/icons/applicationIcons.ts`                                | Consolidated into named semantic exports; direct Material UI icon imports are lint-restricted.                                                                         |
+| Icon-only actions             | `shared/components/buttons/ApplicationIconButton.tsx`             | Added. An accessible label is required.                                                                                                                                |
+| `BulkTaskActions`             | `features/task-management/components/actions/BulkTaskActions.tsx` | Rebuilt with typed selected tasks, explicit permissions, and callbacks.                                                                                                |
+| `TaskActionsMenu`             | Task action builder plus `shared/components/menus/ActionMenu.tsx` | Split. Generic presentation is shared; task wording and availability remain in the feature.                                                                            |
+| `TaskRowContextMenu`          | `features/task-management/components/actions/TaskRowActions.tsx`  | Replaced by a visible row-action button usable with touch, keyboard, and pointer. A future right-click shortcut may call the same actions but cannot be the only path. |
+
+Task action permissions determine which controls are presented. They are not a
+security boundary: repositories and APIs must independently enforce the current
+user's authorisation when an action is executed.
 
 ## Containers and feedback
 
@@ -76,8 +80,9 @@ selection, and narrow-screen compound layouts, live in
 ## Migration sequence
 
 1. Input fields — completed in the foundation catalogue.
-2. Buttons, action menus, and task permissions.
-3. Table primitives, task columns, filters, and responsive row actions.
+2. Buttons, action menus, and task permissions — completed in the foundation
+   catalogue.
+3. Table primitives, task columns, filters, and responsive table composition.
 4. Dialog and detail-window feature composition.
 5. Live Schedule search, summaries, and schedule interactions.
 6. Review candidate components after real feature migrations; remove wrappers

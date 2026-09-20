@@ -132,3 +132,29 @@ test("domain-specific compound fields remain inside their feature", () => {
     ),
   );
 });
+
+test("task actions are typed and remain inside task management", () => {
+  const actionDirectory = resolve(
+    sourceDirectory,
+    "features/task-management/components/actions",
+  );
+  const actionFiles = collectFiles(actionDirectory);
+  assert.ok(actionFiles.length >= 4);
+  for (const file of actionFiles) {
+    assert.doesNotMatch(
+      readFileSync(file, "utf8"),
+      /\bany\b/,
+      relative(sourceDirectory, file) + " uses any",
+    );
+  }
+  assert.ok(
+    existsSync(
+      resolve(sourceDirectory, "shared/components/menus/ActionMenu.tsx"),
+    ),
+  );
+  assert.ok(
+    !existsSync(
+      resolve(sourceDirectory, "shared/components/menus/TaskActionsMenu.tsx"),
+    ),
+  );
+});

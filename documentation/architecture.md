@@ -59,6 +59,9 @@ LightThemeIcon. Do not build a dynamic map containing every library icon.
 | Original component                    | Foundation                                                          |
 | ------------------------------------- | ------------------------------------------------------------------- |
 | AppButton                             | ApplicationButton; shared theme owns styling                        |
+| TaskActionsMenu                       | Generic ActionMenu plus feature-owned task action builder           |
+| BulkTaskActions                       | Typed task-management component with explicit permissions           |
+| TaskRowContextMenu                    | Visible, accessible TaskRowActions control                          |
 | BaseField, FieldLabel, FieldContainer | Native labelled Material UI fields; no additional wrapper hierarchy |
 | SelectField, SingleSelectField        | SelectionField for searchable choices                               |
 | MultiSelectField                      | MultipleSelectionField with filtered actions and selection limits   |
@@ -70,7 +73,7 @@ LightThemeIcon. Do not build a dynamic map containing every library icon.
 | SnackbarNotificationProvider          | NotificationProvider                                                |
 | CustomTooltip                         | ApplicationTooltip for supplementary help                           |
 | ResponsiveDataGrid                    | ApplicationDataTable; feature supplies rows and columns             |
-| TaskTableMUI, TaskActionsMenu         | Deferred to task-management migration                               |
+| TaskTableMUI                          | Deferred to task-management table migration                         |
 | ScheduleLiveSearch, TaskTooltip       | Deferred to live-schedule migration                                 |
 | CombinedLocationField, ImpScoreField  | Rebuilt as task-management feature fields                           |
 | DateTimeRangePopover                  | DateTimeRangeField composed with ApplicationPopover when required   |

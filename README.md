@@ -43,5 +43,5 @@ server. Select a viewport width and text scale, navigate inside the preview, and
 use **Measure overflow**. Also check with browser zoom and a real mobile device.
 The validation harness is development-only and excluded from the production build.
 
-Build, lint, and four architecture checks pass. Visual browser validation is
+Build, lint, and six architecture checks pass. Visual browser validation is
 pending; see `documentation/architecture.md` for the checklist and limitations.
