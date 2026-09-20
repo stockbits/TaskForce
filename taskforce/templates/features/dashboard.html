@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "components/page.html" import page_header %}
+{% from "components/icons.html" import icon %}
+
+{% block content %}
+  {{ page_header("Workspace", page_title, page_description) }}
+  <div class="card-grid">
+    <article class="card">
+      {{ icon("tasks") }}
+      <h2>Task Management</h2>
+      <p>Search, filters, tables, progression and notes will be migrated within one feature boundary.</p>
+      <a class="text-link" href="{{ url_for('task_management') }}">Open Task Management</a>
+    </article>
+    <article class="card">
+      {{ icon("calendar") }}
+      <h2>Live Schedule</h2>
+      <p>Operational schedule views will reuse the shared shell without owning global layout.</p>
+      <a class="text-link" href="{{ url_for('live_schedule') }}">Open Live Schedule</a>
+    </article>
+    <article class="card">
+      {{ icon("components") }}
+      <h2>Component Library</h2>
+      <p>Review responsive, reusable controls before using them in a business feature.</p>
+      <a class="text-link" href="{{ url_for('component_library') }}">Open Component Library</a>
+    </article>
+  </div>
+{% endblock %}

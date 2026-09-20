@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% from "components/page.html" import page_header, placeholder %}
+
+{% block content %}
+  {{ page_header("Application", page_title, page_description) }}
+  {{ placeholder(
+    "Settings foundation",
+    "Theme preference is available in the header. Authorisation and administration settings will be added with their real service contracts."
+  ) }}
+{% endblock %}

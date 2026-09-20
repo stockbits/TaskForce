@@ -1,0 +1,19 @@
+{% macro data_table(caption, columns, rows) -%}
+<div class="table-scroll" tabindex="0" role="region" aria-label="{{ caption }} table; scroll horizontally to see all columns">
+  <table>
+    <caption>{{ caption }}</caption>
+    <thead>
+      <tr>
+        {% for column in columns %}<th scope="col">{{ column.label }}</th>{% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+        <tr>
+          {% for column in columns %}<td>{{ row[column.identifier] }}</td>{% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{%- endmacro %}

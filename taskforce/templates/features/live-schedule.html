@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% from "components/page.html" import page_header, placeholder %}
+
+{% block content %}
+  {{ page_header("Feature workspace", page_title, page_description) }}
+  {{ placeholder(
+    "Ready for schedule migration",
+    "Live Schedule will own matching rules, schedule records and interactions while reusing the application shell and controls."
+  ) }}
+{% endblock %}

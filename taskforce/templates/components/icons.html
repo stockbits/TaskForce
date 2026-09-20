@@ -1,0 +1,5 @@
+{% macro icon(name, label=None) -%}
+<svg class="application-icon" {% if label %}role="img" aria-label="{{ label }}"{% else %}aria-hidden="true"{% endif %}>
+  <use href="/static/icons/application-icons.svg#{{ name }}"></use>
+</svg>
+{%- endmacro %}

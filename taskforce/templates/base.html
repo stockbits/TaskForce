@@ -1,0 +1,48 @@
+{% from "components/icons.html" import icon %}
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>{{ page_title }} · TaskForce</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='styles/application.css') }}">
+    <script src="{{ url_for('static', path='scripts/application.js') }}" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <header class="application-header">
+      <button class="icon-button navigation-toggle" type="button" aria-label="Open navigation" aria-controls="application-navigation" aria-expanded="false" data-navigation-toggle>
+        {{ icon("menu") }}
+      </button>
+      <a class="brand" href="{{ url_for('dashboard') }}">TaskForce</a>
+      <button class="icon-button" type="button" aria-label="Change colour theme" data-theme-toggle>
+        {{ icon("theme") }}
+      </button>
+    </header>
+
+    <div class="application-shell">
+      <button class="navigation-backdrop" type="button" aria-label="Close navigation" data-navigation-close></button>
+      <aside class="application-navigation" id="application-navigation" aria-label="Primary navigation">
+        <nav>
+          <ul>
+            {% for item in navigation_items %}
+              <li>
+                <a href="{{ url_for(item.route_name) }}" {% if current_path == item.path %}aria-current="page"{% endif %}>
+                  {{ icon(item.icon_name) }}
+                  <span>{{ item.label }}</span>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </nav>
+      </aside>
+
+      <main id="main-content" class="page-container" tabindex="-1">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+
+    <div class="notification" role="status" aria-live="polite" aria-atomic="true" hidden data-notification-region></div>
+  </body>
+</html>
