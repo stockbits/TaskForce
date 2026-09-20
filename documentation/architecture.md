@@ -61,7 +61,8 @@ LightThemeIcon. Do not build a dynamic map containing every library icon.
 | AppButton                             | ApplicationButton; shared theme owns styling                        |
 | BaseField, FieldLabel, FieldContainer | Native labelled Material UI fields; no additional wrapper hierarchy |
 | SelectField, SingleSelectField        | SelectionField for searchable choices                               |
-| MultiSelectField                      | MultipleSelectionField with wrapping selected labels                |
+| MultiSelectField                      | MultipleSelectionField with filtered actions and selection limits   |
+| FreeTypeSelectField                   | CreatableSelectionField; consumer supplies suggestions              |
 | GlobalSearchField                     | SearchField; no mock-data dependency                                |
 | SectionExpandableCard                 | ExpandableSection                                                   |
 | DraggableDialog                       | ApplicationDialog; no unbounded drag offsets                        |
@@ -71,8 +72,11 @@ LightThemeIcon. Do not build a dynamic map containing every library icon.
 | ResponsiveDataGrid                    | ApplicationDataTable; feature supplies rows and columns             |
 | TaskTableMUI, TaskActionsMenu         | Deferred to task-management migration                               |
 | ScheduleLiveSearch, TaskTooltip       | Deferred to live-schedule migration                                 |
-| CombinedLocationField, ImpScoreField  | Domain fields remain deferred                                       |
-| DateTimeRangePopover                  | ApplicationPopover shell only; date-range behaviour deferred        |
+| CombinedLocationField, ImpScoreField  | Rebuilt as task-management feature fields                           |
+| DateTimeRangePopover                  | DateTimeRangeField composed with ApplicationPopover when required   |
+
+The full inventory, decisions, and migration order are recorded in
+`documentation/component-catalogue.md`.
 
 ## Validation
 

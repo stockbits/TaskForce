@@ -1,21 +1,18 @@
 import { useId } from "react";
 import { Autocomplete, TextField } from "@mui/material";
-export interface SelectionOption {
-  identifier: string;
+
+export interface CreatableSelectionFieldProperties {
   label: string;
-  disabled?: boolean;
-}
-export interface SelectionFieldProperties {
-  label: string;
-  options: SelectionOption[];
-  value: SelectionOption | null;
-  onChange: (value: SelectionOption | null) => void;
+  options: string[];
+  value: string | null;
+  onChange: (value: string | null) => void;
   disabled?: boolean;
   required?: boolean;
   error?: boolean;
   helperText?: string;
 }
-export default function SelectionField({
+
+export default function CreatableSelectionField({
   label,
   options,
   value,
@@ -24,21 +21,21 @@ export default function SelectionField({
   required,
   error,
   helperText,
-}: SelectionFieldProperties) {
+}: CreatableSelectionFieldProperties) {
   const identifier = useId();
+
   return (
     <Autocomplete
       id={identifier}
+      freeSolo
       fullWidth
       options={options}
       value={value}
       disabled={disabled}
       onChange={(_event, selection) => onChange(selection)}
-      isOptionEqualToValue={(option, selection) =>
-        option.identifier === selection.identifier
-      }
-      getOptionLabel={(option) => option.label}
-      getOptionDisabled={(option) => Boolean(option.disabled)}
+      onInputChange={(_event, inputValue, reason) => {
+        if (reason === "input") onChange(inputValue || null);
+      }}
       renderInput={(parameters) => (
         <TextField
           {...parameters}

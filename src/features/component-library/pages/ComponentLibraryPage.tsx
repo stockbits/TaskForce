@@ -5,28 +5,17 @@ import PageContainer from "@shared/components/page-container/PageContainer";
 import PageHeader from "@shared/components/page-header/PageHeader";
 import ApplicationButton from "@shared/components/buttons/ApplicationButton";
 import TextInputField from "@shared/components/fields/TextInputField";
-import SelectionField, {
-  type SelectionOption,
-} from "@shared/components/fields/SelectionField";
-import MultipleSelectionField from "@shared/components/fields/MultipleSelectionField";
-import SearchField from "@shared/components/fields/SearchField";
 import ExpandableSection from "@shared/components/cards/ExpandableSection";
 import ApplicationDialog from "@shared/components/dialogs/ApplicationDialog";
 import ApplicationPopover from "@shared/components/popovers/ApplicationPopover";
 import ApplicationDataTable from "@shared/components/tables/ApplicationDataTable";
 import ApplicationTooltip from "@shared/components/tooltips/ApplicationTooltip";
 import { useNotification } from "@shared/components/notifications/NotificationProvider";
+import InputFieldExamples, {
+  exampleSelectionOptions,
+} from "../examples/InputFieldExamples";
 
-const exampleOptions: SelectionOption[] = [
-  { identifier: "planning", label: "Planning" },
-  { identifier: "delivery", label: "Delivery" },
-  {
-    identifier: "long-label",
-    label:
-      "An intentionally long selection label to check wrapping on narrow screens",
-  },
-];
-const exampleRows = exampleOptions.map((option) => ({
+const exampleRows = exampleSelectionOptions.map((option) => ({
   id: option.identifier,
   name: option.label,
   status: "Example only",
@@ -38,9 +27,6 @@ const exampleColumns: GridColDef<(typeof exampleRows)[number]>[] = [
 
 /** Disposable examples only. No business data, persistence or feature workflows. */
 export default function ComponentLibraryPage() {
-  const [search, setSearch] = useState("");
-  const [selection, setSelection] = useState<SelectionOption | null>(null);
-  const [selections, setSelections] = useState<SelectionOption[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [popoverAnchor, setPopoverAnchor] = useState<HTMLElement | null>(null);
   const notify = useNotification();
@@ -52,48 +38,7 @@ export default function ComponentLibraryPage() {
         description="Try the shared controls at different screen sizes. All values here are examples and are not saved."
       />
       <Stack spacing={6}>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: {
-              xs: "minmax(0, 1fr)",
-              lg: "repeat(2, minmax(0, 1fr))",
-            },
-            gap: 6,
-          }}
-        >
-          <TextInputField
-            label="Example name"
-            helperText="Long content should remain usable without widening the page."
-          />
-          <SearchField
-            label="Search examples"
-            value={search}
-            onChange={setSearch}
-          />
-          <SelectionField
-            label="Example selection"
-            options={exampleOptions}
-            value={selection}
-            onChange={setSelection}
-          />
-          <MultipleSelectionField
-            label="Multiple selections"
-            options={exampleOptions}
-            value={selections}
-            onChange={setSelections}
-          />
-          <TextInputField
-            label="Example validation"
-            error
-            helperText="A longer validation message should wrap and remain readable."
-          />
-          <TextInputField
-            label="Disabled example"
-            disabled
-            value="Unavailable"
-          />
-        </Box>
+        <InputFieldExamples />
         <Stack direction="row" useFlexGap flexWrap="wrap" spacing={3}>
           <ApplicationButton
             variant="contained"
@@ -135,9 +80,7 @@ export default function ComponentLibraryPage() {
           </Typography>
           <ApplicationDataTable
             label="Example records"
-            rows={exampleRows.filter((row) =>
-              row.name.toLowerCase().includes(search.toLowerCase()),
-            )}
+            rows={exampleRows}
             columns={exampleColumns}
             pageSizeOptions={[5, 10]}
             initialState={{

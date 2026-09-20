@@ -10,6 +10,9 @@ This branch contains the new application foundation. The previous feature implem
 - `src/styles`: global styling
 - `documentation`: architecture and migration guidance
 
+See `documentation/component-catalogue.md` for the main-branch component
+inventory and the old-to-new migration decisions.
+
 ## Naming
 
 - React components use PascalCase and descriptive full words.

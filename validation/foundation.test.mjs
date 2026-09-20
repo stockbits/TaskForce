@@ -102,3 +102,33 @@ test("Material UI icon imports are centralised and explicit", () => {
     assert.notEqual(dependency.specifier, "@mui/icons-material");
   }
 });
+
+test("domain-specific compound fields remain inside their feature", () => {
+  const sharedFieldsDirectory = resolve(
+    sourceDirectory,
+    "shared/components/fields",
+  );
+  const sharedFieldNames = new Set(
+    collectFiles(sharedFieldsDirectory).map((file) =>
+      relative(sharedFieldsDirectory, file),
+    ),
+  );
+  assert.ok(!sharedFieldNames.has("ImportanceScoreField.tsx"));
+  assert.ok(!sharedFieldNames.has("LocationCriterionField.tsx"));
+  assert.ok(
+    existsSync(
+      resolve(
+        sourceDirectory,
+        "features/task-management/components/fields/ImportanceScoreField.tsx",
+      ),
+    ),
+  );
+  assert.ok(
+    existsSync(
+      resolve(
+        sourceDirectory,
+        "features/task-management/components/fields/LocationCriterionField.tsx",
+      ),
+    ),
+  );
+});
