@@ -1,63 +1,26 @@
-import { defineConfig } from "vite";
+import { fileURLToPath, URL } from "node:url";
 import react from "@vitejs/plugin-react";
-import path from "path";
-import { fileURLToPath } from "url";
+import { defineConfig } from "vite";
 
-/* =====================================================
-   ESM-safe __dirname Replacement
-===================================================== */
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-/* =====================================================
-   Vite Multi-Page App Support (Main + Popup)
-===================================================== */
 export default defineConfig({
   plugins: [react()],
-
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "@types": path.resolve(__dirname, "./src/types"),
-      "@lib": path.resolve(__dirname, "./src/lib"),
-      "@hooks": path.resolve(__dirname, "./src/lib/hooks"),
-      "@utils": path.resolve(__dirname, "./src/lib/utils"),
-      "@features": path.resolve(__dirname, "./src/features"),
-      "@shared": path.resolve(__dirname, "./src/shared"),
-      "@config": path.resolve(__dirname, "./src/shared/config"),
-      "@ui": path.resolve(__dirname, "./src/shared/ui"),
-      "@layout": path.resolve(__dirname, "./src/layout"),
-      "@components": path.resolve(__dirname, "./src/components"),
-    },
+      "@application": fileURLToPath(new URL("./src/application", import.meta.url)),
+      "@features": fileURLToPath(new URL("./src/features", import.meta.url)),
+      "@shared": fileURLToPath(new URL("./src/shared", import.meta.url)),
+      "@styles": fileURLToPath(new URL("./src/styles", import.meta.url))
+    }
   },
-
   build: {
     outDir: "dist",
     sourcemap: false,
     emptyOutDir: true,
-    chunkSizeWarningLimit: 1500,
-
-    // Build configuration
-    rollupOptions: {
-      input: {
-        main: path.resolve(__dirname, "index.html"),
-      },
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          mui: ['@mui/material', '@mui/icons-material', '@mui/x-data-grid', '@emotion/react', '@emotion/styled'],
-        },
-      },
-    },
+    chunkSizeWarningLimit: 1500
   },
-
   server: {
     port: 5173,
     open: true,
-    strictPort: true,
-  },
-
-  optimizeDeps: {
-    include: ["react", "react-dom"],
-  },
+    strictPort: true
+  }
 });

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>TaskForce responsive validation</title>
+    <style>
+      body {
+        font: 16px system-ui;
+        margin: 16px;
+        background: #e5eaf2;
+        color: #14243a;
+      }
+      label {
+        display: inline-block;
+        margin: 8px;
+      }
+      input,
+      select,
+      button {
+        font: inherit;
+        padding: 8px;
+      }
+      iframe {
+        display: block;
+        border: 1px solid #526079;
+        background: white;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Responsive validation</h1>
+    <p>
+      Development-only harness. Frame dimensions exercise real CSS viewport
+      breakpoints; text scale changes the frame root font size.
+    </p>
+    <label
+      >Viewport width
+      <select id="width">
+        <option>320</option>
+        <option>375</option>
+        <option>390</option>
+        <option>768</option>
+        <option>1024</option>
+        <option>1440</option>
+        <option>844</option>
+      </select></label
+    >
+    <label
+      >Viewport height <input id="height" type="number" min="240" value="800"
+    /></label>
+    <label
+      >Text scale
+      <select id="scale">
+        <option value="100">100%</option>
+        <option value="200">200%</option>
+      </select></label
+    >
+    <button id="measure">Measure overflow</button>
+    <output id="result" aria-live="polite"></output>
+    <iframe
+      title="Application preview"
+      id="preview"
+      src="/"
+      width="320"
+      height="800"
+    ></iframe>
+    <script type="module">
+      const frame = document.querySelector("#preview");
+      const width = document.querySelector("#width");
+      const height = document.querySelector("#height");
+      const scale = document.querySelector("#scale");
+      function applyDimensions() {
+        frame.width = width.value;
+        frame.height = height.value;
+        if (frame.contentDocument)
+          frame.contentDocument.documentElement.style.fontSize =
+            scale.value + "%";
+      }
+      for (const input of [width, height, scale])
+        input.addEventListener("change", applyDimensions);
+      frame.addEventListener("load", applyDimensions);
+      document.querySelector("#measure").addEventListener("click", () => {
+        const documentElement = frame.contentDocument.documentElement;
+        const overflow =
+          documentElement.scrollWidth - documentElement.clientWidth;
+        document.querySelector("#result").textContent =
+          overflow > 1
+            ? "FAIL: page overflow " + overflow + "px"
+            : "PASS: no page overflow";
+      });
+    </script>
+  </body>
+</html>
