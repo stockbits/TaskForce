@@ -17,6 +17,11 @@ def test_node_build_files_are_absent() -> None:
     for relative_path in forbidden_paths:
         assert not (PROJECT_DIRECTORY / relative_path).exists(), relative_path
 
+    legacy_source_directory = PROJECT_DIRECTORY / "src"
+    assert not any(
+        path.is_file() for path in legacy_source_directory.rglob("*")
+    ), "src contains legacy frontend files"
+
 
 def test_application_paths_use_descriptive_names_without_spaces() -> None:
     for path in APPLICATION_DIRECTORY.rglob("*"):
