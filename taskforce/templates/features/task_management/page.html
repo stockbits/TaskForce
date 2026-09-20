@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% from "components/page.html" import page_header %}
+{% from "components/forms.html" import text_field, select_field %}
+{% from "components/actions.html" import button %}
+{% from "components/icons.html" import icon %}
+{% from "features/task_management/components.html" import multiple_filter, row_action_menu %}
+
+{% block content %}
+  {{ page_header("Operational workspace", page_title, page_description) }}
+
+  <form class="task-search-card card" method="get" action="{{ url_for('task_management') }}">
+    <div class="task-search-heading">
+      <div>
+        <h2>Find tasks</h2>
+        <p>Use global search, or select Division, Domain and Task Status.</p>
+      </div>
+      <div class="global-search-row">
+        {{ text_field("task_search", "Global search", value=criteria.task_search, field_type="search", helper_text="Task, work, estimate, employee, resource, asset or description.") }}
+        <button class="button button-primary" type="submit">{{ icon("search") }}<span>Search</span></button>
+      </div>
+    </div>
+
+    <details class="filter-section" open>
+      <summary>Basic filters</summary>
+      <div class="task-filter-grid">
+        {{ multiple_filter("division", "Division", filter_options.divisions, criteria.divisions, true) }}
+        {{ multiple_filter("domain_identifier", "Domain", filter_options.domain_identifiers, criteria.domain_identifiers, true) }}
+        {{ multiple_filter("task_status", "Task status", filter_options.statuses, criteria.statuses, true) }}
+        {{ multiple_filter("planning_work_area", "Planning work area", filter_options.planning_work_areas, criteria.planning_work_areas) }}
+        {{ multiple_filter("capability", "Capabilities", filter_options.capabilities, criteria.capabilities) }}
+      </div>
+    </details>
+
+    <details class="filter-section">
+      <summary>Advanced filters</summary>
+      <div class="task-filter-grid">
+        {{ multiple_filter("commitment_type", "Commitment type", filter_options.commitment_types, criteria.commitment_types) }}
+        {{ multiple_filter("response_code", "Response code", filter_options.response_codes, criteria.response_codes) }}
+        {{ text_field("requester", "Requester", value=criteria.requester, extra_attributes='list="requester-options"') }}
+        <datalist id="requester-options">{% for option in filter_options.requesters %}<option value="{{ option }}"></option>{% endfor %}</datalist>
+        {{ text_field("job_type", "Job type", value=criteria.job_type, extra_attributes='list="job-type-options"') }}
+        <datalist id="job-type-options">{% for option in filter_options.job_types %}<option value="{{ option }}"></option>{% endfor %}</datalist>
+        <div class="compound-field task-compound-filter">
+          {{ select_field("score_condition", "Score condition", [("", "Any"), ("greater-than", "Greater than"), ("equal-to", "Equal to"), ("less-than", "Less than")], selected=criteria.score_condition.value if criteria.score_condition else "") }}
+          {{ text_field("score_value", "Importance score", value=criteria.score_value if criteria.score_value is not none else "", field_type="number", extra_attributes='min="0" max="999" inputmode="numeric"') }}
+        </div>
+        <div class="compound-field task-compound-filter">
+          {{ select_field("location_field", "Location field", [("", "Any"), ("postcode", "Postcode"), ("asset-name", "Asset name"), ("customer-address", "Customer address")], selected=criteria.location_field.value if criteria.location_field else "") }}
+          {{ text_field("location_value", "Location value", value=criteria.location_value) }}
+        </div>
+      </div>
+    </details>
+
+    <footer class="task-search-actions">
+      <a class="button button-secondary" href="{{ url_for('task_management') }}">Clear</a>
+      <button class="button button-primary" type="submit">Search tasks</button>
+    </footer>
+  </form>
+
+  {% if search_result.message %}
+    <p class="search-message{% if search_result.is_error %} search-message-error{% endif %}" role="{% if search_result.is_error %}alert{% else %}status{% endif %}">
+      {{ search_result.message }}
+    </p>
+  {% endif %}
+
+  {% if search_result.tasks %}
+    <section class="task-results" aria-labelledby="task-results-title">
+      <header class="task-results-toolbar">
+        <div>
+          <h2 id="task-results-title">Task results</h2>
+          <p><span data-selected-task-count>0</span> selected · {{ search_result.tasks | length }} results</p>
+        </div>
+        <div class="wrapping-actions">
+          <button class="button button-secondary" type="button" disabled data-selected-task-action data-notification="Open task action is ready for service wiring.">Open</button>
+          <button class="button button-secondary" type="button" disabled data-selected-task-action data-notification="Progress action is ready for service wiring.">Progress</button>
+          <a class="button button-secondary" href="{{ url_for('export_tasks') }}?{{ request.url.query }}">Export CSV</a>
+        </div>
+      </header>
+
+      <div class="table-scroll task-table-scroll" tabindex="0" role="region" aria-label="Task results table; scroll horizontally to see all columns">
+        <table class="task-table">
+          <caption>Filtered task results</caption>
+          <thead>
+            <tr>
+              <th class="selection-column" scope="col"><input type="checkbox" aria-label="Select all visible tasks" data-select-all-tasks></th>
+              <th scope="col">Task ID</th>
+              <th scope="col">Division</th>
+              <th scope="col">Domain</th>
+              <th scope="col">Status</th>
+              <th scope="col">Task type</th>
+              <th scope="col">Skill</th>
+              <th scope="col">Score</th>
+              <th scope="col">Resource</th>
+              <th scope="col">Postcode</th>
+              <th scope="col">Expected start</th>
+              <th class="actions-column" scope="col"><span class="visually-hidden">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for task in search_result.tasks %}
+              <tr>
+                <td class="selection-column"><input type="checkbox" value="{{ task.task_identifier }}" aria-label="Select {{ task.task_identifier }}" data-task-selection></td>
+                <th scope="row">{{ task.task_identifier }}</th>
+                <td>{{ task.division }}</td>
+                <td>{{ task.domain_identifier }}</td>
+                <td><span class="status-badge">{{ task.status }}</span></td>
+                <td>{{ task.task_type }}</td>
+                <td>{{ task.primary_skill }}</td>
+                <td>{{ task.importance_score }}</td>
+                <td>{{ task.resource_name or "Unassigned" }}</td>
+                <td>{{ task.postcode }}</td>
+                <td>{{ task.expected_start }}</td>
+                <td class="actions-column">{{ row_action_menu(task) }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% elif not criteria.has_search %}
+    <section class="card empty-state">
+      {{ icon("search") }}
+      <h2>No results yet</h2>
+      <p>Apply the filters above to populate the task table.</p>
+    </section>
+  {% endif %}
+{% endblock %}

@@ -47,12 +47,13 @@ adapters must enforce every task action independently.
 | Previous component | Python destination | Decision |
 | --- | --- | --- |
 | `ResponsiveDataGrid` | `templates/components/table.html` | Rebuilt as a semantic table inside a labelled horizontal-scroll region. |
-| `TaskTableMUI` | Task Management table composition | Queued; split querying, columns, filters, selection and actions. |
+| `TaskTableMUI` | `features/task_management` query service and feature table template | Read-only search, filters, visible row actions, selection and CSV export are migrated using synthetic example data. Persistence actions remain queued. |
 | `ScheduleLiveSearch` | Live Schedule route and template | Queued; schedule matching rules remain feature-owned. |
 | `TaskTooltip` | Visible schedule summary | Queued; task information cannot depend only on hover. |
 
 ## Current status
 
-The pip-only shell and non-persistent component catalogue are implemented.
-Business features remain placeholders. The next migration category is the Task
-Management domain contract, table, filters, selection and repository boundary.
+The pip-only shell and non-persistent component catalogue are implemented. Task
+Management now has a typed read-only vertical slice. The next migration category
+is task details and persisted progression/note actions, after defining the real
+data-service and authorisation boundary.

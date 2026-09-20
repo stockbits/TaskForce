@@ -4,8 +4,9 @@ TaskForce is a mobile-first FastAPI application rendered with Jinja templates.
 It installs and runs with Python and pip only. The application has no Node,
 npm, React, Vite, Material UI, CDN, or browser package-manager dependency.
 
-The previous React implementation remains available in Git history and on the
-`main` branch while features are migrated deliberately.
+The previous full React implementation remains available on the `Refactor`
+branch at commit `f9e4c3e` while features are migrated deliberately. Task
+Management read-only search, filtering, selection and CSV export are now wired.
 
 ## Requirements
 
@@ -46,6 +47,7 @@ python -m ruff format --check .
 
 - `taskforce/application.py`: FastAPI application composition
 - `taskforce/routes`: HTTP route modules
+- `taskforce/features`: feature-owned models, queries, repositories, services and routes
 - `taskforce/templates/components`: business-independent Jinja macros
 - `taskforce/templates/features`: feature-owned pages and compositions
 - `taskforce/static`: local styles, scripts, and semantic icon catalogue

@@ -3,6 +3,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
+from taskforce.features.task_management.routes import router as task_management_router
 from taskforce.routes.pages import router as page_router
 
 APPLICATION_DIRECTORY = Path(__file__).resolve().parent
@@ -20,6 +21,7 @@ def create_application() -> FastAPI:
         name="static",
     )
     application.include_router(page_router)
+    application.include_router(task_management_router)
     return application
 
 

@@ -22,8 +22,8 @@ to imitate Material UI's programming API.
 - `routes` translates HTTP requests into feature templates and view models.
 - `templates/components` contains reusable, business-independent macros.
 - `templates/features` owns page composition and business terminology.
-- Future `features` Python packages will own services, repositories, domain
-  models, validation, and authorisation decisions.
+- `features` Python packages own services, repositories, domain models,
+  validation, routes and authorisation decisions.
 - `static` contains the shared theme, progressive enhancement, and icons.
 
 Shared macros receive values and callbacks or form destinations through their
@@ -60,14 +60,16 @@ not an external library name.
 ## Migration order
 
 1. Validate the pip-only shell and component catalogue.
-2. Define task and resource domain models and repository interfaces.
-3. Migrate Task Management routes, filters, table and actions.
+2. Define task and resource domain models and repository interfaces — Task
+   Management task search is complete; shared resource contracts remain queued.
+3. Migrate Task Management routes, filters, table and actions — read-only
+   search, selection and CSV export are complete; persisted actions are queued.
 4. Migrate Live Schedule.
 5. Migrate callout management and detail windows.
 6. Connect approved internal data services through repository adapters.
 
-The old implementation should be consulted from Git history or `main`; do not
-copy it into a legacy directory.
+The original full implementation is preserved on the `Refactor` branch at
+commit `f9e4c3e`. Consult it there; do not copy it into a legacy directory.
 
 ## Validation
 

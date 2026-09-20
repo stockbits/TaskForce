@@ -12,4 +12,5 @@
   <symbol id="view" viewBox="0 0 24 24"><path d="M12 5C6.5 5 2 9.5 1 12c1 2.5 5.5 7 11 7s10-4.5 11-7c-1-2.5-5.5-7-11-7m0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8m0-2a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/></symbol>
   <symbol id="notes" viewBox="0 0 24 24"><path d="M4 3h16v18H4zm3 4v2h10V7zm0 4v2h10v-2zm0 4v2h7v-2z"/></symbol>
   <symbol id="close" viewBox="0 0 24 24"><path d="m6.4 5 5.6 5.6L17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4z"/></symbol>
+  <symbol id="search" viewBox="0 0 24 24"><path d="M10 2a8 8 0 1 0 4.9 14.3l5.4 5.4 1.4-1.4-5.4-5.4A8 8 0 0 0 10 2m0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12"/></symbol>
 </svg>

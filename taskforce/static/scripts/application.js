@@ -91,3 +91,32 @@ document.addEventListener("click", (event) => {
   const closeButton = target.closest("[data-dialog-close]");
   if (closeButton) closeButton.closest("dialog")?.close();
 });
+
+const taskSelections = Array.from(
+  document.querySelectorAll("[data-task-selection]"),
+);
+const selectAllTasks = document.querySelector("[data-select-all-tasks]");
+const selectedTaskCount = document.querySelector("[data-selected-task-count]");
+const selectedTaskActions = document.querySelectorAll(
+  "[data-selected-task-action]",
+);
+
+function updateTaskSelection() {
+  const selectedCount = taskSelections.filter((selection) => selection.checked).length;
+  if (selectedTaskCount) selectedTaskCount.textContent = String(selectedCount);
+  for (const action of selectedTaskActions) action.disabled = selectedCount === 0;
+  if (selectAllTasks) {
+    selectAllTasks.checked =
+      taskSelections.length > 0 && selectedCount === taskSelections.length;
+    selectAllTasks.indeterminate =
+      selectedCount > 0 && selectedCount < taskSelections.length;
+  }
+}
+
+for (const selection of taskSelections) {
+  selection.addEventListener("change", updateTaskSelection);
+}
+selectAllTasks?.addEventListener("change", () => {
+  for (const selection of taskSelections) selection.checked = selectAllTasks.checked;
+  updateTaskSelection();
+});

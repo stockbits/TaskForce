@@ -61,3 +61,21 @@ def test_single_semantic_icon_catalogue_exists() -> None:
     content = icon_files[0].read_text(encoding="utf-8")
     for identifier in ("menu", "dashboard", "tasks", "calendar", "settings"):
         assert f'id="{identifier}"' in content
+
+
+def test_task_management_uses_feature_layers() -> None:
+    feature_directory = APPLICATION_DIRECTORY / "features/task_management"
+    expected_files = (
+        "models.py",
+        "queries.py",
+        "repositories.py",
+        "routes.py",
+        "services.py",
+    )
+
+    for relative_path in expected_files:
+        assert (feature_directory / relative_path).is_file(), relative_path
+
+    route_source = (feature_directory / "routes.py").read_text(encoding="utf-8")
+    assert "json.loads" not in route_source
+    assert "filter_tasks(" not in route_source
